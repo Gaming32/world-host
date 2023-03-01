@@ -23,7 +23,7 @@ public class WorldHostClientEndpoint {
     @OnOpen
     @SuppressWarnings("unused")
     public void onOpen(Session session) {
-        session.setMaxIdleTimeout(-1);
+        session.setMaxIdleTimeout(0);
     }
 
     public static class UuidEncoder implements Encoder.BinaryStream<UUID> {
