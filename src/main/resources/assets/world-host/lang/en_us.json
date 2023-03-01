@@ -13,5 +13,8 @@
   "world-host.ws_connect.not_available": "Failed to get player UUID. Unable to use World Host.",
   "world-host.ws_connect.connect_failed": "Failed to connect to Web Host server!",
   "world-host.ws_connect.connected": "Connected to Web Host server successfully",
-  "world-host.servers": "Servers"
+  "world-host.servers": "Servers",
+  "world-host.open_world": "Open World",
+  "world-host.friend_added_you": "%s added you as a friend",
+  "world-host.need_add_back": "You need to add them back to become friends."
 }

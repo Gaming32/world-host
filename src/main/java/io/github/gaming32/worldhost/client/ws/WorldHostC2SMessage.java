@@ -25,18 +25,10 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record IsOnlineTo(UUID connectionId) implements WorldHostC2SMessage {
-        @Override
-        public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(1);
-            writeUuid(dos, connectionId);
-        }
-    }
-
     record FriendRequest(UUID toUser) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(2);
+            dos.writeByte(1);
             writeUuid(dos, toUser);
         }
     }
@@ -44,7 +36,7 @@ public sealed interface WorldHostC2SMessage {
     record PublishedWorld(Collection<UUID> friends) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(3);
+            dos.writeByte(2);
             dos.writeInt(friends.size());
             for (final UUID friend : friends) {
                 writeUuid(dos, friend);
@@ -55,7 +47,7 @@ public sealed interface WorldHostC2SMessage {
     record ClosedWorld(Collection<UUID> friends) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(4);
+            dos.writeByte(3);
             dos.writeInt(friends.size());
             for (final UUID friend : friends) {
                 writeUuid(dos, friend);
@@ -66,7 +58,7 @@ public sealed interface WorldHostC2SMessage {
     record RequestJoin(UUID friend) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(5);
+            dos.writeByte(4);
             writeUuid(dos, friend);
         }
     }
@@ -74,7 +66,7 @@ public sealed interface WorldHostC2SMessage {
     record JoinGranted(UUID connectionId, JoinType joinType) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(6);
+            dos.writeByte(5);
             writeUuid(dos, connectionId);
             joinType.encode(dos);
         }
@@ -83,7 +75,7 @@ public sealed interface WorldHostC2SMessage {
     record QueryRequest(UUID friend) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(7);
+            dos.writeByte(6);
             writeUuid(dos, friend);
         }
     }
@@ -91,7 +83,7 @@ public sealed interface WorldHostC2SMessage {
     record QueryResponse(UUID connectionId, ServerMetadata metadata) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(8);
+            dos.writeByte(7);
             writeUuid(dos, connectionId);
             final PacketByteBuf buf = PacketByteBufs.create();
             new QueryResponseS2CPacket(metadata).write(buf);

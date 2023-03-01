@@ -7,8 +7,11 @@
   ],
   "client": [
     "client.MinecraftClientAccessor",
+    "client.MixinGameMenuScreen",
+    "client.MixinIntegratedServer",
     "client.MixinMinecraftClient",
-    "client.MixinMultiplayerScreen"
+    "client.MixinMultiplayerScreen",
+    "client.MixinOpenToLanScreen"
   ],
   "injectors": {
     "defaultRequire": 1

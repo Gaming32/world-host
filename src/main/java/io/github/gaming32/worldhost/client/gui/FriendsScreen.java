@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.client.gui;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import eu.midnightdust.lib.config.MidnightConfig;
+import io.github.gaming32.worldhost.GeneralUtil;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.WorldHostTexts;
@@ -18,7 +19,6 @@ import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class FriendsScreen extends Screen {
@@ -139,7 +139,7 @@ public class FriendsScreen extends Screen {
         }
 
         public String getName() {
-            return StringUtils.getIfBlank(profile.getName(), () -> profile.getId().toString());
+            return GeneralUtil.getName(profile);
         }
 
         public void maybeRemove() {

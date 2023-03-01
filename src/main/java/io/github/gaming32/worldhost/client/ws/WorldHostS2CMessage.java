@@ -1,17 +1,23 @@
 package io.github.gaming32.worldhost.client.ws;
 
+import com.mojang.authlib.GameProfile;
+import io.github.gaming32.worldhost.GeneralUtil;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
+import io.github.gaming32.worldhost.client.DeferredToastManager;
 import io.github.gaming32.worldhost.client.FriendsListUpdate;
 import io.github.gaming32.worldhost.client.WorldHostClient;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.network.ServerAddress;
+import net.minecraft.client.toast.SystemToast;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.query.QueryResponseS2CPacket;
 import net.minecraft.server.ServerMetadata;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
@@ -35,7 +41,12 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             if (WorldHostData.friends.contains(user)) {
-                session.getAsyncRemote().sendObject(new WorldHostC2SMessage.PublishedWorld(List.of(user)));
+                final IntegratedServer server = MinecraftClient.getInstance().getServer();
+                if (server != null && server.isRemote()) {
+                    session.getAsyncRemote().sendObject(
+                        new WorldHostC2SMessage.PublishedWorld(List.of(user))
+                    );
+                }
             }
         }
     }
@@ -51,7 +62,25 @@ public sealed interface WorldHostS2CMessage {
     record FriendRequest(UUID fromUser) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            // TODO: Implement
+            // TODO: Show user face
+            Util.getMainWorkerExecutor().execute(() -> {
+                final GameProfile profile = MinecraftClient.getInstance()
+                    .getSessionService()
+                    .fillProfileProperties(
+                        new GameProfile(fromUser, null), false
+                    );
+                MinecraftClient.getInstance().execute(() -> {
+                    DeferredToastManager.show(
+                        SystemToast.Type.PERIODIC_NOTIFICATION,
+                        Text.translatable(
+                            "world-host.friend_added_you",
+                            GeneralUtil.getName(profile)
+                        ),
+                        WorldHostData.friends.contains(fromUser)
+                            ? null : Text.translatable("world-host.need_add_back")
+                    );
+                });
+            });
         }
     }
 
@@ -75,7 +104,11 @@ public sealed interface WorldHostS2CMessage {
     record RequestJoin(UUID user, UUID connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            // TODO: Implement
+//            if (WorldHostData.friends.contains(user)) {
+//                session.getAsyncRemote().sendObject(new WorldHostC2SMessage.JoinGranted(
+//                    connectionId
+//                ));
+//            }
         }
     }
 

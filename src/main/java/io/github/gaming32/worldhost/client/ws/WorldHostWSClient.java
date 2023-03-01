@@ -34,6 +34,16 @@ public class WorldHostWSClient implements AutoCloseable {
         session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ListOnline(friends));
     }
 
+    public void publishedWorld(Collection<UUID> friends) {
+        ensureAuthenticated();
+        session.getAsyncRemote().sendObject(new WorldHostC2SMessage.PublishedWorld(friends));
+    }
+
+    public void closedWorld(Collection<UUID> friends) {
+        ensureAuthenticated();
+        session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ClosedWorld(friends));
+    }
+
     @Override
     public void close() throws IOException {
         session.close();
