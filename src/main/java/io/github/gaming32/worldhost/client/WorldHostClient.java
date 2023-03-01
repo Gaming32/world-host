@@ -10,6 +10,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.toast.SystemToast;
+import net.minecraft.server.ServerMetadata;
 import net.minecraft.text.Text;
 import net.minecraft.util.ApiServices;
 import net.minecraft.util.Util;
@@ -29,6 +30,7 @@ public class WorldHostClient implements ClientModInitializer {
     private static Future<Void> authenticatingFuture;
 
     public static final Set<UUID> ONLINE_FRIENDS = new HashSet<>();
+    public static final Map<UUID, ServerMetadata> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 
     @Override

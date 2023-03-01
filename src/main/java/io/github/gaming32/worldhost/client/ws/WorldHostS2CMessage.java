@@ -4,9 +4,14 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.client.FriendsListUpdate;
 import io.github.gaming32.worldhost.client.WorldHostClient;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.network.ServerAddress;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.packet.s2c.query.QueryResponseS2CPacket;
+import net.minecraft.server.ServerMetadata;
+import net.minecraft.server.integrated.IntegratedServer;
 
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
@@ -62,6 +67,7 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             WorldHostClient.ONLINE_FRIENDS.remove(user);
+            WorldHostClient.ONLINE_FRIEND_PINGS.remove(user);
             WorldHostClient.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
         }
     }
@@ -70,6 +76,29 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             // TODO: Implement
+        }
+    }
+
+    record QueryRequest(UUID friend, UUID connectionId) implements WorldHostS2CMessage {
+        @Override
+        public void handle(Session session) {
+            if (WorldHostData.friends.contains(friend)) {
+                final IntegratedServer server = MinecraftClient.getInstance().getServer();
+                if (server != null) {
+                    session.getAsyncRemote().sendObject(new WorldHostC2SMessage.QueryResponse(
+                        connectionId, server.getServerMetadata()
+                    ));
+                }
+            }
+        }
+    }
+
+    record QueryResponse(UUID friend, ServerMetadata metadata) implements WorldHostS2CMessage {
+        @Override
+        public void handle(Session session) {
+            if (WorldHostData.friends.contains(friend)) {
+                WorldHostClient.ONLINE_FRIEND_PINGS.put(friend, metadata);
+            }
         }
     }
 
@@ -85,6 +114,16 @@ public sealed interface WorldHostS2CMessage {
             case 4 -> new PublishedWorld(readUuid(dis));
             case 5 -> new ClosedWorld(readUuid(dis));
             case 6 -> new RequestJoin(readUuid(dis), readUuid(dis));
+            case 7 -> new QueryRequest(readUuid(dis), readUuid(dis));
+            case 8 -> {
+                final UUID friend = readUuid(dis);
+                final PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeBytes(dis, dis.readInt());
+                yield new QueryResponse(
+                    friend,
+                    new QueryResponseS2CPacket(buf).getServerMetadata()
+                );
+            }
             default -> new Error("Received packet with unknown type_id from server: " + typeId);
         };
     }
