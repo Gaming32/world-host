@@ -8,6 +8,9 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.toast.SystemToast;
+import net.minecraft.client.toast.ToastManager;
+import net.minecraft.text.Text;
 import net.minecraft.util.ApiServices;
 import net.minecraft.util.Util;
 
@@ -25,15 +28,21 @@ public class WorldHostClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         API_SERVICES.userCache().setExecutor(Util.getMainWorkerExecutor());
-        reconnect();
+        reconnect(false);
     }
 
-    public static void reconnect() {
+    public static void reconnect(boolean successToast) {
+        final ToastManager toastManager = MinecraftClient.getInstance().getToastManager();
         if (wsClient != null) {
             try {
                 wsClient.close();
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to close connection to WS server", e);
+                SystemToast.show(
+                    toastManager, SystemToast.Type.WORLD_ACCESS_FAILURE,
+                    Text.translatable("world-host.ws_connect.close_failed"),
+                    Text.of(e.getLocalizedMessage())
+                );
             } finally {
                 wsClient = null;
             }
@@ -41,6 +50,11 @@ public class WorldHostClient implements ClientModInitializer {
         final UUID uuid = MinecraftClient.getInstance().getSession().getUuidOrNull();
         if (uuid == null) {
             WorldHost.LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
+            SystemToast.show(
+                toastManager, SystemToast.Type.TUTORIAL_HINT,
+                Text.translatable("world-host.ws_connect.not_available"),
+                Text.empty()
+            );
             return;
         }
         WorldHost.LOGGER.info("Attempting to connect to WS server at {}", WorldHostData.serverUri);
@@ -48,12 +62,41 @@ public class WorldHostClient implements ClientModInitializer {
             wsClient = new WorldHostWSClient(new URI(WorldHostData.serverUri));
         } catch (Exception e) {
             WorldHost.LOGGER.error("Failed to connect to WS server", e);
+            SystemToast.show(
+                toastManager, SystemToast.Type.PACK_COPY_FAILURE,
+                Text.translatable("world-host.ws_connect.connect_failed"),
+                Text.of(e.getLocalizedMessage())
+            );
         }
         if (wsClient != null) {
             try {
                 wsClient.authenticate(MinecraftClient.getInstance().getSession().getUuidOrNull());
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to connect to WS server", e);
+                SystemToast.show(
+                    toastManager, SystemToast.Type.PACK_COPY_FAILURE,
+                    Text.translatable("world-host.ws_connect.connect_failed"),
+                    Text.of(e.getLocalizedMessage())
+                );
+                try {
+                    wsClient.close();
+                } catch (Exception e2) {
+                    WorldHost.LOGGER.error("Failed to close connection to WS server", e);
+                    SystemToast.show(
+                        toastManager, SystemToast.Type.WORLD_ACCESS_FAILURE,
+                        Text.translatable("world-host.ws_connect.close_failed"),
+                        Text.of(e2.getLocalizedMessage())
+                    );
+                } finally {
+                    wsClient = null;
+                }
+            }
+            if (successToast && wsClient != null) {
+                SystemToast.show(
+                    toastManager, SystemToast.Type.WORLD_ACCESS_FAILURE,
+                    Text.translatable("world-host.ws_connect.connected"),
+                    Text.empty()
+                );
             }
         }
     }

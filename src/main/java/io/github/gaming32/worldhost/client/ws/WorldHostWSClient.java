@@ -29,7 +29,7 @@ public class WorldHostWSClient implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
         session.close();
     }
 }
