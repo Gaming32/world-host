@@ -1,6 +1,6 @@
 {
   "world-host.midnightconfig.title": "World Host Config",
-  "world-host.midnightconfig.serverIp": "Server IP",
+  "world-host.midnightconfig.serverUri": "Server URI",
   "world-host.friends": "Friends",
   "world-host.friends.request": "Send Friend Request",
   "world-host.friends.add_silently": "Add Friend Silently",

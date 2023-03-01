@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public class WorldHostData extends MidnightConfig {
     @Entry
-    public static String serverIp = "world-host.jemnetworks.com:9646";
+    public static String serverUri = "ws://world-host.jemnetworks.com:9646";
 
     @Entry
     @Hidden

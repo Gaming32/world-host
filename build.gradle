@@ -40,6 +40,17 @@ dependencies {
     }
 
     include modImplementation("maven.modrinth:midnightlib:1.0.0-fabric")
+
+    include implementation("javax.websocket:javax.websocket-api:1.1")
+
+    include runtimeOnly("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.51.v20230217")
+    include("org.eclipse.jetty.websocket:websocket-client:9.4.51.v20230217")
+    include("org.eclipse.jetty.websocket:websocket-common:9.4.51.v20230217")
+    include("org.eclipse.jetty.websocket:websocket-api:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-io:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-util:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-client:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-http:9.4.51.v20230217")
 }
 
 processResources {
