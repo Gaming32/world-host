@@ -44,7 +44,7 @@ public class FriendsScreen extends Screen {
         }
 
         addDrawableChild(new ButtonWidget(
-            width / 2 - 306, height - 28, 150, 20, AddFriendScreen.FRIEND_USERNAME_TEXT,
+            width / 2 - 306, height - 28, 150, 20, Text.translatable("world-host.add_friend"),
             button -> client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
                 addFriend(profile);
                 if (WorldHostClient.wsClient != null) {

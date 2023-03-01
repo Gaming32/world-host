@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 public class AddFriendScreen extends Screen {
     public static final Pattern VALID_USERNAME = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
-    public static final Text FRIEND_USERNAME_TEXT = Text.translatable("world-host.add_friend.enter_username");
+    private static final Text FRIEND_USERNAME_TEXT = Text.translatable("world-host.add_friend.enter_username");
 
     private final Screen parent;
     private final Consumer<GameProfile> addAction;
