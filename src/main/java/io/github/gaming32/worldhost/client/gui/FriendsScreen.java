@@ -7,6 +7,7 @@ import io.github.gaming32.worldhost.GeneralUtil;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.WorldHostTexts;
+import io.github.gaming32.worldhost.client.WorldHostClient;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.ConfirmScreen;
@@ -22,7 +23,6 @@ import net.minecraft.util.Util;
 import org.jetbrains.annotations.Nullable;
 
 public class FriendsScreen extends Screen {
-    private static final Text REQUEST_TEXT = Text.translatable("world-host.friends.request");
     private static final Text ADD_SILENTLY_TEXT = Text.translatable("world-host.friends.add_silently");
 
     private final Screen parent;
@@ -43,8 +43,15 @@ public class FriendsScreen extends Screen {
             list.setRenderBackground(false);
         }
 
-        addDrawableChild(new ButtonWidget(width / 2 - 306, height - 28, 150, 20, REQUEST_TEXT, button -> {
-        })).active = false; // TODO: Implement friend request
+        addDrawableChild(new ButtonWidget(
+            width / 2 - 306, height - 28, 150, 20, AddFriendScreen.FRIEND_USERNAME_TEXT,
+            button -> client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
+                addFriend(profile);
+                if (WorldHostClient.wsClient != null) {
+                    WorldHostClient.wsClient.sendFriendRequest(profile.getId());
+                }
+            }))
+        ));
 
         addDrawableChild(new ButtonWidget(
             width / 2 - 152, height - 28, 150, 20, ADD_SILENTLY_TEXT,

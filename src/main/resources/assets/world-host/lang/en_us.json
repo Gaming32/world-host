@@ -2,7 +2,6 @@
   "world-host.midnightconfig.title": "World Host Config",
   "world-host.midnightconfig.serverUri": "Server URI",
   "world-host.friends": "Friends",
-  "world-host.friends.request": "Send Friend Request",
   "world-host.friends.add_silently": "Add Friend Silently",
   "world-host.friends.remove": "Remove Friend",
   "world-host.friends.remove.title": "Are you sure you want to remove this friend from your friends list?",

@@ -15,7 +15,7 @@ public class DeferredToastManager {
     private static List<ToastInfo> deferredToasts = new ArrayList<>();
 
     public static void show(SystemToast.Type type, Text title, @Nullable Text description) {
-        final ToastInfo info = new ToastInfo(type, title, description);
+        final ToastInfo info = new ToastInfo(type, title, description != null ? description : Text.empty());
         if (deferredToasts != null) {
             deferredToasts.add(info);
         } else {
