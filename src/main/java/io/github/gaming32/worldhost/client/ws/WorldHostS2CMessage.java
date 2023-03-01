@@ -66,6 +66,13 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
+    record RequestJoin(UUID user, UUID connectionId) implements WorldHostS2CMessage {
+        @Override
+        public void handle(Session session) {
+            // TODO: Implement
+        }
+    }
+
     void handle(Session session);
 
     static WorldHostS2CMessage decode(DataInputStream dis) throws IOException {
@@ -77,6 +84,7 @@ public sealed interface WorldHostS2CMessage {
             case 3 -> new FriendRequest(readUuid(dis));
             case 4 -> new PublishedWorld(readUuid(dis));
             case 5 -> new ClosedWorld(readUuid(dis));
+            case 6 -> new RequestJoin(readUuid(dis), readUuid(dis));
             default -> new Error("Received packet with unknown type_id from server: " + typeId);
         };
     }

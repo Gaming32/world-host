@@ -50,11 +50,28 @@ public sealed interface WorldHostC2SMessage {
     record ClosedWorld(Collection<UUID> friends) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            dos.writeByte(3);
+            dos.writeByte(4);
             dos.writeInt(friends.size());
             for (final UUID friend : friends) {
                 writeUuid(dos, friend);
             }
+        }
+    }
+
+    record RequestJoin(UUID friend) implements WorldHostC2SMessage {
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(5);
+            writeUuid(dos, friend);
+        }
+    }
+
+    record JoinGranted(UUID connectionId, JoinType joinType) implements WorldHostC2SMessage {
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(6);
+            writeUuid(dos, connectionId);
+            joinType.encode(dos);
         }
     }
 
