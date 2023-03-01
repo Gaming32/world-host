@@ -20,6 +20,12 @@ public class WorldHostClientEndpoint {
         message.handle(session);
     }
 
+    @OnOpen
+    @SuppressWarnings("unused")
+    public void onOpen(Session session) {
+        session.setMaxIdleTimeout(-1);
+    }
+
     public static class UuidEncoder implements Encoder.BinaryStream<UUID> {
         @Override
         public void encode(UUID object, OutputStream os) throws IOException {
