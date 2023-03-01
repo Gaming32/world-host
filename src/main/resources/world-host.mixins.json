@@ -7,7 +7,8 @@
   ],
   "client": [
     "client.MinecraftClientAccessor",
-    "client.MixinMinecraftClient"
+    "client.MixinMinecraftClient",
+    "client.MixinMultiplayerScreen"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -12,5 +12,6 @@
   "world-host.ws_connect.close_failed": "Failed to close connection to World Host server.",
   "world-host.ws_connect.not_available": "Failed to get player UUID. Unable to use World Host.",
   "world-host.ws_connect.connect_failed": "Failed to connect to Web Host server!",
-  "world-host.ws_connect.connected": "Connected to Web Host server successfully"
+  "world-host.ws_connect.connected": "Connected to Web Host server successfully",
+  "world-host.servers": "Servers"
 }
