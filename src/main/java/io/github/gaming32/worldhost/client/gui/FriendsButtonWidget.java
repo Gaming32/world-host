@@ -1,23 +1,31 @@
 package io.github.gaming32.worldhost.client.gui;
 
 import io.github.gaming32.worldhost.WorldHostTexts;
+import io.github.gaming32.worldhost.client.FriendsListUpdate;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-public class FriendsButtonWidget extends ButtonWidget {
-    private final int bgX, bgWidth;
+import java.util.Set;
+import java.util.UUID;
 
-    public FriendsButtonWidget(int x, int y, int width, int height, int online, PressAction onPress) {
-        this(x, y, width, height, WorldHostTexts.FRIENDS.copy().append("  " + online + " "), online, onPress);
+public class FriendsButtonWidget extends ButtonWidget implements FriendsListUpdate {
+    private int bgX, bgWidth;
+
+    public FriendsButtonWidget(int x, int y, int width, int height, PressAction onPress) {
+        super(x, y, width, height, Text.empty(), onPress);
+        registerForUpdates();
     }
 
-    private FriendsButtonWidget(int x, int y, int width, int height, Text text, int online, PressAction onPress) {
-        super(x, y, width, height, text, onPress);
+    @Override
+    public void friendsListUpdate(Set<UUID> friends) {
+        final int online = friends.size();
+        final Text baseText = WorldHostTexts.FRIENDS.copy().append("  " + online + " ");
+        setMessage(baseText);
         final TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-        bgX = width / 2 - textRenderer.getWidth(text) / 2 + textRenderer.getWidth(WorldHostTexts.FRIENDS.copy().append(" "));
+        bgX = width / 2 - textRenderer.getWidth(baseText) / 2 + textRenderer.getWidth(WorldHostTexts.FRIENDS.copy().append(" "));
         bgWidth = textRenderer.getWidth(" " + online + " ");
     }
 

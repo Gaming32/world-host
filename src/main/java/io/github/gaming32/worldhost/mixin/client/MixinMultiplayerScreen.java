@@ -28,7 +28,7 @@ public class MixinMultiplayerScreen extends Screen {
         )).active = false;
 
         addDrawableChild(new FriendsButtonWidget(
-            width / 2 + 2, 32, 100, 20, 0,
+            width / 2 + 2, 32, 100, 20,
             button -> {
                 WorldHost.LOGGER.info("Clicked Friends tab");
             }

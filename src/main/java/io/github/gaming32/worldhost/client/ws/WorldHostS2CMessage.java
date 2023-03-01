@@ -2,6 +2,11 @@ package io.github.gaming32.worldhost.client.ws;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
+import io.github.gaming32.worldhost.client.FriendsListUpdate;
+import io.github.gaming32.worldhost.client.WorldHostClient;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ConnectScreen;
+import net.minecraft.client.network.ServerAddress;
 
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
@@ -9,6 +14,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.UUID;
 
 // Mirrors https://github.com/Gaming32/world-host-server/blob/main/src/s2c_message.rs
@@ -20,19 +26,20 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record IsOnlineTo(UUID user, UUID connectionId) implements WorldHostS2CMessage {
+    record IsOnlineTo(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             if (WorldHostData.friends.contains(user)) {
-                session.getAsyncRemote().sendObject(new WorldHostC2SMessage.IsOnlineTo(connectionId));
+                session.getAsyncRemote().sendObject(new WorldHostC2SMessage.PublishedWorld(List.of(user)));
             }
         }
     }
 
-    record OnlineGame(String ip) implements WorldHostS2CMessage {
+    record OnlineGame(String host, int port) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            // TODO: Implement
+            final MinecraftClient client = MinecraftClient.getInstance();
+            ConnectScreen.connect(client.currentScreen, client, new ServerAddress(host, port), null);
         }
     }
 
@@ -43,10 +50,19 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record WentInGame(UUID user) implements WorldHostS2CMessage {
+    record PublishedWorld(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            // TODO: Implement
+            WorldHostClient.ONLINE_FRIENDS.add(user);
+            WorldHostClient.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
+        }
+    }
+
+    record ClosedWorld(UUID user) implements WorldHostS2CMessage {
+        @Override
+        public void handle(Session session) {
+            WorldHostClient.ONLINE_FRIENDS.remove(user);
+            WorldHostClient.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
         }
     }
 
@@ -56,10 +72,11 @@ public sealed interface WorldHostS2CMessage {
         final int typeId = dis.readUnsignedByte();
         return switch (typeId) {
             case 0 -> new Error(readString(dis));
-            case 1 -> new IsOnlineTo(readUuid(dis), readUuid(dis));
-            case 2 -> new OnlineGame(readString(dis));
+            case 1 -> new IsOnlineTo(readUuid(dis));
+            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort());
             case 3 -> new FriendRequest(readUuid(dis));
-            case 4 -> new WentInGame(readUuid(dis));
+            case 4 -> new PublishedWorld(readUuid(dis));
+            case 5 -> new ClosedWorld(readUuid(dis));
             default -> new Error("Received packet with unknown type_id from server: " + typeId);
         };
     }

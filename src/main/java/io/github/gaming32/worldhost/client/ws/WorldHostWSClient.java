@@ -5,6 +5,7 @@ import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
@@ -26,6 +27,11 @@ public class WorldHostWSClient implements AutoCloseable {
         if (!authenticated) {
             throw new IllegalStateException("Attempted to communicate with server before authenticating.");
         }
+    }
+
+    public void requestOnlineFriends(Collection<UUID> friends) {
+        ensureAuthenticated();
+        session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ListOnline(friends));
     }
 
     @Override

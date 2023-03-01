@@ -1,5 +1,7 @@
 package io.github.gaming32.worldhost.client.ws;
 
+import io.github.gaming32.worldhost.WorldHost;
+
 import javax.websocket.*;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -12,7 +14,9 @@ import java.util.UUID;
 )
 public class WorldHostClientEndpoint {
     @OnMessage
+    @SuppressWarnings("unused")
     public void onMessage(Session session, WorldHostS2CMessage message) {
+        WorldHost.LOGGER.info("Received WS message {}", message);
         message.handle(session);
     }
 

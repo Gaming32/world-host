@@ -36,7 +36,18 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record WentInGame(Collection<UUID> friends) implements WorldHostC2SMessage {
+    record PublishedWorld(Collection<UUID> friends) implements WorldHostC2SMessage {
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(3);
+            dos.writeInt(friends.size());
+            for (final UUID friend : friends) {
+                writeUuid(dos, friend);
+            }
+        }
+    }
+
+    record ClosedWorld(Collection<UUID> friends) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(3);
