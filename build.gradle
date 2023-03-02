@@ -23,6 +23,10 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+
+    maven {
+        url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"
+    }
 }
 
 dependencies {
@@ -51,6 +55,8 @@ dependencies {
     include("org.eclipse.jetty:jetty-util:9.4.51.v20230217")
     include("org.eclipse.jetty:jetty-client:9.4.51.v20230217")
     include("org.eclipse.jetty:jetty-http:9.4.51.v20230217")
+
+    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
 }
 
 processResources {

@@ -30,7 +30,7 @@ public class WorldHostConfigScreen extends MidnightConfig.MidnightConfigScreen {
     @Override
     public void removed() {
         if (!oldServerUri.equals(WorldHostData.serverUri)) {
-            WorldHostClient.reconnect(true);
+            WorldHostClient.reconnect(true, true);
         }
     }
 }

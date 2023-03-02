@@ -26,6 +26,7 @@ public class WorldHostClient implements ClientModInitializer {
         WorldHost.CACHE_DIR
     );
     public static WorldHostWSClient wsClient;
+    private static long lastReconnectTime;
 
     private static Future<Void> authenticatingFuture;
 
@@ -36,8 +37,16 @@ public class WorldHostClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         API_SERVICES.userCache().setExecutor(Util.getMainWorkerExecutor());
-        reconnect(false);
+        reconnect(false, true);
         ClientTickEvents.START_CLIENT_TICK.register(client -> {
+            if (wsClient == null) {
+                authenticatingFuture = null;
+                final long time = Util.getMeasuringTimeMs();
+                if (time - lastReconnectTime > 2000) {
+                    lastReconnectTime = time;
+                    reconnect(true, false);
+                }
+            }
             if (authenticatingFuture != null && authenticatingFuture.isDone()) {
                 authenticatingFuture = null;
                 WorldHost.LOGGER.info("Finished authenticating with WS server. Requesting friends list.");
@@ -47,17 +56,19 @@ public class WorldHostClient implements ClientModInitializer {
         });
     }
 
-    public static void reconnect(boolean successToast) {
+    public static void reconnect(boolean successToast, boolean failureToast) {
         if (wsClient != null) {
             try {
                 wsClient.close();
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to close connection to WS server", e);
-                DeferredToastManager.show(
-                    SystemToast.Type.WORLD_ACCESS_FAILURE,
-                    Text.translatable("world-host.ws_connect.close_failed"),
-                    Text.of(e.getLocalizedMessage())
-                );
+                if (failureToast) {
+                    DeferredToastManager.show(
+                        SystemToast.Type.WORLD_ACCESS_FAILURE,
+                        Text.translatable("world-host.ws_connect.close_failed"),
+                        Text.of(Util.getInnermostMessage(e))
+                    );
+                }
             } finally {
                 wsClient = null;
             }
@@ -65,11 +76,13 @@ public class WorldHostClient implements ClientModInitializer {
         final UUID uuid = MinecraftClient.getInstance().getSession().getUuidOrNull();
         if (uuid == null) {
             WorldHost.LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
-            DeferredToastManager.show(
-                SystemToast.Type.TUTORIAL_HINT,
-                Text.translatable("world-host.ws_connect.not_available"),
-                null
-            );
+            if (failureToast) {
+                DeferredToastManager.show(
+                    SystemToast.Type.TUTORIAL_HINT,
+                    Text.translatable("world-host.ws_connect.not_available"),
+                    null
+                );
+            }
             return;
         }
         WorldHost.LOGGER.info("Attempting to connect to WS server at {}", WorldHostData.serverUri);
@@ -77,11 +90,13 @@ public class WorldHostClient implements ClientModInitializer {
             wsClient = new WorldHostWSClient(new URI(WorldHostData.serverUri));
         } catch (Exception e) {
             WorldHost.LOGGER.error("Failed to connect to WS server", e);
-            DeferredToastManager.show(
-                SystemToast.Type.PACK_COPY_FAILURE,
-                Text.translatable("world-host.ws_connect.connect_failed"),
-                Text.of(e.getLocalizedMessage())
-            );
+            if (failureToast) {
+                DeferredToastManager.show(
+                    SystemToast.Type.PACK_COPY_FAILURE,
+                    Text.translatable("world-host.ws_connect.connect_failed"),
+                    Text.of(Util.getInnermostMessage(e))
+                );
+            }
         }
         if (wsClient != null) {
             authenticatingFuture = wsClient.authenticate(MinecraftClient.getInstance().getSession().getUuidOrNull());
