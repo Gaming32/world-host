@@ -12,7 +12,7 @@
     "client.MixinMinecraftClient",
     "client.MixinMultiplayerScreen",
     "client.MixinOpenToLanScreen",
-    "client.MixinTutorialToast"
+    "client.MixinSystemToast"
   ],
   "injectors": {
     "defaultRequire": 1

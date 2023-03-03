@@ -15,8 +15,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.server.ServerMetadata;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.ApiServices;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
 import java.net.URI;
@@ -56,6 +58,10 @@ public class WorldHostClient implements ClientModInitializer {
                 WorldHost.LOGGER.info("Finished authenticating with WS server. Requesting friends list.");
                 ONLINE_FRIENDS.clear();
                 wsClient.requestOnlineFriends(WorldHostData.friends);
+                final IntegratedServer server = MinecraftClient.getInstance().getServer();
+                if (server != null && server.isRemote()) {
+                    wsClient.publishedWorld(WorldHostData.friends);
+                }
             }
         });
     }
@@ -67,15 +73,20 @@ public class WorldHostClient implements ClientModInitializer {
                 .fillProfileProperties(
                     new GameProfile(user, null), false
                 );
-            MinecraftClient.getInstance().execute(() -> DeferredToastManager.show(
-                (matrices, x, y) -> {
-                    RenderSystem.enableBlend();
-                    DrawableHelper.drawTexture(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
-                    DrawableHelper.drawTexture(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
-                },
-                Text.translatable(title, GeneralUtil.getName(profile)),
-                description
-            ));
+            MinecraftClient.getInstance().execute(() -> {
+                final Identifier skinTexture = MinecraftClient.getInstance().getSkinProvider().loadSkin(profile);
+                DeferredToastManager.show(
+                    SystemToast.Type.PERIODIC_NOTIFICATION,
+                    (matrices, x, y) -> {
+                        RenderSystem.setShaderTexture(0, skinTexture);
+                        RenderSystem.enableBlend();
+                        DrawableHelper.drawTexture(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
+                        DrawableHelper.drawTexture(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
+                    },
+                    Text.translatable(title, GeneralUtil.getName(profile)),
+                    description
+                );
+            });
         });
     }
 
