@@ -25,12 +25,6 @@ public class WorldHostClientEndpoint {
         message.handle(session);
     }
 
-    @OnOpen
-    @SuppressWarnings("unused")
-    public void onOpen(Session session) {
-        session.setMaxIdleTimeout(0);
-    }
-
     @OnError
     @SuppressWarnings("unused")
     public void onError(Session session, Throwable t) throws IOException {

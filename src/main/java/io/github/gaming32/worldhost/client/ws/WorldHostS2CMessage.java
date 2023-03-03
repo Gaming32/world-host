@@ -69,17 +69,15 @@ public sealed interface WorldHostS2CMessage {
                     .fillProfileProperties(
                         new GameProfile(fromUser, null), false
                     );
-                MinecraftClient.getInstance().execute(() -> {
-                    DeferredToastManager.show(
-                        SystemToast.Type.PERIODIC_NOTIFICATION,
-                        Text.translatable(
-                            "world-host.friend_added_you",
-                            GeneralUtil.getName(profile)
-                        ),
-                        WorldHostData.friends.contains(fromUser)
-                            ? null : Text.translatable("world-host.need_add_back")
-                    );
-                });
+                MinecraftClient.getInstance().execute(() -> DeferredToastManager.show(
+                    SystemToast.Type.PERIODIC_NOTIFICATION,
+                    Text.translatable(
+                        "world-host.friend_added_you",
+                        GeneralUtil.getName(profile)
+                    ),
+                    WorldHostData.friends.contains(fromUser)
+                        ? null : Text.translatable("world-host.need_add_back")
+                ));
             });
         }
     }
@@ -87,8 +85,25 @@ public sealed interface WorldHostS2CMessage {
     record PublishedWorld(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
+            if (!WorldHostData.friends.contains(user)) return;
             WorldHostClient.ONLINE_FRIENDS.add(user);
             WorldHostClient.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
+            // TODO: Show user face
+            Util.getMainWorkerExecutor().execute(() -> {
+                final GameProfile profile = MinecraftClient.getInstance()
+                    .getSessionService()
+                    .fillProfileProperties(
+                        new GameProfile(user, null), false
+                    );
+                MinecraftClient.getInstance().execute(() -> DeferredToastManager.show(
+                    SystemToast.Type.PERIODIC_NOTIFICATION,
+                    Text.translatable(
+                        "world-host.went_online",
+                        GeneralUtil.getName(profile)
+                    ),
+                    Text.translatable("world-host.went_online.desc")
+                ));
+            });
         }
     }
 

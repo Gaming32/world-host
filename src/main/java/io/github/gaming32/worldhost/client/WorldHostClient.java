@@ -42,7 +42,7 @@ public class WorldHostClient implements ClientModInitializer {
             if (wsClient == null) {
                 authenticatingFuture = null;
                 final long time = Util.getMeasuringTimeMs();
-                if (time - lastReconnectTime > 2000) {
+                if (time - lastReconnectTime > 10_000) {
                     lastReconnectTime = time;
                     reconnect(true, false);
                 }

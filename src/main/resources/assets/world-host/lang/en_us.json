@@ -16,5 +16,7 @@
   "world-host.open_world": "Open World",
   "world-host.friend_added_you": "%s added you as a friend",
   "world-host.need_add_back": "You need to add them back to become friends.",
-  "world-host.error_in_connection": "Error occurred in connection to World Host server."
+  "world-host.error_in_connection": "Error occurred in connection to World Host server.",
+  "world-host.went_online": "%s went online",
+  "world-host.went_online.desc": "Go to the Multiplayer menu to join them"
 }
