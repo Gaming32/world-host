@@ -18,6 +18,9 @@
     ],
     "modmenu": [
       "io.github.gaming32.worldhost.compat.ModMenuCompat"
+    ],
+    "preLaunch": [
+      "com.llamalad7.mixinextras.MixinExtrasBootstrap::init"
     ]
   },
   "mixins": [

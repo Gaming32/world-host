@@ -1,5 +1,8 @@
 package io.github.gaming32.worldhost.client;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.systems.RenderSystem;
+import io.github.gaming32.worldhost.GeneralUtil;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.client.ws.WorldHostWSClient;
@@ -9,6 +12,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.server.ServerMetadata;
 import net.minecraft.text.Text;
@@ -53,6 +57,25 @@ public class WorldHostClient implements ClientModInitializer {
                 ONLINE_FRIENDS.clear();
                 wsClient.requestOnlineFriends(WorldHostData.friends);
             }
+        });
+    }
+
+    public static void showProfileToast(UUID user, String title, Text description) {
+        Util.getMainWorkerExecutor().execute(() -> {
+            final GameProfile profile = MinecraftClient.getInstance()
+                .getSessionService()
+                .fillProfileProperties(
+                    new GameProfile(user, null), false
+                );
+            MinecraftClient.getInstance().execute(() -> DeferredToastManager.show(
+                (matrices, x, y) -> {
+                    RenderSystem.enableBlend();
+                    DrawableHelper.drawTexture(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
+                    DrawableHelper.drawTexture(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
+                },
+                Text.translatable(title, GeneralUtil.getName(profile)),
+                description
+            ));
         });
     }
 

@@ -11,7 +11,8 @@
     "client.MixinIntegratedServer",
     "client.MixinMinecraftClient",
     "client.MixinMultiplayerScreen",
-    "client.MixinOpenToLanScreen"
+    "client.MixinOpenToLanScreen",
+    "client.MixinTutorialToast"
   ],
   "injectors": {
     "defaultRequire": 1

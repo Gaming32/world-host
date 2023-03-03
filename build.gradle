@@ -27,6 +27,10 @@ repositories {
     maven {
         url = "https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1"
     }
+
+    maven {
+        url = "https://jitpack.io"
+    }
 }
 
 dependencies {
@@ -57,6 +61,9 @@ dependencies {
     include("org.eclipse.jetty:jetty-http:9.4.51.v20230217")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
+
+    include implementation("com.github.LlamaLad7:MixinExtras:0.2.0-beta.4")
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.2.0-beta.4")
 }
 
 processResources {
