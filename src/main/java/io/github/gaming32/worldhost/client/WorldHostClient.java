@@ -57,7 +57,7 @@ public class WorldHostClient implements ClientModInitializer {
                 authenticatingFuture = null;
                 WorldHost.LOGGER.info("Finished authenticating with WS server. Requesting friends list.");
                 ONLINE_FRIENDS.clear();
-                wsClient.requestOnlineFriends(WorldHostData.friends);
+                wsClient.listOnline(WorldHostData.friends);
                 final IntegratedServer server = MinecraftClient.getInstance().getServer();
                 if (server != null && server.isRemote()) {
                     wsClient.publishedWorld(WorldHostData.friends);
@@ -70,9 +70,7 @@ public class WorldHostClient implements ClientModInitializer {
         Util.getMainWorkerExecutor().execute(() -> {
             final GameProfile profile = MinecraftClient.getInstance()
                 .getSessionService()
-                .fillProfileProperties(
-                    new GameProfile(user, null), false
-                );
+                .fillProfileProperties(new GameProfile(user, null), false);
             MinecraftClient.getInstance().execute(() -> {
                 final Identifier skinTexture = MinecraftClient.getInstance().getSkinProvider().loadSkin(profile);
                 DeferredToastManager.show(
@@ -141,6 +139,13 @@ public class WorldHostClient implements ClientModInitializer {
                     null
                 );
             }
+        }
+    }
+
+    public static void pingFriends() {
+        ONLINE_FRIEND_PINGS.clear();
+        if (wsClient != null) {
+            wsClient.queryRequest(WorldHostData.friends);
         }
     }
 }

@@ -1,13 +1,15 @@
 package io.github.gaming32.worldhost.mixin.client;
 
-import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostTexts;
 import io.github.gaming32.worldhost.client.gui.FriendsButtonWidget;
+import io.github.gaming32.worldhost.client.gui.OnlineFriendsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,6 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MultiplayerScreen.class)
 public class MixinMultiplayerScreen extends Screen {
+    @Shadow @Final private Screen parent;
+
     protected MixinMultiplayerScreen(Text title) {
         super(title);
     }
@@ -30,7 +34,8 @@ public class MixinMultiplayerScreen extends Screen {
         addDrawableChild(new FriendsButtonWidget(
             width / 2 + 2, 32, 100, 20,
             button -> {
-                WorldHost.LOGGER.info("Clicked Friends tab");
+                assert client != null;
+                client.setScreen(new OnlineFriendsScreen(parent));
             }
         ));
     }

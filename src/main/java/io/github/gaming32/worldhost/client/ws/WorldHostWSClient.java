@@ -29,7 +29,7 @@ public class WorldHostWSClient implements AutoCloseable {
         }
     }
 
-    public void requestOnlineFriends(Collection<UUID> friends) {
+    public void listOnline(Collection<UUID> friends) {
         ensureAuthenticated();
         session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ListOnline(friends));
     }
@@ -44,9 +44,19 @@ public class WorldHostWSClient implements AutoCloseable {
         session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ClosedWorld(friends));
     }
 
-    public void sendFriendRequest(UUID friend) {
+    public void friendRequest(UUID friend) {
         ensureAuthenticated();
         session.getAsyncRemote().sendObject(new WorldHostC2SMessage.FriendRequest(friend));
+    }
+
+    public void queryRequest(Collection<UUID> friends) {
+        ensureAuthenticated();
+        session.getAsyncRemote().sendObject(new WorldHostC2SMessage.QueryRequest(friends));
+    }
+
+    public void requestJoin(UUID friend) {
+        ensureAuthenticated();
+        session.getAsyncRemote().sendObject(new WorldHostC2SMessage.RequestJoin(friend));
     }
 
     @Override

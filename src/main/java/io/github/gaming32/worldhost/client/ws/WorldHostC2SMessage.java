@@ -72,11 +72,14 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record QueryRequest(UUID friend) implements WorldHostC2SMessage {
+    record QueryRequest(Collection<UUID> friends) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(6);
-            writeUuid(dos, friend);
+            dos.writeInt(friends.size());
+            for (final UUID friend : friends) {
+                writeUuid(dos, friend);
+            }
         }
     }
 

@@ -38,24 +38,34 @@ public class FriendsScreen extends Screen {
     protected void init() {
         super.init();
 
-        list = addSelectableChild(new FriendsList(width, height, 32, height - 32, 36));
-        if (client != null && client.world != null) {
-            list.setRenderBackground(false);
+        if (list == null) {
+            list = addSelectableChild(new FriendsList(width, height, 32, height - 32, 36));
+            if (client != null && client.world != null) {
+                list.setRenderBackground(false);
+            }
+        } else {
+            list.updateSize(width, height, 32, height - 32);
         }
 
         addDrawableChild(new ButtonWidget(
             width / 2 - 306, height - 28, 150, 20, Text.translatable("world-host.add_friend"),
-            button -> client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
-                addFriend(profile);
-                if (WorldHostClient.wsClient != null) {
-                    WorldHostClient.wsClient.sendFriendRequest(profile.getId());
-                }
-            }))
+            button -> {
+                assert client != null;
+                client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
+                    addFriend(profile);
+                    if (WorldHostClient.wsClient != null) {
+                        WorldHostClient.wsClient.friendRequest(profile.getId());
+                    }
+                }));
+            }
         ));
 
         addDrawableChild(new ButtonWidget(
             width / 2 - 152, height - 28, 150, 20, ADD_SILENTLY_TEXT,
-            button -> client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, this::addFriend))
+            button -> {
+                assert client != null;
+                client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, this::addFriend));
+            }
         ));
 
         removeButton = addDrawableChild(new ButtonWidget(width / 2 + 2, height - 28, 150, 20, Text.translatable("world-host.friends.remove"), button -> {
@@ -67,7 +77,10 @@ public class FriendsScreen extends Screen {
 
         addDrawableChild(new ButtonWidget(
             width / 2 + 156, height - 28, 150, 20, ScreenTexts.DONE,
-            button -> client.setScreen(parent)
+            button -> {
+                assert client != null;
+                client.setScreen(parent);
+            }
         ));
 
         list.updateEntries();

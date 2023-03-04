@@ -12,7 +12,8 @@
     "client.MixinMinecraftClient",
     "client.MixinMultiplayerScreen",
     "client.MixinOpenToLanScreen",
-    "client.MixinSystemToast"
+    "client.MixinSystemToast",
+    "client.MultiplayerServerListPingerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
