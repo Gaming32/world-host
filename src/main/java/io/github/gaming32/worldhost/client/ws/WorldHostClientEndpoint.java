@@ -19,14 +19,17 @@ import java.util.UUID;
 )
 public class WorldHostClientEndpoint {
     @OnMessage
-    @SuppressWarnings("unused")
     public void onMessage(Session session, WorldHostS2CMessage message) {
         WorldHost.LOGGER.info("Received WS message {}", message);
         message.handle(session);
     }
 
+    @OnOpen
+    public void onOpen(Session session) {
+        session.setMaxIdleTimeout(0);
+    }
+
     @OnError
-    @SuppressWarnings("unused")
     public void onError(Session session, Throwable t) throws IOException {
         if (session == null) return;
         WorldHost.LOGGER.error("Error in WS client", t);

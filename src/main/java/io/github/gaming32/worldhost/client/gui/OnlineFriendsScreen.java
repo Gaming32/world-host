@@ -53,6 +53,7 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
         client.keyboard.setRepeatEvents(true);
         if (list == null) {
             list = new OnlineFriendsList(client, width, height, 60, height - 32, 36);
+            WorldHostClient.ONLINE_FRIENDS.forEach(uuid -> list.addEntry(new OnlineFriendsListEntry(uuid)));
             WorldHostClient.pingFriends();
             WorldHostClient.ONLINE_FRIEND_UPDATES.add(this);
         } else {
@@ -320,7 +321,11 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
         private void updateServerInfo() {
             serverInfo.name = getName();
             final ServerMetadata metadata = WorldHostClient.ONLINE_FRIEND_PINGS.get(profile.getId());
-            if (metadata == null) return;
+            if (metadata == null) {
+                serverInfo.playerCountLabel = ScreenTexts.EMPTY;
+                serverInfo.label = ScreenTexts.EMPTY;
+                return;
+            }
 
             if (metadata.getDescription() != null) {
                 serverInfo.label = metadata.getDescription();
