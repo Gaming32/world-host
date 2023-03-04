@@ -7,6 +7,8 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.client.ws.WorldHostWSClient;
 import io.github.gaming32.worldhost.mixin.client.MinecraftClientAccessor;
+import io.github.gaming32.worldhost.upnp.Gateway;
+import io.github.gaming32.worldhost.upnp.GatewayFinder;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -40,6 +42,8 @@ public class WorldHostClient implements ClientModInitializer {
     public static final Map<UUID, ServerMetadata> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 
+    public static Gateway upnpGateway;
+
     @Override
     public void onInitializeClient() {
         API_SERVICES.userCache().setExecutor(Util.getMainWorkerExecutor());
@@ -63,6 +67,10 @@ public class WorldHostClient implements ClientModInitializer {
                     wsClient.publishedWorld(WorldHostData.friends);
                 }
             }
+        });
+        new GatewayFinder(gateway -> {
+            WorldHost.LOGGER.info("Found UPnP gateway: {}", gateway.getGatewayIP());
+            upnpGateway = gateway;
         });
     }
 

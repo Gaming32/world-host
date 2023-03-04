@@ -4,6 +4,7 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.client.FriendsListUpdate;
 import io.github.gaming32.worldhost.client.WorldHostClient;
+import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ConnectScreen;
@@ -49,8 +50,10 @@ public sealed interface WorldHostS2CMessage {
     record OnlineGame(String host, int port) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            final MinecraftClient client = MinecraftClient.getInstance();
-            ConnectScreen.connect(client.currentScreen, client, new ServerAddress(host, port), null);
+            MinecraftClient.getInstance().execute(() -> {
+                final MinecraftClient client = MinecraftClient.getInstance();
+                ConnectScreen.connect(client.currentScreen, client, new ServerAddress(host, port), null);
+            });
         }
     }
 
@@ -89,11 +92,27 @@ public sealed interface WorldHostS2CMessage {
     record RequestJoin(UUID user, UUID connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-//            if (WorldHostData.friends.contains(user)) {
-//                session.getAsyncRemote().sendObject(new WorldHostC2SMessage.JoinGranted(
-//                    connectionId
-//                ));
-//            }
+            if (WorldHostData.friends.contains(user)) {
+                final IntegratedServer server = MinecraftClient.getInstance().getServer();
+                if (server == null || !server.isRemote()) return;
+                if (WorldHostClient.upnpGateway != null) {
+                    try {
+                        final UPnPErrors.AddPortMappingErrors error = WorldHostClient.upnpGateway.openPort(
+                            server.getServerPort(), 60, false
+                        );
+                        if (error == null) {
+                            session.getAsyncRemote().sendObject(new WorldHostC2SMessage.JoinGranted(
+                                connectionId, new JoinType.UPnP(server.getServerPort())
+                            ));
+                            return;
+                        }
+                        WorldHost.LOGGER.info("Failed to use UPnP mode due to {}. Falling back to Proxy mode.", error);
+                    } catch (Exception e) {
+                        WorldHost.LOGGER.error("Failed to open UPnP", e);
+                    }
+                }
+                WorldHost.LOGGER.error("Proxy mode not implemented yet.");
+            }
         }
     }
 

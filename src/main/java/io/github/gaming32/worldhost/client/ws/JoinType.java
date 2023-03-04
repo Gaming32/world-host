@@ -12,7 +12,9 @@ public sealed interface JoinType {
         }
     }
 
-    record Proxy() implements JoinType {
+    enum Proxy implements JoinType {
+        INSTANCE;
+
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(1);

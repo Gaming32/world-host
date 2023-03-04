@@ -31,15 +31,20 @@ public class WorldHostClientEndpoint {
 
     @OnError
     public void onError(Session session, Throwable t) throws IOException {
-        if (session == null) return;
         WorldHost.LOGGER.error("Error in WS client", t);
+        if (session == null) return;
         session.close();
-        WorldHostClient.wsClient = null;
         DeferredToastManager.show(
             SystemToast.Type.TUTORIAL_HINT,
             Text.translatable("world-host.error_in_connection"),
             Text.of(Util.getInnermostMessage(t))
         );
+    }
+
+    @OnClose
+    public void onClose(Session session, CloseReason closeReason) {
+        WorldHostClient.wsClient = null;
+        WorldHost.LOGGER.info("WS connection terminated for {}", closeReason);
     }
 
     public static class UuidEncoder implements Encoder.BinaryStream<UUID> {
