@@ -111,7 +111,9 @@ public sealed interface WorldHostS2CMessage {
                         WorldHost.LOGGER.error("Failed to open UPnP", e);
                     }
                 }
-                WorldHost.LOGGER.error("Proxy mode not implemented yet.");
+                session.getAsyncRemote().sendObject(new WorldHostC2SMessage.JoinGranted(
+                    connectionId, JoinType.Proxy.INSTANCE
+                ));
             }
         }
     }
