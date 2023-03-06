@@ -104,6 +104,14 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
+    record ProxyDisconnect(long connectionId) implements WorldHostC2SMessage {
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(9);
+            dos.writeLong(connectionId);
+        }
+    }
+
     void encode(DataOutputStream dos) throws IOException;
 
     static void writeUuid(DataOutputStream dos, UUID uuid) throws IOException {
