@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.client.ws;
 
+import io.github.gaming32.worldhost.ProxyClient;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.client.FriendsListUpdate;
@@ -142,24 +143,48 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
+    // TODO: Implement using a proper Netty channel to introduce packets directly to the Netty pipeline somehow.
     record ProxyC2SPacket(long connectionId, byte[] data) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            // TODO: Implement
+            final ProxyClient client = WorldHostClient.CONNECTED_PROXY_CLIENTS.get(connectionId);
+            if (client != null) {
+                try {
+                    client.getOutputStream().write(data);
+                } catch (IOException e) {
+                    WorldHost.LOGGER.error("Failed to write to ProxyClient", e);
+                }
+            }
         }
     }
 
     record ProxyConnect(long connectionId, InetAddress remoteAddr) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            // TODO: Implement
+            final IntegratedServer server = MinecraftClient.getInstance().getServer();
+            if (server == null || !server.isRemote()) {
+                if (WorldHostClient.wsClient != null) {
+                    WorldHostClient.wsClient.proxyDisconnect(connectionId);
+                }
+                return;
+            }
+            try {
+                final ProxyClient client = new ProxyClient(server.getServerPort(), remoteAddr, connectionId);
+                WorldHostClient.CONNECTED_PROXY_CLIENTS.put(connectionId, client);
+                client.start();
+            } catch (IOException e) {
+                WorldHost.LOGGER.error("Failed to start ProxyClient", e);
+            }
         }
     }
 
     record ProxyDisconnect(long connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            // TODO: Implement
+            final ProxyClient client = WorldHostClient.CONNECTED_PROXY_CLIENTS.remove(connectionId);
+            if (client != null) {
+                client.close();
+            }
         }
     }
 

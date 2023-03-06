@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.mixin.client;
 
+import io.github.gaming32.worldhost.ProxyClient;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.client.WorldHostClient;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -24,6 +25,8 @@ public abstract class MixinIntegratedServer {
 
     @Inject(method = "stop", at = @At("TAIL"))
     private void serverIsClosed(boolean bl, CallbackInfo ci) {
+        WorldHostClient.CONNECTED_PROXY_CLIENTS.values().forEach(ProxyClient::close);
+        WorldHostClient.CONNECTED_PROXY_CLIENTS.clear();
         if (isRemote() && WorldHostClient.wsClient != null) {
             WorldHostClient.wsClient.closedWorld(WorldHostData.friends);
         }

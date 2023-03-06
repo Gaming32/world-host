@@ -3,12 +3,15 @@ package io.github.gaming32.worldhost.client;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.GeneralUtil;
+import io.github.gaming32.worldhost.ProxyClient;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.client.ws.WorldHostWSClient;
 import io.github.gaming32.worldhost.mixin.client.MinecraftClientAccessor;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -41,6 +44,8 @@ public class WorldHostClient implements ClientModInitializer {
     public static final Set<UUID> ONLINE_FRIENDS = new HashSet<>();
     public static final Map<UUID, ServerMetadata> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
+
+    public static final Long2ObjectMap<ProxyClient> CONNECTED_PROXY_CLIENTS = new Long2ObjectOpenHashMap<>();
 
     public static Gateway upnpGateway;
 

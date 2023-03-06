@@ -59,6 +59,16 @@ public class WorldHostWSClient implements AutoCloseable {
         session.getAsyncRemote().sendObject(new WorldHostC2SMessage.RequestJoin(friend));
     }
 
+    public void proxyS2CPacket(long connectionId, byte[] data) {
+        ensureAuthenticated();
+        session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ProxyS2CPacket(connectionId, data));
+    }
+
+    public void proxyDisconnect(long connectionId) {
+        ensureAuthenticated();
+        session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ProxyDisconnect(connectionId));
+    }
+
     @Override
     public void close() throws IOException {
         session.close();
