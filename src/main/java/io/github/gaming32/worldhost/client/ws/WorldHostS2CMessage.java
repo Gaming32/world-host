@@ -20,11 +20,12 @@ import javax.websocket.Session;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
-// Mirrors https://github.com/Gaming32/world-host-server/blob/main/src/s2c_message.rs
+// Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostS2CMessage.kt
 public sealed interface WorldHostS2CMessage {
     record Error(String message) implements WorldHostS2CMessage {
         @Override
@@ -108,7 +109,7 @@ public sealed interface WorldHostS2CMessage {
                         }
                         WorldHost.LOGGER.info("Failed to use UPnP mode due to {}. Falling back to Proxy mode.", error);
                     } catch (Exception e) {
-                        WorldHost.LOGGER.error("Failed to open UPnP", e);
+                        WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                     }
                 }
                 session.getAsyncRemote().sendObject(new WorldHostC2SMessage.JoinGranted(
@@ -141,6 +142,27 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
+    record ProxyC2SPacket(long connectionId, byte[] data) implements WorldHostS2CMessage {
+        @Override
+        public void handle(Session session) {
+            // TODO: Implement
+        }
+    }
+
+    record ProxyConnect(long connectionId, InetAddress remoteAddr) implements WorldHostS2CMessage {
+        @Override
+        public void handle(Session session) {
+            // TODO: Implement
+        }
+    }
+
+    record ProxyDisconnect(long connectionId) implements WorldHostS2CMessage {
+        @Override
+        public void handle(Session session) {
+            // TODO: Implement
+        }
+    }
+
     void handle(Session session);
 
     static WorldHostS2CMessage decode(DataInputStream dis) throws IOException {
@@ -163,6 +185,9 @@ public sealed interface WorldHostS2CMessage {
                     new QueryResponseS2CPacket(buf).getServerMetadata()
                 );
             }
+            case 9 -> new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());
+            case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
+            case 11 -> new ProxyDisconnect(dis.readLong());
             default -> new Error("Received packet with unknown type_id from server: " + typeId);
         };
     }

@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.UUID;
 
-// Mirrors https://github.com/Gaming32/world-host-server/blob/main/src/c2s_message.rs
+// Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostC2SMessage.kt
 public sealed interface WorldHostC2SMessage {
     record ListOnline(Collection<UUID> friends) implements WorldHostC2SMessage {
         @Override
@@ -92,6 +92,15 @@ public sealed interface WorldHostC2SMessage {
             new QueryResponseS2CPacket(metadata).write(buf);
             dos.writeInt(buf.readableBytes());
             buf.readBytes(dos, buf.readableBytes());
+        }
+    }
+
+    record ProxyS2CPacket(long connectionId, byte[] data) implements WorldHostC2SMessage {
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(8);
+            dos.writeLong(connectionId);
+            dos.write(data);
         }
     }
 
