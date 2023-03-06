@@ -30,19 +30,19 @@ public class ProxyClient extends Thread {
             final byte[] b = new byte[8192];
             int n;
             while ((n = is.read(b)) != -1) {
-                if (WorldHostClient.wsClient == null) {
-                    WorldHostClient.CONNECTED_PROXY_CLIENTS.remove(connectionId);
-                    close();
-                    break;
-                }
+                if (WorldHostClient.wsClient == null) break;
+                if (n == 0) continue;
                 WorldHostClient.wsClient.proxyS2CPacket(connectionId, Arrays.copyOf(b, n));
-            }
-            if (WorldHostClient.wsClient != null) {
-                WorldHostClient.wsClient.proxyDisconnect(connectionId);
             }
         } catch (IOException e) {
             WorldHost.LOGGER.error("Proxy client connection for {} has error", remoteAddress, e);
         }
+        WorldHostClient.CONNECTED_PROXY_CLIENTS.remove(connectionId);
+        close();
+        if (WorldHostClient.wsClient != null) {
+            WorldHostClient.wsClient.proxyDisconnect(connectionId);
+        }
+        WorldHost.LOGGER.info("Proxy client connection for {} closed", remoteAddress);
     }
 
     public void close() {
