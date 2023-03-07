@@ -28,6 +28,7 @@ import net.minecraft.util.Util;
 
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 @Environment(EnvType.CLIENT)
@@ -36,6 +37,7 @@ public class WorldHostClient implements ClientModInitializer {
         ((MinecraftClientAccessor)MinecraftClient.getInstance()).getAuthenticationService(),
         WorldHost.CACHE_DIR
     );
+    public static boolean attemptingConnection;
     public static WorldHostWSClient wsClient;
     private static long lastReconnectTime;
 
@@ -59,7 +61,9 @@ public class WorldHostClient implements ClientModInitializer {
                 final long time = Util.getMeasuringTimeMs();
                 if (time - lastReconnectTime > 10_000) {
                     lastReconnectTime = time;
-                    reconnect(true, false);
+                    if (!attemptingConnection) {
+                        reconnect(true, false);
+                    }
                 }
             }
             if (authenticatingFuture != null && authenticatingFuture.isDone()) {
@@ -130,29 +134,33 @@ public class WorldHostClient implements ClientModInitializer {
             }
             return;
         }
-        WorldHost.LOGGER.info("Attempting to connect to WS server at {}", WorldHostData.serverUri);
-        try {
-            wsClient = new WorldHostWSClient(new URI(WorldHostData.serverUri));
-        } catch (Exception e) {
-            WorldHost.LOGGER.error("Failed to connect to WS server", e);
-            if (failureToast) {
-                DeferredToastManager.show(
-                    SystemToast.Type.PACK_COPY_FAILURE,
-                    Text.translatable("world-host.ws_connect.connect_failed"),
-                    Text.of(Util.getInnermostMessage(e))
-                );
+        attemptingConnection = true;
+        CompletableFuture.runAsync(() -> {
+            WorldHost.LOGGER.info("Attempting to connect to WS server at {}", WorldHostData.serverUri);
+            try {
+                wsClient = new WorldHostWSClient(new URI(WorldHostData.serverUri));
+            } catch (Exception e) {
+                WorldHost.LOGGER.error("Failed to connect to WS server", e);
+                if (failureToast) {
+                    DeferredToastManager.show(
+                        SystemToast.Type.PACK_COPY_FAILURE,
+                        Text.translatable("world-host.ws_connect.connect_failed"),
+                        Text.of(Util.getInnermostMessage(e))
+                    );
+                }
             }
-        }
-        if (wsClient != null) {
-            authenticatingFuture = wsClient.authenticate(MinecraftClient.getInstance().getSession().getUuidOrNull());
-            if (successToast) {
-                DeferredToastManager.show(
-                    SystemToast.Type.WORLD_ACCESS_FAILURE,
-                    Text.translatable("world-host.ws_connect.connected"),
-                    null
-                );
+            attemptingConnection = false;
+            if (wsClient != null) {
+                authenticatingFuture = wsClient.authenticate(MinecraftClient.getInstance().getSession().getUuidOrNull());
+                if (successToast) {
+                    DeferredToastManager.show(
+                        SystemToast.Type.WORLD_ACCESS_FAILURE,
+                        Text.translatable("world-host.ws_connect.connected"),
+                        null
+                    );
+                }
             }
-        }
+        });
     }
 
     public static void pingFriends() {

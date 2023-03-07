@@ -3,11 +3,13 @@ package io.github.gaming32.worldhost.client;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.toast.SystemToast;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DeferredToastManager {
     @Nullable
@@ -37,8 +39,10 @@ public class DeferredToastManager {
     }
 
     private static void show(ToastInfo toast) {
-        queuedCustomIcon = toast.icon;
-        SystemToast.show(MinecraftClient.getInstance().getToastManager(), toast.type, toast.title, toast.description);
+        MinecraftClient.getInstance().execute(() -> {
+            queuedCustomIcon = toast.icon;
+            SystemToast.show(MinecraftClient.getInstance().getToastManager(), toast.type, toast.title, Objects.requireNonNullElse(toast.description, ScreenTexts.EMPTY));
+        });
     }
 
     public static void ready() {

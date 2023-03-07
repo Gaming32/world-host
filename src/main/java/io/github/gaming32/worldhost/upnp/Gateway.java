@@ -27,7 +27,6 @@ import org.w3c.dom.traversal.NodeIterator;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.HttpURLConnection;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.URL;
 import java.util.HashMap;
@@ -40,12 +39,12 @@ import java.util.StringTokenizer;
  */
 public class Gateway {
 
-    private final Inet4Address iface;
+    private final InetAddress iface;
     private final InetAddress routerip;
 
     private String serviceType = null, controlURL = null;
 
-    public Gateway(byte[] data, Inet4Address ip, InetAddress gatewayip) throws Exception {
+    public Gateway(byte[] data, InetAddress ip, InetAddress gatewayip) throws Exception {
         iface = ip;
         routerip=gatewayip;
         String location = null;

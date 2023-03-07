@@ -20,7 +20,9 @@ package io.github.gaming32.worldhost.upnp;
 
 import java.net.*;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -41,10 +43,10 @@ public class GatewayFinder {
 
     private class GatewayListener extends Thread {
 
-        private final Inet4Address ip;
+        private final InetAddress ip;
         private final String req;
 
-        public GatewayListener(Inet4Address ip, String req) {
+        public GatewayListener(InetAddress ip, String req) {
             setName("UPnP Gateway Finder " + ip);
             this.ip = ip;
             this.req = req;
@@ -89,7 +91,7 @@ public class GatewayFinder {
 
     public GatewayFinder(Consumer<Gateway> onFound) {
         this.onFound = onFound;
-        for (Inet4Address ip : getLocalIPs()) {
+        for (InetAddress ip : getLocalIPs()) {
             for (String req : SEARCH_MESSAGES) {
                 GatewayListener l = new GatewayListener(ip, req);
                 l.start();
@@ -107,8 +109,8 @@ public class GatewayFinder {
         return false;
     }
 
-    private static Inet4Address[] getLocalIPs() {
-        LinkedList<Inet4Address> ret = new LinkedList<>();
+    private static InetAddress[] getLocalIPs() {
+        Set<InetAddress> ret = new HashSet<>();
         try {
             Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
             while (ifaces.hasMoreElements()) {
@@ -119,17 +121,14 @@ public class GatewayFinder {
                     }
                     Enumeration<InetAddress> addrs = iface.getInetAddresses();
                     while (addrs.hasMoreElements()) {
-                        InetAddress addr = addrs.nextElement();
-                        if (addr instanceof Inet4Address) {
-                            ret.add((Inet4Address) addr);
-                        }
+                        ret.add(addrs.nextElement());
                     }
                 } catch (Throwable ignored) {
                 }
             }
         } catch (Throwable ignored) {
         }
-        return ret.toArray(new Inet4Address[]{});
+        return ret.toArray(new InetAddress[0]);
     }
 
 }
