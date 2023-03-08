@@ -13,6 +13,7 @@
     "client.MixinMultiplayerScreen",
     "client.MixinOpenToLanScreen",
     "client.MixinSystemToast",
+    "client.MixinTitleScreen",
     "client.MultiplayerServerListPingerAccessor"
   ],
   "injectors": {
