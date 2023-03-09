@@ -7,7 +7,6 @@ import io.github.gaming32.worldhost.WorldHostTexts;
 import io.github.gaming32.worldhost.client.WorldHostClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
 
 public class WorldHostConfigScreen extends MidnightConfig.MidnightConfigScreen {
     private final String oldServerUri = WorldHostData.serverUri;
@@ -19,9 +18,16 @@ public class WorldHostConfigScreen extends MidnightConfig.MidnightConfigScreen {
     @Override
     public void init() {
         super.init();
-        ((ClickableWidget)children().get(0)).x = width / 2 - 229;
-        ((ClickableWidget)children().get(1)).x = width / 2 - 75;
-        addDrawableChild(new ButtonWidget(width / 2 + 79, height - 28, 150, 20, WorldHostTexts.FRIENDS, button -> {
+
+        final ButtonWidget cancelButton = (ButtonWidget)children().get(0);
+        cancelButton.setWidth(80);
+        cancelButton.x = width / 2 - 122;
+
+        final ButtonWidget doneButton = (ButtonWidget)children().get(1);
+        doneButton.setWidth(80);
+        doneButton.x = width / 2 + 42;
+
+        addDrawableChild(new ButtonWidget(width / 2 - 40, height - 28, 80, 20, WorldHostTexts.FRIENDS, button -> {
             assert client != null;
             client.setScreen(new FriendsScreen(this));
         }));

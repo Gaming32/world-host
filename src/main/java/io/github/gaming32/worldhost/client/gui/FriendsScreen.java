@@ -39,16 +39,16 @@ public class FriendsScreen extends Screen {
         super.init();
 
         if (list == null) {
-            list = addSelectableChild(new FriendsList(width, height, 32, height - 32, 36));
+            list = addSelectableChild(new FriendsList(width, height, 32, height - 64, 36));
             if (client != null && client.world != null) {
                 list.setRenderBackground(false);
             }
         } else {
-            list.updateSize(width, height, 32, height - 32);
+            list.updateSize(width, height, 32, height - 64);
         }
 
         addDrawableChild(new ButtonWidget(
-            width / 2 - 306, height - 28, 150, 20, Text.translatable("world-host.add_friend"),
+            width / 2 - 152, height - 52, 150, 20, Text.translatable("world-host.add_friend"),
             button -> {
                 assert client != null;
                 client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
@@ -68,15 +68,18 @@ public class FriendsScreen extends Screen {
             }
         ));
 
-        removeButton = addDrawableChild(new ButtonWidget(width / 2 + 2, height - 28, 150, 20, Text.translatable("world-host.friends.remove"), button -> {
-            if (list.getSelectedOrNull() != null) {
-                list.getSelectedOrNull().maybeRemove();
+        removeButton = addDrawableChild(new ButtonWidget(
+            width / 2 + 2, height - 52, 150, 20, Text.translatable("world-host.friends.remove"),
+            button -> {
+                if (list.getSelectedOrNull() != null) {
+                    list.getSelectedOrNull().maybeRemove();
+                }
             }
-        }));
+        ));
         removeButton.active = false;
 
         addDrawableChild(new ButtonWidget(
-            width / 2 + 156, height - 28, 150, 20, ScreenTexts.DONE,
+            width / 2 + 2, height - 28, 150, 20, ScreenTexts.DONE,
             button -> {
                 assert client != null;
                 client.setScreen(parent);

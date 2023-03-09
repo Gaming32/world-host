@@ -52,30 +52,36 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
         assert client != null;
         client.keyboard.setRepeatEvents(true);
         if (list == null) {
-            list = new OnlineFriendsList(client, width, height, 60, height - 32, 36);
+            list = new OnlineFriendsList(client, width, height, 60, height - 64, 36);
             WorldHostClient.ONLINE_FRIENDS.forEach(uuid -> list.addEntry(new OnlineFriendsListEntry(uuid)));
             WorldHostClient.pingFriends();
             WorldHostClient.ONLINE_FRIEND_UPDATES.add(this);
         } else {
-            list.updateSize(width, height, 60, height - 32);
+            list.updateSize(width, height, 60, height - 64);
         }
 
         addSelectableChild(list);
 
         joinButton = addDrawableChild(new ButtonWidget(
-            width / 2 - 229, height - 28, 150, 20,
+            width / 2 - 152, height - 52, 150, 20,
             Text.translatable("selectServer.select"),
             button -> connect()
         ));
 
         addDrawableChild(new ButtonWidget(
-            width / 2 - 75, height - 28, 150, 20,
+            width / 2 + 2, height - 52, 150, 20,
             Text.translatable("selectServer.refresh"),
             button -> client.setScreen(new OnlineFriendsScreen(parent))
         ));
 
         addDrawableChild(new ButtonWidget(
-            width / 2 + 79, height - 28, 150, 20,
+            width / 2 - 152, height - 28, 150, 20,
+            WorldHostTexts.FRIENDS,
+            button -> client.setScreen(new FriendsScreen(this))
+        ));
+
+        addDrawableChild(new ButtonWidget(
+            width / 2 + 2, height - 28, 150, 20,
             ScreenTexts.CANCEL,
             button -> client.setScreen(parent)
         ));
