@@ -1,0 +1,30 @@
+name: Gradle build
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache Gradle stuff
+        uses: actions/cache@v3
+        with:
+          key: gradle-${{ hashFiles('build.gradle', 'settings.gradle', 'gradle.properties', 'gradle/**') }}
+          restore-keys: |
+            gradle-${{ hashFiles('build.gradle', 'settings.gradle', 'gradle.properties', 'gradle/**') }}
+            gradle-
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            .gradle/quilt-loom-cache
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          java-version: 17
+      - name: Build with Gradle
+        run: ./gradlew build
+      - name: Capture build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Artifact
+          path: build/libs/
