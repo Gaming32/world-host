@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "world-host-common",
   "version": "${version}",
-  "name": "World Host",
+  "name": "World Host Common",
   "description": "Internal cross-version common code for World Host",
   "authors": [
     "Gaming32"
