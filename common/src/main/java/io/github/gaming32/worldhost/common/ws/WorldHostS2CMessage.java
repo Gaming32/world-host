@@ -55,7 +55,7 @@ public sealed interface WorldHostS2CMessage {
     record FriendRequest(UUID fromUser) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            WorldHostCommon.getPlatform().showProfileToast(
+            WorldHostCommon.showProfileToast(
                 fromUser, "world-host.friend_added_you",
                 WorldHostData.friends.contains(fromUser) ? null : Components.translatable("world-host.need_add_back")
             );
@@ -68,7 +68,7 @@ public sealed interface WorldHostS2CMessage {
             if (!WorldHostData.friends.contains(user)) return;
             WorldHostCommon.ONLINE_FRIENDS.add(user);
             WorldHostCommon.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
-            WorldHostCommon.getPlatform().showProfileToast(
+            WorldHostCommon.showProfileToast(
                 user, "world-host.went_online",
                 Components.translatable("world-host.went_online.desc")
             );

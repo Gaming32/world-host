@@ -10,7 +10,6 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.Services;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public interface WorldHostPlatform {
@@ -21,8 +20,6 @@ public interface WorldHostPlatform {
     Services createServices();
 
     void showToast(ToastComponent toastComponent, SystemToast.SystemToastIds id, Component title, @Nullable Component message);
-
-    void showProfileToast(UUID user, String title, Component description);
 
     ServerStatus parseServerStatus(FriendlyByteBuf buf);
 

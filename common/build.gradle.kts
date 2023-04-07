@@ -1,6 +1,7 @@
 plugins {
     id("java")
-    id("org.quiltmc.loom") version "1.1.+"
+    id("fabric-loom") version "1.1.+"
+    id("io.github.juuxel.loom-quiltflower") version "1.8.0"
 }
 
 group = "io.github.gaming32.world-host"
@@ -10,8 +11,6 @@ repositories {
     mavenCentral()
 
     maven("https://maven.fabricmc.net/")
-
-    maven("https://maven.terraformersmc.com/releases")
 
     exclusiveContent {
         forRepository {
@@ -29,8 +28,6 @@ repositories {
         name = "ParchmentMC"
         url = uri("https://maven.parchmentmc.org")
     }
-
-    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -60,7 +57,13 @@ dependencies {
 }
 
 tasks {
-    jar {
+    processResources {
+        filesMatching("fabric.mod.json") {
+            expand("version" to project.version)
+        }
+    }
+
+    remapJar {
         archiveBaseName.set("world-host-common")
     }
 }

@@ -1,5 +1,7 @@
 package io.github.gaming32.worldhost.common;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.common.upnp.Gateway;
 import io.github.gaming32.worldhost.common.upnp.GatewayFinder;
@@ -9,9 +11,12 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
 import org.slf4j.Logger;
 
@@ -21,6 +26,8 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 public class WorldHostCommon {
+    public static final String MOD_ID = "world-host";
+
     public static final Logger LOGGER = LogUtils.getLogger();
     public static final File CACHE_DIR = FabricLoader.getInstance()
         .getGameDir()
@@ -157,5 +164,27 @@ public class WorldHostCommon {
         if (wsClient != null) {
             wsClient.queryRequest(WorldHostData.friends);
         }
+    }
+
+    public static void showProfileToast(UUID user, String title, Component description) {
+        Util.backgroundExecutor().execute(() -> {
+            final GameProfile profile = Minecraft.getInstance()
+                .getMinecraftSessionService()
+                .fillProfileProperties(new GameProfile(user, null), false);
+            Minecraft.getInstance().execute(() -> {
+                final ResourceLocation skinTexture = Minecraft.getInstance().getSkinManager().getInsecureSkinLocation(profile);
+                DeferredToastManager.show(
+                    SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                    (matrices, x, y) -> {
+                        RenderSystem.setShaderTexture(0, skinTexture);
+                        RenderSystem.enableBlend();
+                        GuiComponent.blit(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
+                        GuiComponent.blit(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
+                    },
+                    Component.translatable(title, GeneralUtil.getName(profile)),
+                    description
+                );
+            });
+        });
     }
 }
