@@ -2,31 +2,32 @@ package io.github.gaming32.worldhost.client.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.GeneralUtil;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostData;
 import io.github.gaming32.worldhost.WorldHostTexts;
 import io.github.gaming32.worldhost.client.WorldHostClient;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.ConfirmScreen;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FriendsScreen extends Screen {
-    private static final Text ADD_SILENTLY_TEXT = Text.translatable("world-host.friends.add_silently");
+    private static final Component ADD_SILENTLY_TEXT = Component.translatable("world-host.friends.add_silently");
 
     private final Screen parent;
-    private ButtonWidget removeButton;
+    private Button removeButton;
     private FriendsList list;
 
     public FriendsScreen(Screen parent) {
@@ -39,19 +40,19 @@ public class FriendsScreen extends Screen {
         super.init();
 
         if (list == null) {
-            list = addSelectableChild(new FriendsList(width, height, 32, height - 64, 36));
-            if (client != null && client.world != null) {
+            list = addWidget(new FriendsList(width, height, 32, height - 64, 36));
+            if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
         } else {
             list.updateSize(width, height, 32, height - 64);
         }
 
-        addDrawableChild(new ButtonWidget(
-            width / 2 - 152, height - 52, 150, 20, Text.translatable("world-host.add_friend"),
+        addRenderableWidget(new Button(
+            width / 2 - 152, height - 52, 150, 20, Component.translatable("world-host.add_friend"),
             button -> {
-                assert client != null;
-                client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
+                assert minecraft != null;
+                minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
                     addFriend(profile);
                     if (WorldHostClient.wsClient != null) {
                         WorldHostClient.wsClient.friendRequest(profile.getId());
@@ -60,29 +61,29 @@ public class FriendsScreen extends Screen {
             }
         ));
 
-        addDrawableChild(new ButtonWidget(
+        addRenderableWidget(new Button(
             width / 2 - 152, height - 28, 150, 20, ADD_SILENTLY_TEXT,
             button -> {
-                assert client != null;
-                client.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, this::addFriend));
+                assert minecraft != null;
+                minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, this::addFriend));
             }
         ));
 
-        removeButton = addDrawableChild(new ButtonWidget(
-            width / 2 + 2, height - 52, 150, 20, Text.translatable("world-host.friends.remove"),
+        removeButton = addRenderableWidget(new Button(
+            width / 2 + 2, height - 52, 150, 20, Component.translatable("world-host.friends.remove"),
             button -> {
-                if (list.getSelectedOrNull() != null) {
-                    list.getSelectedOrNull().maybeRemove();
+                if (list.getSelected() != null) {
+                    list.getSelected().maybeRemove();
                 }
             }
         ));
         removeButton.active = false;
 
-        addDrawableChild(new ButtonWidget(
-            width / 2 + 2, height - 28, 150, 20, ScreenTexts.DONE,
+        addRenderableWidget(new Button(
+            width / 2 + 2, height - 28, 150, 20, CommonComponents.GUI_DONE,
             button -> {
-                assert client != null;
-                client.setScreen(parent);
+                assert minecraft != null;
+                minecraft.setScreen(parent);
             }
         ));
 
@@ -90,9 +91,9 @@ public class FriendsScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        assert client != null;
-        client.setScreen(parent);
+    public void onClose() {
+        assert minecraft != null;
+        minecraft.setScreen(parent);
     }
 
     private void addFriend(GameProfile profile) {
@@ -102,16 +103,16 @@ public class FriendsScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
         list.render(matrices, mouseX, mouseY, delta);
-        drawCenteredText(matrices, textRenderer, title, width / 2, 15, 0xffffff);
+        drawCenteredString(matrices, font, title, width / 2, 15, 0xffffff);
         super.render(matrices, mouseX, mouseY, delta);
     }
 
-    public class FriendsList extends AlwaysSelectedEntryListWidget<FriendsEntry> {
+    public class FriendsList extends ObjectSelectionList<FriendsEntry> {
         public FriendsList(int i, int j, int k, int l, int m) {
-            super(FriendsScreen.this.client, i, j, k, l, m);
+            super(FriendsScreen.this.minecraft, i, j, k, l, m);
         }
 
         @Override
@@ -131,34 +132,35 @@ public class FriendsScreen extends Screen {
         }
     }
 
-    public class FriendsEntry extends AlwaysSelectedEntryListWidget.Entry<FriendsEntry> {
-        private final MinecraftClient client;
+    public class FriendsEntry extends ObjectSelectionList.Entry<FriendsEntry> {
+        private final Minecraft client;
         private GameProfile profile;
 
         public FriendsEntry(GameProfile profile) {
-            client = MinecraftClient.getInstance();
+            client = Minecraft.getInstance();
             this.profile = profile;
-            Util.getMainWorkerExecutor().execute(
-                () -> this.profile = client.getSessionService().fillProfileProperties(profile, false)
+            Util.backgroundExecutor().execute(
+                () -> this.profile = client.getMinecraftSessionService().fillProfileProperties(profile, false)
             );
         }
 
+        @NotNull
         @Override
-        public Text getNarration() {
-            return Text.of(getName());
+        public Component getNarration() {
+            return Component.nullToEmpty(getName());
         }
 
         @Override
-        public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            final Identifier skinTexture = client.getSkinProvider().loadSkin(profile);
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+            final ResourceLocation skinTexture = client.getSkinManager().getInsecureSkinLocation(profile);
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.setShaderTexture(0, skinTexture);
             RenderSystem.enableBlend();
-            DrawableHelper.drawTexture(matrices, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
-            DrawableHelper.drawTexture(matrices, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
+            GuiComponent.blit(matrices, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
+            GuiComponent.blit(matrices, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
             RenderSystem.disableBlend();
-            drawCenteredText(matrices, client.textRenderer, getName(), x + 110, y + 16 - client.textRenderer.fontHeight / 2, 0xffffff);
+            drawCenteredString(matrices, client.font, getName(), x + 110, y + 16 - client.font.lineHeight / 2, 0xffffff);
         }
 
         public String getName() {
@@ -176,8 +178,8 @@ public class FriendsScreen extends Screen {
                     }
                     client.setScreen(FriendsScreen.this);
                 },
-                Text.translatable("world-host.friends.remove.title"),
-                Text.translatable("world-host.friends.remove.message")
+                Component.translatable("world-host.friends.remove.title"),
+                Component.translatable("world-host.friends.remove.message")
             ));
         }
 

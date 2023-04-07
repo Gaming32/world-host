@@ -3,9 +3,9 @@ package io.github.gaming32.worldhost.client.ws;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.client.DeferredToastManager;
 import io.github.gaming32.worldhost.client.WorldHostClient;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.text.Text;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.network.chat.Component;
 
 import javax.websocket.*;
 import java.io.DataOutputStream;
@@ -35,9 +35,9 @@ public class WorldHostClientEndpoint {
         if (session == null) return;
         session.close();
         DeferredToastManager.show(
-            SystemToast.Type.TUTORIAL_HINT,
-            Text.translatable("world-host.error_in_connection"),
-            Text.of(Util.getInnermostMessage(t))
+            SystemToast.SystemToastIds.TUTORIAL_HINT,
+            Component.translatable("world-host.error_in_connection"),
+            Component.nullToEmpty(Util.describeError(t))
         );
     }
 

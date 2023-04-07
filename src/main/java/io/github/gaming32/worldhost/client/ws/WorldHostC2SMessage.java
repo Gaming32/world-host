@@ -1,9 +1,9 @@
 package io.github.gaming32.worldhost.client.ws;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.query.QueryResponseS2CPacket;
-import net.minecraft.server.ServerMetadata;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
+import net.minecraft.network.protocol.status.ServerStatus;
 
 import javax.websocket.EndpointConfig;
 import java.io.DataOutputStream;
@@ -83,13 +83,13 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record QueryResponse(UUID connectionId, ServerMetadata metadata) implements WorldHostC2SMessage {
+    record QueryResponse(UUID connectionId, ServerStatus metadata) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(7);
             writeUuid(dos, connectionId);
-            final PacketByteBuf buf = PacketByteBufs.create();
-            new QueryResponseS2CPacket(metadata).write(buf);
+            final FriendlyByteBuf buf = PacketByteBufs.create();
+            new ClientboundStatusResponsePacket(metadata).write(buf);
             dos.writeInt(buf.readableBytes());
             buf.readBytes(dos, buf.readableBytes());
         }

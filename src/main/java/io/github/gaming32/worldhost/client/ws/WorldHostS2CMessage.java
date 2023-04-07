@@ -7,14 +7,14 @@ import io.github.gaming32.worldhost.client.FriendsListUpdate;
 import io.github.gaming32.worldhost.client.WorldHostClient;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ConnectScreen;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.s2c.query.QueryResponseS2CPacket;
-import net.minecraft.server.ServerMetadata;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
+import net.minecraft.network.protocol.status.ServerStatus;
 
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
@@ -39,8 +39,8 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             if (WorldHostData.friends.contains(user)) {
-                final IntegratedServer server = MinecraftClient.getInstance().getServer();
-                if (server != null && server.isRemote()) {
+                final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                if (server != null && server.isPublished()) {
                     session.getAsyncRemote().sendObject(
                         new WorldHostC2SMessage.PublishedWorld(List.of(user))
                     );
@@ -52,9 +52,9 @@ public sealed interface WorldHostS2CMessage {
     record OnlineGame(String host, int port) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            MinecraftClient.getInstance().execute(() -> {
-                final MinecraftClient client = MinecraftClient.getInstance();
-                ConnectScreen.connect(client.currentScreen, client, new ServerAddress(host, port), null);
+            Minecraft.getInstance().execute(() -> {
+                final Minecraft client = Minecraft.getInstance();
+                ConnectScreen.startConnecting(client.screen, client, new ServerAddress(host, port), null);
             });
         }
     }
@@ -64,7 +64,7 @@ public sealed interface WorldHostS2CMessage {
         public void handle(Session session) {
             WorldHostClient.showProfileToast(
                 fromUser, "world-host.friend_added_you",
-                WorldHostData.friends.contains(fromUser) ? null : Text.translatable("world-host.need_add_back")
+                WorldHostData.friends.contains(fromUser) ? null : Component.translatable("world-host.need_add_back")
             );
         }
     }
@@ -77,7 +77,7 @@ public sealed interface WorldHostS2CMessage {
             WorldHostClient.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
             WorldHostClient.showProfileToast(
                 user, "world-host.went_online",
-                Text.translatable("world-host.went_online.desc")
+                Component.translatable("world-host.went_online.desc")
             );
         }
     }
@@ -95,16 +95,16 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             if (WorldHostData.friends.contains(user)) {
-                final IntegratedServer server = MinecraftClient.getInstance().getServer();
-                if (server == null || !server.isRemote()) return;
+                final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                if (server == null || !server.isPublished()) return;
                 if (WorldHostClient.upnpGateway != null) {
                     try {
                         final UPnPErrors.AddPortMappingErrors error = WorldHostClient.upnpGateway.openPort(
-                            server.getServerPort(), 60, false
+                            server.getPort(), 60, false
                         );
                         if (error == null) {
                             session.getAsyncRemote().sendObject(new WorldHostC2SMessage.JoinGranted(
-                                connectionId, new JoinType.UPnP(server.getServerPort())
+                                connectionId, new JoinType.UPnP(server.getPort())
                             ));
                             return;
                         }
@@ -124,17 +124,17 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             if (WorldHostData.friends.contains(friend)) {
-                final IntegratedServer server = MinecraftClient.getInstance().getServer();
+                final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
                 if (server != null) {
                     session.getAsyncRemote().sendObject(new WorldHostC2SMessage.QueryResponse(
-                        connectionId, server.getServerMetadata()
+                        connectionId, server.getStatus()
                     ));
                 }
             }
         }
     }
 
-    record QueryResponse(UUID friend, ServerMetadata metadata) implements WorldHostS2CMessage {
+    record QueryResponse(UUID friend, ServerStatus metadata) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
             if (WorldHostData.friends.contains(friend)) {
@@ -161,15 +161,15 @@ public sealed interface WorldHostS2CMessage {
     record ProxyConnect(long connectionId, InetAddress remoteAddr) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            final IntegratedServer server = MinecraftClient.getInstance().getServer();
-            if (server == null || !server.isRemote()) {
+            final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+            if (server == null || !server.isPublished()) {
                 if (WorldHostClient.wsClient != null) {
                     WorldHostClient.wsClient.proxyDisconnect(connectionId);
                 }
                 return;
             }
             try {
-                final ProxyClient client = new ProxyClient(server.getServerPort(), remoteAddr, connectionId);
+                final ProxyClient client = new ProxyClient(server.getPort(), remoteAddr, connectionId);
                 WorldHostClient.CONNECTED_PROXY_CLIENTS.put(connectionId, client);
                 client.start();
             } catch (IOException e) {
@@ -203,11 +203,11 @@ public sealed interface WorldHostS2CMessage {
             case 7 -> new QueryRequest(readUuid(dis), readUuid(dis));
             case 8 -> {
                 final UUID friend = readUuid(dis);
-                final PacketByteBuf buf = PacketByteBufs.create();
+                final FriendlyByteBuf buf = PacketByteBufs.create();
                 buf.writeBytes(dis, dis.readInt());
                 yield new QueryResponse(
                     friend,
-                    new QueryResponseS2CPacket(buf).getServerMetadata()
+                    new ClientboundStatusResponsePacket(buf).getStatus()
                 );
             }
             case 9 -> new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());

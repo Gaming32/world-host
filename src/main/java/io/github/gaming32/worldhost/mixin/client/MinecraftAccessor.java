@@ -1,12 +1,12 @@
 package io.github.gaming32.worldhost.mixin.client;
 
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(MinecraftClient.class)
-public interface MinecraftClientAccessor {
+@Mixin(Minecraft.class)
+public interface MinecraftAccessor {
     @Accessor
     YggdrasilAuthenticationService getAuthenticationService();
 }

@@ -1,10 +1,10 @@
 package io.github.gaming32.worldhost.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -17,19 +17,19 @@ public class DeferredToastManager {
 
     @FunctionalInterface
     public interface IconRenderer {
-        void draw(MatrixStack matrices, int x, int y);
+        void draw(PoseStack matrices, int x, int y);
     }
 
-    private record ToastInfo(SystemToast.Type type, IconRenderer icon, Text title, @Nullable Text description) {
+    private record ToastInfo(SystemToast.SystemToastIds type, IconRenderer icon, Component title, @Nullable Component description) {
     }
 
     private static List<ToastInfo> deferredToasts = new ArrayList<>();
 
-    public static void show(SystemToast.Type type, Text title, @Nullable Text description) {
+    public static void show(SystemToast.SystemToastIds type, Component title, @Nullable Component description) {
         show(type, null, title, description);
     }
 
-    public static void show(SystemToast.Type type, IconRenderer icon, Text title, @Nullable Text description) {
+    public static void show(SystemToast.SystemToastIds type, IconRenderer icon, Component title, @Nullable Component description) {
         final ToastInfo toast = new ToastInfo(type, icon, title, description);
         if (deferredToasts != null) {
             deferredToasts.add(toast);
@@ -39,9 +39,9 @@ public class DeferredToastManager {
     }
 
     private static void show(ToastInfo toast) {
-        MinecraftClient.getInstance().execute(() -> {
+        Minecraft.getInstance().execute(() -> {
             queuedCustomIcon = toast.icon;
-            SystemToast.show(MinecraftClient.getInstance().getToastManager(), toast.type, toast.title, Objects.requireNonNullElse(toast.description, ScreenTexts.EMPTY));
+            SystemToast.addOrUpdate(Minecraft.getInstance().getToasts(), toast.type, toast.title, Objects.requireNonNullElse(toast.description, CommonComponents.EMPTY));
         });
     }
 

@@ -1,12 +1,12 @@
 package io.github.gaming32.worldhost.mixin.client;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.client.DeferredToastManager;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.components.toasts.Toast;
+import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -26,10 +26,10 @@ public class MixinSystemToast {
     private DeferredToastManager.IconRenderer customIcon;
 
     @Inject(
-        method = "<init>(Lnet/minecraft/client/toast/SystemToast$Type;Lnet/minecraft/text/Text;Ljava/util/List;I)V",
+        method = "<init>(Lnet/minecraft/client/gui/components/toasts/SystemToast$SystemToastIds;Lnet/minecraft/network/chat/Component;Ljava/util/List;I)V",
         at = @At("TAIL")
     )
-    private void customIconSupport(SystemToast.Type type, Text title, List<OrderedText> lines, int width, CallbackInfo ci) {
+    private void customIconSupport(SystemToast.SystemToastIds type, Component title, List<FormattedCharSequence> lines, int width, CallbackInfo ci) {
         customIcon = DeferredToastManager.queuedCustomIcon;
         DeferredToastManager.queuedCustomIcon = null;
         if (customIcon != null) {
@@ -37,20 +37,20 @@ public class MixinSystemToast {
         }
     }
 
-    @ModifyConstant(method = "draw", constant = @Constant(floatValue = 18))
+    @ModifyConstant(method = "render", constant = @Constant(floatValue = 18))
     private float moveTextRight(float constant) {
         return customIcon != null ? constant + 12 : constant;
     }
 
     @Inject(
-        method = "draw",
+        method = "render",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/client/toast/SystemToast;lines:Ljava/util/List;",
+            target = "Lnet/minecraft/client/gui/components/toasts/SystemToast;messageLines:Ljava/util/List;",
             ordinal = 1
         )
     )
-    private void drawCustomIcon(MatrixStack matrices, ToastManager manager, long startTime, CallbackInfoReturnable<Toast.Visibility> cir) {
+    private void drawCustomIcon(PoseStack matrices, ToastComponent manager, long startTime, CallbackInfoReturnable<Toast.Visibility> cir) {
         if (customIcon != null) {
             customIcon.draw(matrices, 6, 6);
         }

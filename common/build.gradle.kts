@@ -26,12 +26,21 @@ repositories {
         }
     }
 
+    maven {
+        name = "ParchmentMC"
+        url = uri("https://maven.parchmentmc.org")
+    }
+
     maven("https://jitpack.io")
 }
 
 dependencies {
     minecraft("com.mojang:minecraft:1.19.4")
-    mappings("net.fabricmc:yarn:1.19.4+build.1:v2")
+    @Suppress("UnstableApiUsage")
+    mappings(loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-1.19.3:2023.03.12@zip")
+    })
     modImplementation("net.fabricmc:fabric-loader:0.14.14")
 }
 

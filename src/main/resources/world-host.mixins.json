@@ -6,15 +6,15 @@
   "mixins": [
   ],
   "client": [
-    "client.MinecraftClientAccessor",
-    "client.MixinGameMenuScreen",
+    "client.MinecraftAccessor",
     "client.MixinIntegratedServer",
-    "client.MixinMinecraftClient",
-    "client.MixinMultiplayerScreen",
-    "client.MixinOpenToLanScreen",
+    "client.MixinJoinMultiplayerScreen",
+    "client.MixinMinecraft",
+    "client.MixinPauseScreen",
+    "client.MixinShareToLanScreen",
     "client.MixinSystemToast",
     "client.MixinTitleScreen",
-    "client.MultiplayerServerListPingerAccessor"
+    "client.ServerStatusPingerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

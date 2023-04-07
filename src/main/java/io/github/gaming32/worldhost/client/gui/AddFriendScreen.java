@@ -2,19 +2,19 @@ package io.github.gaming32.worldhost.client.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.client.WorldHostClient;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.UserCache;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.players.GameProfileCache;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -22,18 +22,18 @@ import java.util.regex.Pattern;
 
 public class AddFriendScreen extends Screen {
     public static final Pattern VALID_USERNAME = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
-    private static final Text FRIEND_USERNAME_TEXT = Text.translatable("world-host.add_friend.enter_username");
+    private static final Component FRIEND_USERNAME_TEXT = Component.translatable("world-host.add_friend.enter_username");
 
     private final Screen parent;
     private final Consumer<GameProfile> addAction;
 
-    private ButtonWidget addFriendButton;
-    private TextFieldWidget usernameField;
+    private Button addFriendButton;
+    private EditBox usernameField;
     private long lastTyping;
     private boolean usernameUpdate;
     private GameProfile friendProfile;
 
-    protected AddFriendScreen(Screen parent, Text title, Consumer<GameProfile> addAction) {
+    protected AddFriendScreen(Screen parent, Component title, Consumer<GameProfile> addAction) {
         super(title);
         this.parent = parent;
         this.addAction = addAction;
@@ -41,25 +41,25 @@ public class AddFriendScreen extends Screen {
 
     @Override
     protected void init() {
-        assert client != null;
-        client.keyboard.setRepeatEvents(true);
-        UserCache.setUseRemote(true); // This makes non-existent users return an empty value instead of an offline mode fallback.
+        assert minecraft != null;
+        minecraft.keyboardHandler.setSendRepeatsToGui(true);
+        GameProfileCache.setUsesAuthentication(true); // This makes non-existent users return an empty value instead of an offline mode fallback.
 
-        addFriendButton = addDrawableChild(new ButtonWidget(width / 2 - 100, 288, 200, 20, Text.translatable("world-host.add_friend"), button -> {
+        addFriendButton = addRenderableWidget(new Button(width / 2 - 100, 288, 200, 20, Component.translatable("world-host.add_friend"), button -> {
             if (friendProfile != null) { // Just in case the user somehow clicks the button with this null
                 addAction.accept(friendProfile);
             }
-            client.setScreen(parent);
+            minecraft.setScreen(parent);
         }));
         addFriendButton.active = false;
 
-        addDrawableChild(new ButtonWidget(width / 2 - 100, 312, 200, 20, ScreenTexts.CANCEL, button -> client.setScreen(parent)));
+        addRenderableWidget(new Button(width / 2 - 100, 312, 200, 20, CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent)));
 
-        usernameField = addSelectableChild(new TextFieldWidget(textRenderer, width / 2 - 100, 116, 200, 20, FRIEND_USERNAME_TEXT));
+        usernameField = addWidget(new EditBox(font, width / 2 - 100, 116, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(16);
-        usernameField.setTextFieldFocused(true);
-        usernameField.setChangedListener(text -> {
-            lastTyping = Util.getMeasuringTimeMs();
+        usernameField.setFocus(true);
+        usernameField.setResponder(text -> {
+            lastTyping = Util.getMillis();
             usernameUpdate = true;
             friendProfile = null;
             addFriendButton.active = false;
@@ -67,22 +67,22 @@ public class AddFriendScreen extends Screen {
     }
 
     @Override
-    public void resize(MinecraftClient client, int width, int height) {
-        final String oldUsername = usernameField.getText();
+    public void resize(Minecraft client, int width, int height) {
+        final String oldUsername = usernameField.getValue();
         super.resize(client, width, height);
-        usernameField.setText(oldUsername);
+        usernameField.setValue(oldUsername);
     }
 
     @Override
-    public void close() {
-        assert client != null;
-        client.setScreen(parent);
+    public void onClose() {
+        assert minecraft != null;
+        minecraft.setScreen(parent);
     }
 
     @Override
     public void removed() {
-        assert client != null;
-        client.keyboard.setRepeatEvents(false);
+        assert minecraft != null;
+        minecraft.keyboardHandler.setSendRepeatsToGui(false);
     }
 
     @Override
@@ -101,14 +101,14 @@ public class AddFriendScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
-        if (Util.getMeasuringTimeMs() - 300 > lastTyping && usernameUpdate) {
+        if (Util.getMillis() - 300 > lastTyping && usernameUpdate) {
             usernameUpdate = false;
-            final String username = usernameField.getText();
+            final String username = usernameField.getValue();
             if (VALID_USERNAME.matcher(username).matches()) {
-                WorldHostClient.API_SERVICES.userCache().findByNameAsync(username, p -> {
+                WorldHostClient.API_SERVICES.profileCache().getAsync(username, p -> {
                     if (p.isPresent()) {
-                        assert client != null;
-                        friendProfile = client.getSessionService().fillProfileProperties(p.get(), false);
+                        assert minecraft != null;
+                        friendProfile = minecraft.getMinecraftSessionService().fillProfileProperties(p.get(), false);
                         addFriendButton.active = true;
                     } else {
                         friendProfile = null;
@@ -119,22 +119,22 @@ public class AddFriendScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
-        drawCenteredText(matrices, textRenderer, title, width / 2, 20, 16777215);
-        drawTextWithShadow(matrices, textRenderer, FRIEND_USERNAME_TEXT, width / 2 - 100, 100, 10526880);
+        drawCenteredString(matrices, font, title, width / 2, 20, 16777215);
+        drawString(matrices, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 100, 10526880);
         usernameField.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
 
         if (friendProfile != null) {
-            assert client != null;
-            final Identifier skinTexture = client.getSkinProvider().loadSkin(friendProfile);
+            assert minecraft != null;
+            final ResourceLocation skinTexture = minecraft.getSkinManager().getInsecureSkinLocation(friendProfile);
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.setShaderTexture(0, skinTexture);
             RenderSystem.enableBlend();
-            DrawableHelper.drawTexture(matrices, width / 2 - 64, 148, 128, 128, 8, 8, 8, 8, 64, 64);
-            DrawableHelper.drawTexture(matrices, width / 2 - 64, 148, 128, 128, 40, 8, 8, 8, 64, 64);
+            GuiComponent.blit(matrices, width / 2 - 64, 148, 128, 128, 8, 8, 8, 8, 64, 64);
+            GuiComponent.blit(matrices, width / 2 - 64, 148, 128, 128, 40, 8, 8, 8, 64, 64);
             RenderSystem.disableBlend();
         }
     }
