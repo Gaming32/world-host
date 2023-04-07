@@ -1,7 +1,6 @@
 plugins {
     id("java")
-    id("fabric-loom") version "1.0.+"
-    id("io.github.juuxel.loom-quiltflower") version "1.8.0"
+    id("org.quiltmc.loom") version "1.1.+"
 }
 
 group = "io.github.gaming32.world-host"
@@ -42,6 +41,22 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-1.19.3:2023.03.12@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:0.14.14")
+
+    // The exact JiJed version is dependent on the Minecraft version. However, it needs to be ABI-compatible.
+    modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")
+
+    implementation("javax.websocket:javax.websocket-api:1.1")
+    include("javax.websocket:javax.websocket-api:1.1")
+
+    runtimeOnly("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.51.v20230217")
+    include("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.51.v20230217")
+    include("org.eclipse.jetty.websocket:websocket-client:9.4.51.v20230217")
+    include("org.eclipse.jetty.websocket:websocket-common:9.4.51.v20230217")
+    include("org.eclipse.jetty.websocket:websocket-api:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-io:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-util:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-client:9.4.51.v20230217")
+    include("org.eclipse.jetty:jetty-http:9.4.51.v20230217")
 }
 
 tasks {

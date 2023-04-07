@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "world-host-common",
+  "version": "${version}",
+  "name": "World Host",
+  "description": "Internal cross-version common code for World Host",
+  "authors": [
+    "Gaming32"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/world-host-common/icon.png",
+  "environment": "client",
+  "mixins": [],
+  "custom": {
+    "modmenu": {
+      "badges": ["library"],
+      "parent": "world-host",
+      "update_checker": false
+    }
+  },
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "minecraft": "*"
+  }
+}
