@@ -65,6 +65,14 @@ dependencies {
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.2.0-beta.6")
 }
 
+loom {
+    runs {
+        runConfigs.configureEach {
+            isIdeConfigGenerated = true
+        }
+    }
+}
+
 tasks {
     processResources {
         filesMatching("fabric.mod.json") {
