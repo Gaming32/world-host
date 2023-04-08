@@ -16,7 +16,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-            .gradle/loom-cache
+            .gradle/quilt-loom-cache
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
