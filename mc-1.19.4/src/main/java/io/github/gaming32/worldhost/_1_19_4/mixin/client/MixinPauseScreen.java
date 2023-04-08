@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(PauseScreen.class)
 public class MixinPauseScreen {
-    @ModifyConstant(method = "createPauseMenu", constant = @Constant(stringValue = "menu.shareToLan"))
-    private String changeLabel(String constant) {
+    @ModifyConstant(method = "<clinit>", constant = @Constant(stringValue = "menu.shareToLan"))
+    private static String changeLabel(String constant) {
         return "world-host.open_world";
     }
 }

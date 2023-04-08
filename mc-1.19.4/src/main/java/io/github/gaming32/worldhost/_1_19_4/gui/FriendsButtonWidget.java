@@ -30,10 +30,10 @@ public class FriendsButtonWidget extends Button implements FriendsListUpdate {
     }
 
     @Override
-    public void renderWidget(PoseStack poseStack, int mouseX, int mouseY, float tickDelta) {
+    public void renderString(PoseStack poseStack, Font font, int i) {
         final int baseX = getX() + bgX;
         final int baseY = getY() + (height - 12) / 2;
         fill(poseStack, baseX, baseY, baseX + bgWidth, baseY + 12, 0x80000000);
-        super.renderWidget(poseStack, mouseX, mouseY, tickDelta);
+        super.renderString(poseStack, font, i);
     }
 }
