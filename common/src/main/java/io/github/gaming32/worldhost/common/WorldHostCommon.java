@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.common;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
+import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.common.upnp.Gateway;
 import io.github.gaming32.worldhost.common.upnp.GatewayFinder;
 import io.github.gaming32.worldhost.common.ws.WorldHostWSClient;
@@ -71,7 +72,11 @@ public class WorldHostCommon {
     }
 
     private static void init() {
+        MidnightConfig.init(MOD_ID, WorldHostData.class);
+
         apiServices = platform.createServices();
+        apiServices.profileCache().setExecutor(Util.backgroundExecutor());
+        reconnect(false, true);
 
         platform.registerClientTickHandler(client -> {
             if (wsClient == null) {

@@ -7,11 +7,14 @@
   "authors": [
     "Gaming32"
   ],
-  "contact": {},
+  "contact": {
+    "homepage": "https://github.com/Gaming32/world-host",
+    "sources": "https://github.com/Gaming32/world-host",
+    "issues": "https://github.com/Gaming32/world-host/issues"
+  },
   "license": "MIT",
   "icon": "assets/world-host-common/icon.png",
   "environment": "client",
-  "mixins": [],
   "custom": {
     "modmenu": {
       "badges": ["library"],
