@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "world-host",
+  "id": "world-host-1-19-4",
   "version": "${version}",
-  "name": "World Host",
-  "description": "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser.",
+  "name": "World Host 1.19.4",
+  "description": "1.19.4-specific code for World Host",
   "authors": [
     "Gaming32"
   ],
@@ -13,7 +13,7 @@
     "issues": "https://github.com/Gaming32/world-host/issues"
   },
   "license": "MIT",
-  "icon": "assets/world-host/icon.png",
+  "icon": "assets/world-host-1-19-4/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
@@ -26,6 +26,16 @@
   "mixins": [
     "world-host.mixins.json"
   ],
+  "custom": {
+    "modmenu": {
+      "parent": {
+        "id": "world-host",
+        "name": "World Host",
+        "description": "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser.",
+        "icon": "assets/world-host-1-19-4/icon.png"
+      }
+    }
+  },
   "depends": {
     "fabricloader": ">=0.14.0",
     "minecraft": ">=1.19.4",

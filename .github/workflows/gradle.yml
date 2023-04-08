@@ -27,4 +27,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: Artifact
-          path: mc-*/build/libs/
+          path: |
+            mc-*/build/libs/
+            monojar/build/libs/

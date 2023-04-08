@@ -1,7 +1,6 @@
 plugins {
     id("java")
-    id("fabric-loom") version "1.1.+"
-    id("io.github.juuxel.loom-quiltflower") version "1.8.0"
+    id("org.quiltmc.loom") version "1.1.+"
 }
 
 group = "io.github.gaming32.world-host"
@@ -43,7 +42,7 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-1.19.2:2022.11.27@zip")
     })
-    modImplementation("net.fabricmc:fabric-loader:0.14.14")
+    modImplementation("org.quiltmc:quilt-loader:0.18.5")
 
     implementation(project(":common"))
     include(project(":common"))
