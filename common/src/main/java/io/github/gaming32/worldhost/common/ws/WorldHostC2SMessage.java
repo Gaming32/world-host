@@ -88,7 +88,7 @@ public sealed interface WorldHostC2SMessage {
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(7);
             writeUuid(dos, connectionId);
-            final FriendlyByteBuf buf = WorldHostCommon.getPlatform().createByteBuf();
+            final FriendlyByteBuf buf = WorldHostCommon.createByteBuf();
             new ClientboundStatusResponsePacket(metadata).write(buf);
             dos.writeInt(buf.readableBytes());
             buf.readBytes(dos, buf.readableBytes());

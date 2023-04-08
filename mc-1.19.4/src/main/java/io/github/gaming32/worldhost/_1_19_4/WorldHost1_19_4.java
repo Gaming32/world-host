@@ -1,6 +1,6 @@
-package io.github.gaming32.worldhost._1_19_2;
+package io.github.gaming32.worldhost._1_19_4;
 
-import io.github.gaming32.worldhost._1_19_2.mixin.client.MinecraftAccessor;
+import io.github.gaming32.worldhost._1_19_4.mixin.client.MinecraftAccessor;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostPlatform;
 import net.fabricmc.api.ClientModInitializer;
@@ -15,7 +15,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.Services;
 import org.jetbrains.annotations.Nullable;
 
-public class WorldHost1_19_2 implements WorldHostPlatform, ClientModInitializer {
+public class WorldHost1_19_4 implements WorldHostPlatform, ClientModInitializer {
     @Override
     public void onInitializeClient() {
         WorldHostCommon.init(this);
@@ -36,7 +36,7 @@ public class WorldHost1_19_2 implements WorldHostPlatform, ClientModInitializer 
 
     @Override
     public ServerStatus parseServerStatus(FriendlyByteBuf buf) {
-        return new ClientboundStatusResponsePacket(buf).getStatus();
+        return new ClientboundStatusResponsePacket(buf).status();
     }
 
     @Override

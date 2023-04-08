@@ -1,6 +1,5 @@
 package io.github.gaming32.worldhost.common;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.FriendlyByteBuf;
@@ -10,13 +9,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.Services;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
-
 public interface WorldHostPlatform {
-    FriendlyByteBuf createByteBuf();
-
-    void registerClientTickHandler(Consumer<Minecraft> handler);
-
     Services createServices();
 
     void showToast(ToastComponent toastComponent, SystemToast.SystemToastIds id, Component title, @Nullable Component message);
@@ -24,6 +17,8 @@ public interface WorldHostPlatform {
     ServerStatus parseServerStatus(FriendlyByteBuf buf);
 
     MutableComponent translatableComponent(String key);
+
+    MutableComponent translatableComponent(String key, Object... args);
 
     Component immutableComponent(String text);
 }

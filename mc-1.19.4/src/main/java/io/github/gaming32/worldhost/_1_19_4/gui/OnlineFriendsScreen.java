@@ -1,10 +1,10 @@
-package io.github.gaming32.worldhost._1_19_2.gui;
+package io.github.gaming32.worldhost._1_19_4.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.gaming32.worldhost._1_19_2.mixin.client.ServerStatusPingerAccessor;
+import io.github.gaming32.worldhost._1_19_4.mixin.client.ServerStatusPingerAccessor;
 import io.github.gaming32.worldhost.common.FriendsListUpdate;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
@@ -30,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.text.ParseException;
 import java.util.*;
 
 // A lot of this is based off of MultiplayerScreen and MultiplayerServerListWidget
@@ -49,7 +48,6 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
     protected void init() {
         super.init();
         assert minecraft != null;
-        minecraft.keyboardHandler.setSendRepeatsToGui(true);
         if (list == null) {
             list = new OnlineFriendsList(minecraft, width, height, 60, height - 64, 36);
             WorldHostCommon.ONLINE_FRIENDS.forEach(uuid -> list.addEntry(new OnlineFriendsListEntry(uuid)));
@@ -61,37 +59,40 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
 
         addWidget(list);
 
-        joinButton = addRenderableWidget(new Button(
-            width / 2 - 152, height - 52, 150, 20,
-            Component.translatable("selectServer.select"),
-            button -> connect()
-        ));
+        joinButton = addRenderableWidget(
+            Button.builder(Component.translatable("selectServer.select"), button -> connect())
+                .pos(width / 2 - 152, height - 52)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 + 2, height - 52, 150, 20,
-            Component.translatable("selectServer.refresh"),
-            button -> minecraft.setScreen(new OnlineFriendsScreen(parent))
-        ));
+        addRenderableWidget(
+            Button.builder(
+                Component.translatable("selectServer.refresh"),
+                button -> minecraft.setScreen(new OnlineFriendsScreen(parent))
+            ).pos(width / 2 + 2, height - 52)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 - 152, height - 28, 150, 20,
-            WorldHostTexts.FRIENDS,
-            button -> minecraft.setScreen(new FriendsScreen(this))
-        ));
+        addRenderableWidget(
+            Button.builder(WorldHostTexts.FRIENDS, button -> minecraft.setScreen(new FriendsScreen(this)))
+                .pos(width / 2 - 152, height - 28)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 + 2, height - 28, 150, 20,
-            CommonComponents.GUI_CANCEL,
-            button -> minecraft.setScreen(parent)
-        ));
+        addRenderableWidget(
+            Button.builder(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
+                .pos(width / 2 + 2, height - 28)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 - 102, 32, 100, 20, WorldHostTexts.SERVERS,
-            button -> {
+        addRenderableWidget(
+            Button.builder(WorldHostTexts.SERVERS, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new JoinMultiplayerScreen(parent));
-            }
-        ));
+            }).pos(width / 2 - 102, 32)
+                .width(100)
+                .build()
+        );
 
         addRenderableWidget(new FriendsButtonWidget(
             width / 2 + 2, 32, 100, 20,
@@ -103,8 +104,6 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
 
     @Override
     public void removed() {
-        assert minecraft != null;
-        minecraft.keyboardHandler.setSendRepeatsToGui(false);
         WorldHostCommon.ONLINE_FRIEND_UPDATES.remove(this);
     }
 
@@ -214,11 +213,6 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
         }
 
         @Override
-        protected boolean isFocused() {
-            return OnlineFriendsScreen.this.getFocused() == this;
-        }
-
-        @Override
         protected int getRowTop(int index) {
             return super.getRowTop(index);
         }
@@ -230,8 +224,7 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
         private GameProfile profile;
 
         private final ResourceLocation iconTextureId;
-        @Nullable
-        private String iconUri;
+        private byte @Nullable [] iconBytes;
         @Nullable
         private DynamicTexture icon;
         private long clickTime;
@@ -278,15 +271,17 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
                 RenderSystem.disableBlend();
             }
 
-            final String icon = serverInfo.getIconB64();
-            if (!Objects.equals(icon, iconUri)) {
+            final byte[] icon = serverInfo.getIconBytes();
+            if (!Arrays.equals(icon, iconBytes)) {
                 if (uploadServerIcon(icon)) {
-                    iconUri = icon;
+                    iconBytes = icon;
                 } else {
-                    serverInfo.setIconB64(null);
+                    serverInfo.setIconBytes(null);
                 }
             }
 
+            // Mojang did "@Nullable byte[]" instead of "byte @Nullable []"
+            //noinspection ConstantValue
             if (icon == null) {
                 RenderSystem.setShaderTexture(0, client.getSkinManager().getInsecureSkinLocation(profile));
                 RenderSystem.enableBlend();
@@ -333,59 +328,48 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
                 return;
             }
 
-            if (metadata.getDescription() != null) {
-                serverInfo.motd = metadata.getDescription();
-            } else {
-                serverInfo.motd = CommonComponents.EMPTY;
-            }
-
-            if (metadata.getVersion() != null) {
-                serverInfo.version = Component.literal(metadata.getVersion().getName());
-                serverInfo.protocol = metadata.getVersion().getProtocol();
-            } else {
+            serverInfo.motd = metadata.description();
+            metadata.version().ifPresentOrElse(version -> {
+                serverInfo.version = Component.literal(version.name());
+                serverInfo.protocol = version.protocol();
+            }, () -> {
                 serverInfo.version = Component.translatable("multiplayer.status.old");
                 serverInfo.protocol = 0;
-            }
+            });
+            metadata.players().ifPresentOrElse(players -> {
+                serverInfo.status = ServerStatusPingerAccessor.formatPlayerCount(players.online(), players.max());
+                serverInfo.players = players;
+                if (!players.sample().isEmpty()) {
+                    final List<Component> playerList = new ArrayList<>(players.sample().size());
 
-            serverInfo.playerList = List.of();
-            if (metadata.getPlayers() != null) {
-                serverInfo.status = ServerStatusPingerAccessor.formatPlayerCount(
-                    metadata.getPlayers().getNumPlayers(), metadata.getPlayers().getMaxPlayers()
-                );
-                final List<Component> lines = new ArrayList<>();
-                final GameProfile[] sampleProfiles = metadata.getPlayers().getSample();
-                if (sampleProfiles != null && sampleProfiles.length > 0) {
-                    for (final GameProfile sampleProfile : sampleProfiles) {
-                        lines.add(Component.literal(sampleProfile.getName()));
+                    for(GameProfile gameProfile : players.sample()) {
+                        playerList.add(Component.literal(gameProfile.getName()));
                     }
-                    if (sampleProfiles.length < metadata.getPlayers().getNumPlayers()) {
-                        lines.add(Component.translatable(
-                            "multiplayer.status.and_more", metadata.getPlayers().getNumPlayers() - sampleProfiles.length
+
+                    if (players.sample().size() < players.online()) {
+                        playerList.add(Component.translatable(
+                            "multiplayer.status.and_more",
+                            players.online() - players.sample().size()
                         ));
                     }
-                    serverInfo.playerList = lines;
-                }
-            } else {
-                serverInfo.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
-            }
 
-            String favicon = serverInfo.getIconB64();
-            if (favicon != null) {
-                try {
-                    favicon = ServerData.parseFavicon(favicon);
-                } catch (ParseException e) {
-                    WorldHostCommon.LOGGER.error("Invalid server icon", e);
+                    serverInfo.playerList = playerList;
+                } else {
+                    serverInfo.playerList = List.of();
                 }
-            }
-
-            serverInfo.setIconB64(favicon);
+            }, () -> serverInfo.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY));
+            metadata.favicon().ifPresent(favicon -> {
+                if (!Arrays.equals(favicon.iconBytes(), serverInfo.getIconBytes())) {
+                    serverInfo.setIconBytes(favicon.iconBytes());
+                }
+            });
         }
 
         private String getName() {
             return WorldHostCommon.getName(profile);
         }
 
-        private boolean uploadServerIcon(@Nullable String newIconUri) {
+        private boolean uploadServerIcon(byte @Nullable [] newIconUri) {
             if (newIconUri == null) {
                 client.getTextureManager().release(iconTextureId);
                 if (icon != null && icon.getPixels() != null) {
@@ -395,7 +379,7 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
                 icon = null;
             } else {
                 try {
-                    NativeImage nativeImage = NativeImage.fromBase64(newIconUri);
+                    NativeImage nativeImage = NativeImage.read(newIconUri);
                     Validate.validState(nativeImage.getWidth() == 64, "Must be 64 pixels wide");
                     Validate.validState(nativeImage.getHeight() == 64, "Must be 64 pixels high");
                     if (icon == null) {

@@ -196,7 +196,7 @@ public sealed interface WorldHostS2CMessage {
             case 7 -> new QueryRequest(readUuid(dis), readUuid(dis));
             case 8 -> {
                 final UUID friend = readUuid(dis);
-                final FriendlyByteBuf buf = WorldHostCommon.getPlatform().createByteBuf();
+                final FriendlyByteBuf buf = WorldHostCommon.createByteBuf();
                 buf.writeBytes(dis, dis.readInt());
                 yield new QueryResponse(friend, WorldHostCommon.getPlatform().parseServerStatus(buf));
             }

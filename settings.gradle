@@ -12,3 +12,4 @@ rootProject.name = 'world-host'
 
 include 'common'
 include 'mc-1.19.2'
+include 'mc-1.19.4'

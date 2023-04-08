@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost._1_19_2.mixin.client;
+package io.github.gaming32.worldhost._1_19_4.mixin.client;
 
 import io.github.gaming32.worldhost.common.DeferredToastManager;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
@@ -20,7 +20,6 @@ public class MixinMinecraft {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void tickEvent(CallbackInfo ci) {
-        //noinspection DataFlowIssue
         WorldHostCommon.getTickHandler().accept((Minecraft)(Object)this);
     }
 }

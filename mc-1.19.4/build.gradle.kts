@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "io.github.gaming32.world-host"
-version = "0.2+1.19.2"
+version = "0.2+1.19.4"
 
 repositories {
     mavenCentral()
@@ -37,24 +37,24 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.19.2")
+    minecraft("com.mojang:minecraft:1.19.4")
     @Suppress("UnstableApiUsage")
     mappings(loom.layered {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-1.19.2:2022.11.27@zip")
+        parchment("org.parchmentmc.data:parchment-1.19.3:2023.03.12@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:0.14.14")
 
     implementation(project(":common"))
     include(project(":common"))
 
-    modImplementation("com.terraformersmc:modmenu:4.2.0-beta.2") {
+    modImplementation("com.terraformersmc:modmenu:6.1.0-rc.4") {
         exclude(group = "net.fabricmc.fabric-api")
         exclude(group = "net.fabricmc")
     }
 
-    modImplementation("maven.modrinth:midnightlib:1.0.0-fabric")
-    include("maven.modrinth:midnightlib:1.0.0-fabric")
+    modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")
+    include("maven.modrinth:midnightlib:1.3.0-fabric")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
 

@@ -7,6 +7,7 @@ import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.common.upnp.Gateway;
 import io.github.gaming32.worldhost.common.upnp.GatewayFinder;
 import io.github.gaming32.worldhost.common.ws.WorldHostWSClient;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
@@ -15,16 +16,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import java.io.File;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 public class WorldHostCommon {
     public static final String MOD_ID = "world-host";
@@ -51,6 +55,7 @@ public class WorldHostCommon {
     public static Gateway upnpGateway;
 
     private static WorldHostPlatform platform;
+    private static Consumer<Minecraft> tickHandler;
 
     public static void init(WorldHostPlatform platform) {
         if (WorldHostCommon.platform != null) {
@@ -71,6 +76,10 @@ public class WorldHostCommon {
         return apiServices;
     }
 
+    public static Consumer<Minecraft> getTickHandler() {
+        return tickHandler;
+    }
+
     private static void init() {
         MidnightConfig.init(MOD_ID, WorldHostData.class);
 
@@ -78,7 +87,7 @@ public class WorldHostCommon {
         apiServices.profileCache().setExecutor(Util.backgroundExecutor());
         reconnect(false, true);
 
-        platform.registerClientTickHandler(client -> {
+        tickHandler = client -> {
             if (wsClient == null) {
                 authenticatingFuture = null;
                 final long time = Util.getMillis();
@@ -99,12 +108,20 @@ public class WorldHostCommon {
                     wsClient.publishedWorld(WorldHostData.friends);
                 }
             }
-        });
+        };
 
         new GatewayFinder(gateway -> {
             LOGGER.info("Found UPnP gateway: {}", gateway.getGatewayIP());
             upnpGateway = gateway;
         });
+    }
+
+    public static FriendlyByteBuf createByteBuf() {
+        return new FriendlyByteBuf(Unpooled.buffer());
+    }
+
+    public static String getName(GameProfile profile) {
+        return StringUtils.getIfBlank(profile.getName(), () -> profile.getId().toString());
     }
 
     public static void reconnect(boolean successToast, boolean failureToast) {
@@ -186,7 +203,7 @@ public class WorldHostCommon {
                         GuiComponent.blit(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
                         GuiComponent.blit(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
                     },
-                    Component.translatable(title, GeneralUtil.getName(profile)),
+                    Components.translatable(title, getName(profile)),
                     description
                 );
             });

@@ -17,10 +17,10 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "io.github.gaming32.worldhost._1_19_2.WorldHost1_19_2"
+      "io.github.gaming32.worldhost._1_19_4.WorldHost1_19_4"
     ],
     "modmenu": [
-      "io.github.gaming32.worldhost._1_19_2.compat.ModMenuCompat"
+      "io.github.gaming32.worldhost._1_19_4.compat.ModMenuCompat"
     ]
   },
   "mixins": [
@@ -28,7 +28,7 @@
   ],
   "depends": {
     "fabricloader": ">=0.14.0",
-    "minecraft": "1.19.2",
+    "minecraft": ">=1.19.4",
     "world-host-common": "*"
   }
 }

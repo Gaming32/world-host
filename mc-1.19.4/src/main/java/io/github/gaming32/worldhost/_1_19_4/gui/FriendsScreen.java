@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost._1_19_2.gui;
+package io.github.gaming32.worldhost._1_19_4.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -46,9 +46,8 @@ public class FriendsScreen extends Screen {
             list.updateSize(width, height, 32, height - 64);
         }
 
-        addRenderableWidget(new Button(
-            width / 2 - 152, height - 52, 150, 20, Component.translatable("world-host.add_friend"),
-            button -> {
+        addRenderableWidget(
+            Button.builder(Component.translatable("world-host.add_friend"), button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
                     addFriend(profile);
@@ -56,34 +55,35 @@ public class FriendsScreen extends Screen {
                         WorldHostCommon.wsClient.friendRequest(profile.getId());
                     }
                 }));
-            }
-        ));
+            }).pos(width / 2 - 152, height - 52)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 - 152, height - 28, 150, 20, ADD_SILENTLY_TEXT,
-            button -> {
+        addRenderableWidget(
+            Button.builder(ADD_SILENTLY_TEXT, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, this::addFriend));
-            }
-        ));
+            }).pos(width / 2 - 152, height - 28)
+                .build()
+        );
 
-        removeButton = addRenderableWidget(new Button(
-            width / 2 + 2, height - 52, 150, 20, Component.translatable("world-host.friends.remove"),
-            button -> {
+        removeButton = addRenderableWidget(
+            Button.builder(Component.translatable("world-host.friends.remove"), button -> {
                 if (list.getSelected() != null) {
                     list.getSelected().maybeRemove();
                 }
-            }
-        ));
+            }).pos(width / 2 + 2, height - 52)
+                .build()
+        );
         removeButton.active = false;
 
-        addRenderableWidget(new Button(
-            width / 2 + 2, height - 28, 150, 20, CommonComponents.GUI_DONE,
-            button -> {
+        addRenderableWidget(
+            Button.builder(CommonComponents.GUI_DONE, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(parent);
-            }
-        ));
+            }).pos(width / 2 + 2, height - 28)
+                .build()
+        );
 
         list.updateEntries();
     }

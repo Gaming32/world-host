@@ -8,6 +8,10 @@ public class Components {
         return WorldHostCommon.getPlatform().translatableComponent(key);
     }
 
+    public static MutableComponent translatable(String key, Object... args) {
+        return WorldHostCommon.getPlatform().translatableComponent(key, args);
+    }
+
     public static Component immutable(String text) {
         return WorldHostCommon.getPlatform().immutableComponent(text);
     }
