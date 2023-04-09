@@ -23,6 +23,5 @@
   "world-host.went_online.desc": "Go to the Multiplayer menu to join them",
   "world-host.online_friends.title": "Online Friends",
   "world-host.worldhost.ip.success": "The public proxy IP for your world is [%s]",
-  "world-host.worldhost.ip.copy": "Click to copy to clipboard",
   "world-host.worldhost.ip.no_server_support": "This World Host server does not support public proxy IPs"
 }

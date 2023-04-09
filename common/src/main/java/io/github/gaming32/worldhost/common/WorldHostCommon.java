@@ -105,7 +105,7 @@ public class WorldHostCommon {
                             "world-host.worldhost.ip.success",
                             Components.literal(ip).withStyle(style ->
                                 style.withColor(ChatFormatting.GREEN)
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Components.translatable("world-host.worldhost.ip.copy")))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Components.translatable("chat.copy.click")))
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, ip))
                             )
                         ),
