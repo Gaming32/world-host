@@ -26,10 +26,10 @@
   "depends": {
     "fabricloader": ">=0.14.0",
     "minecraft": ["1.19.2", ">=1.19.4"],
-    "world-host-common": "*"
+    "world-host-common": "${version}"
   },
   "recommends": {
-    "world-host-1-19-2": "*",
-    "world-host-1-19-4": "*"
+    "world-host-1-19-2": "${version}",
+    "world-host-1-19-4": "${version}"
   }
 }
