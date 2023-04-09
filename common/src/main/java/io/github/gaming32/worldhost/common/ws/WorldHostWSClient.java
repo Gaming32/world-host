@@ -1,5 +1,7 @@
 package io.github.gaming32.worldhost.common.ws;
 
+import net.minecraft.Util;
+
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
 import javax.websocket.Session;
@@ -13,6 +15,10 @@ public class WorldHostWSClient implements AutoCloseable {
     private final Session session;
 
     private boolean authenticated;
+
+    private UUID connectionId = Util.NIL_UUID;
+    private String baseIp = "";
+    private int basePort;
 
     public WorldHostWSClient(URI serverUri) throws DeploymentException, IOException {
         session = ContainerProvider.getWebSocketContainer().connectToServer(WorldHostClientEndpoint.class, serverUri);
@@ -67,6 +73,30 @@ public class WorldHostWSClient implements AutoCloseable {
     public void proxyDisconnect(long connectionId) {
         ensureAuthenticated();
         session.getAsyncRemote().sendObject(new WorldHostC2SMessage.ProxyDisconnect(connectionId));
+    }
+
+    public UUID getConnectionId() {
+        return connectionId;
+    }
+
+    public void setConnectionId(UUID connectionId) {
+        this.connectionId = connectionId;
+    }
+
+    public String getBaseIp() {
+        return baseIp;
+    }
+
+    public void setBaseIp(String baseIp) {
+        this.baseIp = baseIp;
+    }
+
+    public int getBasePort() {
+        return basePort;
+    }
+
+    public void setBasePort(int basePort) {
+        this.basePort = basePort;
     }
 
     @Override

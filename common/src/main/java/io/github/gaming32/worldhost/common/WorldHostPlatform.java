@@ -23,5 +23,7 @@ public interface WorldHostPlatform {
 
     MutableComponent translatableComponent(String key, Object... args);
 
+    MutableComponent literalComponent(String text);
+
     Component immutableComponent(String text);
 }

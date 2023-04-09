@@ -20,6 +20,6 @@ public class MixinMinecraft {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void tickEvent(CallbackInfo ci) {
-        WorldHostCommon.getTickHandler().accept((Minecraft)(Object)this);
+        WorldHostCommon.TICK_HANDLER.accept((Minecraft)(Object)this);
     }
 }

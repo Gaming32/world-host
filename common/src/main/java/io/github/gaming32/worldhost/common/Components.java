@@ -12,6 +12,10 @@ public class Components {
         return WorldHostCommon.getPlatform().translatableComponent(key, args);
     }
 
+    public static MutableComponent literal(String text) {
+        return WorldHostCommon.getPlatform().literalComponent(text);
+    }
+
     public static Component immutable(String text) {
         return WorldHostCommon.getPlatform().immutableComponent(text);
     }

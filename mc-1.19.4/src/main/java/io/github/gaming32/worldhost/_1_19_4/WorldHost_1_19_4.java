@@ -51,6 +51,11 @@ public class WorldHost_1_19_4 implements WorldHostPlatform {
     }
 
     @Override
+    public MutableComponent literalComponent(String text) {
+        return Component.literal(text);
+    }
+
+    @Override
     public Component immutableComponent(String text) {
         return Component.nullToEmpty(text);
     }

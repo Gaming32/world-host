@@ -2,6 +2,8 @@ package io.github.gaming32.worldhost.common;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
 import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.common.upnp.Gateway;
@@ -11,13 +13,17 @@ import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
@@ -29,6 +35,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
+
+import static net.minecraft.commands.Commands.literal;
 
 public class WorldHostCommon {
     public static final String MOD_ID = "world-host";
@@ -55,7 +63,59 @@ public class WorldHostCommon {
     public static Gateway upnpGateway;
 
     private static WorldHostPlatform platform;
-    private static Consumer<Minecraft> tickHandler;
+
+    public static final Consumer<Minecraft> TICK_HANDLER = client -> {
+        if (wsClient == null) {
+            authenticatingFuture = null;
+            final long time = Util.getMillis();
+            if (time - lastReconnectTime > 10_000) {
+                lastReconnectTime = time;
+                if (!attemptingConnection) {
+                    reconnect(true, false);
+                }
+            }
+        }
+        if (authenticatingFuture != null && authenticatingFuture.isDone()) {
+            authenticatingFuture = null;
+            LOGGER.info("Finished authenticating with WS server. Requesting friends list.");
+            ONLINE_FRIENDS.clear();
+            wsClient.listOnline(WorldHostData.friends);
+            final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+            if (server != null && server.isPublished()) {
+                wsClient.publishedWorld(WorldHostData.friends);
+            }
+        }
+    };
+
+    public static final Consumer<CommandDispatcher<CommandSourceStack>> COMMAND_REGISTRATION_HANDLER = dispatcher -> {
+        dispatcher.register(literal("worldhost")
+            .then(literal("ip")
+                .requires(s -> s.getServer().isPublished())
+                .executes(ctx -> {
+                    if (wsClient.getBaseIp().isEmpty()) {
+                        ctx.getSource().sendFailure(Component.translatable("world-host.worldhost.ip.no_server_support"));
+                        return 0;
+                    }
+                    final String ip = "connect0000-" +
+                        wsClient.getConnectionId() +
+                        '.' + wsClient.getBaseIp() +
+                        (wsClient.getBasePort() != 25565 ? ':' + wsClient.getBasePort() : "");
+                    ctx.getSource().sendSuccess(
+                        Components.translatable(
+                            "world-host.worldhost.ip.success",
+                            Components.literal(ip).withStyle(style ->
+                                style.withColor(ChatFormatting.GREEN)
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Components.translatable("world-host.worldhost.ip.copy")))
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, ip))
+                            )
+                        ),
+                        false
+                    );
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
+    };
 
     public static void init(WorldHostPlatform platform) {
         if (WorldHostCommon.platform != null) {
@@ -76,39 +136,12 @@ public class WorldHostCommon {
         return apiServices;
     }
 
-    public static Consumer<Minecraft> getTickHandler() {
-        return tickHandler;
-    }
-
     private static void init() {
         MidnightConfig.init(MOD_ID, WorldHostData.class);
 
         apiServices = platform.createServices();
         apiServices.profileCache().setExecutor(Util.backgroundExecutor());
         reconnect(false, true);
-
-        tickHandler = client -> {
-            if (wsClient == null) {
-                authenticatingFuture = null;
-                final long time = Util.getMillis();
-                if (time - lastReconnectTime > 10_000) {
-                    lastReconnectTime = time;
-                    if (!attemptingConnection) {
-                        reconnect(true, false);
-                    }
-                }
-            }
-            if (authenticatingFuture != null && authenticatingFuture.isDone()) {
-                authenticatingFuture = null;
-                LOGGER.info("Finished authenticating with WS server. Requesting friends list.");
-                ONLINE_FRIENDS.clear();
-                wsClient.listOnline(WorldHostData.friends);
-                final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
-                if (server != null && server.isPublished()) {
-                    wsClient.publishedWorld(WorldHostData.friends);
-                }
-            }
-        };
 
         new GatewayFinder(gateway -> {
             LOGGER.info("Found UPnP gateway: {}", gateway.getGatewayIP());
