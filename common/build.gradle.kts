@@ -1,6 +1,7 @@
 plugins {
     id("java")
-    id("org.quiltmc.loom") version "1.1.+"
+    id("fabric-loom") version "1.1.+"
+    id("io.github.juuxel.loom-quiltflower") version "1.8.0"
 }
 
 group = "io.github.gaming32.world-host"
@@ -22,11 +23,6 @@ repositories {
             includeGroup("maven.modrinth")
         }
     }
-
-    maven {
-        name = "ParchmentMC"
-        url = uri("https://maven.parchmentmc.org")
-    }
 }
 
 dependencies {
@@ -36,7 +32,7 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-1.19.3:2023.03.12@zip")
     })
-    modImplementation("org.quiltmc:quilt-loader:0.18.5")
+    modImplementation("net.fabricmc:fabric-loader:0.14.14")
 
     // The exact JiJed version is dependent on the Minecraft version. However, it needs to be ABI-compatible.
     modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")

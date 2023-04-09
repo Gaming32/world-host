@@ -1,12 +1,13 @@
-package io.github.gaming32.worldhost._1_19_4;
+package io.github.gaming32.worldhost._1_19_2;
 
-import io.github.gaming32.worldhost._1_19_4.mixin.client.MinecraftAccessor;
+import io.github.gaming32.worldhost._1_19_2.gui.WorldHostConfigScreen;
+import io.github.gaming32.worldhost._1_19_2.mixin.client.MinecraftAccessor;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostPlatform;
-import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -15,12 +16,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.Services;
 import org.jetbrains.annotations.Nullable;
 
-public class WorldHost1_19_4 implements WorldHostPlatform, ClientModInitializer {
-    @Override
-    public void onInitializeClient() {
-        WorldHostCommon.init(this);
-    }
-
+public class WorldHost_1_19_2 implements WorldHostPlatform {
     @Override
     public Services createServices() {
         return Services.create(
@@ -36,7 +32,12 @@ public class WorldHost1_19_4 implements WorldHostPlatform, ClientModInitializer 
 
     @Override
     public ServerStatus parseServerStatus(FriendlyByteBuf buf) {
-        return new ClientboundStatusResponsePacket(buf).status();
+        return new ClientboundStatusResponsePacket(buf).getStatus();
+    }
+
+    @Override
+    public Screen createConfigScreen(Screen parent) {
+        return new WorldHostConfigScreen(parent);
     }
 
     @Override

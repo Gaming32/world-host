@@ -15,25 +15,14 @@
   "license": "MIT",
   "icon": "assets/world-host-1-19-4/icon.png",
   "environment": "client",
-  "entrypoints": {
-    "client": [
-      "io.github.gaming32.worldhost._1_19_4.WorldHost1_19_4"
-    ],
-    "modmenu": [
-      "io.github.gaming32.worldhost._1_19_4.compat.ModMenuCompat"
-    ]
-  },
   "mixins": [
-    "world-host.mixins.json"
+    "world-host-1-19-4.mixins.json"
   ],
   "custom": {
     "modmenu": {
-      "parent": {
-        "id": "world-host",
-        "name": "World Host",
-        "description": "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser.",
-        "icon": "assets/world-host-1-19-4/icon.png"
-      }
+      "badges": ["library"],
+      "parent": "world-host",
+      "update_checker": false
     }
   },
   "depends": {

@@ -1,17 +1,16 @@
 plugins {
     id("java")
-    id("org.quiltmc.loom") version "1.1.+"
+    id("fabric-loom") version "1.1.+"
+    id("io.github.juuxel.loom-quiltflower") version "1.8.0"
 }
 
 group = "io.github.gaming32.world-host"
-version = "0.2+1.19.2"
+version = "0.2"
 
 repositories {
     mavenCentral()
 
     maven("https://maven.fabricmc.net/")
-
-    maven("https://maven.terraformersmc.com/releases")
 
     exclusiveContent {
         forRepository {
@@ -27,11 +26,6 @@ repositories {
 
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 
-    maven {
-        name = "ParchmentMC"
-        url = uri("https://maven.parchmentmc.org")
-    }
-
     maven("https://jitpack.io")
 }
 
@@ -42,15 +36,9 @@ dependencies {
         officialMojangMappings()
         parchment("org.parchmentmc.data:parchment-1.19.2:2022.11.27@zip")
     })
-    modImplementation("org.quiltmc:quilt-loader:0.18.5")
+    modImplementation("net.fabricmc:fabric-loader:0.14.14")
 
     implementation(project(":common"))
-    include(project(":common"))
-
-    modImplementation("com.terraformersmc:modmenu:4.2.0-beta.2") {
-        exclude(group = "net.fabricmc.fabric-api")
-        exclude(group = "net.fabricmc")
-    }
 
     modImplementation("maven.modrinth:midnightlib:1.0.0-fabric")
     include("maven.modrinth:midnightlib:1.0.0-fabric")
@@ -58,7 +46,6 @@ dependencies {
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
 
     modImplementation("com.github.LlamaLad7:MixinExtras:0.2.0-beta.6")
-    include("com.github.LlamaLad7:MixinExtras:0.2.0-beta.6")
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.2.0-beta.6")
 }
 
@@ -78,6 +65,6 @@ tasks {
     }
 
     remapJar {
-        archiveBaseName.set("world-host")
+        archiveBaseName.set("world-host-1-19-2")
     }
 }
