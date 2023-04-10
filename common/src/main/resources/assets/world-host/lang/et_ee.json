@@ -1,6 +1,10 @@
 {
   "world-host.midnightconfig.title": "World Hosti seadistus",
   "world-host.midnightconfig.serverUri": "Serveri URI",
+  "world-host.midnightconfig.showOnlineStatus": "Kuva võrgusolek",
+  "world-host.midnightconfig.showOnlineStatus.tooltip": "Kuva avakuval võrgusolek",
+  "world-host.midnightconfig.enableFriends": "Luba sõbraloend",
+  "world-host.midnightconfig.enableFriends.tooltip": "Lubab kõik sõpradega seonduvad liidesed ja kogu sõbrasüsteemi.\nKeelamisel ja taaslubamisel jäävad kõik su sõbrad alles.",
   "world-host.friends": "Sõbrad",
   "world-host.friends.add_silently": "Lisa sõber vaikselt",
   "world-host.friends.add_silently.tooltip": "See lisab inimese sõbraks ilma teda teavitamata.",
@@ -16,12 +20,15 @@
   "world-host.ws_connect.connected": "World Hosti serveriga edukalt ühendatud",
   "world-host.servers": "Serverid",
   "world-host.open_world": "Ava sõpradele",
+  "world-host.open_world_no_friends": "Ava välistele",
   "world-host.friend_added_you": "%s lisas sind sõbraks",
   "world-host.need_add_back": "Sõpradeks saamiseks pead ta vastu lisama.",
   "world-host.error_in_connection": "World Hosti serveri ühendusega esines viga.",
   "world-host.went_online": "%s on nüüd saadaval",
-  "world-host.went_online.desc": "Mine mitmikmängu menüüsse, et temaga liituda",
+  "world-host.went_online.desc": "Temaga liitumiseks mine mitmikmängu menüüsse",
   "world-host.online_friends.title": "Võrgus olevad sõbrad",
-  "world-host.worldhost.ip.success": "Avaliku proksi IP sinu maailmale on %s",
-  "world-host.worldhost.ip.no_server_support": "See World Hosti server ei toeta avalikke proksi-IPsid"
+  "world-host.worldhost.ip.success": "Avalik proksi-IP sinu maailmale on %s",
+  "world-host.worldhost.ip.no_server_support": "See World Hosti server ei toeta avalikke proksi-IPsid",
+  "world-host.lan_opened.friends": "Maailm hostitud sõbraloendis olevatele sõpradele. See on saadaval ka LAN-pordil %s.",
+  "world-host.lan_opened.no_friends": "Maailm hostitud IPle %s. See on saadaval ka LAN-pordil %s."
 }
