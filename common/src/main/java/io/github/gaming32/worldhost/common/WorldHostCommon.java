@@ -13,7 +13,6 @@ import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -21,9 +20,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
@@ -96,18 +93,14 @@ public class WorldHostCommon {
                         ctx.getSource().sendFailure(Component.translatable("world-host.worldhost.ip.no_server_support"));
                         return 0;
                     }
-                    final String ip = "connect0000-" +
-                        wsClient.getConnectionId() +
-                        '.' + wsClient.getBaseIp() +
-                        (wsClient.getBasePort() != 25565 ? ':' + wsClient.getBasePort() : "");
+                    String ip = "connect0000-" + wsClient.getConnectionId() + '.' + wsClient.getBaseIp();
+                    if (wsClient.getBasePort() != 25565) {
+                        ip += ':' + wsClient.getBasePort();
+                    }
                     ctx.getSource().sendSuccess(
                         Components.translatable(
                             "world-host.worldhost.ip.success",
-                            Components.literal(ip).withStyle(style ->
-                                style.withColor(ChatFormatting.GREEN)
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Components.translatable("chat.copy.click")))
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, ip))
-                            )
+                            Components.copyOnClickText(ip)
                         ),
                         false
                     );

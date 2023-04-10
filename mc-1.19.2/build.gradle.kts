@@ -45,8 +45,8 @@ dependencies {
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
 
-    modImplementation("com.github.LlamaLad7:MixinExtras:0.2.0-beta.6")
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.2.0-beta.6")
+    modImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
+    annotationProcessor("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
 }
 
 loom {

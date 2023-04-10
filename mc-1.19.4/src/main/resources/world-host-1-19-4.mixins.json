@@ -4,7 +4,8 @@
   "package": "io.github.gaming32.worldhost._1_19_4.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "MixinCommands"
+    "MixinCommands",
+    "MixinPublishCommand"
   ],
   "client": [
     "client.MinecraftAccessor",

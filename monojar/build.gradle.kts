@@ -46,7 +46,7 @@ dependencies {
         exclude(group = "net.fabricmc")
     }
 
-    include("com.github.LlamaLad7:MixinExtras:0.2.0-beta.6")
+    include("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
 
     implementation(project(":mc-1.19.2"))
     include(project(":mc-1.19.2"))

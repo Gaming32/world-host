@@ -22,6 +22,6 @@
   "world-host.went_online": "%s on nüüd saadaval",
   "world-host.went_online.desc": "Mine mitmikmängu menüüsse, et temaga liituda",
   "world-host.online_friends.title": "Võrgus olevad sõbrad",
-  "world-host.worldhost.ip.success": "Avaliku proksi IP sinu maailmale on [%s]",
+  "world-host.worldhost.ip.success": "Avaliku proksi IP sinu maailmale on %s",
   "world-host.worldhost.ip.no_server_support": "See World Hosti server ei toeta avalikke proksi-IPsid"
 }
