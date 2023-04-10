@@ -17,6 +17,9 @@ public class WorldHostData extends MidnightConfig {
     public static boolean enableFriends = true;
 
     @Entry
+    public static boolean enableReconnectionToasts = false;
+
+    @Entry
     @Hidden
     public static Set<UUID> friends = new LinkedHashSet<>();
 }

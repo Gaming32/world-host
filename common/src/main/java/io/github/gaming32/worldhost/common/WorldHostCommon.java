@@ -71,7 +71,7 @@ public class WorldHostCommon {
             if (time - lastReconnectTime > 10_000) {
                 lastReconnectTime = time;
                 if (!attemptingConnection) {
-                    reconnect(true, false);
+                    reconnect(WorldHostData.enableReconnectionToasts, false);
                 }
             }
         }
@@ -87,7 +87,7 @@ public class WorldHostCommon {
         }
     };
 
-    public static final Consumer<CommandDispatcher<CommandSourceStack>> COMMAND_REGISTRATION_HANDLER = dispatcher -> {
+    public static final Consumer<CommandDispatcher<CommandSourceStack>> COMMAND_REGISTRATION_HANDLER = dispatcher ->
         dispatcher.register(literal("worldhost")
             .then(literal("ip")
                 .requires(s -> s.getServer().isPublished())
@@ -108,7 +108,6 @@ public class WorldHostCommon {
                 })
             )
         );
-    };
 
     public static void init(WorldHostPlatform platform) {
         if (WorldHostCommon.platform != null) {

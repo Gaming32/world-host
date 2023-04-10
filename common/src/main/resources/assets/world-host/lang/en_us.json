@@ -5,6 +5,7 @@
   "world-host.midnightconfig.showOnlineStatus.tooltip": "Show online status on the title screen",
   "world-host.midnightconfig.enableFriends": "Enable Friends",
   "world-host.midnightconfig.enableFriends.tooltip": "Enable all friends-related GUIs and the entire friends system.\nIf you disable this and re-enable it, all your friends will still be there.",
+  "world-host.midnightconfig.enableReconnectionToasts": "Enable Reconnection Toasts",
   "world-host.friends": "Friends",
   "world-host.friends.add_silently": "Add Friend Silently",
   "world-host.friends.add_silently.tooltip": "This will add the person as a friend, without notifying them.",
