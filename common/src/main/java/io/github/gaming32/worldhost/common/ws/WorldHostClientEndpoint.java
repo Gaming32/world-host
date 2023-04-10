@@ -7,13 +7,10 @@ import net.minecraft.Util;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 
 import javax.websocket.*;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.UUID;
 
 @ClientEndpoint(
-    encoders = {WorldHostC2SMessage.Encoder.class, WorldHostClientEndpoint.UuidEncoder.class},
+    encoders = WorldHostC2SMessage.Encoder.class,
     decoders = WorldHostS2CMessage.Decoder.class
 )
 public class WorldHostClientEndpoint {
@@ -41,25 +38,8 @@ public class WorldHostClientEndpoint {
     }
 
     @OnClose
-    public void onClose(Session session, CloseReason closeReason) {
+    public void onClose(CloseReason closeReason) {
         WorldHostCommon.wsClient = null;
         WorldHostCommon.LOGGER.info("WS connection terminated for {}", closeReason);
-    }
-
-    public static class UuidEncoder implements Encoder.BinaryStream<UUID> {
-        @Override
-        public void encode(UUID object, OutputStream os) throws IOException {
-            final DataOutputStream dos = new DataOutputStream(os);
-            dos.writeLong(object.getMostSignificantBits());
-            dos.writeLong(object.getLeastSignificantBits());
-        }
-
-        @Override
-        public void init(EndpointConfig config) {
-        }
-
-        @Override
-        public void destroy() {
-        }
     }
 }

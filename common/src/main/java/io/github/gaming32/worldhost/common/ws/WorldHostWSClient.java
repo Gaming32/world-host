@@ -1,12 +1,13 @@
 package io.github.gaming32.worldhost.common.ws;
 
-import net.minecraft.Util;
+import io.github.gaming32.worldhost.common.WorldHostCommon;
 
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.Future;
@@ -16,7 +17,7 @@ public class WorldHostWSClient implements AutoCloseable {
 
     private boolean authenticated;
 
-    private UUID connectionId = Util.NIL_UUID;
+    private UUID connectionId = WorldHostCommon.CONNECTION_ID;
     private String baseIp = "";
     private int basePort;
 
@@ -24,9 +25,15 @@ public class WorldHostWSClient implements AutoCloseable {
         session = ContainerProvider.getWebSocketContainer().connectToServer(WorldHostClientEndpoint.class, serverUri);
     }
 
-    public Future<Void> authenticate(UUID uuid) {
+    public Future<Void> authenticate(UUID userUuid) {
         authenticated = true;
-        return session.getAsyncRemote().sendObject(uuid);
+        final ByteBuffer bb = ByteBuffer.allocate(32);
+        bb.putLong(userUuid.getMostSignificantBits());
+        bb.putLong(userUuid.getLeastSignificantBits());
+        bb.putLong(connectionId.getMostSignificantBits());
+        bb.putLong(connectionId.getLeastSignificantBits());
+        bb.flip();
+        return session.getAsyncRemote().sendBinary(bb);
     }
 
     private void ensureAuthenticated() {

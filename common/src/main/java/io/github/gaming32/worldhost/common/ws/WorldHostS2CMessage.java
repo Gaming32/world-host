@@ -214,7 +214,7 @@ public sealed interface WorldHostS2CMessage {
             case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
             case 11 -> new ProxyDisconnect(dis.readLong());
             case 12 -> new ConnectionInfo(readUuid(dis), readString(dis), dis.readUnsignedShort());
-            default -> new Error("Received packet with unknown type_id from server: " + typeId);
+            default -> new Error("Received packet with unknown type_id from server (outdated client?): " + typeId);
         };
     }
 

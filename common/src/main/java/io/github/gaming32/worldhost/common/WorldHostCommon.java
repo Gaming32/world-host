@@ -45,18 +45,20 @@ public class WorldHostCommon {
         .resolve(".world-host-cache")
         .toFile();
 
+    public static final Set<UUID> ONLINE_FRIENDS = new HashSet<>();
+    public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
+    public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
+
+    public static final Long2ObjectMap<ProxyClient> CONNECTED_PROXY_CLIENTS = new Long2ObjectOpenHashMap<>();
+
+    public static final UUID CONNECTION_ID = UUID.randomUUID();
+
     private static Services apiServices;
     public static boolean attemptingConnection;
     public static WorldHostWSClient wsClient;
     private static long lastReconnectTime;
 
     private static Future<Void> authenticatingFuture;
-
-    public static final Set<UUID> ONLINE_FRIENDS = new HashSet<>();
-    public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
-    public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
-
-    public static final Long2ObjectMap<ProxyClient> CONNECTED_PROXY_CLIENTS = new Long2ObjectOpenHashMap<>();
 
     public static Gateway upnpGateway;
 
@@ -128,6 +130,8 @@ public class WorldHostCommon {
     }
 
     private static void init() {
+        LOGGER.info("Using client-generated connection ID {}", CONNECTION_ID);
+
         MidnightConfig.init(MOD_ID, WorldHostData.class);
 
         apiServices = platform.createServices();
