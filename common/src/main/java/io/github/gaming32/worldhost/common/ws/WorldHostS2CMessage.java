@@ -31,7 +31,7 @@ public sealed interface WorldHostS2CMessage {
     record IsOnlineTo(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            if (WorldHostData.friends.contains(user)) {
+            if (WorldHostCommon.isFriend(user)) {
                 final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
                 if (server != null && server.isPublished()) {
                     session.getAsyncRemote().sendObject(
@@ -55,9 +55,10 @@ public sealed interface WorldHostS2CMessage {
     record FriendRequest(UUID fromUser) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
+            if (!WorldHostData.enableFriends) return;
             WorldHostCommon.showProfileToast(
                 fromUser, "world-host.friend_added_you",
-                WorldHostData.friends.contains(fromUser) ? null : Components.translatable("world-host.need_add_back")
+                WorldHostCommon.isFriend(fromUser) ? null : Components.translatable("world-host.need_add_back")
             );
         }
     }
@@ -65,7 +66,7 @@ public sealed interface WorldHostS2CMessage {
     record PublishedWorld(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            if (!WorldHostData.friends.contains(user)) return;
+            if (!WorldHostCommon.isFriend(user)) return;
             WorldHostCommon.ONLINE_FRIENDS.add(user);
             WorldHostCommon.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
             WorldHostCommon.showProfileToast(
@@ -87,7 +88,7 @@ public sealed interface WorldHostS2CMessage {
     record RequestJoin(UUID user, UUID connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            if (WorldHostData.friends.contains(user)) {
+            if (WorldHostCommon.isFriend(user)) {
                 final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
                 if (server == null || !server.isPublished()) return;
                 if (WorldHostCommon.upnpGateway != null) {
@@ -116,7 +117,7 @@ public sealed interface WorldHostS2CMessage {
     record QueryRequest(UUID friend, UUID connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            if (WorldHostData.friends.contains(friend)) {
+            if (WorldHostCommon.isFriend(friend)) {
                 final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
                 if (server != null) {
                     session.getAsyncRemote().sendObject(new WorldHostC2SMessage.QueryResponse(
@@ -130,7 +131,7 @@ public sealed interface WorldHostS2CMessage {
     record QueryResponse(UUID friend, ServerStatus metadata) implements WorldHostS2CMessage {
         @Override
         public void handle(Session session) {
-            if (WorldHostData.friends.contains(friend)) {
+            if (WorldHostCommon.isFriend(friend)) {
                 WorldHostCommon.ONLINE_FRIEND_PINGS.put(friend, metadata);
             }
         }

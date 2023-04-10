@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost._1_19_2.mixin.client;
 
 import io.github.gaming32.worldhost._1_19_2.gui.FriendsButtonWidget;
 import io.github.gaming32.worldhost._1_19_2.gui.OnlineFriendsScreen;
+import io.github.gaming32.worldhost.common.WorldHostData;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,6 +27,8 @@ public class MixinJoinMultiplayerScreen extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void tabs(CallbackInfo ci) {
+        if (!WorldHostData.enableFriends) return;
+
         addRenderableWidget(new Button(
             width / 2 - 102, 32, 100, 20, WorldHostTexts.SERVERS,
             button -> {}
@@ -42,11 +45,11 @@ public class MixinJoinMultiplayerScreen extends Screen {
 
     @ModifyConstant(method = "init", constant = @Constant(intValue = 32))
     private int makeTopBigger(int constant) {
-        return 60;
+        return WorldHostData.enableFriends ? 60 : constant;
     }
 
     @ModifyConstant(method = "render", constant = @Constant(intValue = 20))
     private int moveTitleUp(int constant) {
-        return 15;
+        return WorldHostData.enableFriends ? 15 : constant;
     }
 }

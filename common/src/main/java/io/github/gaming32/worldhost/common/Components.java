@@ -27,7 +27,8 @@ public class Components {
         return translatable("chat.square_brackets", toWrap);
     }
 
-    public static MutableComponent copyOnClickText(String text) {
+    public static MutableComponent copyOnClickText(Object obj) {
+        final String text = obj.toString();
         return wrapInSquareBrackets(
             literal(text)
                 .withStyle(style -> style.withColor(ChatFormatting.GREEN)

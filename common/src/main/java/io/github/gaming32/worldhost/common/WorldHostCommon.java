@@ -25,6 +25,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -89,18 +90,15 @@ public class WorldHostCommon {
             .then(literal("ip")
                 .requires(s -> s.getServer().isPublished())
                 .executes(ctx -> {
-                    if (wsClient.getBaseIp().isEmpty()) {
+                    final String externalIp = getExternalIp();
+                    if (externalIp == null) {
                         ctx.getSource().sendFailure(Component.translatable("world-host.worldhost.ip.no_server_support"));
                         return 0;
-                    }
-                    String ip = "connect0000-" + wsClient.getConnectionId() + '.' + wsClient.getBaseIp();
-                    if (wsClient.getBasePort() != 25565) {
-                        ip += ':' + wsClient.getBasePort();
                     }
                     ctx.getSource().sendSuccess(
                         Components.translatable(
                             "world-host.worldhost.ip.success",
-                            Components.copyOnClickText(ip)
+                            Components.copyOnClickText(externalIp)
                         ),
                         false
                     );
@@ -234,5 +232,21 @@ public class WorldHostCommon {
                 );
             });
         });
+    }
+
+    public static boolean isFriend(UUID user) {
+        return WorldHostData.enableFriends && WorldHostData.friends.contains(user);
+    }
+
+    @Nullable
+    public static String getExternalIp() {
+        if (wsClient.getBaseIp().isEmpty()) {
+            return null;
+        }
+        String ip = "connect0000-" + wsClient.getConnectionId() + '.' + wsClient.getBaseIp();
+        if (wsClient.getBasePort() != 25565) {
+            ip += ':' + wsClient.getBasePort();
+        }
+        return ip;
     }
 }

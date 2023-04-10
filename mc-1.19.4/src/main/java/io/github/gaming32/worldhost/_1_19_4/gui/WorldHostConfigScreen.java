@@ -4,11 +4,14 @@ import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostData;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.server.MinecraftServer;
 
 public class WorldHostConfigScreen extends MidnightConfig.MidnightConfigScreen {
     private final String oldServerUri = WorldHostData.serverUri;
+    private final boolean oldEnableFriends = WorldHostData.enableFriends;
 
     public WorldHostConfigScreen(Screen parent) {
         super(parent, WorldHostCommon.MOD_ID);
@@ -17,6 +20,8 @@ public class WorldHostConfigScreen extends MidnightConfig.MidnightConfigScreen {
     @Override
     public void init() {
         super.init();
+
+        if (!WorldHostData.enableFriends) return;
 
         final Button cancelButton = (Button)children().get(0);
         cancelButton.setWidth(80);
@@ -40,6 +45,12 @@ public class WorldHostConfigScreen extends MidnightConfig.MidnightConfigScreen {
     public void removed() {
         if (!oldServerUri.equals(WorldHostData.serverUri)) {
             WorldHostCommon.reconnect(true, true);
+        }
+        if (oldEnableFriends && !WorldHostData.enableFriends && WorldHostCommon.wsClient != null) {
+            final MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
+            if (server != null && server.isPublished()) {
+                WorldHostCommon.wsClient.closedWorld(WorldHostData.friends);
+            }
         }
     }
 }

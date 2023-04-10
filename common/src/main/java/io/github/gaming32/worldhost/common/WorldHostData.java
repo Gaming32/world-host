@@ -14,6 +14,9 @@ public class WorldHostData extends MidnightConfig {
     public static boolean showOnlineStatus = true;
 
     @Entry
+    public static boolean enableFriends = true;
+
+    @Entry
     @Hidden
     public static Set<UUID> friends = new LinkedHashSet<>();
 }

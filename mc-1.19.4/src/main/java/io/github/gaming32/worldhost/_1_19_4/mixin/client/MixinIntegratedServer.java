@@ -18,7 +18,7 @@ public abstract class MixinIntegratedServer {
 
     @Inject(method = "publishServer", at = @At(value = "RETURN", ordinal = 0))
     private void serverIsOpen(GameType gameMode, boolean cheats, int port, CallbackInfoReturnable<Boolean> cir) {
-        if (WorldHostCommon.wsClient != null) {
+        if (WorldHostCommon.wsClient != null && WorldHostData.enableFriends) {
             WorldHostCommon.wsClient.publishedWorld(WorldHostData.friends);
         }
     }
