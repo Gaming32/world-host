@@ -1,6 +1,8 @@
 {
   "world-host.midnightconfig.title": "World Host Config",
   "world-host.midnightconfig.serverUri": "Server URI",
+  "world-host.midnightconfig.showOnlineStatus": "Show Online Status",
+  "world-host.midnightconfig.showOnlineStatus.tooltip": "Show online status on the title screen",
   "world-host.friends": "Friends",
   "world-host.friends.add_silently": "Add Friend Silently",
   "world-host.friends.add_silently.tooltip": "This will add the person as a friend, without notifying them.",

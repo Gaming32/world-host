@@ -11,6 +11,9 @@ public class WorldHostData extends MidnightConfig {
     public static String serverUri = "wss://world-host.jemnetworks.com:9646";
 
     @Entry
+    public static boolean showOnlineStatus = true;
+
+    @Entry
     @Hidden
     public static Set<UUID> friends = new LinkedHashSet<>();
 }
