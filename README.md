@@ -1,10 +1,13 @@
 # World Host
 
+[![build](https://img.shields.io/github/actions/workflow/status/Gaming32/world-host/gradle.yml?branch=main)](https://github.com/Gaming32/world-host/actions/workflows/gradle.yml)
+[![modrinth](https://img.shields.io/modrinth/v/2AIZDfYo?color=success&label=modrinth)](https://modrinth.com/mod/world-host)
+<br>
+[
+![server uptime](https://img.shields.io/uptimerobot/ratio/m793898716-1dc62bc23f759a549159ccb0?label=server%20uptime)
+](https://stats.uptimerobot.com/KmL5JhDV0X)
+
 Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser.
-
-## Status
-
-Main server: ![Main server uptime (30 days)](https://img.shields.io/uptimerobot/ratio/m793898716-1dc62bc23f759a549159ccb0)
 
 [See the status page](https://stats.uptimerobot.com/KmL5JhDV0X)
 
