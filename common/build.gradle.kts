@@ -37,8 +37,8 @@ dependencies {
     // The exact JiJed version is dependent on the Minecraft version. However, it needs to be ABI-compatible.
     modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")
 
-    implementation("javax.websocket:javax.websocket-api:1.1")
-    include("javax.websocket:javax.websocket-api:1.1")
+    implementation("javax.websocket:javax.websocket-client-api:1.1")
+    include("javax.websocket:javax.websocket-client-api:1.1")
 
     runtimeOnly("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.51.v20230217")
     include("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.51.v20230217")
