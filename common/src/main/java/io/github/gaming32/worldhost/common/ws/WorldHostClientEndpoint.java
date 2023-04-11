@@ -23,6 +23,7 @@ public class WorldHostClientEndpoint {
     @OnOpen
     public void onOpen(Session session) {
         session.setMaxIdleTimeout(0);
+        session.setMaxBinaryMessageBufferSize(4 * 1024 * 1024);
     }
 
     @OnError
