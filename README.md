@@ -2,6 +2,12 @@
 
 Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser.
 
+## Status
+
+Main server: ![Main server uptime (30 days)](https://img.shields.io/uptimerobot/ratio/m793898716-1dc62bc23f759a549159ccb0)
+
+[See the status page](https://stats.uptimerobot.com/KmL5JhDV0X)
+
 ## What if my friend doesn't have the mod installed?
 
 If your friend doesn't have the mod installed, you cannot use the friends system with them. However, you can run the command `/worldhost ip` to get an IP that can be used with tunneling. Do note, however, that not using the friends system could increase ping. <!-- If you don't want the ping increase, you can run `/worldhost tempip` to get a *temporary* server IP that lasts for 60 seconds. Clients who connect within the 60 seconds will remain connected. --> If you plan to never use the friends system, you can disable it in the mod settings (requires [Mod Menu](https://modrinth.com/mod/modmenu)).
