@@ -10,4 +10,6 @@ public interface WHGuiPlatform {
     ButtonBuilder button(Component message, Button.OnPress onPress);
 
     void editBoxFocus(EditBox editBox, boolean focus);
+
+    Button createFriendsButtonWidget(int x, int y, int width, int height, Button.OnPress onPress);
 }

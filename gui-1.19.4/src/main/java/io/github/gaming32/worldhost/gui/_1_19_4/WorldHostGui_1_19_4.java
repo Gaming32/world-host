@@ -21,4 +21,9 @@ public class WorldHostGui_1_19_4 implements WHGuiPlatform {
     public void editBoxFocus(EditBox editBox, boolean focus) {
         editBox.setFocused(focus);
     }
+
+    @Override
+    public Button createFriendsButtonWidget(int x, int y, int width, int height, Button.OnPress onPress) {
+        return new FriendsButtonWidget(x, y, width, height, onPress);
+    }
 }

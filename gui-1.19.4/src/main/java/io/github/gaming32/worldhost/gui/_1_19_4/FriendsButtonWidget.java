@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost._1_19_4.gui;
+package io.github.gaming32.worldhost.gui._1_19_4;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.common.FriendsListUpdate;

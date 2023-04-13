@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import eu.midnightdust.lib.config.MidnightConfig;
+import io.github.gaming32.worldhost.common.Components;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostData;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
@@ -23,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FriendsScreen extends WHScreen {
-    private static final Component ADD_SILENTLY_TEXT = Component.translatable("world-host.friends.add_silently");
+    private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
 
     private final Screen parent;
     private Button removeButton;
@@ -48,7 +49,7 @@ public class FriendsScreen extends WHScreen {
         }
 
         addRenderableWidget(
-            button(Component.translatable("world-host.add_friend"), button -> {
+            button(Components.translatable("world-host.add_friend"), button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
                     addFriend(profile);
@@ -69,7 +70,7 @@ public class FriendsScreen extends WHScreen {
         );
 
         removeButton = addRenderableWidget(
-            button(Component.translatable("world-host.friends.remove"), button -> {
+            button(Components.translatable("world-host.friends.remove"), button -> {
                 if (list.getSelected() != null) {
                     list.getSelected().maybeRemove();
                 }
@@ -146,7 +147,7 @@ public class FriendsScreen extends WHScreen {
         @NotNull
         @Override
         public Component getNarration() {
-            return Component.nullToEmpty(getName());
+            return Components.immutable(getName());
         }
 
         @Override
@@ -177,8 +178,8 @@ public class FriendsScreen extends WHScreen {
                     }
                     client.setScreen(FriendsScreen.this);
                 },
-                Component.translatable("world-host.friends.remove.title"),
-                Component.translatable("world-host.friends.remove.message")
+                Components.translatable("world-host.friends.remove.title"),
+                Components.translatable("world-host.friends.remove.message")
             ));
         }
 

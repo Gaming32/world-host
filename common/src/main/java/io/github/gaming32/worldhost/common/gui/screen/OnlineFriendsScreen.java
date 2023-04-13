@@ -1,14 +1,14 @@
-package io.github.gaming32.worldhost._1_19_2.gui;
+package io.github.gaming32.worldhost.common.gui.screen;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.gaming32.worldhost._1_19_2.mixin.client.ServerStatusPingerAccessor;
+import io.github.gaming32.worldhost.common.Components;
 import io.github.gaming32.worldhost.common.FriendsListUpdate;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
-import io.github.gaming32.worldhost.common.gui.screen.FriendsScreen;
+import io.github.gaming32.worldhost.common.gui.WHScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -31,18 +31,19 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.text.ParseException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
-// A lot of this is based off of MultiplayerScreen and MultiplayerServerListWidget
-public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
+public class OnlineFriendsScreen extends WHScreen implements FriendsListUpdate {
     private final Screen parent;
     private OnlineFriendsList list;
     private Button joinButton;
     private List<Component> tooltip;
 
     public OnlineFriendsScreen(Screen parent) {
-        super(Component.translatable("world-host.online_friends.title"));
+        super(Components.translatable("world-host.online_friends.title"));
         this.parent = parent;
     }
 
@@ -50,7 +51,7 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
     protected void init() {
         super.init();
         assert minecraft != null;
-        minecraft.keyboardHandler.setSendRepeatsToGui(true);
+        sendRepeatEvents(true);
         if (list == null) {
             list = new OnlineFriendsList(minecraft, width, height, 60, height - 64, 36);
             WorldHostCommon.ONLINE_FRIENDS.forEach(uuid -> list.addEntry(new OnlineFriendsListEntry(uuid)));
@@ -62,39 +63,42 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
 
         addWidget(list);
 
-        joinButton = addRenderableWidget(new Button(
-            width / 2 - 152, height - 52, 150, 20,
-            Component.translatable("selectServer.select"),
-            button -> connect()
-        ));
+        joinButton = addRenderableWidget(
+            button(Components.translatable("selectServer.select"), button -> connect())
+                .pos(width / 2 - 152, height - 52)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 + 2, height - 52, 150, 20,
-            Component.translatable("selectServer.refresh"),
-            button -> minecraft.setScreen(new OnlineFriendsScreen(parent))
-        ));
+        addRenderableWidget(
+            button(
+                Components.translatable("selectServer.refresh"),
+                button -> minecraft.setScreen(new OnlineFriendsScreen(parent))
+            ).pos(width / 2 + 2, height - 52)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 - 152, height - 28, 150, 20,
-            WorldHostTexts.FRIENDS,
-            button -> minecraft.setScreen(new FriendsScreen(this))
-        ));
+        addRenderableWidget(
+            button(WorldHostTexts.FRIENDS, button -> minecraft.setScreen(new FriendsScreen(this)))
+                .pos(width / 2 - 152, height - 28)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 + 2, height - 28, 150, 20,
-            CommonComponents.GUI_CANCEL,
-            button -> minecraft.setScreen(parent)
-        ));
+        addRenderableWidget(
+            button(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
+                .pos(width / 2 + 2, height - 28)
+                .build()
+        );
 
-        addRenderableWidget(new Button(
-            width / 2 - 102, 32, 100, 20, WorldHostTexts.SERVERS,
-            button -> {
+        addRenderableWidget(
+            button(WorldHostTexts.SERVERS, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new JoinMultiplayerScreen(parent));
-            }
-        ));
+            }).pos(width / 2 - 102, 32)
+                .width(100)
+                .build()
+        );
 
-        addRenderableWidget(new FriendsButtonWidget(
+        addRenderableWidget(platform.createFriendsButtonWidget(
             width / 2 + 2, 32, 100, 20,
             button -> {}
         )).active = false;
@@ -105,7 +109,7 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
     @Override
     public void removed() {
         assert minecraft != null;
-        minecraft.keyboardHandler.setSendRepeatsToGui(false);
+        sendRepeatEvents(false);
         WorldHostCommon.ONLINE_FRIEND_UPDATES.remove(this);
     }
 
@@ -215,11 +219,6 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
         }
 
         @Override
-        protected boolean isFocused() {
-            return OnlineFriendsScreen.this.getFocused() == this;
-        }
-
-        @Override
         protected int getRowTop(int index) {
             return super.getRowTop(index);
         }
@@ -232,7 +231,7 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
 
         private final ResourceLocation iconTextureId;
         @Nullable
-        private String iconUri;
+        private Object iconData;
         @Nullable
         private DynamicTexture icon;
         private long clickTime;
@@ -279,12 +278,12 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
                 RenderSystem.disableBlend();
             }
 
-            final String icon = serverInfo.getIconB64();
-            if (!Objects.equals(icon, iconUri)) {
+            final Object icon = WorldHostCommon.getPlatform().getIconData(serverInfo);
+            if (!WorldHostCommon.equals(icon, iconData)) {
                 if (uploadServerIcon(icon)) {
-                    iconUri = icon;
+                    iconData = icon;
                 } else {
-                    serverInfo.setIconB64(null);
+                    WorldHostCommon.getPlatform().setIconData(serverInfo, null);
                 }
             }
 
@@ -334,60 +333,15 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
                 return;
             }
 
-            if (metadata.getDescription() != null) {
-                serverInfo.motd = metadata.getDescription();
-            } else {
-                serverInfo.motd = CommonComponents.EMPTY;
-            }
-
-            if (metadata.getVersion() != null) {
-                serverInfo.version = Component.literal(metadata.getVersion().getName());
-                serverInfo.protocol = metadata.getVersion().getProtocol();
-            } else {
-                serverInfo.version = Component.translatable("multiplayer.status.old");
-                serverInfo.protocol = 0;
-            }
-
-            serverInfo.playerList = List.of();
-            if (metadata.getPlayers() != null) {
-                serverInfo.status = ServerStatusPingerAccessor.formatPlayerCount(
-                    metadata.getPlayers().getNumPlayers(), metadata.getPlayers().getMaxPlayers()
-                );
-                final List<Component> lines = new ArrayList<>();
-                final GameProfile[] sampleProfiles = metadata.getPlayers().getSample();
-                if (sampleProfiles != null && sampleProfiles.length > 0) {
-                    for (final GameProfile sampleProfile : sampleProfiles) {
-                        lines.add(Component.literal(sampleProfile.getName()));
-                    }
-                    if (sampleProfiles.length < metadata.getPlayers().getNumPlayers()) {
-                        lines.add(Component.translatable(
-                            "multiplayer.status.and_more", metadata.getPlayers().getNumPlayers() - sampleProfiles.length
-                        ));
-                    }
-                    serverInfo.playerList = lines;
-                }
-            } else {
-                serverInfo.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
-            }
-
-            String favicon = serverInfo.getIconB64();
-            if (favicon != null) {
-                try {
-                    favicon = ServerData.parseFavicon(favicon);
-                } catch (ParseException e) {
-                    WorldHostCommon.LOGGER.error("Invalid server icon", e);
-                }
-            }
-
-            serverInfo.setIconB64(favicon);
+            WorldHostCommon.getPlatform().updateServerInfo(serverInfo, metadata);
         }
 
         private String getName() {
             return WorldHostCommon.getName(profile);
         }
 
-        private boolean uploadServerIcon(@Nullable String newIconUri) {
-            if (newIconUri == null) {
+        private boolean uploadServerIcon(@Nullable Object newIconData) {
+            if (newIconData == null) {
                 client.getTextureManager().release(iconTextureId);
                 if (icon != null && icon.getPixels() != null) {
                     icon.getPixels().close();
@@ -396,7 +350,7 @@ public class OnlineFriendsScreen extends Screen implements FriendsListUpdate {
                 icon = null;
             } else {
                 try {
-                    NativeImage nativeImage = NativeImage.fromBase64(newIconUri);
+                    NativeImage nativeImage = WorldHostCommon.getPlatform().readServerIcon(newIconData);
                     Validate.validState(nativeImage.getWidth() == 64, "Must be 64 pixels wide");
                     Validate.validState(nativeImage.getHeight() == 64, "Must be 64 pixels high");
                     if (icon == null) {
