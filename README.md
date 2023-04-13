@@ -17,4 +17,12 @@ If your friend doesn't have the mod installed, you cannot use the friends system
 
 ## How does this mod work?
 
-This mod has a server that your client connects to. This server is used to communicate with other clients using World Host. When your friend wants to join you, your friends client asks the server for an IP address to connect to. The server then asks your client to create a join mode (`JoinType` in the protocol). There are two join mods: UPnP and Proxy. UPnP mode is tried first. Your client tries to open a temporary port forward in your router that your friends client can use to connect to you directly. If this succeeds, your client tells the server the port to use, then the server tells your friend's client your IP and the port number. If UPnP fails, then your client tells the server to use Proxy mode. The server will then give your friend's client the same "proxy IP" as `/worldhost ip` gives. <!-- `/worldhost tempip` tries to do this whole process with trying UPnP first instead of just giving you the proxy IP straightaway. -->
+This mod has a server that your client connects to, this server is used to communicate with other clients using World Host. 
+
+1. When your friend wants to join you, your friend's client asks the server for an IP address to connect to. 
+2. The server then asks your client to create a join mode (`JoinType` in the protocol). There are two join mods: UPnP and Proxy. 
+3. UPnP mode is tried first. Your client tries to open a temporary port forward in your router that your friends client can use to connect to you directly. 
+4. If UPnP succeeds, your client tells the server the port to use, then the server tells your friend's client your IP and the port number. 
+5. If UPnP fails, then your client tells the server to use Proxy mode. The server will then give your friend's client the same "proxy IP" as `/worldhost ip` does. 
+ 
+<!-- `/worldhost tempip` tries to do this whole process with trying UPnP first instead of just giving you the proxy IP straightaway. -->
