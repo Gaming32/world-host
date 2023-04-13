@@ -29,10 +29,10 @@ public class MonojarEntrypoint implements ClientModInitializer {
             .orElseThrow()
             .getMetadata()
             .getVersion();
-        if (_1_19_2.test(minecraftVersion)) {
-            init_1_19_2();
-        } else if (_1_19_4.test(minecraftVersion)) {
+        if (_1_19_4.test(minecraftVersion)) {
             init_1_19_4();
+        } else if (_1_19_2.test(minecraftVersion)) {
+            init_1_19_2();
         } else {
             throw new AssertionError();
         }
