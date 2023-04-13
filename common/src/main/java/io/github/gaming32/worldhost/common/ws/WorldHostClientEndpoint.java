@@ -3,10 +3,10 @@ package io.github.gaming32.worldhost.common.ws;
 import io.github.gaming32.worldhost.common.Components;
 import io.github.gaming32.worldhost.common.DeferredToastManager;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
+import jakarta.websocket.*;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 
-import javax.websocket.*;
 import java.io.IOException;
 
 @ClientEndpoint(

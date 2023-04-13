@@ -23,6 +23,11 @@ repositories {
             includeGroup("maven.modrinth")
         }
     }
+
+    maven {
+        name = "ParchmentMC"
+        url = uri("https://maven.parchmentmc.org")
+    }
 }
 
 dependencies {
@@ -37,18 +42,20 @@ dependencies {
     // The exact JiJed version is dependent on the Minecraft version. However, it needs to be ABI-compatible.
     modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")
 
-    implementation("javax.websocket:javax.websocket-client-api:1.1")
-    include("javax.websocket:javax.websocket-client-api:1.1")
+    implementation("jakarta.websocket:jakarta.websocket-client-api:2.1.0")
+    include("jakarta.websocket:jakarta.websocket-client-api:2.1.0")
 
-    runtimeOnly("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.51.v20230217")
-    include("org.eclipse.jetty.websocket:javax-websocket-client-impl:9.4.51.v20230217")
-    include("org.eclipse.jetty.websocket:websocket-client:9.4.51.v20230217")
-    include("org.eclipse.jetty.websocket:websocket-common:9.4.51.v20230217")
-    include("org.eclipse.jetty.websocket:websocket-api:9.4.51.v20230217")
-    include("org.eclipse.jetty:jetty-io:9.4.51.v20230217")
-    include("org.eclipse.jetty:jetty-util:9.4.51.v20230217")
-    include("org.eclipse.jetty:jetty-client:9.4.51.v20230217")
-    include("org.eclipse.jetty:jetty-http:9.4.51.v20230217")
+    runtimeOnly("org.eclipse.jetty.websocket:websocket-jakarta-client:11.0.14")
+    include("org.eclipse.jetty.websocket:websocket-jakarta-client:11.0.14")
+    include("org.eclipse.jetty:jetty-client:11.0.14")
+    include("org.eclipse.jetty:jetty-http:11.0.14")
+    include("org.eclipse.jetty:jetty-util:11.0.14")
+    include("org.eclipse.jetty:jetty-io:11.0.14")
+    include("org.eclipse.jetty:jetty-alpn-client:11.0.14")
+    include("org.eclipse.jetty.toolchain:jetty-jakarta-websocket-api:2.0.0")
+    include("org.eclipse.jetty.websocket:websocket-jakarta-common:11.0.14")
+    include("org.eclipse.jetty.websocket:websocket-core-client:11.0.14")
+    include("org.eclipse.jetty.websocket:websocket-core-common:11.0.14")
 }
 
 tasks {

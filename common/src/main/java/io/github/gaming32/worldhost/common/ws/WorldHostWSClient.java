@@ -1,10 +1,10 @@
 package io.github.gaming32.worldhost.common.ws;
 
 import io.github.gaming32.worldhost.common.WorldHostCommon;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.DeploymentException;
+import jakarta.websocket.Session;
 
-import javax.websocket.ContainerProvider;
-import javax.websocket.DeploymentException;
-import javax.websocket.Session;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;

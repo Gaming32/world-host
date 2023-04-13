@@ -5,7 +5,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 
-import javax.websocket.EndpointConfig;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -119,18 +118,10 @@ public sealed interface WorldHostC2SMessage {
         dos.writeLong(uuid.getLeastSignificantBits());
     }
 
-    class Encoder implements javax.websocket.Encoder.BinaryStream<WorldHostC2SMessage> {
+    class Encoder implements jakarta.websocket.Encoder.BinaryStream<WorldHostC2SMessage> {
         @Override
         public void encode(WorldHostC2SMessage object, OutputStream os) throws IOException {
             object.encode(new DataOutputStream(os));
-        }
-
-        @Override
-        public void init(EndpointConfig config) {
-        }
-
-        @Override
-        public void destroy() {
         }
     }
 }

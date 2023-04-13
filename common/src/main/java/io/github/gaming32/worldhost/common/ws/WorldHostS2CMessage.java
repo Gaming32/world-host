@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.common.ws;
 
 import io.github.gaming32.worldhost.common.*;
 import io.github.gaming32.worldhost.common.upnp.UPnPErrors;
+import jakarta.websocket.Session;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
@@ -9,8 +10,6 @@ import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.status.ServerStatus;
 
-import javax.websocket.EndpointConfig;
-import javax.websocket.Session;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -228,18 +227,10 @@ public sealed interface WorldHostS2CMessage {
         return new String(buf, StandardCharsets.UTF_8);
     }
 
-    class Decoder implements javax.websocket.Decoder.BinaryStream<WorldHostS2CMessage> {
+    class Decoder implements jakarta.websocket.Decoder.BinaryStream<WorldHostS2CMessage> {
         @Override
         public WorldHostS2CMessage decode(InputStream is) throws IOException {
             return WorldHostS2CMessage.decode(new DataInputStream(is));
-        }
-
-        @Override
-        public void init(EndpointConfig config) {
-        }
-
-        @Override
-        public void destroy() {
         }
     }
 }
