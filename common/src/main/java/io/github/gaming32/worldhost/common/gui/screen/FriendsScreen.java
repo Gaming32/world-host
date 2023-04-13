@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost._1_19_4.gui;
+package io.github.gaming32.worldhost.common.gui.screen;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -7,7 +7,7 @@ import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostData;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
-import io.github.gaming32.worldhost.common.gui.AddFriendScreen;
+import io.github.gaming32.worldhost.common.gui.WHScreen;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -22,7 +22,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class FriendsScreen extends Screen {
+public class FriendsScreen extends WHScreen {
     private static final Component ADD_SILENTLY_TEXT = Component.translatable("world-host.friends.add_silently");
 
     private final Screen parent;
@@ -48,7 +48,7 @@ public class FriendsScreen extends Screen {
         }
 
         addRenderableWidget(
-            Button.builder(Component.translatable("world-host.add_friend"), button -> {
+            button(Component.translatable("world-host.add_friend"), button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, profile -> {
                     addFriend(profile);
@@ -61,7 +61,7 @@ public class FriendsScreen extends Screen {
         );
 
         addRenderableWidget(
-            Button.builder(ADD_SILENTLY_TEXT, button -> {
+            button(ADD_SILENTLY_TEXT, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, this::addFriend));
             }).pos(width / 2 - 152, height - 28)
@@ -69,7 +69,7 @@ public class FriendsScreen extends Screen {
         );
 
         removeButton = addRenderableWidget(
-            Button.builder(Component.translatable("world-host.friends.remove"), button -> {
+            button(Component.translatable("world-host.friends.remove"), button -> {
                 if (list.getSelected() != null) {
                     list.getSelected().maybeRemove();
                 }
@@ -79,7 +79,7 @@ public class FriendsScreen extends Screen {
         removeButton.active = false;
 
         addRenderableWidget(
-            Button.builder(CommonComponents.GUI_DONE, button -> {
+            button(CommonComponents.GUI_DONE, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(parent);
             }).pos(width / 2 + 2, height - 28)

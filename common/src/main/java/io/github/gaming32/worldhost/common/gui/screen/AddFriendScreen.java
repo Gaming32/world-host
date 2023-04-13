@@ -1,10 +1,11 @@
-package io.github.gaming32.worldhost.common.gui;
+package io.github.gaming32.worldhost.common.gui.screen;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.common.Components;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
+import io.github.gaming32.worldhost.common.gui.WHScreen;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;

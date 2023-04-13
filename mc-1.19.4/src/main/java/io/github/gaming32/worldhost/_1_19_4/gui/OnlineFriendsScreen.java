@@ -8,6 +8,7 @@ import io.github.gaming32.worldhost._1_19_4.mixin.client.ServerStatusPingerAcces
 import io.github.gaming32.worldhost.common.FriendsListUpdate;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
+import io.github.gaming32.worldhost.common.gui.screen.FriendsScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
