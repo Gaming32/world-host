@@ -53,6 +53,12 @@ dependencies {
 
     implementation(project(":mc-1.19.4"))
     include(project(":mc-1.19.4"))
+
+    implementation(project(":gui-1.19.2"))
+    include(project(":gui-1.19.2"))
+
+    implementation(project(":gui-1.19.4"))
+    include(project(":gui-1.19.4"))
 }
 
 tasks {

@@ -30,6 +30,8 @@
   },
   "recommends": {
     "world-host-1-19-2": "${version}",
-    "world-host-1-19-4": "${version}"
+    "world-host-1-19-4": "${version}",
+    "world-host-gui-1-19-2": "${version}",
+    "world-host-gui-1-19-4": "${version}"
   }
 }

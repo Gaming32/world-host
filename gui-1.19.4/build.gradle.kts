@@ -10,8 +10,6 @@ version = "0.2.6"
 repositories {
     mavenCentral()
 
-    maven("https://maven.fabricmc.net/")
-
     exclusiveContent {
         forRepository {
             maven {
@@ -23,39 +21,18 @@ repositories {
             includeGroup("maven.modrinth")
         }
     }
-
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
-
-    maven("https://jitpack.io")
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:1.19.2")
+    minecraft("com.mojang:minecraft:1.19.4")
     @Suppress("UnstableApiUsage")
     mappings(loom.layered {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-1.19.2:2022.11.27@zip")
+        parchment("org.parchmentmc.data:parchment-1.19.3:2023.03.12@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:0.14.14")
 
     implementation(project(":common"))
-    implementation(project(":gui-1.19.2"))
-
-    modImplementation("maven.modrinth:midnightlib:1.0.0-fabric")
-    include("maven.modrinth:midnightlib:1.0.0-fabric")
-
-    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
-
-    modImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
-    annotationProcessor("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
-}
-
-loom {
-    runs {
-        runConfigs.configureEach {
-            isIdeConfigGenerated = true
-        }
-    }
 }
 
 tasks {
@@ -66,6 +43,6 @@ tasks {
     }
 
     remapJar {
-        archiveBaseName.set("world-host-1-19-2")
+        archiveBaseName.set("world-host-gui-1-19-4")
     }
 }

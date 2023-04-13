@@ -4,6 +4,8 @@ import io.github.gaming32.worldhost._1_19_4.gui.WorldHostConfigScreen;
 import io.github.gaming32.worldhost._1_19_4.mixin.client.MinecraftAccessor;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostPlatform;
+import io.github.gaming32.worldhost.common.gui.WHGuiPlatform;
+import io.github.gaming32.worldhost.gui._1_19_4.WorldHostGui_1_19_4;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
@@ -17,6 +19,8 @@ import net.minecraft.server.Services;
 import org.jetbrains.annotations.Nullable;
 
 public class WorldHost_1_19_4 implements WorldHostPlatform {
+    private final WHGuiPlatform guiPlatform = new WorldHostGui_1_19_4();
+
     @Override
     public Services createServices() {
         return Services.create(
@@ -38,6 +42,11 @@ public class WorldHost_1_19_4 implements WorldHostPlatform {
     @Override
     public Screen createConfigScreen(Screen parent) {
         return new WorldHostConfigScreen(parent);
+    }
+
+    @Override
+    public WHGuiPlatform getGuiPlatform() {
+        return guiPlatform;
     }
 
     @Override

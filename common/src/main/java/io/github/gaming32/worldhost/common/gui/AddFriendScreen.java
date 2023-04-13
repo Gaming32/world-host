@@ -1,15 +1,15 @@
-package io.github.gaming32.worldhost._1_19_4.gui;
+package io.github.gaming32.worldhost.common.gui;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.gaming32.worldhost.common.Components;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
@@ -21,9 +21,9 @@ import org.lwjgl.glfw.GLFW;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-public class AddFriendScreen extends Screen {
+public class AddFriendScreen extends WHScreen {
     public static final Pattern VALID_USERNAME = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
-    private static final Component FRIEND_USERNAME_TEXT = Component.translatable("world-host.add_friend.enter_username");
+    private static final Component FRIEND_USERNAME_TEXT = Components.translatable("world-host.add_friend.enter_username");
 
     private final Screen parent;
     private final Consumer<GameProfile> addAction;
@@ -34,7 +34,7 @@ public class AddFriendScreen extends Screen {
     private boolean usernameUpdate;
     private GameProfile friendProfile;
 
-    protected AddFriendScreen(Screen parent, Component title, Consumer<GameProfile> addAction) {
+    public AddFriendScreen(Screen parent, Component title, Consumer<GameProfile> addAction) {
         super(title);
         this.parent = parent;
         this.addAction = addAction;
@@ -43,23 +43,24 @@ public class AddFriendScreen extends Screen {
     @Override
     protected void init() {
         assert minecraft != null;
+        sendRepeatEvents(true);
         GameProfileCache.setUsesAuthentication(true); // This makes non-existent users return an empty value instead of an offline mode fallback.
 
         addFriendButton = addRenderableWidget(
-            Button.builder(Component.translatable("world-host.add_friend"), button -> {
+            button(Components.translatable("world-host.add_friend"), button -> {
                 if (friendProfile != null) { // Just in case the user somehow clicks the button with this null
                     addAction.accept(friendProfile);
                 }
                 minecraft.setScreen(parent);
             }).pos(width / 2 - 100, 288)
                 .width(200)
-                .tooltip(Tooltip.create(Component.translatable("world-host.add_friend.tooltip")))
+                .tooltip(Components.translatable("world-host.add_friend.tooltip"))
                 .build()
         );
         addFriendButton.active = false;
 
         addRenderableWidget(
-            Button.builder(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
+            button(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
                 .pos(width / 2 - 100, 312)
                 .width(200)
                 .build()
@@ -67,7 +68,7 @@ public class AddFriendScreen extends Screen {
 
         usernameField = addWidget(new EditBox(font, width / 2 - 100, 116, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(16);
-        usernameField.setFocused(true);
+        editBoxFocus(usernameField, true);
         usernameField.setResponder(text -> {
             lastTyping = Util.getMillis();
             usernameUpdate = true;
@@ -87,6 +88,11 @@ public class AddFriendScreen extends Screen {
     public void onClose() {
         assert minecraft != null;
         minecraft.setScreen(parent);
+    }
+
+    @Override
+    public void removed() {
+        sendRepeatEvents(false);
     }
 
     @Override

@@ -39,6 +39,7 @@ dependencies {
     modImplementation("net.fabricmc:fabric-loader:0.14.14")
 
     implementation(project(":common"))
+    implementation(project(":gui-1.19.4"))
 
     modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")
     include("maven.modrinth:midnightlib:1.3.0-fabric")

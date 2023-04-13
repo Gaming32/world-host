@@ -7,6 +7,7 @@ import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
 import io.github.gaming32.worldhost.common.WorldHostData;
 import io.github.gaming32.worldhost.common.WorldHostTexts;
+import io.github.gaming32.worldhost.common.gui.AddFriendScreen;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;

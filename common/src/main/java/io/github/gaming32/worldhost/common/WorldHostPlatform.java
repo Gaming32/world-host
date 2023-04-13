@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.common;
 
+import io.github.gaming32.worldhost.common.gui.WHGuiPlatform;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.screens.Screen;
@@ -18,6 +19,8 @@ public interface WorldHostPlatform {
     ServerStatus parseServerStatus(FriendlyByteBuf buf);
 
     Screen createConfigScreen(Screen parent);
+
+    WHGuiPlatform getGuiPlatform();
 
     MutableComponent translatableComponent(String key);
 
