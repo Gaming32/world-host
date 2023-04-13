@@ -42,8 +42,7 @@ dependencies {
     // The exact JiJed version is dependent on the Minecraft version. However, it needs to be ABI-compatible.
     modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")
 
-    implementation("jakarta.websocket:jakarta.websocket-client-api:2.1.0")
-    include("jakarta.websocket:jakarta.websocket-client-api:2.1.0")
+    implementation("org.eclipse.jetty.toolchain:jetty-jakarta-websocket-api:2.0.0")
 
     runtimeOnly("org.eclipse.jetty.websocket:websocket-jakarta-client:11.0.14")
     include("org.eclipse.jetty.websocket:websocket-jakarta-client:11.0.14")

@@ -1,6 +1,7 @@
 package io.github.gaming32.worldhost.common.ws;
 
 import io.github.gaming32.worldhost.common.WorldHostCommon;
+import jakarta.websocket.EndpointConfig;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -122,6 +123,14 @@ public sealed interface WorldHostC2SMessage {
         @Override
         public void encode(WorldHostC2SMessage object, OutputStream os) throws IOException {
             object.encode(new DataOutputStream(os));
+        }
+
+        @Override
+        public void init(EndpointConfig config) {
+        }
+
+        @Override
+        public void destroy() {
         }
     }
 }
