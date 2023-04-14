@@ -7,16 +7,6 @@ plugins {
 group = "io.github.gaming32.world-host"
 version = "0.2.6"
 
-repositories {
-    mavenCentral()
-
-    maven("https://maven.fabricmc.net/")
-
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
-
-    maven("https://jitpack.io")
-}
-
 dependencies {
     minecraft("com.mojang:minecraft:1.19.2")
     @Suppress("UnstableApiUsage")
@@ -31,7 +21,7 @@ dependencies {
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
 
-    modImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
+    implementation("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
     annotationProcessor("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
 }
 

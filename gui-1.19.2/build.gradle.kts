@@ -7,10 +7,6 @@ plugins {
 group = "io.github.gaming32.world-host"
 version = "0.2.6"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     minecraft("com.mojang:minecraft:1.19.2")
     @Suppress("UnstableApiUsage")

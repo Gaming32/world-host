@@ -7,17 +7,6 @@ plugins {
 group = "io.github.gaming32.world-host"
 version = "0.2.6"
 
-repositories {
-    mavenCentral()
-
-    maven("https://maven.fabricmc.net/")
-
-    maven {
-        name = "ParchmentMC"
-        url = uri("https://maven.parchmentmc.org")
-    }
-}
-
 dependencies {
     minecraft("com.mojang:minecraft:1.19.4")
     @Suppress("UnstableApiUsage")
