@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.NativeImage;
 import io.github.gaming32.worldhost.common.gui.WHGuiPlatform;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -22,9 +21,9 @@ public interface WorldHostPlatform {
 
     ServerStatus parseServerStatus(FriendlyByteBuf buf);
 
-    Screen createConfigScreen(Screen parent);
-
     WHGuiPlatform getGuiPlatform();
+
+    MutableComponent emptyComponent();
 
     MutableComponent translatableComponent(String key);
 

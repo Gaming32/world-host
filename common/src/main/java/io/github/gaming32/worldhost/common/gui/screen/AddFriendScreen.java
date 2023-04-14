@@ -44,7 +44,7 @@ public class AddFriendScreen extends WHScreen {
     @Override
     protected void init() {
         assert minecraft != null;
-        sendRepeatEvents(true);
+        platform.sendRepeatEvents(true);
         GameProfileCache.setUsesAuthentication(true); // This makes non-existent users return an empty value instead of an offline mode fallback.
 
         addFriendButton = addRenderableWidget(
@@ -69,7 +69,7 @@ public class AddFriendScreen extends WHScreen {
 
         usernameField = addWidget(new EditBox(font, width / 2 - 100, 116, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(16);
-        editBoxFocus(usernameField, true);
+        platform.editBoxFocus(usernameField, true);
         usernameField.setResponder(text -> {
             lastTyping = Util.getMillis();
             usernameUpdate = true;
@@ -93,7 +93,7 @@ public class AddFriendScreen extends WHScreen {
 
     @Override
     public void removed() {
-        sendRepeatEvents(false);
+        platform.sendRepeatEvents(false);
     }
 
     @Override

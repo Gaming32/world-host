@@ -9,18 +9,6 @@ version = "0.2.6"
 
 repositories {
     mavenCentral()
-
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = "Modrinth"
-                url = uri("https://api.modrinth.com/maven")
-            }
-        }
-        filter {
-            includeGroup("maven.modrinth")
-        }
-    }
 }
 
 dependencies {

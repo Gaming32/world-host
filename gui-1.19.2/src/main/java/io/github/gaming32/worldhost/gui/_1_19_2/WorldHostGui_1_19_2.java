@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.gui._1_19_2;
 import io.github.gaming32.worldhost.common.gui.ButtonBuilder;
 import io.github.gaming32.worldhost.common.gui.WHGuiPlatform;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
@@ -67,5 +68,19 @@ public class WorldHostGui_1_19_2 implements WHGuiPlatform {
     @Override
     public Button createFriendsButtonWidget(int x, int y, int width, int height, Button.OnPress onPress) {
         return new FriendsButtonWidget(x, y, width, height, onPress);
+    }
+
+    @Override
+    public boolean hasTooltips() {
+        return false;
+    }
+
+    @Override
+    public void setTooltip(AbstractWidget widget, Component tooltip) {
+    }
+
+    @Override
+    public void setY(AbstractWidget widget, int y) {
+        widget.y = y;
     }
 }

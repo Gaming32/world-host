@@ -7,6 +7,10 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 
 public class Components {
+    public static MutableComponent empty() {
+        return WorldHostCommon.getPlatform().emptyComponent();
+    }
+
     public static MutableComponent translatable(String key) {
         return WorldHostCommon.getPlatform().translatableComponent(key);
     }

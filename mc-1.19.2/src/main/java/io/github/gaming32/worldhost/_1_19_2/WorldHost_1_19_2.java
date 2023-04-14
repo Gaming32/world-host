@@ -2,7 +2,6 @@ package io.github.gaming32.worldhost._1_19_2;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.NativeImage;
-import io.github.gaming32.worldhost._1_19_2.gui.WorldHostConfigScreen;
 import io.github.gaming32.worldhost._1_19_2.mixin.client.MinecraftAccessor;
 import io.github.gaming32.worldhost._1_19_2.mixin.client.ServerStatusPingerAccessor;
 import io.github.gaming32.worldhost.common.WorldHostCommon;
@@ -13,7 +12,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.CommonComponents;
@@ -51,13 +49,13 @@ public class WorldHost_1_19_2 implements WorldHostPlatform {
     }
 
     @Override
-    public Screen createConfigScreen(Screen parent) {
-        return new WorldHostConfigScreen(parent);
+    public WHGuiPlatform getGuiPlatform() {
+        return guiPlatform;
     }
 
     @Override
-    public WHGuiPlatform getGuiPlatform() {
-        return guiPlatform;
+    public MutableComponent emptyComponent() {
+        return Component.empty();
     }
 
     @Override

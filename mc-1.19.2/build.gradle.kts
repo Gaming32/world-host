@@ -12,18 +12,6 @@ repositories {
 
     maven("https://maven.fabricmc.net/")
 
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = "Modrinth"
-                url = uri("https://api.modrinth.com/maven")
-            }
-        }
-        filter {
-            includeGroup("maven.modrinth")
-        }
-    }
-
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 
     maven("https://jitpack.io")
@@ -40,9 +28,6 @@ dependencies {
 
     implementation(project(":common"))
     implementation(project(":gui-1.19.2"))
-
-    modImplementation("maven.modrinth:midnightlib:1.0.0-fabric")
-    include("maven.modrinth:midnightlib:1.0.0-fabric")
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.1.0")
 

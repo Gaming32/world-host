@@ -51,7 +51,7 @@ public class OnlineFriendsScreen extends WHScreen implements FriendsListUpdate {
     protected void init() {
         super.init();
         assert minecraft != null;
-        sendRepeatEvents(true);
+        platform.sendRepeatEvents(true);
         if (list == null) {
             list = new OnlineFriendsList(minecraft, width, height, 60, height - 64, 36);
             WorldHostCommon.ONLINE_FRIENDS.forEach(uuid -> list.addEntry(new OnlineFriendsListEntry(uuid)));
@@ -109,7 +109,7 @@ public class OnlineFriendsScreen extends WHScreen implements FriendsListUpdate {
     @Override
     public void removed() {
         assert minecraft != null;
-        sendRepeatEvents(false);
+        platform.sendRepeatEvents(false);
         WorldHostCommon.ONLINE_FRIEND_UPDATES.remove(this);
     }
 

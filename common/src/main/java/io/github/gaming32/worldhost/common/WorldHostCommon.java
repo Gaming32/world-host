@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.logging.LogUtils;
-import eu.midnightdust.lib.config.MidnightConfig;
 import io.github.gaming32.worldhost.common.upnp.Gateway;
 import io.github.gaming32.worldhost.common.upnp.GatewayFinder;
 import io.github.gaming32.worldhost.common.ws.WorldHostWSClient;

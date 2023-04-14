@@ -12,18 +12,6 @@ repositories {
 
     maven("https://maven.fabricmc.net/")
 
-    exclusiveContent {
-        forRepository {
-            maven {
-                name = "Modrinth"
-                url = uri("https://api.modrinth.com/maven")
-            }
-        }
-        filter {
-            includeGroup("maven.modrinth")
-        }
-    }
-
     maven {
         name = "ParchmentMC"
         url = uri("https://maven.parchmentmc.org")
@@ -38,9 +26,6 @@ dependencies {
         parchment("org.parchmentmc.data:parchment-1.19.3:2023.03.12@zip")
     })
     modImplementation("net.fabricmc:fabric-loader:0.14.14")
-
-    // The exact JiJed version is dependent on the Minecraft version. However, it needs to be ABI-compatible.
-    modImplementation("maven.modrinth:midnightlib:1.3.0-fabric")
 
     implementation("org.eclipse.jetty.toolchain:jetty-jakarta-websocket-api:2.0.0")
 
