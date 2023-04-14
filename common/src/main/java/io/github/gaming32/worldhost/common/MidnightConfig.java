@@ -42,41 +42,41 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unchecked")
 public class MidnightConfig {
-    protected static final Pattern INTEGER_ONLY = Pattern.compile("(-?[0-9]*)");
-    protected static final Pattern DECIMAL_ONLY = Pattern.compile("-?(\\d+\\.?\\d*|\\d*\\.?\\d+|\\.)");
-    protected static final Pattern HEXADECIMAL_ONLY = Pattern.compile("(-?[#0-9a-fA-F]*)");
+    private static final Pattern INTEGER_ONLY = Pattern.compile("(-?[0-9]*)");
+    private static final Pattern DECIMAL_ONLY = Pattern.compile("-?(\\d+\\.?\\d*|\\d*\\.?\\d+|\\.)");
+    private static final Pattern HEXADECIMAL_ONLY = Pattern.compile("(-?[#0-9a-fA-F]*)");
 
-    protected static final List<EntryInfo> ENTRIES = new ArrayList<>();
+    private static final List<EntryInfo> ENTRIES = new ArrayList<>();
 
-    public static class EntryInfo {
-        public Field field;
-        public Object widget;
-        public int width;
-        public int max;
-        public boolean centered;
-        public Map.Entry<EditBox,Component> error;
-        public Object defaultValue;
-        public Object value;
-        public String tempValue;
-        public boolean inLimits = true;
-        public String id;
-        public Component name;
-        public int index;
-        public AbstractWidget colorButton;
+    protected static class EntryInfo {
+        Field field;
+        Object widget;
+        int width;
+        int max;
+        boolean centered;
+        Map.Entry<EditBox,Component> error;
+        Object defaultValue;
+        Object value;
+        String tempValue;
+        boolean inLimits = true;
+        String id;
+        Component name;
+        int index;
+        AbstractWidget colorButton;
     }
 
-    public static final Map<String,Class<?>> configClass = new HashMap<>();
-    protected static Path path;
+    public static final Map<String,Class<?>> CONFIG_CLASS = new HashMap<>();
+    private static Path path;
 
-    protected static final Gson GSON = new GsonBuilder()
-        .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.PRIVATE, Modifier.PROTECTED)
+    private static final Gson GSON = new GsonBuilder()
+        .excludeFieldsWithModifiers(Modifier.TRANSIENT, Modifier.PRIVATE)
         .addSerializationExclusionStrategy(new HiddenAnnotationExclusionStrategy())
         .setPrettyPrinting()
         .create();
 
     public static void init(String modid, Class<?> config) {
         path = FabricLoader.getInstance().getConfigDir().resolve(modid + ".json");
-        configClass.put(modid, config);
+        CONFIG_CLASS.put(modid, config);
 
         for (Field field : config.getFields()) {
             EntryInfo info = new EntryInfo();
@@ -104,7 +104,7 @@ public class MidnightConfig {
         path = FabricLoader.getInstance().getConfigDir().resolve(modid + ".json");
         try {
             if (!Files.exists(path)) Files.createFile(path);
-            Files.write(path, GSON.toJson(configClass.get(modid).getDeclaredConstructor().newInstance()).getBytes());
+            Files.write(path, GSON.toJson(CONFIG_CLASS.get(modid).getDeclaredConstructor().newInstance()).getBytes());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -240,7 +240,7 @@ public class MidnightConfig {
             }
         }
         public void loadValues() {
-            try { GSON.fromJson(Files.newBufferedReader(path), configClass.get(modid)); }
+            try { GSON.fromJson(Files.newBufferedReader(path), CONFIG_CLASS.get(modid)); }
             catch (Exception e) { write(modid); }
 
             for (EntryInfo info : ENTRIES) {
