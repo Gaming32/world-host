@@ -5,6 +5,7 @@
   "world-host.midnightconfig.showOnlineStatus.tooltip": "Kuva avakuval võrgusolek",
   "world-host.midnightconfig.enableFriends": "Luba sõbraloend",
   "world-host.midnightconfig.enableFriends.tooltip": "Lubab kõik sõpradega seonduvad liidesed ja kogu sõbrasüsteemi.\nKeelamisel ja taaslubamisel jäävad kõik su sõbrad alles.",
+  "world-host.midnightconfig.enableReconnectionToasts": "Luba taasühendamise hüpikud",
   "world-host.friends": "Sõbrad",
   "world-host.friends.add_silently": "Lisa sõber vaikselt",
   "world-host.friends.add_silently.tooltip": "See lisab inimese sõbraks ilma teda teavitamata.",
