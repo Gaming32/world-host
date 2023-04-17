@@ -15,12 +15,12 @@ preprocess {
     val forge10809 = createNode("1.8.9-forge", 1_08_09, "srg")
 
     fabric11904.link(forge11904)
-    fabric11904.link(fabric11902)
-    fabric11902.link(forge11902)
+    forge11904.link(forge11902)
+    forge11902.link(fabric11902)
     fabric11902.link(fabric11802)
     fabric11802.link(forge11802)
-    fabric11802.link(fabric11605)
-    fabric11605.link(forge11605)
+    forge11802.link(forge11605)
+    forge11605.link(fabric11605)
     forge11605.link(forge11202)
     forge11202.link(forge10809)
 }
