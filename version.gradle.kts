@@ -53,6 +53,10 @@ sourceSets {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
 tasks.register("generateLangFiles") {
     doLast {
         if (mcData.version >= 1_13_00) return@doLast

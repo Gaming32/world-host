@@ -9,9 +9,9 @@ jobs:
       - name: Cache Gradle stuff
         uses: actions/cache@v3
         with:
-          key: gradle-${{ hashFiles('build.gradle.kts', 'settings.gradle.kts', 'gradle.properties', 'gradle/**', 'version.gradle.kts', 'versions/*') }}
+          key: gradle-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**', 'versions/*') }}
           restore-keys: |
-            gradle-${{ hashFiles('build.gradle.kts', 'settings.gradle.kts', 'gradle.properties', 'gradle/**', 'version.gradle.kts', 'versions/*') }}
+            gradle-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**', 'versions/*') }}
             gradle-
           path: |
             ~/.gradle/caches
