@@ -18,6 +18,8 @@ repositories {
         name = "ParchmentMC"
         url = uri("https://maven.parchmentmc.org")
     }
+
+    maven("https://repo.polyfrost.cc/releases")
 }
 
 val bundle: Configuration by configurations.creating {
@@ -56,6 +58,11 @@ dependencies {
     if (mcData.version < 1_10_00) {
         includeImplementation("it.unimi.dsi:fastutil-core:8.5.5")
     }
+
+    if (mcData.isLegacyForge) {
+        compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
+        shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+")
+    }
 }
 
 val generatedResources = "$buildDir/generated-resources/main"
@@ -69,6 +76,25 @@ sourceSets {
 
 java {
     withSourcesJar()
+}
+
+loom {
+    if (mcData.isLegacyForge) {
+        launchConfigs.named("client") {
+            arg("--tweakClass", "cc.polyfrost.oneconfig.loader.stage0.LaunchWrapperTweaker")
+
+            property("mixin.debug.export", "true")
+        }
+    }
+
+    if (mcData.isForge) {
+        forge {
+            mixinConfig("world-host.mixins.json")
+        }
+    }
+
+    @Suppress("UnstableApiUsage")
+    mixin.defaultRefmapName.set("world-host.mixins.refmap.json")
 }
 
 tasks.register("generateLangFiles") {
