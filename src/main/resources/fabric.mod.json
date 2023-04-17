@@ -15,6 +15,11 @@
   "license": "MIT",
   "icon": "assets/world-host/icon.png",
   "environment": "client",
+  "entrypoints": {
+    "client": [
+      "io.github.gaming32.worldhost.WorldHost"
+    ]
+  },
   "depends": {
     "fabricloader": "*",
     "minecraft": "${mc_version == '1.19.4' ? '>=1.19.4' : mc_version}"
