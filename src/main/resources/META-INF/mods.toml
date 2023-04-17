@@ -1,9 +1,10 @@
 modLoader = "javafml"
 loaderVersion = "[32,)"
 issueTrackerURL = "https://github.com/Gaming32/world-host/issues"
+license = "MIT"
 
 [[mods]]
-modId = "$mod_id"
+modId = "${mod_id.replace('-', '_')}"
 version = "$mod_version"
 displayName = "$mod_name"
 displayURL = "https://modrinth.com/mod/world-host"

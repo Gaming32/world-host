@@ -22,7 +22,11 @@ public class WorldHost
     implements ClientModInitializer
     //#endif
 {
+    //#if FORGE
+    //$$ public static final String MOD_ID = "world_host";
+    //#else
     public static final String MOD_ID = "world-host";
+    //#endif
 
     public static final Logger LOGGER = LogUtils.getLogger();
 
