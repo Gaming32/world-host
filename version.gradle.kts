@@ -8,6 +8,7 @@ plugins {
     id("xyz.deftu.gradle.tools.blossom")
     id("xyz.deftu.gradle.tools.minecraft.loom")
     id("xyz.deftu.gradle.tools.minecraft.releases")
+    id("xyz.deftu.gradle.tools.shadow")
 }
 
 version = "${modData.version}+${mcData.versionStr}-${mcData.loader.name}"
@@ -19,7 +20,16 @@ repositories {
     }
 }
 
+val bundle: Configuration by configurations.creating {
+    configurations.getByName(if (mcData.isFabric) "include" else "shade").extendsFrom(this)
+}
+
 dependencies {
+    fun includeImplementation(dependency: Any) {
+        implementation(dependency)
+        bundle(dependency)
+    }
+
     if (mcData.version > 1_15_02) {
         @Suppress("UnstableApiUsage")
         mappings(loom.layered {
@@ -41,6 +51,10 @@ dependencies {
         mappings("net.fabricmc:yarn:${fetchYarnMappings(mcData.version)}")
     } else {
         mappings(loom.officialMojangMappings())
+    }
+
+    if (mcData.version < 1_10_00) {
+        includeImplementation("it.unimi.dsi:fastutil-core:8.5.5")
     }
 }
 
