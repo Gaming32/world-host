@@ -1,11 +1,14 @@
 package io.github.gaming32.worldhost;
 
-//#if MC >= 11700
-import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.status.ServerStatus;
+import java.io.File;
+import java.util.*;
+
+//#if MC >= 11700
+import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 //#else
 //$$ import org.apache.logging.log4j.LogManager;
@@ -14,9 +17,6 @@ import org.slf4j.Logger;
 
 //#if FABRIC
 import net.fabricmc.api.ClientModInitializer;
-
-import java.io.File;
-import java.util.*;
 //#endif
 
 //#if FORGE
