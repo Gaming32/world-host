@@ -121,10 +121,10 @@ public class WorldHost
         } catch (IOException e) {
             LOGGER.error("Failed to load {}.", CONFIG_FILE.getFileName(), e);
         }
-        writeConfig();
+        saveConfig();
     }
 
-    public static void writeConfig() {
+    public static void saveConfig() {
         try (JsonWriter writer = JsonWriter.json5(CONFIG_FILE)) {
             CONFIG.write(writer);
         } catch (IOException e) {

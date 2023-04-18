@@ -71,4 +71,40 @@ public class WorldHostConfig {
 
         writer.endObject();
     }
+
+    public String getServerIp() {
+        return serverIp;
+    }
+
+    public void setServerIp(String serverIp) {
+        this.serverIp = serverIp;
+    }
+
+    public boolean isShowOnlineStatus() {
+        return showOnlineStatus;
+    }
+
+    public void setShowOnlineStatus(boolean showOnlineStatus) {
+        this.showOnlineStatus = showOnlineStatus;
+    }
+
+    public boolean isEnableFriends() {
+        return enableFriends;
+    }
+
+    public void setEnableFriends(boolean enableFriends) {
+        this.enableFriends = enableFriends;
+    }
+
+    public boolean isEnableReconnectionToasts() {
+        return enableReconnectionToasts;
+    }
+
+    public void setEnableReconnectionToasts(boolean enableReconnectionToasts) {
+        this.enableReconnectionToasts = enableReconnectionToasts;
+    }
+
+    public Set<UUID> getFriends() {
+        return friends;
+    }
 }

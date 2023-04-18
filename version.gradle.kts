@@ -9,6 +9,7 @@ plugins {
     id("xyz.deftu.gradle.tools.minecraft.loom")
     id("xyz.deftu.gradle.tools.minecraft.releases")
     id("xyz.deftu.gradle.tools.shadow")
+    id("io.github.juuxel.loom-quiltflower") version "1.8.0"
 }
 
 version = "${modData.version}+${mcData.versionStr}-${mcData.loader.name}"
@@ -20,6 +21,8 @@ repositories {
     }
 
     maven("https://repo.polyfrost.cc/releases")
+
+    maven("https://maven.terraformersmc.com/releases")
 }
 
 val bundle: Configuration by configurations.creating {
@@ -65,6 +68,18 @@ dependencies {
     }
 
     includeImplementation("org.quiltmc:quilt-json5:1.0.2")
+
+    if (mcData.isFabric) {
+        when (mcData.version) {
+            1_19_04 -> "6.1.0"
+            1_19_02 -> "4.2.0-beta.2"
+            1_18_02 -> "3.2.5"
+            1_16_05 -> "1.16.23"
+            else -> null
+        }?.let {
+            modImplementation("com.terraformersmc:modmenu:$it")
+        }
+    }
 }
 
 val generatedResources = "$buildDir/generated-resources/main"
@@ -97,6 +112,10 @@ loom {
 
     @Suppress("UnstableApiUsage")
     mixin.defaultRefmapName.set("world-host.mixins.refmap.json")
+}
+
+preprocess {
+    patternAnnotation.set("io.github.gaming32.worldhost.versions.Pattern")
 }
 
 tasks.register("generateLangFiles") {

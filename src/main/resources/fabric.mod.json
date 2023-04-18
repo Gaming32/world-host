@@ -18,6 +18,9 @@
   "entrypoints": {
     "client": [
       "io.github.gaming32.worldhost.WorldHost"
+    ],
+    "modmenu": [
+      "io.github.gaming32.worldhost.compat.WorldHostModMenuCompat"
     ]
   },
   "mixins": [
