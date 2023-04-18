@@ -63,6 +63,8 @@ dependencies {
         compileOnly("org.spongepowered:mixin:0.7.11-SNAPSHOT")
         shade("cc.polyfrost:oneconfig-wrapper-launchwrapper:1.0.0-beta+")
     }
+
+    includeImplementation("org.quiltmc:quilt-json5:1.0.2")
 }
 
 val generatedResources = "$buildDir/generated-resources/main"
