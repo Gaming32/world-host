@@ -19,8 +19,7 @@ rootProject.name = "world-host"
 rootProject.buildFileName = "build.gradle.kts"
 
 listOf(
-    "1.8.9-forge",
-    "1.12.2-forge",
+    "1.16.1-fabric",
     "1.16.5-forge",
     "1.16.5-fabric",
     "1.18.2-forge",
