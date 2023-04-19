@@ -2,10 +2,12 @@ package io.github.gaming32.worldhost.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,6 +63,22 @@ public class WorldHostConfigScreen extends WorldHostScreen {
                 WorldHost.saveConfig();
             }
         )).setToggled(WorldHost.CONFIG.isEnableReconnectionToasts());
+
+        addRenderableWidget(
+            button(WorldHostComponents.FRIENDS, button -> {
+                assert minecraft != null;
+                minecraft.setScreen(new FriendsScreen(this));
+            }).pos(width / 2 - 155, yOffset + 120)
+                .build()
+        );
+
+        addRenderableWidget(
+            button(CommonComponents.GUI_DONE, button -> {
+                assert minecraft != null;
+                minecraft.setScreen(parent);
+            }).pos(width / 2 + 5, yOffset + 120)
+                .build()
+        );
     }
 
     @Override

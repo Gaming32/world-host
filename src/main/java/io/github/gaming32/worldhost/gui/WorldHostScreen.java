@@ -1,7 +1,9 @@
 package io.github.gaming32.worldhost.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.gaming32.worldhost.versions.ButtonBuilder;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
@@ -53,4 +55,14 @@ public abstract class WorldHostScreen extends Screen {
     //$$     return addButton(widget);
     //$$ }
     //#endif
+
+    public static ButtonBuilder button(Component message, Button.OnPress onPress) {
+        return new ButtonBuilder(message, onPress);
+    }
+
+    public static void sendRepeatEvents(boolean sendRepeatEvents) {
+        //#if MC < 11904
+        //$$ Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(sendRepeatEvents);
+        //#endif
+    }
 }

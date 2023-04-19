@@ -1,11 +1,17 @@
 package io.github.gaming32.worldhost;
 
+import com.mojang.authlib.GameProfile;
+import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.protocol.status.ServerStatus;
+import net.minecraft.server.Services;
+import net.minecraft.server.players.GameProfileCache;
+import org.apache.commons.lang3.StringUtils;
 import org.quiltmc.json5.JsonReader;
 import org.quiltmc.json5.JsonWriter;
 import java.io.File;
@@ -74,6 +80,8 @@ public class WorldHost
 
     public static Gateway upnpGateway;
 
+    private static GameProfileCache profileCache;
+
     //#if FABRIC
     @Override
     public void onInitializeClient() {
@@ -85,6 +93,14 @@ public class WorldHost
         LOGGER.info("Using client-generated connection ID {}", CONNECTION_ID);
 
         loadConfig();
+
+        //noinspection ResultOfMethodCallIgnored
+        CACHE_DIR.mkdirs();
+        profileCache = Services.create(
+            ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService(),
+            CACHE_DIR
+        ).profileCache();
+        profileCache.setExecutor(Util.backgroundExecutor());
 
         new GatewayFinder(gateway -> {
             upnpGateway = gateway;
@@ -122,6 +138,14 @@ public class WorldHost
         } catch (IOException e) {
             LOGGER.error("Failed to write {}.", CONFIG_FILE.getFileName(), e);
         }
+    }
+
+    public static String getName(GameProfile profile) {
+        return StringUtils.getIfBlank(profile.getName(), () -> profile.getId().toString());
+    }
+
+    public static GameProfileCache getProfileCache() {
+        return profileCache;
     }
 
     //#if FORGE
