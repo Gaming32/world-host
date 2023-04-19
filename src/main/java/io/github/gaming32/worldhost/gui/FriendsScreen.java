@@ -39,9 +39,11 @@ public class FriendsScreen extends WorldHostScreen {
 
         if (list == null) {
             list = addWidget(new FriendsList(width, height, 32, height - 64, 36));
+            //#if MC > 11601
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
+            //#endif
         } else {
             list.updateSize(width, height, 32, height - 64);
         }
@@ -143,18 +145,20 @@ public class FriendsScreen extends WorldHostScreen {
             );
         }
 
+        //#if MC > 11605
         @NotNull
         @Override
         public Component getNarration() {
             return Components.immutable(getName());
         }
+        //#endif
 
         @Override
         public void render(@NotNull PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            final ResourceLocation skinTexture = client.getSkinManager().getInsecureSkinLocation(profile);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.setShaderTexture(0, skinTexture);
+            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(client.getSkinManager(), profile);
+            WorldHost.positionTexShader();
+            WorldHost.color(1f, 1f, 1f, 1f);
+            WorldHost.texture(skinTexture);
             RenderSystem.enableBlend();
             GuiComponent.blit(matrices, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
             GuiComponent.blit(matrices, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
@@ -173,7 +177,7 @@ public class FriendsScreen extends WorldHostScreen {
                     if (yes) {
                         WorldHost.CONFIG.getFriends().remove(profile.getId());
                         WorldHost.saveConfig();
-                        list.updateEntries();
+                        FriendsScreen.this.list.updateEntries();
                     }
                     client.setScreen(FriendsScreen.this);
                 },

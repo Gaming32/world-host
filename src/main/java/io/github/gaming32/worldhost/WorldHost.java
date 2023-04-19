@@ -1,15 +1,17 @@
 package io.github.gaming32.worldhost;
 
 import com.mojang.authlib.GameProfile;
-import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
+import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.resources.SkinManager;
 import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.server.Services;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
 import org.quiltmc.json5.JsonReader;
@@ -20,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 //#if MC >= 11700
 import com.mojang.logging.LogUtils;
@@ -27,6 +31,16 @@ import org.slf4j.Logger;
 //#else
 //$$ import org.apache.logging.log4j.LogManager;
 //$$ import org.apache.logging.log4j.Logger;
+//#endif
+
+//#if MC >= 11902
+import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
+import net.minecraft.server.Services;
+//#else
+//$$ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+//$$ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+//$$ import net.minecraft.client.resources.DefaultPlayerSkin;
+//$$ import net.minecraft.world.entity.player.Player;
 //#endif
 
 //#if FABRIC
@@ -96,11 +110,26 @@ public class WorldHost
 
         //noinspection ResultOfMethodCallIgnored
         CACHE_DIR.mkdirs();
+        //#if MC >= 11902
         profileCache = Services.create(
             ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService(),
             CACHE_DIR
         ).profileCache();
+        //#else
+        //$$ profileCache = new GameProfileCache(
+        //$$     new YggdrasilAuthenticationService(
+        //$$         Minecraft.getInstance().getProxy()
+                //#if MC <= 11601
+                //$$ , UUID.randomUUID().toString()
+                //#endif
+        //$$     )
+        //$$         .createProfileRepository(),
+        //$$     new File(CACHE_DIR, "usercache.json")
+        //$$ );
+        //#endif
+        //#if MC > 11605
         profileCache.setExecutor(Util.backgroundExecutor());
+        //#endif
 
         new GatewayFinder(gateway -> {
             upnpGateway = gateway;
@@ -141,7 +170,12 @@ public class WorldHost
     }
 
     public static String getName(GameProfile profile) {
-        return StringUtils.getIfBlank(profile.getName(), () -> profile.getId().toString());
+        return getIfBlank(profile.getName(), () -> profile.getId().toString());
+    }
+
+    // From Apache Commons Lang StringUtils 3.10+
+    public static <T extends CharSequence> T getIfBlank(final T str, final Supplier<T> defaultSupplier) {
+        return StringUtils.isBlank(str) ? defaultSupplier == null ? null : defaultSupplier.get() : str;
     }
 
     public static GameProfileCache getProfileCache() {
@@ -157,4 +191,51 @@ public class WorldHost
     //$$     }
     //$$ }
     //#endif
+
+    public static ResourceLocation getInsecureSkinLocation(SkinManager skinManager, GameProfile gameProfile) {
+        //#if MC >= 11902
+        return skinManager.getInsecureSkinLocation(gameProfile);
+        //#else
+        //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
+        //$$     .get(MinecraftProfileTexture.Type.SKIN);
+        //$$ return texture != null
+        //$$     ? skinManager.registerTexture(texture, MinecraftProfileTexture.Type.SKIN)
+        //$$     : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
+        //#endif
+    }
+
+    public static void getMaybeAsync(GameProfileCache cache, String name, Consumer<Optional<GameProfile>> action) {
+        //#if MC > 11605
+        cache.getAsync(name, action);
+        //#else
+        //$$ action.accept(Optional.ofNullable(cache.get(name)));
+        //#endif
+    }
+
+    public static void positionTexShader() {
+        //#if MC > 11605
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        //#endif
+    }
+
+    public static void texture(ResourceLocation texture) {
+        //#if MC > 11605
+        RenderSystem.setShaderTexture(0, texture);
+        //#else
+        //$$ Minecraft.getInstance().getTextureManager().bind(texture);
+        //#endif
+    }
+
+    //#if MC <= 11605
+    //$$ @SuppressWarnings("deprecation")
+    //#endif
+    public static void color(float r, float g, float b, float a) {
+        RenderSystem.
+            //#if MC > 11605
+            setShaderColor
+            //#else
+            //$$ color4f
+            //#endif
+                (r, g, b, a);
+    }
 }

@@ -117,7 +117,7 @@ public class AddFriendScreen extends WorldHostScreen {
             usernameUpdate = false;
             final String username = usernameField.getValue();
             if (VALID_USERNAME.matcher(username).matches()) {
-                WorldHost.getProfileCache().getAsync(username, p -> {
+                WorldHost.getMaybeAsync(WorldHost.getProfileCache(), username, p -> {
                     if (p.isPresent()) {
                         assert minecraft != null;
                         friendProfile = minecraft.getMinecraftSessionService().fillProfileProperties(p.get(), false);
@@ -140,10 +140,10 @@ public class AddFriendScreen extends WorldHostScreen {
 
         if (friendProfile != null) {
             assert minecraft != null;
-            final ResourceLocation skinTexture = minecraft.getSkinManager().getInsecureSkinLocation(friendProfile);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.setShaderTexture(0, skinTexture);
+            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(minecraft.getSkinManager(), friendProfile);
+            WorldHost.positionTexShader();
+            WorldHost.color(1f, 1f, 1f, 1f);
+            WorldHost.texture(skinTexture);
             RenderSystem.enableBlend();
             GuiComponent.blit(matrices, width / 2 - 64, 148, 128, 128, 8, 8, 8, 8, 64, 64);
             GuiComponent.blit(matrices, width / 2 - 64, 148, 128, 128, 40, 8, 8, 8, 64, 64);
