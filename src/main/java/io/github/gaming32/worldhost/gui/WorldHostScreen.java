@@ -21,7 +21,11 @@ public abstract class WorldHostScreen extends Screen {
         super(component);
     }
 
-    public static void drawRightString(PoseStack poseStack, Font font, Component text, int x, int y, int color) {
+    public
+    //#if MC > 11601
+    static
+    //#endif
+    void drawRightString(PoseStack poseStack, Font font, Component text, int x, int y, int color) {
         drawString(poseStack, font, text, x - font.width(text), y, color);
     }
 

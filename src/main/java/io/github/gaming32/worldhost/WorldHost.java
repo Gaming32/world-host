@@ -29,21 +29,13 @@ import net.fabricmc.api.ClientModInitializer;
 
 //#if FORGE
 //$$ import net.minecraftforge.fml.common.Mod;
-//#if MC > 11202
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-//#else
-//$$ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-//#endif
 //#endif
 
 //#if FORGE
-//#if MC > 11202
 //$$ @Mod(WorldHost.MOD_ID)
-//#else
-//$$ @Mod(modid = WorldHost.MOD_ID, useMetadata = true, clientSideOnly = true)
-//#endif
 //#endif
 public class WorldHost
     //#if FABRIC
@@ -133,7 +125,6 @@ public class WorldHost
     }
 
     //#if FORGE
-    //#if MC > 11202
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     //$$ public static class ClientModEvents {
     //$$     @SubscribeEvent
@@ -141,11 +132,5 @@ public class WorldHost
     //$$         init();
     //$$     }
     //$$ }
-    //#else
-    //$$ @Mod.EventHandler
-    //$$ public void init(FMLInitializationEvent event) {
-    //$$     init();
-    //$$ }
-    //#endif
     //#endif
 }
