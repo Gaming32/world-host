@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 //#if MC >= 11904
 import net.minecraft.client.gui.components.Tooltip;
 //#else
-//$$ import io.github.gaming32.worldhost.gui.GuiUtil;
+//$$ import io.github.gaming32.worldhost.gui.WorldHostScreen;
 //#endif
 
 public class ButtonBuilder {
@@ -74,7 +74,7 @@ public class ButtonBuilder {
         //#if MC >= 11904
         builder.tooltip(Tooltip.create(tooltip));
         //#else
-        //$$ onTooltip = GuiUtil.onTooltip(tooltip);
+        //$$ onTooltip = WorldHostScreen.onTooltip(tooltip);
         //#endif
         return this;
     }

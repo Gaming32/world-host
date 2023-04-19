@@ -32,7 +32,7 @@ public class YesNoButton extends Button {
             //#if MC >= 11904
             DEFAULT_NARRATION
             //#else
-            //$$ tooltip != null ? GuiUtil.onTooltip(tooltip) : NO_TOOLTIP
+            //$$ tooltip != null ? WorldHostScreen.onTooltip(tooltip) : NO_TOOLTIP
             //#endif
         );
         this.onToggle = onToggle;

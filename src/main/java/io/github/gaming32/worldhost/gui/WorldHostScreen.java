@@ -2,9 +2,8 @@ package io.github.gaming32.worldhost.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-
-import static net.minecraft.client.gui.GuiComponent.drawString;
 
 //#if MC < 11904
 //$$ import net.minecraft.client.Minecraft;
@@ -13,7 +12,15 @@ import static net.minecraft.client.gui.GuiComponent.drawString;
 //$$ import java.util.function.Consumer;
 //#endif
 
-public class GuiUtil {
+//#if MC <= 11605
+//$$ import net.minecraft.client.gui.components.AbstractWidget;
+//#endif
+
+public abstract class WorldHostScreen extends Screen {
+    protected WorldHostScreen(Component component) {
+        super(component);
+    }
+
     public static void drawRightString(PoseStack poseStack, Font font, Component text, int x, int y, int color) {
         drawString(poseStack, font, text, x - font.width(text), y, color);
     }
@@ -27,11 +34,19 @@ public class GuiUtil {
     //$$             Minecraft.getInstance().screen.renderTooltip(arg2, tooltip, i, j);
     //$$         }
     //$$
-    //$$         @Override
-    //$$         public void narrateTooltip(@NotNull Consumer<Component> contents) {
-    //$$             contents.accept(tooltip);
-    //$$         }
+            //#if MC > 11605
+            //$$ @Override
+            //$$ public void narrateTooltip(@NotNull Consumer<Component> contents) {
+            //$$     contents.accept(tooltip);
+            //$$ }
+            //#endif
     //$$     };
+    //$$ }
+    //#endif
+
+    //#if MC <= 11605
+    //$$ protected <T extends AbstractWidget> T addRenderableWidget(T widget) {
+    //$$     return addButton(widget);
     //$$ }
     //#endif
 }

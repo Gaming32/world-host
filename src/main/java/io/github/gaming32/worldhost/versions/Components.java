@@ -1,10 +1,9 @@
 package io.github.gaming32.worldhost.versions;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-//#if MC >= 11902
-import net.minecraft.network.chat.Component;
-//#else
+//#if MC < 11902
 //$$ import net.minecraft.network.chat.TranslatableComponent;
 //#endif
 

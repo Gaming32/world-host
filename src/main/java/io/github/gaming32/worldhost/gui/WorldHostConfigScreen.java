@@ -4,15 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.gaming32.worldhost.gui.GuiUtil.drawRightString;
-
-public class WorldHostConfigScreen extends Screen {
+public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component TITLE = Components.translatable("world-host.config.title");
     private static final Component SERVER_IP = Components.translatable("world-host.config.serverIp");
     private static final Component SHOW_ONLINE_STATUS = Components.translatable("world-host.config.showOnlineStatus");
