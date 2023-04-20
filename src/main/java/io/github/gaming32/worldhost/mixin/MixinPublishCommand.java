@@ -41,13 +41,16 @@ public class MixinPublishCommand {
             //#if MC >= 11904
             cir.setReturnValue(Components.translatable(
             //#else
-            //$$ original.call((
+            //$$ original.call(
             //#endif
                 "world-host.lan_opened.friends",
                 new Object[] {
                     Components.copyOnClickText(port)
                 }
-            ));
+                //#if MC >= 11904
+                )
+                //#endif
+            );
             return;
         }
         final String externalIp = WorldHost.getExternalIp();
@@ -55,13 +58,16 @@ public class MixinPublishCommand {
         //#if MC >= 11904
         cir.setReturnValue(Components.translatable(
         //#else
-        //$$ original.call((
+        //$$ original.call(
         //#endif
             "world-host.lan_opened.no_friends",
             new Object[] {
                 Components.copyOnClickText(externalIp),
                 Components.copyOnClickText(port)
             }
-        ));
+            //#if MC >= 11904
+            )
+            //#endif
+        );
     }
 }

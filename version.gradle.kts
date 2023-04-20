@@ -47,6 +47,10 @@ dependencies {
 
     includeImplementation("org.quiltmc:quilt-json5:1.0.2")
 
+    val mixinExtras = "com.github.LlamaLad7.MixinExtras:mixinextras-${mcData.loader.name}:0.2.0-beta.6"
+    includeImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
+    annotationProcessor("com.github.LlamaLad7.MixinExtras:mixinextras-fabric:0.2.0-beta.6")
+
     if (mcData.isFabric) {
         when (mcData.version) {
             1_19_04 -> "6.1.0"
