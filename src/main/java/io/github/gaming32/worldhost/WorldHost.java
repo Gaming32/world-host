@@ -186,7 +186,7 @@ public class WorldHost
         }
     }
 
-    public static void tickHandler(Minecraft client) {
+    public static void tickHandler(Minecraft minecraft) {
         if (protoClient == null || protoClient.isClosed()) {
             protoClient = null;
             connectingFuture = null;

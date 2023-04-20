@@ -79,9 +79,9 @@ public class AddFriendScreen extends WorldHostScreen {
     }
 
     @Override
-    public void resize(@NotNull Minecraft client, int width, int height) {
+    public void resize(@NotNull Minecraft minecraft, int width, int height) {
         final String oldUsername = usernameField.getValue();
-        super.resize(client, width, height);
+        super.resize(minecraft, width, height);
         usernameField.setValue(oldUsername);
     }
 

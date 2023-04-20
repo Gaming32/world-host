@@ -133,14 +133,14 @@ public class FriendsScreen extends WorldHostScreen {
     }
 
     public class FriendsEntry extends ObjectSelectionList.Entry<FriendsEntry> {
-        private final Minecraft client;
+        private final Minecraft minecraft;
         private GameProfile profile;
 
         public FriendsEntry(GameProfile profile) {
-            client = Minecraft.getInstance();
+            minecraft = Minecraft.getInstance();
             this.profile = profile;
             Util.backgroundExecutor().execute(
-                () -> this.profile = client.getMinecraftSessionService().fillProfileProperties(profile, false)
+                () -> this.profile = minecraft.getMinecraftSessionService().fillProfileProperties(profile, false)
             );
         }
 
@@ -162,7 +162,7 @@ public class FriendsScreen extends WorldHostScreen {
             GuiComponent.blit(matrices, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
             GuiComponent.blit(matrices, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
             RenderSystem.disableBlend();
-            drawCenteredString(matrices, client.font, getName(), x + 110, y + 16 - client.font.lineHeight / 2, 0xffffff);
+            drawCenteredString(matrices, minecraft.font, getName(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
         }
 
         public String getName() {
@@ -170,15 +170,15 @@ public class FriendsScreen extends WorldHostScreen {
         }
 
         public void maybeRemove() {
-            assert client != null;
-            client.setScreen(new ConfirmScreen(
+            assert minecraft != null;
+            minecraft.setScreen(new ConfirmScreen(
                 yes -> {
                     if (yes) {
                         WorldHost.CONFIG.getFriends().remove(profile.getId());
                         WorldHost.saveConfig();
                         FriendsScreen.this.list.updateEntries();
                     }
-                    client.setScreen(FriendsScreen.this);
+                    minecraft.setScreen(FriendsScreen.this);
                 },
                 Components.translatable("world-host.friends.remove.title"),
                 Components.translatable("world-host.friends.remove.message")
