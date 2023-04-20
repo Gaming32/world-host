@@ -32,6 +32,10 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
+//#if MC < 11904
+//$$ import java.text.ParseException;
+//#endif
+
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
     private final Screen parent;
     private OnlineFriendsList list;
@@ -422,7 +426,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             //$$     try {
             //$$         favicon = ServerData.parseFavicon(favicon);
             //$$     } catch (ParseException e) {
-            //$$         WorldHostCommon.LOGGER.error("Invalid server icon", e);
+            //$$         WorldHost.LOGGER.error("Invalid server icon", e);
             //$$     }
             //$$ }
             //$$

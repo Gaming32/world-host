@@ -16,7 +16,12 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     private int bgX, bgWidth;
 
     public FriendsButton(int x, int y, int width, int height, OnPress onPress) {
-        super(x, y, width, height, Component.empty(), onPress, DEFAULT_NARRATION);
+        super(
+            x, y, width, height, Component.empty(), onPress
+            //#if MC >= 11904
+            , DEFAULT_NARRATION
+            //#endif
+        );
         registerForUpdates();
     }
 
@@ -30,11 +35,21 @@ public class FriendsButton extends Button implements FriendsListUpdate {
         bgWidth = textRenderer.width(" " + online + " ");
     }
 
+    //#if MC < 11904
+    //$$ private int getX() {
+    //$$     return x;
+    //$$ }
+    //$$
+    //$$ private int getY() {
+    //$$     return y;
+    //$$ }
+    //#endif
+
     @Override
     //#if MC >= 11904
     public void renderString(@NotNull PoseStack poseStack, @NotNull Font font, int i) {
     //#else
-    //$$ protected void renderBg(PoseStack matrices, Minecraft minecraft, int mouseX, int mouseY) {
+    //$$ protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
     //#endif
         final int baseX = getX() + bgX;
         final int baseY = getY() + (height - 12) / 2;
