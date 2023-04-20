@@ -81,11 +81,3 @@ loom {
 preprocess {
     patternAnnotation.set("io.github.gaming32.worldhost.versions.Pattern")
 }
-
-tasks.jar {
-    archiveBaseName.set(rootProject.name)
-}
-
-tasks.remapJar {
-    archiveBaseName.set(rootProject.name)
-}

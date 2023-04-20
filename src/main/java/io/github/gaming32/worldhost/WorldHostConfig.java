@@ -9,7 +9,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class WorldHostConfig {
-    private String serverIp = "world-host.jemnetworks.com:9646";
+    private String serverIp = "world-host.jemnetworks.com";
 
     private boolean showOnlineStatus = true;
 
@@ -35,6 +35,9 @@ public class WorldHostConfig {
                         continue;
                     }
                     serverIp = serverUri.substring(index + 3);
+                    if (serverIp.endsWith(":9646")) {
+                        serverIp = serverIp.substring(0, serverIp.length() - 5);
+                    }
                 }
                 case "showOnlineStatus" -> showOnlineStatus = reader.nextBoolean();
                 case "enableFriends" -> enableFriends = reader.nextBoolean();

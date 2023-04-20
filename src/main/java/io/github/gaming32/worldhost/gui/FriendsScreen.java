@@ -13,7 +13,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -53,9 +52,9 @@ public class FriendsScreen extends WorldHostScreen {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(this, ADD_FRIEND_TEXT, profile -> {
                     addFriend(profile);
-//                    if (WorldHost.wsClient != null) {
-//                        WorldHost.wsClient.friendRequest(profile.getId());
-//                    }
+                    if (WorldHost.protoClient != null) {
+                        WorldHost.protoClient.friendRequest(profile.getId());
+                    }
                 }));
             }).pos(width / 2 - 152, height - 52)
                 .build()

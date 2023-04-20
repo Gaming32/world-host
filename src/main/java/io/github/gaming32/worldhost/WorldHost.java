@@ -2,14 +2,23 @@ package io.github.gaming32.worldhost;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
+import io.github.gaming32.worldhost.versions.Components;
+import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.SkinManager;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
@@ -22,6 +31,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -96,6 +106,11 @@ public class WorldHost
 
     private static GameProfileCache profileCache;
 
+    public static boolean attemptingConnection;
+    public static ProtocolClient protoClient;
+    private static long lastReconnectTime;
+    private static Future<Void> connectingFuture;
+
     //#if FABRIC
     @Override
     public void onInitializeClient() {
@@ -130,6 +145,8 @@ public class WorldHost
         //#if MC > 11605
         profileCache.setExecutor(Util.backgroundExecutor());
         //#endif
+
+        reconnect(false, true);
 
         new GatewayFinder(gateway -> {
             upnpGateway = gateway;
@@ -167,6 +184,54 @@ public class WorldHost
         } catch (IOException e) {
             LOGGER.error("Failed to write {}.", CONFIG_FILE.getFileName(), e);
         }
+    }
+
+    public static void tickHandler(Minecraft client) {
+        if (protoClient == null || protoClient.isClosed()) {
+            protoClient = null;
+            connectingFuture = null;
+            final long time = Util.getMillis();
+            if (time - lastReconnectTime > 10_000) {
+                lastReconnectTime = time;
+                if (!attemptingConnection) {
+                    reconnect(CONFIG.isEnableReconnectionToasts(), false);
+                }
+            }
+        }
+        if (connectingFuture != null && connectingFuture.isDone()) {
+            connectingFuture = null;
+            LOGGER.info("Finished authenticating with WS server. Requesting friends list.");
+            ONLINE_FRIENDS.clear();
+            protoClient.listOnline(CONFIG.getFriends());
+            final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+            if (server != null && server.isPublished()) {
+                protoClient.publishedWorld(CONFIG.getFriends());
+            }
+        }
+    }
+
+    public static void reconnect(boolean successToast, boolean failureToast) {
+        if (protoClient != null) {
+            protoClient.close();
+            protoClient = null;
+        }
+        final UUID uuid = Minecraft.getInstance().getUser().getProfileId();
+        if (uuid == null) {
+            LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
+            if (failureToast) {
+                DeferredToastManager.show(
+                    SystemToast.SystemToastIds.TUTORIAL_HINT,
+                    Components.translatable("world-host.ws_connect.not_available"),
+                    null
+                );
+            }
+            return;
+        }
+        attemptingConnection = true;
+        LOGGER.info("Attempting to connect to WH server at {}", CONFIG.getServerIp());
+        protoClient = new ProtocolClient(CONFIG.getServerIp());
+        connectingFuture = protoClient.getConnectingFuture();
+        protoClient.authenticate(Minecraft.getInstance().getUser().getProfileId());
     }
 
     public static String getName(GameProfile profile) {
@@ -237,5 +302,44 @@ public class WorldHost
             //$$ color4f
             //#endif
                 (r, g, b, a);
+    }
+
+    public static boolean isFriend(UUID user) {
+        return CONFIG.isEnableFriends() && CONFIG.getFriends().contains(user);
+    }
+
+    public static void showProfileToast(UUID user, String title, Component description) {
+        Util.backgroundExecutor().execute(() -> {
+            final GameProfile profile = Minecraft.getInstance()
+                .getMinecraftSessionService()
+                .fillProfileProperties(new GameProfile(user, null), false);
+            Minecraft.getInstance().execute(() -> {
+                final ResourceLocation skinTexture = Minecraft.getInstance().getSkinManager().getInsecureSkinLocation(profile);
+                DeferredToastManager.show(
+                    SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                    (matrices, x, y) -> {
+                        RenderSystem.setShaderTexture(0, skinTexture);
+                        RenderSystem.enableBlend();
+                        GuiComponent.blit(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
+                        GuiComponent.blit(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
+                    },
+                    Components.translatable(title, getName(profile)),
+                    description
+                );
+            });
+        });
+    }
+
+    public static FriendlyByteBuf createByteBuf() {
+        return new FriendlyByteBuf(Unpooled.buffer());
+    }
+
+    public static ServerStatus parseServerStatus(FriendlyByteBuf buf) {
+        return new ClientboundStatusResponsePacket(buf)
+            //#if MC >= 11904
+            .status();
+            //#else
+            //$$ .getStatus();
+            //#endif
     }
 }

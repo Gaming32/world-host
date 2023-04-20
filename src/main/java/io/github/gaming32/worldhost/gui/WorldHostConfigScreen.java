@@ -21,11 +21,13 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     private final Screen parent;
 
     private final String oldServerIp;
+    private final boolean oldEnableFriends;
     private EditBox serverIpBox;
 
     public WorldHostConfigScreen(Screen parent) {
         super(TITLE);
         oldServerIp = WorldHost.CONFIG.getServerIp();
+        oldEnableFriends = WorldHost.CONFIG.isEnableFriends();
         this.parent = parent;
     }
 
@@ -102,12 +104,18 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     }
 
     @Override
-    public void onClose() {
-        super.onClose();
+    public void removed() {
         if (!serverIpBox.getValue().equals(oldServerIp)) {
             WorldHost.CONFIG.setServerIp(serverIpBox.getValue());
             WorldHost.saveConfig();
-            // TODO: Perform reconnect
+            WorldHost.reconnect(true, true);
+        } else if (
+            oldEnableFriends &&
+                !WorldHost.CONFIG.isEnableFriends() &&
+                WorldHost.protoClient != null &&
+                !WorldHost.protoClient.isClosed()
+        ) {
+            WorldHost.protoClient.closedWorld(WorldHost.CONFIG.getFriends());
         }
     }
 }

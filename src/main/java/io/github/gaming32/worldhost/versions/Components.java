@@ -18,6 +18,14 @@ public class Components {
         //#endif
     }
 
+    public static MutableComponent translatable(String key, Object... args) {
+        //#if MC >= 11901
+        return Component.translatable(key, args);
+        //#else
+        //$$ return new TranslatableComponent(key, args);
+        //#endif
+    }
+
     public static Component immutable(String text) {
         return Component.nullToEmpty(text);
     }
