@@ -4,10 +4,19 @@
   "package": "io.github.gaming32.worldhost.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
+    "MixinCommands",
+    "MixinPublishCommand"
   ],
   "client": [
     "MinecraftAccessor",
-    "MixinMinecraft"
+    "MixinIntegratedServer",
+    "MixinJoinMultiplayerScreen",
+    "MixinMinecraft",
+    "MixinPauseScreen",
+    "MixinShareToLanScreen",
+    "MixinSystemToast",
+    "MixinTitleScreen",
+    "ServerStatusPingerAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,7 +1,12 @@
 package io.github.gaming32.worldhost.versions;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
+
+import static net.minecraft.network.chat.Component.literal;
 
 //#if MC < 11902
 //$$ import net.minecraft.network.chat.TranslatableComponent;
@@ -28,5 +33,21 @@ public class Components {
 
     public static Component immutable(String text) {
         return Component.nullToEmpty(text);
+    }
+
+    public static MutableComponent wrapInSquareBrackets(Component toWrap) {
+        return translatable("chat.square_brackets", toWrap);
+    }
+
+    public static MutableComponent copyOnClickText(Object obj) {
+        final String text = obj.toString();
+        return wrapInSquareBrackets(
+            literal(text).withStyle(style -> style
+                .withColor(ChatFormatting.GREEN)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, text))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, translatable("chat.copy.click")))
+                .withInsertion(text)
+            )
+        );
     }
 }

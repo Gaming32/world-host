@@ -2,6 +2,8 @@ package io.github.gaming32.worldhost;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.CommandDispatcher;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
@@ -16,6 +18,7 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
@@ -23,6 +26,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.json5.JsonReader;
 import org.quiltmc.json5.JsonWriter;
 import java.io.File;
@@ -34,6 +38,8 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+
+import static net.minecraft.commands.Commands.literal;
 
 //#if MC >= 11700
 import com.mojang.logging.LogUtils;
@@ -210,6 +216,29 @@ public class WorldHost
         }
     }
 
+    public static void commandRegistrationHandler(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(literal("worldhost")
+            .then(literal("ip")
+                .requires(s -> s.getServer().isPublished())
+                .executes(ctx -> {
+                    final String externalIp = getExternalIp();
+                    if (externalIp == null) {
+                        ctx.getSource().sendFailure(Component.translatable("world-host.worldhost.ip.no_server_support"));
+                        return 0;
+                    }
+                    ctx.getSource().sendSuccess(
+                        Components.translatable(
+                            "world-host.worldhost.ip.success",
+                            Components.copyOnClickText(externalIp)
+                        ),
+                        false
+                    );
+                    return Command.SINGLE_SUCCESS;
+                })
+            )
+        );
+    }
+
     public static void reconnect(boolean successToast, boolean failureToast) {
         if (protoClient != null) {
             protoClient.close();
@@ -343,6 +372,25 @@ public class WorldHost
         //$$ }
         //$$ return packet.getStatus();
         //#endif
+    }
+
+    @Nullable
+    public static String getExternalIp() {
+        if (protoClient.getBaseIp().isEmpty()) {
+            return null;
+        }
+        String ip = "connect0000-" + protoClient.getConnectionId() + '.' + protoClient.getBaseIp();
+        if (protoClient.getBasePort() != 25565) {
+            ip += ':' + protoClient.getBasePort();
+        }
+        return ip;
+    }
+
+    public static void pingFriends() {
+        ONLINE_FRIEND_PINGS.clear();
+        if (protoClient != null) {
+            protoClient.queryRequest(CONFIG.getFriends());
+        }
     }
 
     //#if FORGE
