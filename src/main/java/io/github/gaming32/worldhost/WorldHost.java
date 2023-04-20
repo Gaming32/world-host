@@ -215,7 +215,7 @@ public class WorldHost
             protoClient.close();
             protoClient = null;
         }
-        final UUID uuid = Minecraft.getInstance().getUser().getProfileId();
+        final UUID uuid = Minecraft.getInstance().getUser().getGameProfile().getId();
         if (uuid == null) {
             LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
             if (failureToast) {
@@ -231,7 +231,7 @@ public class WorldHost
         LOGGER.info("Attempting to connect to WH server at {}", CONFIG.getServerIp());
         protoClient = new ProtocolClient(CONFIG.getServerIp());
         connectingFuture = protoClient.getConnectingFuture();
-        protoClient.authenticate(Minecraft.getInstance().getUser().getProfileId());
+        protoClient.authenticate(uuid);
     }
 
     public static String getName(GameProfile profile) {
@@ -247,17 +247,8 @@ public class WorldHost
         return profileCache;
     }
 
-    //#if FORGE
-    //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    //$$ public static class ClientModEvents {
-    //$$     @SubscribeEvent
-    //$$     public static void onClientSetup(FMLClientSetupEvent event) {
-    //$$         init();
-    //$$     }
-    //$$ }
-    //#endif
-
-    public static ResourceLocation getInsecureSkinLocation(SkinManager skinManager, GameProfile gameProfile) {
+    public static ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
+        final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
         //#if MC >= 11902
         return skinManager.getInsecureSkinLocation(gameProfile);
         //#else
@@ -314,11 +305,11 @@ public class WorldHost
                 .getMinecraftSessionService()
                 .fillProfileProperties(new GameProfile(user, null), false);
             Minecraft.getInstance().execute(() -> {
-                final ResourceLocation skinTexture = Minecraft.getInstance().getSkinManager().getInsecureSkinLocation(profile);
+                final ResourceLocation skinTexture = getInsecureSkinLocation(profile);
                 DeferredToastManager.show(
-                    SystemToast.SystemToastIds.PERIODIC_NOTIFICATION,
+                    SystemToast.SystemToastIds.WORLD_ACCESS_FAILURE,
                     (matrices, x, y) -> {
-                        RenderSystem.setShaderTexture(0, skinTexture);
+                        texture(skinTexture);
                         RenderSystem.enableBlend();
                         GuiComponent.blit(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
                         GuiComponent.blit(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
@@ -335,11 +326,32 @@ public class WorldHost
     }
 
     public static ServerStatus parseServerStatus(FriendlyByteBuf buf) {
+        //#if MC > 11605
         return new ClientboundStatusResponsePacket(buf)
             //#if MC >= 11904
             .status();
             //#else
             //$$ .getStatus();
             //#endif
+        //#else
+        //$$ final ClientboundStatusResponsePacket packet = new ClientboundStatusResponsePacket();
+        //$$ try {
+        //$$     packet.read(buf);
+        //$$ } catch (IOException e) {
+        //$$     LOGGER.error("Failed to parse server status", e);
+        //$$     return new ServerStatus();
+        //$$ }
+        //$$ return packet.getStatus();
+        //#endif
     }
+
+    //#if FORGE
+    //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    //$$ public static class ClientModEvents {
+    //$$     @SubscribeEvent
+    //$$     public static void onClientSetup(FMLClientSetupEvent event) {
+    //$$         init();
+    //$$     }
+    //$$ }
+    //#endif
 }

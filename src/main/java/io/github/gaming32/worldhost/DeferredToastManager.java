@@ -1,9 +1,9 @@
 package io.github.gaming32.worldhost;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.toasts.SystemToast;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +43,7 @@ public class DeferredToastManager {
             queuedCustomIcon = toast.icon;
             SystemToast.addOrUpdate(
                 Minecraft.getInstance().getToasts(), toast.type, toast.title,
-                Objects.requireNonNullElse(toast.description, CommonComponents.EMPTY)
+                Objects.requireNonNullElse(toast.description, Components.EMPTY)
             );
         });
     }

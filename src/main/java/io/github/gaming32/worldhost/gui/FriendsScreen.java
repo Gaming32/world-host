@@ -154,7 +154,7 @@ public class FriendsScreen extends WorldHostScreen {
 
         @Override
         public void render(@NotNull PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(client.getSkinManager(), profile);
+            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(profile);
             WorldHost.positionTexShader();
             WorldHost.color(1f, 1f, 1f, 1f);
             WorldHost.texture(skinTexture);

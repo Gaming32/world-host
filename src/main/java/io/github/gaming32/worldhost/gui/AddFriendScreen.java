@@ -11,7 +11,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -140,7 +139,7 @@ public class AddFriendScreen extends WorldHostScreen {
 
         if (friendProfile != null) {
             assert minecraft != null;
-            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(minecraft.getSkinManager(), friendProfile);
+            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(friendProfile);
             WorldHost.positionTexShader();
             WorldHost.color(1f, 1f, 1f, 1f);
             WorldHost.texture(skinTexture);

@@ -7,7 +7,6 @@ import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -18,6 +17,10 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+
+//#if MC > 11605
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+//#endif
 
 // Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostS2CMessage.kt
 public sealed interface WorldHostS2CMessage {
@@ -44,10 +47,15 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             Minecraft.getInstance().execute(() -> {
-                final Minecraft mcClient = Minecraft.getInstance();
-                assert mcClient.screen != null;
+                final Minecraft minecraft = Minecraft.getInstance();
+                assert minecraft.screen != null;
+                //#if MC > 11605
                 //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
-                ConnectScreen.startConnecting(mcClient.screen, mcClient, new ServerAddress(host, port), null);
+                ConnectScreen.startConnecting(minecraft.screen, minecraft, new ServerAddress(host, port), null);
+                //#else
+                //$$ minecraft.setCurrentServer(null);
+                //$$ minecraft.setScreen(new ConnectScreen(minecraft.screen, minecraft, host, port));
+                //#endif
             });
         }
     }
