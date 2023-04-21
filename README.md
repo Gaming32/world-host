@@ -1,4 +1,4 @@
-<img alt="WH icon" width="280" align="right" src="https://raw.githubusercontent.com/Gaming32/world-host/main/common/src/main/resources/assets/world-host-common/icon.png">
+<a href="https://modrinth.com/mod/world-host"><img alt="WH icon" width="280" align="right" src="https://raw.githubusercontent.com/Gaming32/world-host/main/common/src/main/resources/assets/world-host-common/icon.png"></a>
 
 # World Host
 
