@@ -6,11 +6,14 @@ import io.github.gaming32.worldhost.mixin.PlainTextButtonAccessor;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
+
+//#if MC > 11605
+import net.minecraft.client.gui.components.PlainTextButton;
+//#endif
 
 public class OnlineStatusButton extends PlainTextButton {
     private final int rightX;
@@ -23,7 +26,13 @@ public class OnlineStatusButton extends PlainTextButton {
         this.rightX = rightX;
         this.font = font;
         setWidth(font.width(getMessage()));
-        setX(rightX - getWidth());
+        //#if MC >= 11904
+        setX(
+        //#else
+        //$$ x = (
+        //#endif
+            rightX - getWidth()
+        );
     }
 
     private static Component generateStatus() {
@@ -33,7 +42,13 @@ public class OnlineStatusButton extends PlainTextButton {
     }
 
     @Override
-    public void renderWidget(@NotNull PoseStack poseStack, int i, int j, float f) {
+    public void
+    //#if MC >= 11904
+    renderWidget
+    //#else
+    //$$ renderButton
+    //#endif
+        (@NotNull PoseStack poseStack, int i, int j, float f) {
         //noinspection DoubleNegation
         if ((WorldHost.protoClient != null) != wasOnline) {
             wasOnline = WorldHost.protoClient != null;
@@ -41,15 +56,22 @@ public class OnlineStatusButton extends PlainTextButton {
             final Component message = generateStatus();
             setMessage(message);
             accessor.setPTBMessage(message);
-            accessor.setUnderlinedMessage(ComponentUtils.mergeStyles(message.copy(), Style.EMPTY.withUnderlined(true)));
+            accessor.setUnderlinedMessage(ComponentUtils.mergeStyles(message.copy(), Style.EMPTY.applyFormat(ChatFormatting.UNDERLINE)));
             setWidth(font.width(message));
-            setX(rightX - getWidth());
+            //#if MC >= 11904
+            setX(
+            //#else
+            //$$ x = (
+            //#endif
+                rightX - getWidth()
+            );
         }
-        super.renderWidget(poseStack, i, j, f);
-    }
-
-    @Override
-    public void setY(int i) {
-        // Dirty hack to avoid Mod Menu moving buttons around
+        super.
+            //#if MC >= 11904
+            renderWidget
+            //#else
+            //$$ renderButton
+            //#endif
+                (poseStack, i, j, f);
     }
 }

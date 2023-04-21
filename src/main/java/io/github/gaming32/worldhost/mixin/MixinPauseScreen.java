@@ -12,6 +12,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//#if MC <= 11605
+//$$ import net.minecraft.client.gui.components.AbstractWidget;
+//#endif
+
 @Mixin(PauseScreen.class)
 public class MixinPauseScreen extends Screen {
     protected MixinPauseScreen(Component component) {
