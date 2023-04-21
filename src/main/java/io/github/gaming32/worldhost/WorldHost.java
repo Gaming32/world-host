@@ -167,6 +167,7 @@ public class WorldHost
                 LOGGER.info("Old {} still exists. Maybe consider removing it?", OLD_CONFIG_FILE.getFileName());
             }
         } catch (NoSuchFileException e) {
+            LOGGER.info("{} not found. Trying to load old {}.", CONFIG_FILE.getFileName(), OLD_CONFIG_FILE.getFileName());
             try (JsonReader reader = JsonReader.json(OLD_CONFIG_FILE)) {
                 CONFIG.read(reader);
                 LOGGER.info(
@@ -174,7 +175,7 @@ public class WorldHost
                     OLD_CONFIG_FILE.getFileName(), CONFIG_FILE.getFileName(), OLD_CONFIG_FILE.getFileName()
                 );
             } catch (NoSuchFileException e1) {
-                LOGGER.info("Old {} not found. Writing default.", CONFIG_FILE.getFileName());
+                LOGGER.info("Old {} not found. Writing default config.", OLD_CONFIG_FILE.getFileName());
             } catch (IOException e1) {
                 LOGGER.error("Failed to load old {}.", OLD_CONFIG_FILE.getFileName(), e1);
             }
