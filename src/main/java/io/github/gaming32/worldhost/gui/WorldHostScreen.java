@@ -11,6 +11,8 @@ import net.minecraft.network.chat.Component;
 //$$ import net.minecraft.client.Minecraft;
 //$$ import net.minecraft.client.gui.components.Button;
 //$$ import org.jetbrains.annotations.NotNull;
+//$$
+//$$ import java.util.List;
 //$$ import java.util.function.Consumer;
 //#endif
 
@@ -33,11 +35,13 @@ public abstract class WorldHostScreen extends Screen {
 
     //#if MC < 11904
     //$$ public static Button.OnTooltip onTooltip(Component tooltip) {
+    //$$     // 170 chars matches 1.19.4+
+    //$$     final var lines = Minecraft.getInstance().font.split(tooltip, 170);
     //$$     return new Button.OnTooltip() {
     //$$         @Override
     //$$         public void onTooltip(@NotNull Button arg, @NotNull PoseStack arg2, int i, int j) {
     //$$             assert Minecraft.getInstance().screen != null;
-    //$$             Minecraft.getInstance().screen.renderTooltip(arg2, tooltip, i, j);
+    //$$             Minecraft.getInstance().screen.renderTooltip(arg2, lines, i, j);
     //$$         }
     //$$
             //#if MC > 11605

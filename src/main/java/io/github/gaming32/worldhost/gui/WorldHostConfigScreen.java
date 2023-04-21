@@ -44,6 +44,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
         addRenderableWidget(new YesNoButton(
             width / 2 + 5, yOffset + 24, 150, 20,
+            Components.translatable("world-host.config.showOnlineStatus.tooltip"),
             button -> {
                 WorldHost.CONFIG.setShowOnlineStatus(button.isToggled());
                 WorldHost.saveConfig();
@@ -52,6 +53,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
         addRenderableWidget(new YesNoButton(
             width / 2 + 5, yOffset + 48, 150, 20,
+            Components.translatable("world-host.config.enableFriends.tooltip"),
             button -> {
                 WorldHost.CONFIG.setEnableFriends(button.isToggled());
                 WorldHost.saveConfig();

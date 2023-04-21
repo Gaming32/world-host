@@ -22,11 +22,11 @@ public class YesNoButton extends Button {
 
     private boolean toggled;
 
-    protected YesNoButton(int x, int y, int width, int height, Consumer<YesNoButton> onToggle) {
+    public YesNoButton(int x, int y, int width, int height, Consumer<YesNoButton> onToggle) {
         this(x, y, width, height, null, onToggle);
     }
 
-    protected YesNoButton(int x, int y, int width, int height, @Nullable Component tooltip, Consumer<YesNoButton> onToggle) {
+    public YesNoButton(int x, int y, int width, int height, @Nullable Component tooltip, Consumer<YesNoButton> onToggle) {
         super(
             x, y, width, height, Components.EMPTY, YesNoButton::onPress,
             //#if MC >= 11904

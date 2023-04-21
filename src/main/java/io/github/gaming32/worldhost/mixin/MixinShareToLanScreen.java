@@ -12,6 +12,8 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 //$$ import io.github.gaming32.worldhost.versions.Components;
 //$$ import net.minecraft.network.chat.MutableComponent;
 //$$ import org.spongepowered.asm.mixin.injection.At;
+//$$ import org.spongepowered.asm.mixin.injection.ModifyArgs;
+//$$ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 //#endif
 
 @Mixin(ShareToLanScreen.class)
@@ -27,67 +29,44 @@ public class MixinShareToLanScreen {
     }
 
     //#if MC < 11904
-    //$$ @WrapOperation(
-        //#if MC < 11802
-        //$$ method = "lambda$init$0",
-        //#else
-        //$$ method = "lambda$init$2",
-        //#endif
+    //$$ @ModifyArgs(
+    //$$     method =
+            //#if MC < 11802
+            //$$ "lambda$init$0",
+            //#else
+            //$$ "lambda$init$2",
+            //#endif
     //$$     at = @At(
     //$$         value = "INVOKE",
-            //#if MC >= 11902
-            //$$ target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;",
-            //#else
-            //$$ target = "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V",
-            //#endif
-    //$$         ordinal = 0
+    //$$         target =
+                //#if MC >= 11902
+                //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
+                //#else
+                //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"
+                //#endif
     //$$     )
     //$$ )
-    //$$ private
-    //#if MC >= 11902
-    //$$ MutableComponent
-    //#else
-    //$$ void
-    //#endif
-    //$$ changeSuccessMessage(
-    //$$     String key,
-    //$$     Object[] args,
-    //$$     Operation<
-            //#if MC >= 11902
-            //$$ MutableComponent
-            //#else
-            //$$ Void
-            //#endif
-    //$$     > original
-    //$$ ) {
+    //$$ private void changeSuccessMessage(Args args) {
+    //$$     final Object[] tArgs = args.get(1);
+    //$$     final Object port = tArgs[0];
     //$$     if (WorldHost.CONFIG.isEnableFriends()) {
-            //#if MC >= 11902
-            //$$ return
-            //#endif
-    //$$             original.call(
-    //$$                 "world-host.lan_opened.friends",
-    //$$                 new Object[] {Components.copyOnClickText(args[0])}
-    //$$             );
-    //$$     } else {
-    //$$         final String externalIp = WorldHost.getExternalIp();
-    //$$         if (externalIp == null) {
-                //#if MC >= 11902
-                //$$ return
-                //#endif
-    //$$                 original.call(key, args);
-    //$$         } else {
-                //#if MC >= 11902
-                //$$ return
-                //#endif
-    //$$                 original.call(
-    //$$                 "world-host.lan_opened.no_friends",
-    //$$                     new Object[] {
-    //$$                         Components.copyOnClickText(externalIp),
-    //$$                         Components.copyOnClickText(args[0])
-    //$$                     }
-    //$$                 );
-    //$$         }
+    //$$         args.setAll(
+    //$$             "world-host.lan_opened.friends",
+    //$$             new Object[] {
+    //$$                 Components.copyOnClickText(port)
+    //$$             }
+    //$$         );
+    //$$         return;
     //$$     }
+    //$$     final String externalIp = WorldHost.getExternalIp();
+    //$$     if (externalIp == null) return;
+    //$$     args.setAll(
+    //$$         "world-host.lan_opened.no_friends",
+    //$$         new Object[] {
+    //$$             Components.copyOnClickText(externalIp),
+    //$$             Components.copyOnClickText(port)
+    //$$         }
+    //$$     );
     //$$ }
     //#endif
 }
