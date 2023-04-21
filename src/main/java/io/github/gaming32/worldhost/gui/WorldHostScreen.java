@@ -35,7 +35,7 @@ public abstract class WorldHostScreen extends Screen {
 
     //#if MC < 11904
     //$$ public static Button.OnTooltip onTooltip(Component tooltip) {
-    //$$     // 170 chars matches 1.19.4+
+    //$$     // 170 matches 1.19.4+
     //$$     final var lines = Minecraft.getInstance().font.split(tooltip, 170);
     //$$     return new Button.OnTooltip() {
     //$$         @Override
@@ -64,7 +64,7 @@ public abstract class WorldHostScreen extends Screen {
         return new ButtonBuilder(message, onPress);
     }
 
-    public static void sendRepeatEvents(boolean sendRepeatEvents) {
+    public static void sendRepeatEvents(@SuppressWarnings("unused") boolean sendRepeatEvents) {
         //#if MC < 11904
         //$$ Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(sendRepeatEvents);
         //#endif

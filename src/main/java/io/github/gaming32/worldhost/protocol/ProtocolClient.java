@@ -42,6 +42,14 @@ public class ProtocolClient implements AutoCloseable {
                 dos.flush();
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
+                if (socket != null) {
+                    try {
+                        socket.close();
+                    } catch (IOException e1) {
+                        WorldHost.LOGGER.error("Failed to close socket", e1);
+                    }
+                    socket = null;
+                }
             }
 
             if (socket == null) {
@@ -161,10 +169,6 @@ public class ProtocolClient implements AutoCloseable {
 
     public void requestJoin(UUID friend) {
         enqueue(new WorldHostC2SMessage.RequestJoin(friend));
-    }
-
-    public void proxyS2CPacket(long connectionId, byte[] data) {
-        enqueue(new WorldHostC2SMessage.ProxyS2CPacket(connectionId, data));
     }
 
     public void proxyDisconnect(long connectionId) {
