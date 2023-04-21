@@ -1,4 +1,4 @@
-<img alt="WH icon" width="250" align="right" src="https://raw.githubusercontent.com/Gaming32/world-host/main/common/src/main/resources/assets/world-host-common/icon.png">
+<img alt="WH icon" width="280" align="right" src="https://raw.githubusercontent.com/Gaming32/world-host/main/common/src/main/resources/assets/world-host-common/icon.png">
 
 # World Host
 
@@ -7,8 +7,10 @@
 
 [![Server uptime](https://img.shields.io/uptimerobot/ratio/m793898716-1dc62bc23f759a549159ccb0?label=Server%20uptime&color=blue)](https://stats.uptimerobot.com/KmL5JhDV0X)
 
-Host your singleplayer worlds **without having to run a server or setup port forwarding!** <br />
-In the future, we also plan to support Bedrock Edition clients through the use of Geyser.
+Host your singleplayer worlds **without having to run a server**
+<br /> **or setup port forwarding!** <br />
+In the future, we also plan to support Bedrock Edition clients<br />
+through the use of Geyser.
 
 ## What if my friend doesn't have the mod installed?
 
