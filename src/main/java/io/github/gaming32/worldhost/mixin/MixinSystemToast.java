@@ -6,7 +6,6 @@ import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -20,6 +19,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
+//#if MC > 11601
+import net.minecraft.util.FormattedCharSequence;
+//#else
+//$$ import net.minecraft.network.chat.FormattedText;
+//#endif
+
 @Mixin(SystemToast.class)
 public class MixinSystemToast {
     @Shadow
@@ -32,7 +37,17 @@ public class MixinSystemToast {
         method = "<init>(Lnet/minecraft/client/gui/components/toasts/SystemToast$SystemToastIds;Lnet/minecraft/network/chat/Component;Ljava/util/List;I)V",
         at = @At("TAIL")
     )
-    private void customIconSupport(SystemToast.SystemToastIds type, Component title, List<FormattedCharSequence> lines, int width, CallbackInfo ci) {
+    private void customIconSupport(
+        SystemToast.SystemToastIds type, Component title,
+        List<
+            //#if MC > 11601
+            FormattedCharSequence
+            //#else
+            //$$ FormattedText
+            //#endif
+        > lines,
+        int width, CallbackInfo ci
+    ) {
         customIcon = DeferredToastManager.queuedCustomIcon;
         DeferredToastManager.queuedCustomIcon = null;
         if (customIcon != null) {

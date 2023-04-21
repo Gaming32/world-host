@@ -28,31 +28,66 @@ public class MixinShareToLanScreen {
 
     //#if MC < 11904
     //$$ @WrapOperation(
-    //$$     method = "method_19851",
+        //#if MC < 11802
+        //$$ method = "lambda$init$0",
+        //#else
+        //$$ method = "lambda$init$2",
+        //#endif
     //$$     at = @At(
     //$$         value = "INVOKE",
-    //$$         target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;",
+            //#if MC >= 11902
+            //$$ target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;",
+            //#else
+            //$$ target = "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V",
+            //#endif
     //$$         ordinal = 0
     //$$     )
     //$$ )
-    //$$ private MutableComponent changeSuccessMessage(String key, Object[] args, Operation<MutableComponent> original) {
+    //$$ private
+    //#if MC >= 11902
+    //$$ MutableComponent
+    //#else
+    //$$ void
+    //#endif
+    //$$ changeSuccessMessage(
+    //$$     String key,
+    //$$     Object[] args,
+    //$$     Operation<
+            //#if MC >= 11902
+            //$$ MutableComponent
+            //#else
+            //$$ Void
+            //#endif
+    //$$     > original
+    //$$ ) {
     //$$     if (WorldHost.CONFIG.isEnableFriends()) {
-    //$$         return original.call(
-    //$$             "world-host.lan_opened.friends",
-    //$$             new Object[] {Components.copyOnClickText(args[0])}
-    //$$         );
-    //$$     }
-    //$$     final String externalIp = WorldHost.getExternalIp();
-    //$$     if (externalIp == null) {
-    //$$         return original.call(key, args);
-    //$$     }
-    //$$     return original.call(
-    //$$         "world-host.lan_opened.no_friends",
-    //$$         new Object[] {
-    //$$             Components.copyOnClickText(externalIp),
-    //$$             Components.copyOnClickText(args[0])
+            //#if MC >= 11902
+            //$$ return
+            //#endif
+    //$$             original.call(
+    //$$                 "world-host.lan_opened.friends",
+    //$$                 new Object[] {Components.copyOnClickText(args[0])}
+    //$$             );
+    //$$     } else {
+    //$$         final String externalIp = WorldHost.getExternalIp();
+    //$$         if (externalIp == null) {
+                //#if MC >= 11902
+                //$$ return
+                //#endif
+    //$$                 original.call(key, args);
+    //$$         } else {
+                //#if MC >= 11902
+                //$$ return
+                //#endif
+    //$$                 original.call(
+    //$$                 "world-host.lan_opened.no_friends",
+    //$$                     new Object[] {
+    //$$                         Components.copyOnClickText(externalIp),
+    //$$                         Components.copyOnClickText(args[0])
+    //$$                     }
+    //$$                 );
     //$$         }
-    //$$     );
+    //$$     }
     //$$ }
     //#endif
 }

@@ -6,14 +6,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 
-import static net.minecraft.network.chat.Component.literal;
-
 //#if MC < 11902
+//$$ import net.minecraft.network.chat.TextComponent;
 //$$ import net.minecraft.network.chat.TranslatableComponent;
 //#endif
 
 public class Components {
     public static final Component EMPTY = immutable("");
+
+    public static MutableComponent literal(String text) {
+        //#if MC >= 11901
+        return Component.literal(text);
+        //#else
+        //$$ return new TextComponent(text);
+        //#endif
+    }
 
     public static MutableComponent translatable(String key) {
         //#if MC >= 11901
@@ -33,6 +40,10 @@ public class Components {
 
     public static Component immutable(String text) {
         return Component.nullToEmpty(text);
+    }
+
+    public static MutableComponent empty() {
+        return EMPTY.copy();
     }
 
     public static MutableComponent wrapInSquareBrackets(Component toWrap) {

@@ -24,17 +24,12 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
-
-//#if MC < 11904
-//$$ import java.text.ParseException;
-//#endif
 
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
     private final Screen parent;
@@ -140,7 +135,12 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         drawCenteredString(matrices, font, title, width / 2, 15, 0xffffff);
         super.render(matrices, mouseX, mouseY, delta);
         if (tooltip != null) {
-            renderComponentTooltip(matrices, tooltip, mouseX, mouseY);
+            //#if MC > 11601
+            renderComponentTooltip
+            //#else
+            //$$ renderTooltip
+            //#endif
+                (matrices, tooltip, mouseX, mouseY);
         }
     }
 
@@ -248,11 +248,13 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             iconTextureId = new ResourceLocation(WorldHost.MOD_ID, "servers/" + friendUuid + "/icon");
         }
 
+        //#if MC >= 11802
         @NotNull
         @Override
         public Component getNarration() {
             return Components.translatable("narrator.select", getName());
         }
+        //#endif
 
         @Override
         public void render(@NotNull PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
@@ -261,7 +263,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             final boolean incompatibleVersion = serverInfo.protocol != SharedConstants.getCurrentVersion().getProtocolVersion();
             minecraft.font.draw(matrices, serverInfo.name, x + 35, y + 1, 0xffffff);
 
-            final List<FormattedCharSequence> lines = minecraft.font.split(serverInfo.motd, entryWidth - 34);
+            final var lines = minecraft.font.split(serverInfo.motd, entryWidth - 34);
             for (int i = 0; i < Math.min(lines.size(), 2); i++) {
                 minecraft.font.draw(matrices, lines.get(i), x + 35, y + 12 + 9 * i, 0x808080);
             }
@@ -326,7 +328,13 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 tooltip = serverInfo.playerList;
             }
 
-            if (this.minecraft.options.touchscreen().get() || hovered) {
+            if (
+                minecraft.options.touchscreen
+                    //#if MC >= 11900
+                    ().get()
+                    //#endif
+                    || hovered
+            ) {
                 WorldHost.texture(new ResourceLocation("textures/gui/server_selection.png"));
                 GuiComponent.fill(matrices, x, y, x + 32, y + 32, 0xa0909090);
                 WorldHost.positionTexShader();
@@ -343,18 +351,18 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             serverInfo.name = getName();
             final ServerStatus metadata = WorldHost.ONLINE_FRIEND_PINGS.get(profile.getId());
             if (metadata == null) {
-                serverInfo.status = CommonComponents.EMPTY;
-                serverInfo.motd = CommonComponents.EMPTY;
+                serverInfo.status = Components.EMPTY;
+                serverInfo.motd = Components.EMPTY;
                 return;
             }
 
             //#if MC >= 11904
             serverInfo.motd = metadata.description();
             metadata.version().ifPresentOrElse(version -> {
-                serverInfo.version = Component.literal(version.name());
+                serverInfo.version = Components.literal(version.name());
                 serverInfo.protocol = version.protocol();
             }, () -> {
-                serverInfo.version = Component.translatable("multiplayer.status.old");
+                serverInfo.version = Components.translatable("multiplayer.status.old");
                 serverInfo.protocol = 0;
             });
             metadata.players().ifPresentOrElse(players -> {
@@ -364,11 +372,11 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                     final List<Component> playerList = new ArrayList<>(players.sample().size());
 
                     for(GameProfile gameProfile : players.sample()) {
-                        playerList.add(Component.literal(gameProfile.getName()));
+                        playerList.add(Components.literal(gameProfile.getName()));
                     }
 
                     if (players.sample().size() < players.online()) {
-                        playerList.add(Component.translatable(
+                        playerList.add(Components.translatable(
                             "multiplayer.status.and_more",
                             players.online() - players.sample().size()
                         ));
@@ -378,7 +386,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 } else {
                     serverInfo.playerList = List.of();
                 }
-            }, () -> serverInfo.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY));
+            }, () -> serverInfo.status = Components.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY));
             metadata.favicon().ifPresent(favicon -> {
                 if (!Arrays.equals(favicon.iconBytes(), serverInfo.getIconBytes())) {
                     serverInfo.setIconBytes(favicon.iconBytes());
@@ -388,14 +396,14 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             //$$ if (metadata.getDescription() != null) {
             //$$     serverInfo.motd = metadata.getDescription();
             //$$ } else {
-            //$$     serverInfo.motd = CommonComponents.EMPTY;
+            //$$     serverInfo.motd = Components.EMPTY;
             //$$ }
             //$$
             //$$ if (metadata.getVersion() != null) {
-            //$$     serverInfo.version = Component.literal(metadata.getVersion().getName());
+            //$$     serverInfo.version = Components.literal(metadata.getVersion().getName());
             //$$     serverInfo.protocol = metadata.getVersion().getProtocol();
             //$$ } else {
-            //$$     serverInfo.version = Component.translatable("multiplayer.status.old");
+            //$$     serverInfo.version = Components.translatable("multiplayer.status.old");
             //$$     serverInfo.protocol = 0;
             //$$ }
             //$$
@@ -408,29 +416,29 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             //$$     final GameProfile[] sampleProfiles = metadata.getPlayers().getSample();
             //$$     if (sampleProfiles != null && sampleProfiles.length > 0) {
             //$$         for (final GameProfile sampleProfile : sampleProfiles) {
-            //$$             lines.add(Component.literal(sampleProfile.getName()));
+            //$$             lines.add(Components.literal(sampleProfile.getName()));
             //$$         }
             //$$         if (sampleProfiles.length < metadata.getPlayers().getNumPlayers()) {
-            //$$             lines.add(Component.translatable(
+            //$$             lines.add(Components.translatable(
             //$$                 "multiplayer.status.and_more", metadata.getPlayers().getNumPlayers() - sampleProfiles.length
             //$$             ));
             //$$         }
             //$$         serverInfo.playerList = lines;
             //$$     }
             //$$ } else {
-            //$$     serverInfo.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
+            //$$     serverInfo.status = Components.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
             //$$ }
             //$$
             //$$ String favicon = serverInfo.getIconB64();
             //$$ if (favicon != null) {
-            //$$     try {
-            //$$         favicon = ServerData.parseFavicon(favicon);
-            //$$     } catch (ParseException e) {
-            //$$         WorldHost.LOGGER.error("Invalid server icon", e);
+            //$$     if (favicon.startsWith("data:image/png;base64,")) {
+            //$$         serverInfo.setIconB64(favicon.substring("data:image/png;base64,".length()));
+            //$$     } else {
+            //$$         WorldHost.LOGGER.error("Invalid server icon");
             //$$     }
+            //$$ } else {
+            //$$     serverInfo.setIconB64(null);
             //$$ }
-            //$$
-            //$$ serverInfo.setIconB64(favicon);
             //#endif
         }
 
@@ -482,11 +490,13 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             select(this);
 
+            //#if MC > 11601
             final double relX = mouseX - list.getRowLeft();
             if (relX < 32.0 && relX > 16.0) {
                 connect();
                 return true;
             }
+            //#endif
 
             if (Util.getMillis() - clickTime < 250L) {
                 connect();

@@ -223,7 +223,7 @@ public class WorldHost
                 .executes(ctx -> {
                     final String externalIp = getExternalIp();
                     if (externalIp == null) {
-                        ctx.getSource().sendFailure(Component.translatable("world-host.worldhost.ip.no_server_support"));
+                        ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.ip.no_server_support"));
                         return 0;
                     }
                     ctx.getSource().sendSuccess(

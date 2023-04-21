@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -17,7 +18,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
 
     public FriendsButton(int x, int y, int width, int height, OnPress onPress) {
         super(
-            x, y, width, height, Component.empty(), onPress
+            x, y, width, height, Components.EMPTY, onPress
             //#if MC >= 11904
             , DEFAULT_NARRATION
             //#endif
@@ -49,7 +50,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     //#if MC >= 11904
     public void renderString(@NotNull PoseStack poseStack, @NotNull Font font, int i) {
     //#else
-    //$$ protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
+    //$$ protected void renderBg(@NotNull PoseStack poseStack, @NotNull Minecraft minecraft, int mouseX, int mouseY) {
     //#endif
         final int baseX = getX() + bgX;
         final int baseY = getY() + (height - 12) / 2;

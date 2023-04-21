@@ -49,11 +49,11 @@ dependencies {
 
     includeImplementation("org.quiltmc:quilt-json5:1.0.2")
 
-    "com.github.LlamaLad7.MixinExtras:mixinextras-${mcData.loader.name}:0.2.0-beta.6".let {
-        modImplementation(it)
-        bundle(it)
-        annotationProcessor(it)
+    includeImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-${mcData.loader.name}:0.2.0-beta.6")
+    if (mcData.isForge) {
+        implementation("com.github.LlamaLad7.MixinExtras:mixinextras-common:0.2.0-beta.6")
     }
+    annotationProcessor("com.github.LlamaLad7.MixinExtras:mixinextras-common:0.2.0-beta.6")
 
     if (mcData.isFabric) {
         when (mcData.version) {

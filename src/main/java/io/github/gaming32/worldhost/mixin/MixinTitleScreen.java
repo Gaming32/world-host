@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
@@ -26,8 +27,8 @@ public class MixinTitleScreen extends Screen {
     )
     private void showOnlineStatus(PoseStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (!WorldHost.CONFIG.isShowOnlineStatus()) return;
-        final Component text = Component.empty()
-            .append(Component.literal("\u25cf").withStyle(WorldHost.protoClient != null ? ChatFormatting.DARK_GREEN : ChatFormatting.RED))
+        final Component text = Components.empty()
+            .append(Components.literal("\u25cf").withStyle(WorldHost.protoClient != null ? ChatFormatting.DARK_GREEN : ChatFormatting.RED))
             .append(" World Host: " + (WorldHost.protoClient != null ? "Online" : "Offline"));
         final int textWidth = font.width(text);
         drawString(matrices, font, text, width - textWidth - 2, height - 20, 0xffffffff);
