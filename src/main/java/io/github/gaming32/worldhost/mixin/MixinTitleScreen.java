@@ -32,6 +32,8 @@ public class MixinTitleScreen extends Screen {
             height -
                 //#if FABRIC && MC <= 11601
                 //$$ (FabricLoader.getInstance().isModLoaded("modmenu") ? 32 : 20),
+                //#elseif FORGE
+                //$$ 30,
                 //#else
                 20,
                 //#endif

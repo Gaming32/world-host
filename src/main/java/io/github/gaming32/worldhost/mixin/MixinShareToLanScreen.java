@@ -7,10 +7,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 //#if MC < 11904
-//$$ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-//$$ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 //$$ import io.github.gaming32.worldhost.versions.Components;
-//$$ import net.minecraft.network.chat.MutableComponent;
 //$$ import org.spongepowered.asm.mixin.injection.At;
 //$$ import org.spongepowered.asm.mixin.injection.ModifyArgs;
 //$$ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;

@@ -19,14 +19,7 @@ import net.minecraft.commands.CommandBuildContext;
 public class MixinCommands {
     @Shadow @Final private CommandDispatcher<CommandSourceStack> dispatcher;
 
-    @Inject(
-        method = "<init>",
-        at = @At(
-            value = "INVOKE",
-            target = "Lcom/mojang/brigadier/CommandDispatcher;setConsumer(Lcom/mojang/brigadier/ResultConsumer;)V",
-            remap = false
-        )
-    )
+    @Inject(method = "<init>", at = @At("RETURN"))
     private void commandRegistrationEvent(
         Commands.CommandSelection commandSelection,
         //#if MC > 11802

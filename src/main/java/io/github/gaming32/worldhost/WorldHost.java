@@ -61,13 +61,25 @@ import net.minecraft.server.Services;
 
 //#if FABRIC
 import net.fabricmc.api.ClientModInitializer;
+//#else
+//$$ import io.github.gaming32.worldhost.gui.WorldHostConfigScreen;
+//$$ import net.minecraft.client.gui.screens.Screen;
+//$$ import java.util.function.BiFunction;
 //#endif
 
 //#if FORGE
+//$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+//#if MC >= 11902
+//$$ import net.minecraftforge.client.ConfigScreenHandler;
+//#elseif MC >= 11802
+//$$ import net.minecraftforge.client.ConfigGuiHandler;
+//#else
+//$$ import net.minecraftforge.fml.ExtensionPoint;
+//#endif
 //#endif
 
 //#if FORGE
@@ -400,6 +412,19 @@ public class WorldHost
     //$$     @SubscribeEvent
     //$$     public static void onClientSetup(FMLClientSetupEvent event) {
     //$$         init();
+    //$$         final BiFunction<Minecraft, Screen, Screen> screenFunction =
+    //$$             (mc, screen) -> new WorldHostConfigScreen(screen);
+    //$$         ModLoadingContext.get().registerExtensionPoint(
+                //#if MC >= 11902
+                //$$ ConfigScreenHandler.ConfigScreenFactory.class,
+                //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
+                //#elseif MC >= 11802
+                //$$ ConfigGuiHandler.ConfigGuiFactory.class,
+                //$$ () -> new ConfigGuiHandler.ConfigGuiFactory(screenFunction)
+                //#else
+                //$$ ExtensionPoint.CONFIGGUIFACTORY, () -> screenFunction
+                //#endif
+    //$$         );
     //$$     }
     //$$ }
     //#endif
