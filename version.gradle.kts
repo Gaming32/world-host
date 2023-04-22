@@ -89,3 +89,18 @@ loom {
 preprocess {
     patternAnnotation.set("io.github.gaming32.worldhost.versions.Pattern")
 }
+
+tasks.processResources {
+    doLast {
+        if (mcData.isForge) {
+            copy {
+                from(file("$buildDir/resources/main/assets/world-host/icon.png"))
+                into("$buildDir/resources/main")
+            }
+            delete(file("$buildDir/resources/main/assets/world-host/icon.png"))
+        }
+        if (mcData.isFabric) {
+            delete(file("$buildDir/resources/main/pack.mcmeta"))
+        }
+    }
+}

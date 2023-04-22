@@ -8,7 +8,7 @@ modId = "${mod_id.replace('-', '_')}"
 version = "$mod_version"
 displayName = "$mod_name"
 displayURL = "https://modrinth.com/mod/world-host"
-logoFile = "assets/world-host/icon.png"
+logoFile = "icon.png"
 authors = "Gaming32"
 description = "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser."
 
