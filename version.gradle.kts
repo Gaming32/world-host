@@ -91,6 +91,23 @@ preprocess {
 }
 
 tasks.processResources {
+    filesMatching("pack.mcmeta") {
+        expand("pack_format" to when {
+            mcData.version >= 11904 -> 13
+            mcData.version >= 11903 -> 12
+            mcData.version >= 11900 -> 9
+            mcData.version >= 11800 -> 8
+            mcData.version >= 11700 -> 7
+            mcData.version >= 11602 -> 6
+            mcData.version >= 11500 -> 5
+            mcData.version >= 11300 -> 4
+            mcData.version >= 11100 -> 3
+            mcData.version >= 10900 -> 2
+            mcData.version >= 10601 -> 1
+            else -> return@filesMatching
+        })
+    }
+
     doLast {
         if (mcData.isForge) {
             copy {
