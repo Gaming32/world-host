@@ -20,7 +20,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ProtocolClient implements AutoCloseable {
     public static final int PROTOCOL_VERSION = 2;
 
-    private final Future<Void> connectingFuture = new CompletableFuture<>();
+    private final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<WorldHostC2SMessage> sendQueue = new LinkedBlockingQueue<>();
 
     private BlockingQueue<UUID> authUuid = new LinkedBlockingQueue<>(1);
@@ -77,6 +77,7 @@ public class ProtocolClient implements AutoCloseable {
                 closed = true;
                 return;
             }
+            connectingFuture.complete(null);
             if (successToast) {
                 DeferredToastManager.show(
                     SystemToast.SystemToastIds.TUTORIAL_HINT,
