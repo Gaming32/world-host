@@ -120,7 +120,7 @@ public class WorldHost
     public static final Path OLD_CONFIG_FILE = new File(CONFIG_DIR, "world-host.json").toPath();
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
-    public static final List<String> WORDS_FOR_RANDOM =
+    public static final List<String> WORDS_FOR_CID =
         //#if FABRIC
         FabricLoader.getInstance()
             .getModContainer(MOD_ID)
@@ -164,7 +164,7 @@ public class WorldHost
         //$$     .map(BufferedReader::lines)
         //#endif
             .orElseThrow(() -> new IllegalStateException("Unable to find 16k.txt"))
-            .skip(6) // The 6 comment lines at the start
+            .filter(s -> !s.startsWith("//"))
             .toList();
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
@@ -481,9 +481,9 @@ public class WorldHost
         final int first = (int)(connectionId & 0x3fff);
         final int second = (int)(connectionId >>> 14) & 0x3fff;
         final int third = (int)(connectionId >>> 28) & 0x3fff;
-        return WORDS_FOR_RANDOM.get(first) + '-' +
-            WORDS_FOR_RANDOM.get(second) + '-' +
-            WORDS_FOR_RANDOM.get(third);
+        return WORDS_FOR_CID.get(first) + '-' +
+            WORDS_FOR_CID.get(second) + '-' +
+            WORDS_FOR_CID.get(third);
     }
 
     private static int ipCommand(CommandContext<CommandSourceStack> ctx) {

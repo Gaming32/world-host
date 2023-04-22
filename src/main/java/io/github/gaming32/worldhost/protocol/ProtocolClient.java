@@ -9,6 +9,7 @@ import org.apache.commons.io.input.BoundedInputStream;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -104,6 +105,7 @@ public class ProtocolClient implements AutoCloseable {
                 } catch (Exception e) {
                     WorldHost.LOGGER.error("Critical error in WH send thread", e);
                 }
+                closed = true;
             }, "WH-SendThread");
 
             final Thread recvThread = new Thread(() -> {
@@ -123,8 +125,11 @@ public class ProtocolClient implements AutoCloseable {
                 } catch (EOFException e) {
                     WorldHost.LOGGER.debug("Recv thread terminated due to socket closure");
                 } catch (Exception e) {
-                    WorldHost.LOGGER.error("Critical error in WH recv thread", e);
+                    if (!(e instanceof SocketException) || !closed) {
+                        WorldHost.LOGGER.error("Critical error in WH recv thread", e);
+                    }
                 }
+                closed = true;
             }, "WH-RecvThread");
 
             sendThread.start();
