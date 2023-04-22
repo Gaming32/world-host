@@ -31,6 +31,7 @@ import org.quiltmc.json5.JsonReader;
 import org.quiltmc.json5.JsonWriter;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -72,7 +73,6 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-//$$ import java.nio.charset.StandardCharsets;
 //$$ import java.util.function.BiFunction;
 //#if MC >= 11902
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
@@ -125,7 +125,7 @@ public class WorldHost
             .flatMap(c -> c.findPath("assets/world-host/16k.txt"))
             .map(path -> {
                 try {
-                    return Files.lines(path);
+                    return Files.lines(path, StandardCharsets.US_ASCII);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }
@@ -157,7 +157,7 @@ public class WorldHost
             //$$     }
             //$$ })
             //#endif
-        //$$     .map(is -> new InputStreamReader(is, StandardCharsets.UTF_8))
+        //$$     .map(is -> new InputStreamReader(is, StandardCharsets.US_ASCII))
         //$$     .map(BufferedReader::new)
         //$$     .map(BufferedReader::lines)
         //#endif
