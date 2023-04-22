@@ -331,7 +331,7 @@ public class WorldHost
             if (failureToast) {
                 DeferredToastManager.show(
                     SystemToast.SystemToastIds.TUTORIAL_HINT,
-                    Components.translatable("world-host.ws_connect.not_available"),
+                    Components.translatable("world-host.wh_connect.not_available"),
                     null
                 );
             }
@@ -339,7 +339,7 @@ public class WorldHost
         }
         attemptingConnection = true;
         LOGGER.info("Attempting to connect to WH server at {}", CONFIG.getServerIp());
-        protoClient = new ProtocolClient(CONFIG.getServerIp());
+        protoClient = new ProtocolClient(CONFIG.getServerIp(), successToast, failureToast);
         connectingFuture = protoClient.getConnectingFuture();
         protoClient.authenticate(uuid);
     }

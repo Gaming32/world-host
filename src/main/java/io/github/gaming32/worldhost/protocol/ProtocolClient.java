@@ -1,7 +1,10 @@
 package io.github.gaming32.worldhost.protocol;
 
 import com.google.common.net.HostAndPort;
+import io.github.gaming32.worldhost.DeferredToastManager;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.client.gui.components.toasts.SystemToast;
 import org.apache.commons.io.input.BoundedInputStream;
 
 import java.io.*;
@@ -28,7 +31,7 @@ public class ProtocolClient implements AutoCloseable {
     private int basePort;
     private String userIp = "";
 
-    public ProtocolClient(String ip) {
+    public ProtocolClient(String ip, boolean successToast, boolean failureToast) {
         final HostAndPort target = HostAndPort.fromString(ip).withDefaultPort(9646);
         final Thread connectionThread = new Thread(() -> {
             Socket socket = null;
@@ -45,11 +48,25 @@ public class ProtocolClient implements AutoCloseable {
                 dos.flush();
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
+                if (failureToast) {
+                    DeferredToastManager.show(
+                        SystemToast.SystemToastIds.TUTORIAL_HINT,
+                        Components.translatable("world-host.wh_connect.connect_failed"),
+                        Components.immutable(e.getLocalizedMessage())
+                    );
+                }
                 if (socket != null) {
                     try {
                         socket.close();
                     } catch (IOException e1) {
-                        WorldHost.LOGGER.error("Failed to close socket", e1);
+                        WorldHost.LOGGER.error("Failed to close WH socket", e1);
+                        if (failureToast) {
+                            DeferredToastManager.show(
+                                SystemToast.SystemToastIds.WORLD_BACKUP,
+                                Components.translatable("world-host.wh_connect.close_failed"),
+                                Components.immutable(e1.getLocalizedMessage())
+                            );
+                        }
                     }
                     socket = null;
                 }
@@ -58,6 +75,13 @@ public class ProtocolClient implements AutoCloseable {
             if (socket == null) {
                 closed = true;
                 return;
+            }
+            if (successToast) {
+                DeferredToastManager.show(
+                    SystemToast.SystemToastIds.TUTORIAL_HINT,
+                    Components.translatable("world-host.wh_connect.connected"),
+                    null
+                );
             }
             final Socket fSocket = socket;
 
@@ -118,6 +142,13 @@ public class ProtocolClient implements AutoCloseable {
                 socket.close();
             } catch (IOException e) {
                 WorldHost.LOGGER.error("Failed to close WH socket.", e);
+                if (WorldHost.CONFIG.isEnableReconnectionToasts()) {
+                    DeferredToastManager.show(
+                        SystemToast.SystemToastIds.WORLD_BACKUP,
+                        Components.translatable("world-host.wh_connect.close_failed"),
+                        Components.immutable(e.getLocalizedMessage())
+                    );
+                }
             }
         }, "WH-ConnectionThread");
         connectionThread.setDaemon(true);
