@@ -61,11 +61,11 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record JoinGranted(UUID connectionId, JoinType joinType) implements WorldHostC2SMessage {
+    record JoinGranted(long connectionId, JoinType joinType) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(5);
-            writeUuid(dos, connectionId);
+            dos.writeLong(connectionId);
             joinType.encode(dos);
         }
     }
@@ -81,11 +81,11 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record QueryResponse(UUID connectionId, ServerStatus metadata) implements WorldHostC2SMessage {
+    record QueryResponse(long connectionId, ServerStatus metadata) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(7);
-            writeUuid(dos, connectionId);
+            dos.writeLong(connectionId);
             final FriendlyByteBuf buf = WorldHost.createByteBuf();
             new ClientboundStatusResponsePacket(metadata).write(buf);
             dos.writeInt(buf.readableBytes());

@@ -109,15 +109,15 @@ tasks.processResources {
     }
 
     doLast {
+        val resources = "$buildDir/resources/main"
         if (mcData.isForge) {
             copy {
-                from(file("$buildDir/resources/main/assets/world-host/icon.png"))
-                into("$buildDir/resources/main")
+                from(file("$resources/assets/world-host/icon.png"))
+                into(resources)
             }
-            delete(file("$buildDir/resources/main/assets/world-host/icon.png"))
-        }
-        if (mcData.isFabric) {
-            delete(file("$buildDir/resources/main/pack.mcmeta"))
+            delete(file("$resources/assets/world-host/icon.png"))
+        } else {
+            delete(file("$resources/pack.mcmeta"))
         }
     }
 }

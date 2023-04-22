@@ -93,7 +93,7 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record RequestJoin(UUID user, UUID connectionId) implements WorldHostS2CMessage {
+    record RequestJoin(UUID user, long connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(user)) {
@@ -120,7 +120,7 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record QueryRequest(UUID friend, UUID connectionId) implements WorldHostS2CMessage {
+    record QueryRequest(UUID friend, long connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(friend)) {
@@ -186,7 +186,7 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record ConnectionInfo(UUID connectionId, String baseIp, int basePort) implements WorldHostS2CMessage {
+    record ConnectionInfo(long connectionId, String baseIp, int basePort) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             client.setConnectionId(connectionId);
@@ -214,8 +214,8 @@ public sealed interface WorldHostS2CMessage {
             case 3 -> new FriendRequest(readUuid(dis));
             case 4 -> new PublishedWorld(readUuid(dis));
             case 5 -> new ClosedWorld(readUuid(dis));
-            case 6 -> new RequestJoin(readUuid(dis), readUuid(dis));
-            case 7 -> new QueryRequest(readUuid(dis), readUuid(dis));
+            case 6 -> new RequestJoin(readUuid(dis), dis.readLong());
+            case 7 -> new QueryRequest(readUuid(dis), dis.readLong());
             case 8 -> {
                 final UUID friend = readUuid(dis);
                 final FriendlyByteBuf buf = WorldHost.createByteBuf();
@@ -225,7 +225,7 @@ public sealed interface WorldHostS2CMessage {
             case 9 -> new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());
             case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
             case 11 -> new ProxyDisconnect(dis.readLong());
-            case 12 -> new ConnectionInfo(readUuid(dis), readString(dis), dis.readUnsignedShort());
+            case 12 -> new ConnectionInfo(dis.readLong(), readString(dis), dis.readUnsignedShort());
             default -> new Error("Received packet with unknown type_id from server (outdated client?): " + typeId);
         };
     }

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 
 public class ProxyClient extends Thread {
     private final Socket socket;
@@ -27,18 +28,18 @@ public class ProxyClient extends Thread {
             final byte[] b = new byte[24576];
             int n;
             while ((n = is.read(b)) != -1) {
-//                if (WorldHost.wsClient == null) break;
+                if (WorldHost.protoClient == null) break;
                 if (n == 0) continue;
-//                WorldHost.wsClient.proxyS2CPacket(connectionId, Arrays.copyOf(b, n));
+                WorldHost.protoClient.proxyS2CPacket(connectionId, Arrays.copyOf(b, n));
             }
         } catch (IOException e) {
             WorldHost.LOGGER.error("Proxy client connection for {} has error", remoteAddress, e);
         }
         WorldHost.CONNECTED_PROXY_CLIENTS.remove(connectionId);
         close();
-//        if (WorldHost.wsClient != null) {
-//            WorldHost.wsClient.proxyDisconnect(connectionId);
-//        }
+        if (WorldHost.protoClient != null) {
+            WorldHost.protoClient.proxyDisconnect(connectionId);
+        }
         WorldHost.LOGGER.info("Proxy client connection for {} closed", remoteAddress);
     }
 

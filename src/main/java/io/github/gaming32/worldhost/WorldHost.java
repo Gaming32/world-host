@@ -29,11 +29,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.json5.JsonReader;
 import org.quiltmc.json5.JsonWriter;
-import java.io.File;
-import java.io.IOException;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -61,24 +62,29 @@ import net.minecraft.server.Services;
 
 //#if FABRIC
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.WorldHostConfigScreen;
 //$$ import net.minecraft.client.gui.screens.Screen;
-//$$ import java.util.function.BiFunction;
-//#endif
-
-//#if FORGE
-//$$ import net.minecraftforge.fml.ModLoadingContext;
-//$$ import net.minecraftforge.fml.common.Mod;
+//$$ import net.minecraft.server.packs.PackType;
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
+//$$ import net.minecraftforge.fml.ModLoadingContext;
+//$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+//$$ import java.nio.charset.StandardCharsets;
+//$$ import java.util.function.BiFunction;
 //#if MC >= 11902
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
 //#elseif MC >= 11802
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
 //#else
 //$$ import net.minecraftforge.fml.ExtensionPoint;
+//#endif
+//#if MC > 11605
+//$$ import net.minecraftforge.resource.ResourcePackLoader;
+//#else
+//$$ import net.minecraftforge.fml.packs.ResourcePackLoader;
 //#endif
 //#endif
 
@@ -112,13 +118,62 @@ public class WorldHost
     public static final Path OLD_CONFIG_FILE = new File(CONFIG_DIR, "world-host.json").toPath();
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
+    public static final List<String> WORDS_FOR_RANDOM =
+        //#if FABRIC
+        FabricLoader.getInstance()
+            .getModContainer(MOD_ID)
+            .flatMap(c -> c.findPath("assets/world-host/16k.txt"))
+            .map(path -> {
+                try {
+                    return Files.lines(path);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            })
+        //#else
+        //$$ ResourcePackLoader
+            //#if MC > 11605
+            //$$ .getPackFor(MOD_ID)
+            //#else
+            //$$ .getResourcePackFor(MOD_ID)
+            //#endif
+        //$$     .map(c -> {
+                //#if MC <= 11902
+                //$$ try {
+                //#endif
+        //$$             return c.getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k"));
+                //#if MC <= 11902
+                //$$ } catch (IOException e) {
+                //$$     throw new UncheckedIOException(e);
+                //$$ }
+                //#endif
+        //$$     })
+            //#if MC > 11902
+            //$$ .map(i -> {
+            //$$     try {
+            //$$         return i.get();
+            //$$     } catch (IOException e) {
+            //$$         throw new UncheckedIOException(e);
+            //$$     }
+            //$$ })
+            //#endif
+        //$$     .map(is -> new InputStreamReader(is, StandardCharsets.UTF_8))
+        //$$     .map(BufferedReader::new)
+        //$$     .map(BufferedReader::lines)
+        //#endif
+            .orElseThrow(() -> new IllegalStateException("Unable to find 16k.txt"))
+            .skip(6) // The 6 comment lines at the start
+            .toList();
+
+    public static final long MAX_CONNECTION_IDS = 1L << 42;
+
     public static final Set<UUID> ONLINE_FRIENDS = new HashSet<>();
     public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 
     public static final Long2ObjectMap<ProxyClient> CONNECTED_PROXY_CLIENTS = new Long2ObjectOpenHashMap<>();
 
-    public static final UUID CONNECTION_ID = UUID.randomUUID();
+    public static final long CONNECTION_ID = new SecureRandom().nextLong(MAX_CONNECTION_IDS);
 
     public static Gateway upnpGateway;
 
@@ -137,7 +192,7 @@ public class WorldHost
     //#endif
 
     private static void init() {
-        LOGGER.info("Using client-generated connection ID {}", CONNECTION_ID);
+        LOGGER.info("Using client-generated connection ID {}", connectionIdToString(CONNECTION_ID));
 
         loadConfig();
 
@@ -392,7 +447,7 @@ public class WorldHost
         if (protoClient.getBaseIp().isEmpty()) {
             return null;
         }
-        String ip = "connect0000-" + protoClient.getConnectionId() + '.' + protoClient.getBaseIp();
+        String ip = connectionIdToString(protoClient.getConnectionId()) + '.' + protoClient.getBaseIp();
         if (protoClient.getBasePort() != 25565) {
             ip += ':' + protoClient.getBasePort();
         }
@@ -404,6 +459,18 @@ public class WorldHost
         if (protoClient != null) {
             protoClient.queryRequest(CONFIG.getFriends());
         }
+    }
+
+    public static String connectionIdToString(long connectionId) {
+        if (connectionId < 0 || connectionId >= MAX_CONNECTION_IDS) {
+            throw new IllegalArgumentException("Invalid connection ID " + connectionId);
+        }
+        final int first = (int)(connectionId & 0x3fff);
+        final int second = (int)(connectionId >>> 14) & 0x3fff;
+        final int third = (int)(connectionId >>> 28) & 0x3fff;
+        return WORDS_FOR_RANDOM.get(first) + '-' +
+            WORDS_FOR_RANDOM.get(second) + '-' +
+            WORDS_FOR_RANDOM.get(third);
     }
 
     //#if FORGE

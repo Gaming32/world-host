@@ -14,6 +14,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ProtocolClient implements AutoCloseable {
+    public static final int PROTOCOL_VERSION = 2;
+
     private final Future<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<WorldHostC2SMessage> sendQueue = new LinkedBlockingQueue<>();
 
@@ -21,7 +23,7 @@ public class ProtocolClient implements AutoCloseable {
 
     private boolean authenticated, closed;
 
-    private UUID connectionId = WorldHost.CONNECTION_ID;
+    private long connectionId = WorldHost.CONNECTION_ID;
     private String baseIp = "";
     private int basePort;
 
@@ -35,10 +37,10 @@ public class ProtocolClient implements AutoCloseable {
                 final UUID userUuid = authUuid.take();
                 authUuid = null;
                 final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+                dos.writeInt(PROTOCOL_VERSION);
                 dos.writeLong(userUuid.getMostSignificantBits());
                 dos.writeLong(userUuid.getLeastSignificantBits());
-                dos.writeLong(connectionId.getMostSignificantBits());
-                dos.writeLong(connectionId.getLeastSignificantBits());
+                dos.writeLong(connectionId);
                 dos.flush();
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
@@ -171,6 +173,10 @@ public class ProtocolClient implements AutoCloseable {
         enqueue(new WorldHostC2SMessage.RequestJoin(friend));
     }
 
+    public void proxyS2CPacket(long connectionId, byte[] data) {
+        enqueue(new WorldHostC2SMessage.ProxyS2CPacket(connectionId, data));
+    }
+
     public void proxyDisconnect(long connectionId) {
         enqueue(new WorldHostC2SMessage.ProxyDisconnect(connectionId));
     }
@@ -179,11 +185,11 @@ public class ProtocolClient implements AutoCloseable {
         return connectingFuture;
     }
 
-    public UUID getConnectionId() {
+    public long getConnectionId() {
         return connectionId;
     }
 
-    public void setConnectionId(UUID connectionId) {
+    public void setConnectionId(long connectionId) {
         this.connectionId = connectionId;
     }
 
