@@ -6,10 +6,10 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import org.apache.commons.io.input.BoundedInputStream;
+import org.apache.commons.io.input.CountingInputStream;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
@@ -25,7 +25,8 @@ public class ProtocolClient implements AutoCloseable {
 
     private BlockingQueue<UUID> authUuid = new LinkedBlockingQueue<>(1);
 
-    private boolean authenticated, closed;
+    private boolean authenticated,
+        closed;
 
     private long connectionId = WorldHost.CONNECTION_ID;
     private String baseIp = "";
@@ -119,16 +120,18 @@ public class ProtocolClient implements AutoCloseable {
                             dis.skipNBytes(length);
                             continue;
                         }
-                        final BoundedInputStream bis = new BoundedInputStream(dis);
+                        final BoundedInputStream bis = new BoundedInputStream(dis, length);
                         bis.setPropagateClose(false);
-                        WorldHostS2CMessage.decode(new DataInputStream(bis)).handle(this);
+                        final CountingInputStream cis = new CountingInputStream(bis);
+                        final WorldHostS2CMessage message = WorldHostS2CMessage.decode(new DataInputStream(cis));
+                        dis.skipNBytes(length - cis.getCount());
+                        WorldHost.LOGGER.debug("Received {}", message);
+                        message.handle(this);
                     }
                 } catch (EOFException e) {
-                    WorldHost.LOGGER.debug("Recv thread terminated due to socket closure");
+                    WorldHost.LOGGER.error("Message decoder read past end!");
                 } catch (Exception e) {
-                    if (!(e instanceof SocketException) || !closed) {
-                        WorldHost.LOGGER.error("Critical error in WH recv thread", e);
-                    }
+                    WorldHost.LOGGER.error("Critical error in WH recv thread", e);
                 }
                 closed = true;
             }, "WH-RecvThread");

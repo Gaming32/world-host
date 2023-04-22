@@ -264,7 +264,9 @@ public class WorldHost
 
     public static void tickHandler(Minecraft minecraft) {
         if (protoClient == null || protoClient.isClosed()) {
-            protoClient = null;
+            if (protoClient != null) {
+                protoClient = null;
+            }
             connectingFuture = null;
             final long time = Util.getMillis();
             if (time - lastReconnectTime > 10_000) {
@@ -435,7 +437,8 @@ public class WorldHost
         return new FriendlyByteBuf(Unpooled.buffer());
     }
 
-    public static ServerStatus parseServerStatus(FriendlyByteBuf buf) {
+    @SuppressWarnings("RedundantThrows")
+    public static ServerStatus parseServerStatus(FriendlyByteBuf buf) throws IOException {
         //#if MC > 11605
         return new ClientboundStatusResponsePacket(buf)
             //#if MC >= 11904
@@ -445,13 +448,21 @@ public class WorldHost
             //#endif
         //#else
         //$$ final ClientboundStatusResponsePacket packet = new ClientboundStatusResponsePacket();
-        //$$ try {
-        //$$     packet.read(buf);
-        //$$ } catch (IOException e) {
-        //$$     LOGGER.error("Failed to parse server status", e);
-        //$$     return new ServerStatus();
-        //$$ }
+        //$$ packet.read(buf);
         //$$ return packet.getStatus();
+        //#endif
+    }
+
+    public static ServerStatus createEmptyServerStatus() {
+        //#if MC >= 11904
+        return new ServerStatus(
+            Components.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
+            //#if FORGE
+            //$$ , Optional.empty()
+            //#endif
+        );
+        //#else
+        //$$ return new ServerStatus();
         //#endif
     }
 
@@ -462,7 +473,7 @@ public class WorldHost
         }
         String ip = connectionIdToString(protoClient.getConnectionId()) + '.' + protoClient.getBaseIp();
         if (protoClient.getBasePort() != 25565) {
-            ip += ':' + protoClient.getBasePort();
+            ip += ":" + protoClient.getBasePort();
         }
         return ip;
     }

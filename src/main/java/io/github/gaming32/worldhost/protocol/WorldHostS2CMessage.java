@@ -221,7 +221,14 @@ public sealed interface WorldHostS2CMessage {
                 final UUID friend = readUuid(dis);
                 final FriendlyByteBuf buf = WorldHost.createByteBuf();
                 buf.writeBytes(dis, dis.readInt());
-                yield new QueryResponse(friend, WorldHost.parseServerStatus(buf));
+                ServerStatus serverStatus;
+                try {
+                    serverStatus = WorldHost.parseServerStatus(buf);
+                } catch (Exception e) {
+                    WorldHost.LOGGER.error("Failed to parse server status", e);
+                    serverStatus = WorldHost.createEmptyServerStatus();
+                }
+                yield new QueryResponse(friend, serverStatus);
             }
             case 9 -> new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());
             case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));

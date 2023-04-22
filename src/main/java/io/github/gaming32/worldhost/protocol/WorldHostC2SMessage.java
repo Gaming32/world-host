@@ -87,7 +87,8 @@ public sealed interface WorldHostC2SMessage {
             dos.writeByte(7);
             dos.writeLong(connectionId);
             final FriendlyByteBuf buf = WorldHost.createByteBuf();
-            new ClientboundStatusResponsePacket(metadata).write(buf);
+            new ClientboundStatusResponsePacket(metadata != null ? metadata : WorldHost.createEmptyServerStatus())
+                .write(buf);
             dos.writeInt(buf.readableBytes());
             buf.readBytes(dos, buf.readableBytes());
         }
