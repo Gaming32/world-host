@@ -19,6 +19,8 @@ repositories {
 
     maven("https://maven.terraformersmc.com/releases")
 
+    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+
     maven("https://jitpack.io")
 }
 
@@ -69,6 +71,8 @@ dependencies {
             modImplementation("io.github.prospector:modmenu:1.14.5+build.30")
         }
     }
+
+    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (mcData.isFabric) "fabric" else "forge-latest"}:1.1.2")
 }
 
 java {
