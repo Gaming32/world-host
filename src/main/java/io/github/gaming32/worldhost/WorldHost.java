@@ -4,9 +4,11 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
+import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -288,20 +290,31 @@ public class WorldHost
         dispatcher.register(literal("worldhost")
             .then(literal("ip")
                 .requires(s -> s.getServer().isPublished())
+                .executes(WorldHost::ipCommand)
+            )
+            .then(literal("tempip")
+                .requires(s -> s.getServer().isPublished())
                 .executes(ctx -> {
-                    final String externalIp = getExternalIp();
-                    if (externalIp == null) {
-                        ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.ip.no_server_support"));
-                        return 0;
+                    if (upnpGateway != null && protoClient != null && !protoClient.getUserIp().isEmpty()) {
+                        try {
+                            final int port = ctx.getSource().getServer().getPort();
+                            final UPnPErrors.AddPortMappingErrors error = upnpGateway.openPort(port, 60, false);
+                            if (error == null) {
+                                ctx.getSource().sendSuccess(
+                                    Components.translatable(
+                                        "world-host.worldhost.tempip.success",
+                                        Components.copyOnClickText(protoClient.getUserIp() + ':' + port)
+                                    ),
+                                    false
+                                );
+                                return Command.SINGLE_SUCCESS;
+                            }
+                            WorldHost.LOGGER.info("Failed to use UPnP mode due to {}. Falling back to Proxy mode.", error);
+                        } catch (Exception e) {
+                            WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
+                        }
                     }
-                    ctx.getSource().sendSuccess(
-                        Components.translatable(
-                            "world-host.worldhost.ip.success",
-                            Components.copyOnClickText(externalIp)
-                        ),
-                        false
-                    );
-                    return Command.SINGLE_SUCCESS;
+                    return ipCommand(ctx);
                 })
             )
         );
@@ -471,6 +484,26 @@ public class WorldHost
         return WORDS_FOR_RANDOM.get(first) + '-' +
             WORDS_FOR_RANDOM.get(second) + '-' +
             WORDS_FOR_RANDOM.get(third);
+    }
+
+    private static int ipCommand(CommandContext<CommandSourceStack> ctx) {
+        if (protoClient == null) {
+            ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.ip.not_connected"));
+            return 0;
+        }
+        final String externalIp = getExternalIp();
+        if (externalIp == null) {
+            ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.ip.no_server_support"));
+            return 0;
+        }
+        ctx.getSource().sendSuccess(
+            Components.translatable(
+                "world-host.worldhost.ip.success",
+                Components.copyOnClickText(externalIp)
+            ),
+            false
+        );
+        return Command.SINGLE_SUCCESS;
     }
 
     //#if FORGE

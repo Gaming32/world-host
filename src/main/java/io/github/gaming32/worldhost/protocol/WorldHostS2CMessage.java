@@ -186,12 +186,13 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record ConnectionInfo(long connectionId, String baseIp, int basePort) implements WorldHostS2CMessage {
+    record ConnectionInfo(long connectionId, String baseIp, int basePort, String userIp) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             client.setConnectionId(connectionId);
             client.setBaseIp(baseIp);
             client.setBasePort(basePort);
+            client.setUserIp(userIp);
         }
     }
 
@@ -225,7 +226,7 @@ public sealed interface WorldHostS2CMessage {
             case 9 -> new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());
             case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
             case 11 -> new ProxyDisconnect(dis.readLong());
-            case 12 -> new ConnectionInfo(dis.readLong(), readString(dis), dis.readUnsignedShort());
+            case 12 -> new ConnectionInfo(dis.readLong(), readString(dis), dis.readUnsignedShort(), readString(dis));
             default -> new Error("Received packet with unknown type_id from server (outdated client?): " + typeId);
         };
     }

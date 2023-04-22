@@ -26,6 +26,7 @@ public class ProtocolClient implements AutoCloseable {
     private long connectionId = WorldHost.CONNECTION_ID;
     private String baseIp = "";
     private int basePort;
+    private String userIp = "";
 
     public ProtocolClient(String ip) {
         final HostAndPort target = HostAndPort.fromString(ip).withDefaultPort(9646);
@@ -207,6 +208,14 @@ public class ProtocolClient implements AutoCloseable {
 
     public void setBasePort(int basePort) {
         this.basePort = basePort;
+    }
+
+    public String getUserIp() {
+        return userIp;
+    }
+
+    public void setUserIp(String userIp) {
+        this.userIp = userIp;
     }
 
     public boolean isClosed() {

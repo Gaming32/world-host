@@ -28,8 +28,10 @@
   "world-host.went_online": "%s went online",
   "world-host.went_online.desc": "Go to the Multiplayer menu to join them",
   "world-host.online_friends.title": "Online Friends",
-  "world-host.worldhost.ip.success": "The public proxy IP for your world is %s",
-  "world-host.worldhost.ip.no_server_support": "This World Host server does not support public proxy IPs",
+  "world-host.worldhost.ip.success": "The public proxy IP for your world is %s.",
+  "world-host.worldhost.ip.no_server_support": "This World Host server does not support public proxy IPs.",
+  "world-host.worldhost.ip.not_connected": "Not connected to World Host server.",
+  "world-host.worldhost.tempip.success": "The low-ping temporary IP for your world is %s.",
   "world-host.lan_opened.friends": "World hosted to friends on the friends tab. It's also available on LAN port %s.",
   "world-host.lan_opened.no_friends": "World hosted to IP %s. It's also available on LAN port %s.",
   "chat.square_brackets": "[%s]"
