@@ -20,7 +20,6 @@ public class MixinMinecraft {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void tickEvent(CallbackInfo ci) {
-        //noinspection DataFlowIssue
-        WorldHost.tickHandler((Minecraft)(Object)this);
+        WorldHost.tickHandler();
     }
 }
