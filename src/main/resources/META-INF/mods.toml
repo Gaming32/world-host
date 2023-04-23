@@ -22,6 +22,6 @@ side = "BOTH"
 [[dependencies.$mod_id]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[${mc_version == '1.19.4' ? '1.19.4)' : '$mc_version]'}"
+versionRange = "$mc_version"
 ordering = "NONE"
 side = "BOTH"
