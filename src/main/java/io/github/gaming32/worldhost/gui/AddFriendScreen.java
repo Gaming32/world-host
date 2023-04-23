@@ -21,7 +21,6 @@ import org.lwjgl.glfw.GLFW;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-// TODO: Fix the face going beneath the screen
 public class AddFriendScreen extends WorldHostScreen {
     public static final Pattern VALID_USERNAME = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
     private static final Component FRIEND_USERNAME_TEXT = Components.translatable("world-host.add_friend.enter_username");
@@ -53,21 +52,20 @@ public class AddFriendScreen extends WorldHostScreen {
                     addAction.accept(friendProfile);
                 }
                 minecraft.setScreen(parent);
-            }).pos(width / 2 - 100, 288)
+            }).pos(width / 2 - 100, height / 4 + 108)
                 .width(200)
-                .tooltip(Components.translatable("world-host.add_friend.tooltip"))
                 .build()
         );
         addFriendButton.active = false;
 
         addRenderableWidget(
             button(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
-                .pos(width / 2 - 100, 312)
+                .pos(width / 2 - 100, height / 4 + 132)
                 .width(200)
                 .build()
         );
 
-        usernameField = addWidget(new EditBox(font, width / 2 - 100, 116, 200, 20, FRIEND_USERNAME_TEXT));
+        usernameField = addWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(16);
         usernameField.setFocused(true);
         usernameField.setResponder(text -> {
@@ -132,8 +130,8 @@ public class AddFriendScreen extends WorldHostScreen {
     @Override
     public void render(@NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
         renderBackground(matrices);
-        drawCenteredString(matrices, font, title, width / 2, 20, 16777215);
-        drawString(matrices, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 100, 10526880);
+        drawCenteredString(matrices, font, title, width / 2, 20, 0xffffff);
+        drawString(matrices, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, 0xa0a0a0);
         usernameField.render(matrices, mouseX, mouseY, delta);
         super.render(matrices, mouseX, mouseY, delta);
 
@@ -144,8 +142,10 @@ public class AddFriendScreen extends WorldHostScreen {
             WorldHost.color(1f, 1f, 1f, 1f);
             WorldHost.texture(skinTexture);
             RenderSystem.enableBlend();
-            GuiComponent.blit(matrices, width / 2 - 64, 148, 128, 128, 8, 8, 8, 8, 64, 64);
-            GuiComponent.blit(matrices, width / 2 - 64, 148, 128, 128, 40, 8, 8, 8, 64, 64);
+            final int size = addFriendButton.getY() - 110;
+            final int x = width / 2 - size / 2;
+            GuiComponent.blit(matrices, x, 98, size, size, 8, 8, 8, 8, 64, 64);
+            GuiComponent.blit(matrices, x, 98, size, size, 40, 8, 8, 8, 64, 64);
             RenderSystem.disableBlend();
         }
     }

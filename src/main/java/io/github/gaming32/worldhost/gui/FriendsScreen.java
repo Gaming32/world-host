@@ -57,6 +57,7 @@ public class FriendsScreen extends WorldHostScreen {
                     }
                 }));
             }).pos(width / 2 - 152, height - 52)
+                .tooltip(Components.translatable("world-host.add_friend.tooltip"))
                 .build()
         );
 
