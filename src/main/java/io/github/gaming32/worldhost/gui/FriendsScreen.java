@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
@@ -13,8 +14,10 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +25,15 @@ import org.jetbrains.annotations.Nullable;
 public class FriendsScreen extends WorldHostScreen {
     private static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
     private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
+    private static final Component BEDROCK_FRIENDS_TEXT = Components.translatable(
+        "world-host.friends.bedrock_notice",
+        Components.translatable("world-host.friends.bedrock_notice.link")
+            .withStyle(s -> s
+                .withUnderlined(true)
+                .withColor(ChatFormatting.BLUE)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://account.xbox.com/Profile"))
+            )
+    );
 
     private final Screen parent;
     private Button removeButton;
@@ -36,15 +48,17 @@ public class FriendsScreen extends WorldHostScreen {
     protected void init() {
         super.init();
 
+        final boolean bedrockLink = WorldHost.HAVE_ANY_BEDROCK;
+
         if (list == null) {
-            list = addWidget(new FriendsList(width, height, 32, height - 64, 36));
+            list = addWidget(new FriendsList(width, height, 32, height - (bedrockLink ? 80 : 64), 36));
             //#if MC > 11601
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
             //#endif
         } else {
-            list.updateSize(width, height, 32, height - 64);
+            list.updateSize(width, height, 32, height - (bedrockLink ? 80 : 64));
         }
 
         addRenderableWidget(
@@ -103,11 +117,33 @@ public class FriendsScreen extends WorldHostScreen {
     }
 
     @Override
-    public void render(@NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
-        renderBackground(matrices);
-        list.render(matrices, mouseX, mouseY, delta);
-        drawCenteredString(matrices, font, title, width / 2, 15, 0xffffff);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float delta) {
+        renderBackground(poseStack);
+        list.render(poseStack, mouseX, mouseY, delta);
+        drawCenteredString(poseStack, font, title, width / 2, 15, 0xffffff);
+        if (WorldHost.HAVE_ANY_BEDROCK) {
+            drawCenteredString(poseStack, font, BEDROCK_FRIENDS_TEXT, width / 2, height - 66 - font.lineHeight / 2, 0xffffff);
+        }
+        super.render(poseStack, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (WorldHost.HAVE_ANY_BEDROCK) {
+            final int textWidth = font.width(BEDROCK_FRIENDS_TEXT);
+            final int textX = width / 2 - textWidth / 2;
+            if (mouseX >= textX && mouseX <= textX + textWidth) {
+                final int textY = height - 66 - font.lineHeight / 2;
+                if (mouseY >= textY && mouseY <= textY + font.lineHeight) {
+                    final Style component = font.getSplitter().componentStyleAtWidth(BEDROCK_FRIENDS_TEXT, (int)Math.round(mouseX) - textX);
+                    if (component != null) {
+                        handleComponentClicked(component);
+                        return true;
+                    }
+                }
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     public class FriendsList extends ObjectSelectionList<FriendsEntry> {

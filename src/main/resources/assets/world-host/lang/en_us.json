@@ -12,6 +12,8 @@
   "world-host.friends.remove": "Remove Friend",
   "world-host.friends.remove.title": "Are you sure you want to remove this friend from your friends list?",
   "world-host.friends.remove.message": "You can always add them back later.",
+  "world-host.friends.bedrock_notice": "Manage Bedrock friends on the %s.",
+  "world-host.friends.bedrock_notice.link": "Xbox website",
   "world-host.add_friend": "Add Friend",
   "world-host.add_friend.tooltip": "This will add the person as a friend, and notify them that you did so, asking them to return the favor.",
   "world-host.add_friend.enter_username": "Friend Username",

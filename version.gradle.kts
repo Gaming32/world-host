@@ -49,6 +49,8 @@ dependencies {
         }
     })
 
+    modImplementation("net.fabricmc:fabric-loader:0.14.19")
+
     includeImplementation("org.quiltmc:quilt-json5:1.0.2")
 
 //    includeImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-${mcData.loader.name}:0.2.0-beta.6")

@@ -177,6 +177,22 @@ public class WorldHost
 
     public static final long CONNECTION_ID = new SecureRandom().nextLong(MAX_CONNECTION_IDS);
 
+    public static final boolean HAVE_GEYSER =
+        //#if FABRIC
+        FabricLoader.getInstance().isModLoaded("geyser-fabric");
+        //#else
+        //$$ false;
+        //#endif
+
+    public static final boolean HAVE_VFP =
+        //#if FABRIC
+        FabricLoader.getInstance().isModLoaded("viafabricplus");
+        //#else
+        //$$ false;
+        //#endif
+
+    public static final boolean HAVE_ANY_BEDROCK = HAVE_GEYSER || HAVE_VFP;
+
     public static Gateway upnpGateway;
 
     private static GameProfileCache profileCache;
