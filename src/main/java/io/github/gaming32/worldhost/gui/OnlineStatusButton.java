@@ -62,9 +62,11 @@ public class OnlineStatusButton extends PlainTextButton {
 
     private static Component generateStatusComponent() {
         final int status = getStatus();
-        return Components.empty()
-            .append(Components.literal("\u25cf").withStyle(COLORS[status]))
-            .append(Components.translatable("world-host.online_status", TEXTS[status]));
+        return Components.translatable(
+            "world-host.online_status",
+            Components.literal("\u25cf").withStyle(COLORS[status]),
+            TEXTS[status]
+        );
     }
 
     @Override

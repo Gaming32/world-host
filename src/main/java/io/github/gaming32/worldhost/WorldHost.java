@@ -185,6 +185,12 @@ public class WorldHost
     private static long lastReconnectTime;
     private static Future<Void> connectingFuture;
 
+    static {
+        if (WORDS_FOR_CID.size() != (1 << 14)) {
+            throw new RuntimeException("Expected WORDS_FOR_CID to have " + (1 << 14) + " elements, but it has " + WORDS_FOR_CID.size() + " elements.");
+        }
+    }
+
     //#if FABRIC
     @Override
     public void onInitializeClient() {
