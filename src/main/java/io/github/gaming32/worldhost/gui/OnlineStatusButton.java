@@ -11,10 +11,10 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.Future;
+
 //#if MC > 11605
 import net.minecraft.client.gui.components.PlainTextButton;
-
-import java.util.concurrent.Future;
 //#endif
 
 public class OnlineStatusButton extends PlainTextButton {
