@@ -181,7 +181,6 @@ public class WorldHost
 
     private static GameProfileCache profileCache;
 
-    public static boolean attemptingConnection;
     public static ProtocolClient protoClient;
     private static long lastReconnectTime;
     private static Future<Void> connectingFuture;
@@ -269,11 +268,9 @@ public class WorldHost
             }
             connectingFuture = null;
             final long time = Util.getMillis();
-            if (time - lastReconnectTime > 10_000) {
+            if (time - lastReconnectTime > 20_000) {
                 lastReconnectTime = time;
-                if (!attemptingConnection) {
-                    reconnect(CONFIG.isEnableReconnectionToasts(), false);
-                }
+                reconnect(CONFIG.isEnableReconnectionToasts(), false);
             }
         }
         if (connectingFuture != null && connectingFuture.isDone()) {
@@ -339,7 +336,6 @@ public class WorldHost
             }
             return;
         }
-        attemptingConnection = true;
         LOGGER.info("Attempting to connect to WH server at {}", CONFIG.getServerIp());
         protoClient = new ProtocolClient(CONFIG.getServerIp(), successToast, failureToast);
         connectingFuture = protoClient.getConnectingFuture();

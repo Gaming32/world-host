@@ -13,16 +13,33 @@ import org.jetbrains.annotations.NotNull;
 
 //#if MC > 11605
 import net.minecraft.client.gui.components.PlainTextButton;
+
+import java.util.concurrent.Future;
 //#endif
 
 public class OnlineStatusButton extends PlainTextButton {
+    private static final ChatFormatting[] COLORS = {
+        ChatFormatting.RED,
+        ChatFormatting.GOLD,
+        ChatFormatting.DARK_GREEN
+    };
+    private static final Component[] TEXTS = {
+        Components.translatable("world-host.online_status.offline"),
+        Components.translatable("world-host.online_status.connecting"),
+        Components.translatable("world-host.online_status.online")
+    };
+
     private final int rightX;
     private final Font font;
 
-    private boolean wasOnline = WorldHost.protoClient != null;
+    private int currentStatus = getStatus();
 
     public OnlineStatusButton(int rightX, int y, int height, Font font) {
-        super(rightX, y, 0, height, generateStatus(), b -> WorldHost.reconnect(true, true), font);
+        super(rightX, y, 0, height, generateStatusComponent(), b -> {
+            if (getStatus() != 1) {
+                WorldHost.reconnect(true, true);
+            }
+        }, font);
         this.rightX = rightX;
         this.font = font;
         setWidth(font.width(getMessage()));
@@ -35,10 +52,19 @@ public class OnlineStatusButton extends PlainTextButton {
         );
     }
 
-    private static Component generateStatus() {
+    private static int getStatus() {
+        if (WorldHost.protoClient == null) {
+            return 0;
+        }
+        final Future<Void> connectingFuture = WorldHost.protoClient.getConnectingFuture();
+        return connectingFuture.isDone() ? 2 : 1;
+    }
+
+    private static Component generateStatusComponent() {
+        final int status = getStatus();
         return Components.empty()
-            .append(Components.literal("\u25cf").withStyle(WorldHost.protoClient != null ? ChatFormatting.DARK_GREEN : ChatFormatting.RED))
-            .append(" World Host: " + (WorldHost.protoClient != null ? "Online" : "Offline"));
+            .append(Components.literal("\u25cf").withStyle(COLORS[status]))
+            .append(Components.translatable("world-host.online_status", TEXTS[status]));
     }
 
     @Override
@@ -49,11 +75,11 @@ public class OnlineStatusButton extends PlainTextButton {
     //$$ renderButton
     //#endif
         (@NotNull PoseStack poseStack, int i, int j, float f) {
-        //noinspection DoubleNegation
-        if ((WorldHost.protoClient != null) != wasOnline) {
-            wasOnline = WorldHost.protoClient != null;
+        final int status = getStatus();
+        if (status != currentStatus) {
+            currentStatus = status;
             final var accessor = (PlainTextButtonAccessor)this;
-            final Component message = generateStatus();
+            final Component message = generateStatusComponent();
             setMessage(message);
             accessor.setPTBMessage(message);
             accessor.setUnderlinedMessage(ComponentUtils.mergeStyles(message.copy(), Style.EMPTY.applyFormat(ChatFormatting.UNDERLINE)));
@@ -74,4 +100,16 @@ public class OnlineStatusButton extends PlainTextButton {
             //#endif
                 (poseStack, i, j, f);
     }
+
+    //#if MC > 11605
+    @Override
+    public boolean isHoveredOrFocused() {
+        return currentStatus != 1 && super.isHoveredOrFocused();
+    }
+    //#else
+    //$$ @Override
+    //$$ public boolean isHovered() {
+    //$$     return currentStatus != 1 && super.isHovered();
+    //$$ }
+    //#endif
 }
