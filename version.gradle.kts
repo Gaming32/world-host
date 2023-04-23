@@ -49,7 +49,9 @@ dependencies {
         }
     })
 
-    modImplementation("net.fabricmc:fabric-loader:0.14.19")
+    if (mcData.isFabric) {
+        modImplementation("net.fabricmc:fabric-loader:0.14.19")
+    }
 
     includeImplementation("org.quiltmc:quilt-json5:1.0.2")
 
