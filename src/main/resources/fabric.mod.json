@@ -29,5 +29,8 @@
   "depends": {
     "fabricloader": "*",
     "minecraft": "${mc_version == '1.19.4' ? '>=1.19.4' : mc_version}"
+  },
+  "breaks": {
+    ${mc_version == '1.19.4' ? '"modmenu": "<6.2.0"' : ''}
   }
 }

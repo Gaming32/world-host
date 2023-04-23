@@ -59,7 +59,7 @@ dependencies {
 
     if (mcData.isFabric) {
         when (mcData.version) {
-            1_19_04 -> "6.1.0"
+            1_19_04 -> "6.2.1"
             1_19_02 -> "4.2.0-beta.2"
             1_18_02 -> "3.2.5"
             1_16_05 -> "1.16.23"
