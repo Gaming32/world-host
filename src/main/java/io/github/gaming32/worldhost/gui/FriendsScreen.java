@@ -29,7 +29,7 @@ public class FriendsScreen extends WorldHostScreen {
         "world-host.friends.bedrock_notice",
         Components.translatable("world-host.friends.bedrock_notice.link")
             .withStyle(s -> s
-                .withUnderlined(true)
+                .applyFormat(ChatFormatting.UNDERLINE)
                 .withColor(ChatFormatting.BLUE)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://account.xbox.com/Profile"))
             )
