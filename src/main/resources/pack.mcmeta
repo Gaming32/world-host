@@ -1,0 +1,6 @@
+{
+  "pack": {
+    "pack_format": $pack_format,
+    "description": "Assets for the World Host mod"
+  }
+}
