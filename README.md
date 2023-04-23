@@ -5,7 +5,7 @@
 [![Modrinth](https://img.shields.io/modrinth/dt/world-host?color=00AF5C&label=Downloads&style=round&logo=modrinth)](https://modrinth.com/mod/world-host)
 ![Mod Environment](https://img.shields.io/badge/Enviroment-Client-purple?style=round)
 
-[![Server uptime](https://img.shields.io/uptimerobot/ratio/m793898716-1dc62bc23f759a549159ccb0?label=Server%20uptime&color=blue)](https://stats.uptimerobot.com/KmL5JhDV0X)
+[![Server uptime](https://img.shields.io/uptimerobot/ratio/m794216582-8c2e3383b556b643f86c85fe?label=Server%20uptime&color=blue)](https://stats.uptimerobot.com/jL0OztYWBj)
 
 Host your singleplayer worlds **without having to run a server or setup port forwarding!** In the future, we also plan to support Bedrock Edition clients
 through the use of Geyser.
