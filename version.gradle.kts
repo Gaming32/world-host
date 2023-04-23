@@ -94,20 +94,37 @@ preprocess {
     patternAnnotation.set("io.github.gaming32.worldhost.versions.Pattern")
 }
 
+releases {
+    modrinth {
+        projectId.set("world-host")
+    }
+    file("changelogs/${modData.version}.md").let {
+        if (it.exists()) {
+            changelogFile.set(it)
+        }
+    }
+    if (mcData.version == 1_19_04) {
+        gameVersions.add("23w13a_or_b")
+    }
+    if (mcData.isFabric) {
+        loaders.add("Quilt")
+    }
+}
+
 tasks.processResources {
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
-            mcData.version >= 11904 -> 13
-            mcData.version >= 11903 -> 12
-            mcData.version >= 11900 -> 9
-            mcData.version >= 11800 -> 8
-            mcData.version >= 11700 -> 7
-            mcData.version >= 11602 -> 6
-            mcData.version >= 11500 -> 5
-            mcData.version >= 11300 -> 4
-            mcData.version >= 11100 -> 3
-            mcData.version >= 10900 -> 2
-            mcData.version >= 10601 -> 1
+            mcData.version >= 1_19_04 -> 13
+            mcData.version >= 1_19_03 -> 12
+            mcData.version >= 1_19_00 -> 9
+            mcData.version >= 1_18_00 -> 8
+            mcData.version >= 1_17_00 -> 7
+            mcData.version >= 1_16_02 -> 6
+            mcData.version >= 1_15_00 -> 5
+            mcData.version >= 1_13_00 -> 4
+            mcData.version >= 1_11_00 -> 3
+            mcData.version >= 1_09_00 -> 2
+            mcData.version >= 1_06_01 -> 1
             else -> return@filesMatching
         })
     }
