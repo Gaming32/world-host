@@ -109,6 +109,7 @@ releases {
         loaders.add("fabric")
         loaders.add("quilt")
         if (mcData.version == 1_19_04) {
+            gameVersions.add("1.19.4")
             gameVersions.add("23w13a_or_b")
         }
     }
