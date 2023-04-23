@@ -1,15 +1,16 @@
+<a href="https://modrinth.com/mod/world-host"><img alt="WH icon" width="280" align="right" src="https://raw.githubusercontent.com/Gaming32/world-host/main/common/src/main/resources/assets/world-host-common/icon.png"></a>
+
 # World Host
 
-[![build](https://img.shields.io/github/actions/workflow/status/Gaming32/world-host/gradle.yml?branch=main)](https://github.com/Gaming32/world-host/actions/workflows/gradle.yml)
-[![modrinth](https://img.shields.io/modrinth/v/2AIZDfYo?color=success&label=modrinth)](https://modrinth.com/mod/world-host)
-<br>
-[
-![server uptime](https://img.shields.io/uptimerobot/ratio/m793898716-1dc62bc23f759a549159ccb0?label=server%20uptime)
-](https://stats.uptimerobot.com/KmL5JhDV0X)
+[![Modrinth](https://img.shields.io/modrinth/dt/world-host?color=00AF5C&label=downloads&style=round&logo=modrinth)](https://modrinth.com/mod/world-host)
+[![Mod Environment](https://img.shields.io/badge/Enviroment-Client-purple?style=round)]()
 
-Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser.
+[![Server uptime](https://img.shields.io/uptimerobot/ratio/m793898716-1dc62bc23f759a549159ccb0?label=Server%20uptime&color=blue)](https://stats.uptimerobot.com/KmL5JhDV0X)
 
-[See the status page](https://stats.uptimerobot.com/KmL5JhDV0X)
+Host your singleplayer worlds **without having to run a server**
+<br /> **or setup port forwarding!** <br />
+In the future, we also plan to support Bedrock Edition clients<br />
+through the use of Geyser.
 
 ## What if my friend doesn't have the mod installed?
 
@@ -26,3 +27,7 @@ This mod has a server that your client connects to, this server is used to commu
 5. If UPnP fails, then your client tells the server to use Proxy mode. The server will then give your friend's client the same "proxy IP" as `/worldhost ip` does. 
  
 <!-- `/worldhost tempip` tries to do this whole process with trying UPnP first instead of just giving you the proxy IP straightaway. -->
+
+## License
+
+The mod is open source and licensed under the [MIT License](LICENSE).
