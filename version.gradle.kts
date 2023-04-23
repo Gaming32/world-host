@@ -106,6 +106,7 @@ releases {
     val loaderName = if (mcData.isFabric) "Fabric/Quilt" else "Forge"
     releaseName.set("[${mcData.versionStr} $loaderName] ${modData.name} ${modData.version}")
     if (mcData.isFabric) {
+        loaders.add("fabric")
         loaders.add("quilt")
         if (mcData.version == 1_19_04) {
             gameVersions.add("23w13a_or_b")
