@@ -1,5 +1,8 @@
+import xyz.deftu.gradle.tools.minecraft.VersionType
+
 plugins {
     java
+    `maven-publish`
     id("xyz.deftu.gradle.multiversion")
     id("xyz.deftu.gradle.tools")
     id("xyz.deftu.gradle.tools.blossom")
@@ -115,6 +118,23 @@ releases {
         if (mcData.version == 1_19_04) {
             gameVersions.add("1.19.4")
             gameVersions.add("23w13a_or_b")
+        }
+    } else {
+        if (mcData.version == 1_16_05) {
+            releaseName.set("[BROKEN] ${releaseName.get()}")
+            versionType.set(VersionType.ALPHA)
+        }
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = modData.group
+            artifactId = modData.id
+            version = project.version.toString()
+
+            from(components["java"])
         }
     }
 }

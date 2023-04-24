@@ -120,52 +120,7 @@ public class WorldHost
     public static final Path OLD_CONFIG_FILE = new File(CONFIG_DIR, "world-host.json").toPath();
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
-    public static final List<String> WORDS_FOR_CID =
-        //#if FABRIC
-        FabricLoader.getInstance()
-            .getModContainer(MOD_ID)
-            .flatMap(c -> c.findPath("assets/world-host/16k.txt"))
-            .map(path -> {
-                try {
-                    return Files.lines(path, StandardCharsets.US_ASCII);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            })
-        //#else
-        //$$ ResourcePackLoader
-            //#if MC > 11605
-            //$$ .getPackFor(MOD_ID)
-            //#else
-            //$$ .getResourcePackFor(MOD_ID)
-            //#endif
-        //$$     .map(c -> {
-                //#if MC <= 11902
-                //$$ try {
-                //#endif
-        //$$             return c.getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k"));
-                //#if MC <= 11902
-                //$$ } catch (IOException e) {
-                //$$     throw new UncheckedIOException(e);
-                //$$ }
-                //#endif
-        //$$     })
-            //#if MC > 11902
-            //$$ .map(i -> {
-            //$$     try {
-            //$$         return i.get();
-            //$$     } catch (IOException e) {
-            //$$         throw new UncheckedIOException(e);
-            //$$     }
-            //$$ })
-            //#endif
-        //$$     .map(is -> new InputStreamReader(is, StandardCharsets.US_ASCII))
-        //$$     .map(BufferedReader::new)
-        //$$     .map(BufferedReader::lines)
-        //#endif
-            .orElseThrow(() -> new IllegalStateException("Unable to find 16k.txt"))
-            .filter(s -> !s.startsWith("//"))
-            .toList();
+    private static List<String> wordsForCid;
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
 
@@ -192,12 +147,6 @@ public class WorldHost
     private static long lastReconnectTime;
     private static Future<Void> connectingFuture;
 
-    static {
-        if (WORDS_FOR_CID.size() != (1 << 14)) {
-            throw new RuntimeException("Expected WORDS_FOR_CID to have " + (1 << 14) + " elements, but it has " + WORDS_FOR_CID.size() + " elements.");
-        }
-    }
-
     //#if FABRIC
     @Override
     public void onInitializeClient() {
@@ -206,6 +155,57 @@ public class WorldHost
     //#endif
 
     private static void init() {
+        wordsForCid =
+            //#if FABRIC
+            FabricLoader.getInstance()
+                .getModContainer(MOD_ID)
+                .flatMap(c -> c.findPath("assets/world-host/16k.txt"))
+                .map(path -> {
+                    try {
+                        return Files.lines(path, StandardCharsets.US_ASCII);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                })
+            //#else
+            //$$ ResourcePackLoader
+                //#if MC > 11605
+                //$$ .getPackFor(MOD_ID)
+                //#else
+                //$$ .getResourcePackFor(MOD_ID)
+                //#endif
+            //$$     .map(c -> {
+                    //#if MC <= 11902
+                    //$$ try {
+                    //#endif
+            //$$             return c.getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k.txt"));
+                    //#if MC <= 11902
+                    //$$ } catch (IOException e) {
+                    //$$     throw new UncheckedIOException(e);
+                    //$$ }
+                    //#endif
+            //$$     })
+                //#if MC > 11902
+                //$$ .map(i -> {
+                //$$     try {
+                //$$         return i.get();
+                //$$     } catch (IOException e) {
+                //$$         throw new UncheckedIOException(e);
+                //$$     }
+                //$$ })
+                //#endif
+            //$$     .map(is -> new InputStreamReader(is, StandardCharsets.US_ASCII))
+            //$$     .map(BufferedReader::new)
+            //$$     .map(BufferedReader::lines)
+            //#endif
+                .orElseThrow(() -> new IllegalStateException("Unable to find 16k.txt"))
+                .filter(s -> !s.startsWith("//"))
+                .toList();
+
+        if (wordsForCid.size() != (1 << 14)) {
+            throw new RuntimeException("Expected WORDS_FOR_CID to have " + (1 << 14) + " elements, but it has " + wordsForCid.size() + " elements.");
+        }
+
         LOGGER.info("Using client-generated connection ID {}", connectionIdToString(CONNECTION_ID));
 
         loadConfig();
@@ -501,9 +501,9 @@ public class WorldHost
         final int first = (int)(connectionId & 0x3fff);
         final int second = (int)(connectionId >>> 14) & 0x3fff;
         final int third = (int)(connectionId >>> 28) & 0x3fff;
-        return WORDS_FOR_CID.get(first) + '-' +
-            WORDS_FOR_CID.get(second) + '-' +
-            WORDS_FOR_CID.get(third);
+        return wordsForCid.get(first) + '-' +
+            wordsForCid.get(second) + '-' +
+            wordsForCid.get(third);
     }
 
     private static int ipCommand(CommandContext<CommandSourceStack> ctx) {
