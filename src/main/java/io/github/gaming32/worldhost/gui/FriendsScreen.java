@@ -48,17 +48,15 @@ public class FriendsScreen extends WorldHostScreen {
     protected void init() {
         super.init();
 
-        final boolean bedrockLink = WorldHost.HAVE_ANY_BEDROCK;
-
         if (list == null) {
-            list = addWidget(new FriendsList(width, height, 32, height - (bedrockLink ? 80 : 64), 36));
+            list = addWidget(new FriendsList(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64), 36));
             //#if MC > 11601
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
             //#endif
         } else {
-            list.updateSize(width, height, 32, height - (bedrockLink ? 80 : 64));
+            list.updateSize(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64));
         }
 
         addRenderableWidget(
@@ -121,7 +119,7 @@ public class FriendsScreen extends WorldHostScreen {
         renderBackground(poseStack);
         list.render(poseStack, mouseX, mouseY, delta);
         drawCenteredString(poseStack, font, title, width / 2, 15, 0xffffff);
-        if (WorldHost.HAVE_ANY_BEDROCK) {
+        if (WorldHost.BEDROCK_SUPPORT) {
             drawCenteredString(poseStack, font, BEDROCK_FRIENDS_TEXT, width / 2, height - 66 - font.lineHeight / 2, 0xffffff);
         }
         super.render(poseStack, mouseX, mouseY, delta);
@@ -129,7 +127,7 @@ public class FriendsScreen extends WorldHostScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (WorldHost.HAVE_ANY_BEDROCK) {
+        if (WorldHost.BEDROCK_SUPPORT) {
             final int textWidth = font.width(BEDROCK_FRIENDS_TEXT);
             final int textX = width / 2 - textWidth / 2;
             if (mouseX >= textX && mouseX <= textX + textWidth) {

@@ -177,21 +177,12 @@ public class WorldHost
 
     public static final long CONNECTION_ID = new SecureRandom().nextLong(MAX_CONNECTION_IDS);
 
-    public static final boolean HAVE_GEYSER =
+    public static final boolean BEDROCK_SUPPORT =
         //#if FABRIC
-        FabricLoader.getInstance().isModLoaded("geyser-fabric");
+        FabricLoader.getInstance().isModLoaded("world-host-bedrock");
         //#else
         //$$ false;
         //#endif
-
-    public static final boolean HAVE_VFP =
-        //#if FABRIC
-        FabricLoader.getInstance().isModLoaded("viafabricplus");
-        //#else
-        //$$ false;
-        //#endif
-
-    public static final boolean HAVE_ANY_BEDROCK = HAVE_GEYSER || HAVE_VFP;
 
     public static Gateway upnpGateway;
 
