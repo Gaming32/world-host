@@ -29,7 +29,11 @@ public class MixinShareToLanScreen {
     //$$ @ModifyArgs(
     //$$     method =
             //#if MC < 11802
+            //#if FABRIC
             //$$ "lambda$init$0",
+            //#else
+            //$$ "func_213082_d", // Mixin can't find lambda$init$0 for some reason, so have an obfuscated method name :)
+            //#endif
             //#else
             //$$ "lambda$init$2",
             //#endif
