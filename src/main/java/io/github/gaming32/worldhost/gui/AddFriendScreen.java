@@ -109,7 +109,7 @@ public class AddFriendScreen extends WorldHostScreen {
 
     @Override
     public void tick() {
-        super.tick();
+        usernameField.tick();
         if (Util.getMillis() - 300 > lastTyping && usernameUpdate) {
             usernameUpdate = false;
             final String username = usernameField.getValue();

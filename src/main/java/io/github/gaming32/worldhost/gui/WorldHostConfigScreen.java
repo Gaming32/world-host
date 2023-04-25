@@ -128,4 +128,9 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             WorldHost.protoClient.closedWorld(WorldHost.CONFIG.getFriends());
         }
     }
+
+    @Override
+    public void tick() {
+        serverIpBox.tick();
+    }
 }
