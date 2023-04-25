@@ -28,6 +28,7 @@ public class AddFriendScreen extends WorldHostScreen {
     private final Screen parent;
     private final Consumer<GameProfile> addAction;
 
+    private Consumer<String> usernameResponder;
     private Button addFriendButton;
     private EditBox usernameField;
     private long lastTyping;
@@ -68,12 +69,15 @@ public class AddFriendScreen extends WorldHostScreen {
         usernameField = addWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(16);
         usernameField.setFocused(true);
-        usernameField.setResponder(text -> {
-            lastTyping = Util.getMillis();
-            usernameUpdate = true;
-            friendProfile = null;
-            addFriendButton.active = false;
-        });
+        if (usernameResponder == null) {
+            // Only set the responder here on first init
+            usernameField.setResponder(usernameResponder = text -> {
+                lastTyping = Util.getMillis();
+                usernameUpdate = true;
+                friendProfile = null;
+                addFriendButton.active = false;
+            });
+        }
     }
 
     @Override
@@ -81,6 +85,8 @@ public class AddFriendScreen extends WorldHostScreen {
         final String oldUsername = usernameField.getValue();
         super.resize(minecraft, width, height);
         usernameField.setValue(oldUsername);
+        // Make sure to set the responder *after* the value
+        usernameField.setResponder(usernameResponder);
     }
 
     @Override
