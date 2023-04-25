@@ -99,7 +99,7 @@ public sealed interface WorldHostS2CMessage {
             if (WorldHost.isFriend(user)) {
                 final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
                 if (server == null || !server.isPublished()) return;
-                if (WorldHost.upnpGateway != null) {
+                if (WorldHost.upnpGateway != null && !WorldHost.CONFIG.isNoUPnP()) {
                     try {
                         final UPnPErrors.AddPortMappingErrors error = WorldHost.upnpGateway.openPort(
                             server.getPort(), 60, false

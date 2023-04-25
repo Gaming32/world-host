@@ -17,6 +17,8 @@ public class WorldHostConfig {
 
     private boolean enableReconnectionToasts = false;
 
+    private boolean noUPnP = false;
+
     private final Set<UUID> friends = new LinkedHashSet<>();
 
     public void read(JsonReader reader) throws IOException {
@@ -42,6 +44,7 @@ public class WorldHostConfig {
                 case "showOnlineStatus" -> showOnlineStatus = reader.nextBoolean();
                 case "enableFriends" -> enableFriends = reader.nextBoolean();
                 case "enableReconnectionToasts" -> enableReconnectionToasts = reader.nextBoolean();
+                case "noUPnP" -> noUPnP = reader.nextBoolean();
                 case "friends" -> {
                     friends.clear();
                     reader.beginArray();
@@ -65,6 +68,7 @@ public class WorldHostConfig {
         writer.name("showOnlineStatus").value(showOnlineStatus);
         writer.name("enableFriends").value(enableFriends);
         writer.name("enableReconnectionToasts").value(enableReconnectionToasts);
+        writer.name("noUPnP").value(noUPnP);
 
         writer.name("friends").beginArray();
         for (final UUID friend : friends) {
@@ -105,6 +109,14 @@ public class WorldHostConfig {
 
     public void setEnableReconnectionToasts(boolean enableReconnectionToasts) {
         this.enableReconnectionToasts = enableReconnectionToasts;
+    }
+
+    public boolean isNoUPnP() {
+        return noUPnP;
+    }
+
+    public void setNoUPnP(boolean noUPnP) {
+        this.noUPnP = noUPnP;
     }
 
     public Set<UUID> getFriends() {

@@ -139,6 +139,7 @@ public class WorldHost
         //$$ false;
         //#endif
 
+    private static boolean hasScannedForUpnp;
     public static Gateway upnpGateway;
 
     private static GameProfileCache profileCache;
@@ -235,10 +236,9 @@ public class WorldHost
 
         reconnect(false, true);
 
-        new GatewayFinder(gateway -> {
-            upnpGateway = gateway;
-            LOGGER.info("Found UPnP gateway: {}", gateway.getGatewayIP());
-        });
+        if (!CONFIG.isNoUPnP()) {
+            scanUpnp();
+        }
     }
 
     public static void loadConfig() {
@@ -305,7 +305,7 @@ public class WorldHost
                 .executes(WorldHost::ipCommand)
             )
             .then(literal("tempip")
-                .requires(s -> s.getServer().isPublished())
+                .requires(s -> !CONFIG.isNoUPnP() && s.getServer().isPublished())
                 .executes(ctx -> {
                     if (upnpGateway != null && protoClient != null && !protoClient.getUserIp().isEmpty()) {
                         try {
@@ -330,6 +330,16 @@ public class WorldHost
                 })
             )
         );
+    }
+
+    public static void scanUpnp() {
+        if (hasScannedForUpnp) return;
+        hasScannedForUpnp = true;
+        LOGGER.info("Scanning for UPnP gateway");
+        new GatewayFinder(gateway -> {
+            upnpGateway = gateway;
+            LOGGER.info("Found UPnP gateway: {}", gateway.getGatewayIP());
+        });
     }
 
     public static void reconnect(boolean successToast, boolean failureToast) {

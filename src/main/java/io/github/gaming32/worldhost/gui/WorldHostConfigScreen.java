@@ -17,6 +17,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component SHOW_ONLINE_STATUS = Components.translatable("world-host.config.showOnlineStatus");
     private static final Component ENABLE_FRIENDS = Components.translatable("world-host.config.enableFriends");
     private static final Component ENABLE_RECONNECTION_TOASTS = Components.translatable("world-host.config.enableReconnectionToasts");
+    private static final Component NO_UPNP = Components.translatable("world-host.config.noUPnP");
 
     private final Screen parent;
 
@@ -68,11 +69,21 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             }
         )).setToggled(WorldHost.CONFIG.isEnableReconnectionToasts());
 
+        addRenderableWidget(new YesNoButton(
+            width / 2 + 5, yOffset + 96, 150, 20,
+            Components.translatable("world-host.config.noUPnP.tooltip"),
+            button -> {
+                WorldHost.CONFIG.setNoUPnP(button.isToggled());
+                WorldHost.saveConfig();
+                WorldHost.scanUpnp();
+            }
+        )).setToggled(WorldHost.CONFIG.isNoUPnP());
+
         addRenderableWidget(
             button(WorldHostComponents.FRIENDS, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new FriendsScreen(this));
-            }).pos(width / 2 - 155, yOffset + 120)
+            }).pos(width / 2 - 155, yOffset + 144)
                 .build()
         );
 
@@ -80,7 +91,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             button(CommonComponents.GUI_DONE, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(parent);
-            }).pos(width / 2 + 5, yOffset + 120)
+            }).pos(width / 2 + 5, yOffset + 144)
                 .build()
         );
     }
@@ -103,6 +114,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         drawRightString(poseStack, font, SHOW_ONLINE_STATUS, width / 2 - 5, yOffset + 24, 0xffffff);
         drawRightString(poseStack, font, ENABLE_FRIENDS, width / 2 - 5, yOffset + 48, 0xffffff);
         drawRightString(poseStack, font, ENABLE_RECONNECTION_TOASTS, width / 2 - 5, yOffset + 72, 0xffffff);
+        drawRightString(poseStack, font, NO_UPNP, width / 2 - 5, yOffset + 96, 0xffffff);
     }
 
     @Override
@@ -111,12 +123,8 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             WorldHost.CONFIG.setServerIp(serverIpBox.getValue());
             WorldHost.saveConfig();
             WorldHost.reconnect(true, true);
-        } else if (
-            oldEnableFriends &&
-                !WorldHost.CONFIG.isEnableFriends() &&
-                WorldHost.protoClient != null &&
-                !WorldHost.protoClient.isClosed()
-        ) {
+        }
+        if (oldEnableFriends && !WorldHost.CONFIG.isEnableFriends() && WorldHost.protoClient != null) {
             WorldHost.protoClient.closedWorld(WorldHost.CONFIG.getFriends());
         }
     }
