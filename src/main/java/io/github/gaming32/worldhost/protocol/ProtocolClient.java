@@ -124,7 +124,13 @@ public class ProtocolClient implements AutoCloseable {
                         bis.setPropagateClose(false);
                         final CountingInputStream cis = new CountingInputStream(bis);
                         final WorldHostS2CMessage message = WorldHostS2CMessage.decode(new DataInputStream(cis));
-                        dis.skipNBytes(length - cis.getCount());
+                        if (cis.getCount() < length) {
+                            WorldHost.LOGGER.warn(
+                                "Didn't read entire message (read: {}, total: {}, message: {})",
+                                cis.getCount(), length, message
+                            );
+                            dis.skipNBytes(length - cis.getCount());
+                        }
                         WorldHost.LOGGER.debug("Received {}", message);
                         message.handle(this);
                     }
