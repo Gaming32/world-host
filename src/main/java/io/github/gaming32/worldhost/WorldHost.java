@@ -288,7 +288,7 @@ public class WorldHost
         }
         if (connectingFuture != null && connectingFuture.isDone()) {
             connectingFuture = null;
-            LOGGER.info("Finished authenticating with WS server. Requesting friends list.");
+            LOGGER.info("Finished authenticating with WH server. Requesting friends list.");
             ONLINE_FRIENDS.clear();
             protoClient.listOnline(CONFIG.getFriends());
             final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
