@@ -78,6 +78,20 @@ dependencies {
     }
 
     modRuntimeOnly("me.djtheredstoner:DevAuth-${if (mcData.isFabric) "fabric" else "forge-latest"}:1.1.2")
+
+    if (mcData.isFabric) {
+        when (mcData.version) {
+            1_19_04 -> "0.79.0+1.19.4"
+            1_19_02 -> "0.76.0+1.19.2"
+            1_18_02 -> "0.76.0+1.18.2"
+            1_16_05, 1_16_01 -> "0.42.0+1.16"
+            else -> null
+        }?.let { fabricApi.module("fabric-resource-loader-v0", it) }
+            ?.let {
+                modImplementation(it)
+                bundle(it)
+            }
+    }
 }
 
 java {
