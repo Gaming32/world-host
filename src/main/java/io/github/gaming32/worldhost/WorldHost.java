@@ -508,6 +508,9 @@ public class WorldHost
         if (connectionId < 0 || connectionId >= MAX_CONNECTION_IDS) {
             throw new IllegalArgumentException("Invalid connection ID " + connectionId);
         }
+        if (CONFIG.isUseShortIp()) {
+            return StringUtils.leftPad(Long.toString(connectionId, 36), 9, '0');
+        }
         final int first = (int)(connectionId & 0x3fff);
         final int second = (int)(connectionId >>> 14) & 0x3fff;
         final int third = (int)(connectionId >>> 28) & 0x3fff;

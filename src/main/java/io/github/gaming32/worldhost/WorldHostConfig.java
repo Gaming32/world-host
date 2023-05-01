@@ -19,6 +19,8 @@ public class WorldHostConfig {
 
     private boolean noUPnP = false;
 
+    private boolean useShortIp = false;
+
     private final Set<UUID> friends = new LinkedHashSet<>();
 
     public void read(JsonReader reader) throws IOException {
@@ -45,6 +47,7 @@ public class WorldHostConfig {
                 case "enableFriends" -> enableFriends = reader.nextBoolean();
                 case "enableReconnectionToasts" -> enableReconnectionToasts = reader.nextBoolean();
                 case "noUPnP" -> noUPnP = reader.nextBoolean();
+                case "useShortIp" -> useShortIp = reader.nextBoolean();
                 case "friends" -> {
                     friends.clear();
                     reader.beginArray();
@@ -69,6 +72,7 @@ public class WorldHostConfig {
         writer.name("enableFriends").value(enableFriends);
         writer.name("enableReconnectionToasts").value(enableReconnectionToasts);
         writer.name("noUPnP").value(noUPnP);
+        writer.name("useShortIp").value(useShortIp);
 
         writer.name("friends").beginArray();
         for (final UUID friend : friends) {
@@ -117,6 +121,14 @@ public class WorldHostConfig {
 
     public void setNoUPnP(boolean noUPnP) {
         this.noUPnP = noUPnP;
+    }
+
+    public boolean isUseShortIp() {
+        return useShortIp;
+    }
+
+    public void setUseShortIp(boolean useShortIp) {
+        this.useShortIp = useShortIp;
     }
 
     public Set<UUID> getFriends() {

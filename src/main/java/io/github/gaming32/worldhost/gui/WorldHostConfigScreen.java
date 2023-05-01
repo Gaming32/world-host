@@ -18,6 +18,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component ENABLE_FRIENDS = Components.translatable("world-host.config.enableFriends");
     private static final Component ENABLE_RECONNECTION_TOASTS = Components.translatable("world-host.config.enableReconnectionToasts");
     private static final Component NO_UPNP = Components.translatable("world-host.config.noUPnP");
+    private static final Component USE_SHORT_IP = Components.translatable("world-host.config.useShortIp");
 
     private final Screen parent;
 
@@ -79,11 +80,20 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             }
         )).setToggled(WorldHost.CONFIG.isNoUPnP());
 
+        addRenderableWidget(new YesNoButton(
+            width / 2 + 5, yOffset + 120, 150, 20,
+            Components.translatable("world-host.config.useShortIp.tooltip"),
+            button -> {
+                WorldHost.CONFIG.setUseShortIp(button.isToggled());
+                WorldHost.saveConfig();
+            }
+        )).setToggled(WorldHost.CONFIG.isUseShortIp());
+
         addRenderableWidget(
             button(WorldHostComponents.FRIENDS, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new FriendsScreen(this));
-            }).pos(width / 2 - 155, yOffset + 144)
+            }).pos(width / 2 - 155, yOffset + 168)
                 .build()
         );
 
@@ -91,7 +101,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             button(CommonComponents.GUI_DONE, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(parent);
-            }).pos(width / 2 + 5, yOffset + 144)
+            }).pos(width / 2 + 5, yOffset + 168)
                 .build()
         );
     }
@@ -115,6 +125,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         drawRightString(poseStack, font, ENABLE_FRIENDS, width / 2 - 5, yOffset + 48, 0xffffff);
         drawRightString(poseStack, font, ENABLE_RECONNECTION_TOASTS, width / 2 - 5, yOffset + 72, 0xffffff);
         drawRightString(poseStack, font, NO_UPNP, width / 2 - 5, yOffset + 96, 0xffffff);
+        drawRightString(poseStack, font, USE_SHORT_IP, width / 2 - 5, yOffset + 120, 0xffffff);
     }
 
     @Override
