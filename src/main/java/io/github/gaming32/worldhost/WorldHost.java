@@ -6,6 +6,8 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
+import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
+import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
@@ -33,6 +35,7 @@ import org.quiltmc.json5.JsonReader;
 import org.quiltmc.json5.JsonWriter;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -145,6 +148,7 @@ public class WorldHost
     private static GameProfileCache profileCache;
 
     public static ProtocolClient protoClient;
+    public static ProxyProtocolClient proxyProtocolClient;
     private static long lastReconnectTime;
     private static Future<Void> connectingFuture;
 
@@ -276,8 +280,10 @@ public class WorldHost
 
     public static void tickHandler() {
         if (protoClient == null || protoClient.isClosed()) {
-            if (protoClient != null) {
-                protoClient = null;
+            protoClient = null;
+            if (proxyProtocolClient != null) {
+                proxyProtocolClient.close();
+                proxyProtocolClient = null;
             }
             connectingFuture = null;
             final long time = Util.getMillis();
@@ -285,6 +291,9 @@ public class WorldHost
                 lastReconnectTime = time;
                 reconnect(CONFIG.isEnableReconnectionToasts(), false);
             }
+        }
+        if (proxyProtocolClient != null && proxyProtocolClient.isClosed()) {
+            proxyProtocolClient = null;
         }
         if (connectingFuture != null && connectingFuture.isDone()) {
             connectingFuture = null;
@@ -346,6 +355,10 @@ public class WorldHost
         if (protoClient != null) {
             protoClient.close();
             protoClient = null;
+        }
+        if (proxyProtocolClient != null) {
+            proxyProtocolClient.close();
+            proxyProtocolClient = null;
         }
         final UUID uuid = Minecraft.getInstance().getUser().getGameProfile().getId();
         if (uuid == null) {
@@ -487,12 +500,20 @@ public class WorldHost
 
     @Nullable
     public static String getExternalIp() {
+        if (proxyProtocolClient != null) {
+            LOGGER.info("Using external proxy for external IP");
+            return getExternalIp0(proxyProtocolClient.getBaseAddr(), proxyProtocolClient.getMcPort());
+        }
         if (protoClient.getBaseIp().isEmpty()) {
             return null;
         }
-        String ip = connectionIdToString(protoClient.getConnectionId()) + '.' + protoClient.getBaseIp();
-        if (protoClient.getBasePort() != 25565) {
-            ip += ":" + protoClient.getBasePort();
+        return getExternalIp0(protoClient.getBaseIp(), protoClient.getBasePort());
+    }
+
+    private static String getExternalIp0(String baseIp, int basePort) {
+        String ip = connectionIdToString(protoClient.getConnectionId()) + '.' + baseIp;
+        if (basePort != 25565) {
+            ip += ":" + basePort;
         }
         return ip;
     }
@@ -537,6 +558,46 @@ public class WorldHost
             false
         );
         return Command.SINGLE_SUCCESS;
+    }
+
+    public static void proxyConnect(long connectionId, InetAddress remoteAddr, Supplier<ProxyPassthrough> proxy) {
+        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+        if (server == null || !server.isPublished()) {
+            if (protoClient != null) {
+                protoClient.proxyDisconnect(connectionId);
+            }
+            return;
+        }
+        try {
+            final ProxyClient proxyClient = new ProxyClient(server.getPort(), remoteAddr, connectionId, proxy);
+            WorldHost.CONNECTED_PROXY_CLIENTS.put(connectionId, proxyClient);
+            proxyClient.start();
+        } catch (IOException e) {
+            WorldHost.LOGGER.error("Failed to start ProxyClient", e);
+        }
+    }
+
+    // TODO: Implement using a proper Netty channel to introduce packets directly to the Netty pipeline somehow.
+    public static void proxyPacket(long connectionId, byte[] data) {
+        final ProxyClient proxyClient = WorldHost.CONNECTED_PROXY_CLIENTS.get(connectionId);
+        if (proxyClient != null) {
+            try {
+                proxyClient.getOutputStream().write(data);
+            } catch (IOException e) {
+                WorldHost.LOGGER.error("Failed to write to ProxyClient", e);
+            }
+        } else {
+            WorldHost.LOGGER.warn("Received packet for unknown connection {}", connectionId);
+        }
+    }
+
+    public static void proxyDisconnect(long connectionId) {
+        final ProxyClient proxyClient = WorldHost.CONNECTED_PROXY_CLIENTS.remove(connectionId);
+        if (proxyClient != null) {
+            proxyClient.close();
+        } else {
+            WorldHost.LOGGER.warn("Received disconnect from unknown connection {}", connectionId);
+        }
     }
 
     //#if FORGE

@@ -1,23 +1,37 @@
 package io.github.gaming32.worldhost;
 
+import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.function.Supplier;
 
 public class ProxyClient extends Thread {
     private final Socket socket;
     private final InetAddress remoteAddress;
     private final long connectionId;
+    private final Supplier<ProxyPassthrough> proxy;
+
     private boolean closed;
 
-    public ProxyClient(int port, InetAddress remoteAddress, long connectionId) throws IOException {
+    public ProxyClient(
+        int port,
+        InetAddress remoteAddress,
+        long connectionId,
+        Supplier<ProxyPassthrough> proxy
+    ) throws IOException {
         super("ProxyClient for " + connectionId);
         socket = new Socket(InetAddress.getLoopbackAddress(), port);
         this.remoteAddress = remoteAddress;
         this.connectionId = connectionId;
+        this.proxy = proxy;
+        if (proxy.get() == null) {
+            WorldHost.LOGGER.error("ProxyPassthrough for {} ({}) is initially null.", connectionId, remoteAddress);
+        }
     }
 
     @Override
@@ -28,17 +42,19 @@ public class ProxyClient extends Thread {
             final byte[] b = new byte[64 * 1024];
             int n;
             while ((n = is.read(b)) != -1) {
-                if (WorldHost.protoClient == null) break;
+                final ProxyPassthrough proxy = this.proxy.get();
+                if (proxy == null) break;
                 if (n == 0) continue;
-                WorldHost.protoClient.proxyS2CPacket(connectionId, Arrays.copyOf(b, n));
+                proxy.proxyS2CPacket(connectionId, Arrays.copyOf(b, n));
             }
         } catch (IOException e) {
             WorldHost.LOGGER.error("Proxy client connection for {} has error", remoteAddress, e);
         }
         WorldHost.CONNECTED_PROXY_CLIENTS.remove(connectionId);
         close();
-        if (WorldHost.protoClient != null) {
-            WorldHost.protoClient.proxyDisconnect(connectionId);
+        final ProxyPassthrough proxy = this.proxy.get();
+        if (proxy != null) {
+            proxy.proxyDisconnect(connectionId);
         }
         WorldHost.LOGGER.info("Proxy client connection for {} closed", remoteAddress);
     }

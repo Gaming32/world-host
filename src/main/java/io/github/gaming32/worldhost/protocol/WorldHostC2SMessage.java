@@ -111,14 +111,6 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    enum EndMarker implements WorldHostC2SMessage {
-        INSTANCE;
-
-        @Override
-        public void encode(DataOutputStream dos) {
-        }
-    }
-
     void encode(DataOutputStream dos) throws IOException;
 
     static void writeUuid(DataOutputStream dos, UUID uuid) throws IOException {

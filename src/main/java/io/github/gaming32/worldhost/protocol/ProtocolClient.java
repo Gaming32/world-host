@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.protocol;
 import com.google.common.net.HostAndPort;
 import io.github.gaming32.worldhost.DeferredToastManager;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.components.toasts.SystemToast;
 import org.apache.commons.io.input.BoundedInputStream;
@@ -10,23 +11,24 @@ import org.apache.commons.io.input.CountingInputStream;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ProtocolClient implements AutoCloseable {
-    public static final int PROTOCOL_VERSION = 2;
+public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
+    public static final int PROTOCOL_VERSION = 3;
 
     private final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
-    private final BlockingQueue<WorldHostC2SMessage> sendQueue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<Optional<WorldHostC2SMessage>> sendQueue = new LinkedBlockingQueue<>();
 
     private BlockingQueue<UUID> authUuid = new LinkedBlockingQueue<>(1);
 
-    private boolean authenticated,
-        closed;
+    private boolean authenticated, closed;
 
     private long connectionId = WorldHost.CONNECTION_ID;
     private String baseIp = "";
@@ -94,9 +96,9 @@ public class ProtocolClient implements AutoCloseable {
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     final DataOutputStream tempDos = new DataOutputStream(baos);
                     while (!closed) {
-                        final WorldHostC2SMessage message = sendQueue.take();
-                        if (message == WorldHostC2SMessage.EndMarker.INSTANCE) break;
-                        message.encode(tempDos);
+                        final var message = sendQueue.take();
+                        if (message.isEmpty()) break;
+                        message.get().encode(tempDos);
                         dos.writeInt(baos.size());
                         dos.write(baos.toByteArray());
                         baos.reset();
@@ -123,7 +125,14 @@ public class ProtocolClient implements AutoCloseable {
                         final BoundedInputStream bis = new BoundedInputStream(dis, length);
                         bis.setPropagateClose(false);
                         final CountingInputStream cis = new CountingInputStream(bis);
-                        final WorldHostS2CMessage message = WorldHostS2CMessage.decode(new DataInputStream(cis));
+                        WorldHostS2CMessage message = null;
+                        try {
+                            message = WorldHostS2CMessage.decode(new DataInputStream(cis));
+                        } catch (EOFException e) {
+                            WorldHost.LOGGER.error("Message decoder read past end!");
+                        } catch (Exception e) {
+                            WorldHost.LOGGER.error("Error decoding WH message", e);
+                        }
                         if (cis.getCount() < length) {
                             WorldHost.LOGGER.warn(
                                 "Didn't read entire message (read: {}, total: {}, message: {})",
@@ -131,13 +140,14 @@ public class ProtocolClient implements AutoCloseable {
                             );
                             dis.skipNBytes(length - cis.getCount());
                         }
+                        if (message == null) continue; // An error occurred!
                         WorldHost.LOGGER.debug("Received {}", message);
                         message.handle(this);
                     }
-                } catch (EOFException e) {
-                    WorldHost.LOGGER.error("Message decoder read past end!");
                 } catch (Exception e) {
-                    WorldHost.LOGGER.error("Critical error in WH recv thread", e);
+                    if (!(e instanceof SocketException) || !e.getMessage().equals("Socket closed")) {
+                        WorldHost.LOGGER.error("Critical error in WH recv thread", e);
+                    }
                 }
                 closed = true;
             }, "WH-RecvThread");
@@ -148,7 +158,7 @@ public class ProtocolClient implements AutoCloseable {
             try {
                 sendThread.join();
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                WorldHost.LOGGER.error("{} interrupted", Thread.currentThread().getName(), e);
             }
 
             // recvThread will terminate when the socket is closed, because it's blocking on the socket, not the sendQueue.
@@ -190,7 +200,7 @@ public class ProtocolClient implements AutoCloseable {
             throw new IllegalStateException("Attempted to communicate with server before authenticating.");
         }
         try {
-            sendQueue.put(message);
+            sendQueue.put(Optional.of(message));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -220,10 +230,12 @@ public class ProtocolClient implements AutoCloseable {
         enqueue(new WorldHostC2SMessage.RequestJoin(friend));
     }
 
+    @Override
     public void proxyS2CPacket(long connectionId, byte[] data) {
         enqueue(new WorldHostC2SMessage.ProxyS2CPacket(connectionId, data));
     }
 
+    @Override
     public void proxyDisconnect(long connectionId) {
         enqueue(new WorldHostC2SMessage.ProxyDisconnect(connectionId));
     }
@@ -272,6 +284,6 @@ public class ProtocolClient implements AutoCloseable {
     public void close() {
         if (closed) return;
         closed = true;
-        sendQueue.add(WorldHostC2SMessage.EndMarker.INSTANCE);
+        sendQueue.add(Optional.empty());
     }
 }

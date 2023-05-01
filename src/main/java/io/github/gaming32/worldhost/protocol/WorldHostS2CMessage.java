@@ -1,8 +1,8 @@
 package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.FriendsListUpdate;
-import io.github.gaming32.worldhost.ProxyClient;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
@@ -141,58 +141,53 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    // TODO: Implement using a proper Netty channel to introduce packets directly to the Netty pipeline somehow.
     record ProxyC2SPacket(long connectionId, byte[] data) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            final ProxyClient proxyClient = WorldHost.CONNECTED_PROXY_CLIENTS.get(connectionId);
-            if (proxyClient != null) {
-                try {
-                    proxyClient.getOutputStream().write(data);
-                } catch (IOException e) {
-                    WorldHost.LOGGER.error("Failed to write to ProxyClient", e);
-                }
-            }
+            WorldHost.proxyPacket(connectionId, data);
         }
     }
 
     record ProxyConnect(long connectionId, InetAddress remoteAddr) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
-            if (server == null || !server.isPublished()) {
-                if (client != null) {
-                    client.proxyDisconnect(connectionId);
-                }
-                return;
-            }
-            try {
-                final ProxyClient proxyClient = new ProxyClient(server.getPort(), remoteAddr, connectionId);
-                WorldHost.CONNECTED_PROXY_CLIENTS.put(connectionId, proxyClient);
-                proxyClient.start();
-            } catch (IOException e) {
-                WorldHost.LOGGER.error("Failed to start ProxyClient", e);
-            }
+            WorldHost.proxyConnect(connectionId, remoteAddr, () -> WorldHost.protoClient);
         }
     }
 
     record ProxyDisconnect(long connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            final ProxyClient proxyClient = WorldHost.CONNECTED_PROXY_CLIENTS.remove(connectionId);
-            if (proxyClient != null) {
-                proxyClient.close();
-            }
+            WorldHost.proxyDisconnect(connectionId);
         }
     }
 
-    record ConnectionInfo(long connectionId, String baseIp, int basePort, String userIp) implements WorldHostS2CMessage {
+    record ConnectionInfo(
+        long connectionId, String baseIp, int basePort, String userIp, int protocolVersion
+    ) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             client.setConnectionId(connectionId);
             client.setBaseIp(baseIp);
             client.setBasePort(basePort);
             client.setUserIp(userIp);
+            if (ProtocolClient.PROTOCOL_VERSION < protocolVersion) {
+                WorldHost.LOGGER.warn(
+                    "Client is out of date with server! Client version: {}. Server version: {}.",
+                    ProtocolClient.PROTOCOL_VERSION, protocolVersion
+                );
+            }
+        }
+    }
+
+    record ExternalProxyServer(String host, int port, String baseAddr, int mcPort) implements WorldHostS2CMessage {
+        @Override
+        public void handle(ProtocolClient client) {
+            WorldHost.LOGGER.info("Attempting to connect to WHEP server at {}, {}", host, port);
+            if (WorldHost.proxyProtocolClient != null) {
+                WorldHost.proxyProtocolClient.close(); // Shouldn't happen, but better safe than sorry
+            }
+            WorldHost.proxyProtocolClient = new ProxyProtocolClient(host, port, client.getConnectionId(), baseAddr, mcPort);
         }
     }
 
@@ -233,7 +228,12 @@ public sealed interface WorldHostS2CMessage {
             case 9 -> new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());
             case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
             case 11 -> new ProxyDisconnect(dis.readLong());
-            case 12 -> new ConnectionInfo(dis.readLong(), readString(dis), dis.readUnsignedShort(), readString(dis));
+            case 12 -> new ConnectionInfo(
+                dis.readLong(), readString(dis), dis.readUnsignedShort(), readString(dis), dis.readInt()
+            );
+            case 13 -> new ExternalProxyServer(
+                readString(dis), dis.readUnsignedShort(), readString(dis), dis.readUnsignedShort()
+            );
             default -> new Error("Received packet with unknown type_id from server (outdated client?): " + typeId);
         };
     }
