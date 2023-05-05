@@ -65,7 +65,11 @@ public class MixinSystemToast {
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/client/gui/components/toasts/SystemToast;messageLines:Ljava/util/List;",
+            //#if MC >= 11902
             ordinal = 1
+            //#else
+            //$$ ordinal = 2
+            //#endif
         )
     )
     private void drawCustomIcon(PoseStack matrices, ToastComponent manager, long startTime, CallbackInfoReturnable<Toast.Visibility> cir) {

@@ -376,6 +376,8 @@ public class WorldHost
         protoClient = new ProtocolClient(CONFIG.getServerIp(), successToast, failureToast);
         connectingFuture = protoClient.getConnectingFuture();
         protoClient.authenticate(uuid);
+
+        showProfileToast(UUID.fromString("48d35281-8094-4ba8-aa14-9b5d634f8df2"), "Text", Components.immutable("test"));
     }
 
     public static String getName(GameProfile profile) {
