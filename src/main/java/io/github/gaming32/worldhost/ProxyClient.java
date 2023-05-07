@@ -39,7 +39,7 @@ public class ProxyClient extends Thread {
         WorldHost.LOGGER.info("Starting proxy client from {}", remoteAddress);
         try {
             final InputStream is = socket.getInputStream();
-            final byte[] b = new byte[64 * 1024];
+            final byte[] b = new byte[0xffff];
             int n;
             while ((n = is.read(b)) != -1) {
                 final ProxyPassthrough proxy = this.proxy.get();
