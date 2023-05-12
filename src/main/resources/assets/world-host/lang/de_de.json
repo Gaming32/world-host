@@ -4,7 +4,7 @@
   "world-host.config.showOnlineStatus": "Online-Status anzeigen",
   "world-host.config.showOnlineStatus.tooltip": "Online-Status auf dem Titelbildschirm anzeigen",
   "world-host.config.enableFriends": "Aktiviere Freunde",
-  "world-host.config.enableFriends.tooltip": "Aktiviert alle auf Freunde bezogenen GUIs und das gesamte Freundesystem.\nWenn du es deaktivierst und wieder aktivierst, sind alle Ihre Freunde noch da.",
+  "world-host.config.enableFriends.tooltip": "Aktiviert alle auf Freunde bezogenen GUIs und das gesamte Freundesystem.\nWenn du es deaktivierst und wieder aktivierst, sind alle deine Freunde noch da.",
   "world-host.config.enableReconnectionToasts": "Enable Reconnection Toasts",
   "world-host.config.noUPnP": "UPnP nicht ausprobieren",
   "world-host.config.noUPnP.tooltip": "UPnP ist ein Mechanismus, der für eine direkte Verbindung verwendet werden kann. Allerdings treten dabei manchmal seltsame Probleme auf.\nAktiviere diese Einstellung, wenn Leute Probleme haben, sich über die Freundesliste oder Tempip mit dir zu verbinden.",
