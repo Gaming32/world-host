@@ -1,18 +1,22 @@
 package io.github.gaming32.worldhost.mixin;
 
+import net.minecraft.client.renderer.GameRenderer;
+import org.spongepowered.asm.mixin.Mixin;
+
+//#if MC >= 11904
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+//#endif
 
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
+    //#if MC >= 11904
     @Shadow @Final Minecraft minecraft;
 
     @Inject(
@@ -32,4 +36,5 @@ public class MixinGameRenderer {
         );
         WHToast.render(new PoseStack(), i, j, partialTicks);
     }
+    //#endif
 }
