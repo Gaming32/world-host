@@ -80,7 +80,7 @@ public class WHToast {
         poseStack.popPose();
     }
 
-    public static boolean click(double mouseX, double mouseY) {
+    public static boolean click(double mouseX, double mouseY, int button) {
         if (!ready) {
             return false;
         }
@@ -93,7 +93,11 @@ public class WHToast {
         for (final ToastInstance toast : TOASTS) {
             final float toastX = screenWidth - X_OFFSET - toast.width;
             final float toastY = screenHeight - y - toast.height - toast.yShift;
-            if (mouseX >= toastX && mouseX <= toastX + toast.width && mouseY >= toastY && mouseY <= toastY + toast.height && toast.click()) {
+            if (
+                mouseX >= toastX && mouseX <= toastX + toast.width &&
+                    mouseY >= toastY && mouseY <= toastY + toast.height &&
+                    toast.click(button)
+            ) {
                 return true;
             }
             y += toast.height + GAP + toast.yShift;

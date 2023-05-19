@@ -6,7 +6,6 @@ import io.github.gaming32.worldhost.gui.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.FriendsScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.server.IntegratedServer;
@@ -71,6 +70,7 @@ public sealed interface WorldHostS2CMessage {
                 fromUser,
                 isFriend ? "world-host.friend_added_you.already" : "world-host.friend_added_you",
                 isFriend ? "world-host.friend_added_you.already.desc" : "world-host.need_add_back",
+                isFriend ? 100 : 200,
                 isFriend ? null : () -> {
                     final Minecraft minecraft = Minecraft.getInstance();
                     minecraft.setScreen(new AddFriendScreen(
@@ -91,7 +91,7 @@ public sealed interface WorldHostS2CMessage {
             WorldHost.ONLINE_FRIENDS.add(user);
             WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
             WorldHost.showProfileToast(
-                user, "world-host.went_online", "world-host.went_online.desc",
+                user, "world-host.went_online", "world-host.went_online.desc", 200,
                 () -> client.requestJoin(user)
             );
         }

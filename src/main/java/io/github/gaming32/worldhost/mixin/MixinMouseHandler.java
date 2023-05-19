@@ -35,7 +35,8 @@ public class MixinMouseHandler {
         final Window window = minecraft.getWindow();
         if (WHToast.click(
             xpos * window.getGuiScaledWidth() / window.getScreenWidth(),
-            ypos * window.getGuiScaledHeight() / window.getScreenHeight()
+            ypos * window.getGuiScaledHeight() / window.getScreenHeight(),
+            button
         )) {
             ci.cancel();
         }

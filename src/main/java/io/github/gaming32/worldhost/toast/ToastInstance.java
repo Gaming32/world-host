@@ -1,20 +1,20 @@
 package io.github.gaming32.worldhost.toast;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 
 import java.util.Collections;
 import java.util.List;
+
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 class ToastInstance {
     private static final int TEXT_WIDTH = 200;
@@ -129,13 +129,16 @@ class ToastInstance {
         }
     }
 
-    public boolean click() {
+    public boolean click(int button) {
         if (clicked) {
             return false;
         }
+        if (button != GLFW_MOUSE_BUTTON_LEFT && button != GLFW_MOUSE_BUTTON_MIDDLE) {
+            return false;
+        }
         clicked = true;
-        ticksRemaining = 20;
-        if (clickAction != null) {
+        ticksRemaining = Math.min(ticksRemaining, 20);
+        if (clickAction != null && button != GLFW_MOUSE_BUTTON_MIDDLE) {
             clickAction.run();
         }
         return true;
@@ -146,32 +149,10 @@ class ToastInstance {
     }
 
     private static void fill(PoseStack poseStack, float minX, float minY, float maxX, float maxY, int color) {
-        Matrix4f matrix4f = poseStack.last().pose();
-        if (minX < maxX) {
-            float o = minX;
-            minX = maxX;
-            maxX = o;
-        }
-
-        if (minY < maxY) {
-            float o = minY;
-            minY = maxY;
-            maxY = o;
-        }
-
-        float f = (float)FastColor.ARGB32.alpha(color) / 255.0F;
-        float g = (float)FastColor.ARGB32.red(color) / 255.0F;
-        float h = (float)FastColor.ARGB32.green(color) / 255.0F;
-        float p = (float)FastColor.ARGB32.blue(color) / 255.0F;
-        BufferBuilder bufferBuilder = Tesselator.getInstance().getBuilder();
-        RenderSystem.enableBlend();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-        bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-        bufferBuilder.vertex(matrix4f, minX, minY, 0).color(g, h, p, f).endVertex();
-        bufferBuilder.vertex(matrix4f, minX, maxY, 0).color(g, h, p, f).endVertex();
-        bufferBuilder.vertex(matrix4f, maxX, maxY, 0).color(g, h, p, f).endVertex();
-        bufferBuilder.vertex(matrix4f, maxX, minY, 0).color(g, h, p, f).endVertex();
-        BufferUploader.drawWithShader(bufferBuilder.end());
-        RenderSystem.disableBlend();
+        poseStack.pushPose();
+        poseStack.translate(minX, minY, 0f);
+        poseStack.scale(maxX - minX, maxY - minY, 1f);
+        GuiComponent.fill(poseStack, 0, 0, 1, 1, color);
+        poseStack.popPose();
     }
 }

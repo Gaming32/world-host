@@ -24,7 +24,6 @@ import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
@@ -439,7 +438,7 @@ public class WorldHost
         return CONFIG.isEnableFriends() && CONFIG.getFriends().contains(user);
     }
 
-    public static void showProfileToast(UUID user, String title, String description, Runnable clickAction) {
+    public static void showProfileToast(UUID user, String title, String description, int ticks, Runnable clickAction) {
         Util.backgroundExecutor().execute(() -> {
             final GameProfile profile = Minecraft.getInstance()
                 .getMinecraftSessionService()
@@ -455,7 +454,7 @@ public class WorldHost
                         GuiComponent.blit(matrices, x, y, width, height, 40, 8, 8, 8, 64, 64);
                     })
                     .clickAction(clickAction)
-                    .ticks(200)
+                    .ticks(ticks)
                     .show();
             });
         });
