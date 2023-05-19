@@ -70,9 +70,7 @@ public sealed interface WorldHostS2CMessage {
             WorldHost.showProfileToast(
                 fromUser,
                 isFriend ? "world-host.friend_added_you.already" : "world-host.friend_added_you",
-                isFriend
-                    ? Components.translatable("world-host.friend_added_you.already.desc")
-                    : Components.translatable("world-host.need_add_back"),
+                isFriend ? "world-host.friend_added_you.already.desc" : "world-host.need_add_back",
                 isFriend ? null : () -> {
                     final Minecraft minecraft = Minecraft.getInstance();
                     minecraft.setScreen(new AddFriendScreen(
@@ -93,8 +91,7 @@ public sealed interface WorldHostS2CMessage {
             WorldHost.ONLINE_FRIENDS.add(user);
             WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
             WorldHost.showProfileToast(
-                user, "world-host.went_online",
-                Components.translatable("world-host.went_online.desc"),
+                user, "world-host.went_online", "world-host.went_online.desc",
                 () -> client.requestJoin(user)
             );
         }
