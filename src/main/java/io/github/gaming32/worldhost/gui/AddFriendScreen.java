@@ -18,6 +18,7 @@ import net.minecraft.server.players.GameProfileCache;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -35,10 +36,14 @@ public class AddFriendScreen extends WorldHostScreen {
     private boolean usernameUpdate;
     private GameProfile friendProfile;
 
-    public AddFriendScreen(Screen parent, Component title, Consumer<GameProfile> addAction) {
+    public AddFriendScreen(Screen parent, Component title, UUID prefilledUser, Consumer<GameProfile> addAction) {
         super(title);
         this.parent = parent;
         this.addAction = addAction;
+        if (prefilledUser != null) {
+            friendProfile = Minecraft.getInstance().getMinecraftSessionService()
+                .fillProfileProperties(new GameProfile(prefilledUser, null), false);
+        }
     }
 
     @Override
@@ -57,7 +62,7 @@ public class AddFriendScreen extends WorldHostScreen {
                 .width(200)
                 .build()
         );
-        addFriendButton.active = false;
+        addFriendButton.active = friendProfile != null;
 
         addRenderableWidget(
             button(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
@@ -69,6 +74,9 @@ public class AddFriendScreen extends WorldHostScreen {
         usernameField = addWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(16);
         usernameField.setFocused(true);
+        if (friendProfile != null) {
+            usernameField.setValue(friendProfile.getName());
+        }
         if (usernameResponder == null) {
             // Only set the responder here on first init
             usernameField.setResponder(usernameResponder = text -> {

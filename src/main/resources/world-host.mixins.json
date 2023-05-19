@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.7",
   "package": "io.github.gaming32.worldhost.mixin",
-  "compatibilityLevel": "$java_version",
+  "compatibilityLevel": "JAVA_8",
   "mixins": [
     "MixinCommands",
     "MixinPublishCommand",
@@ -10,12 +10,13 @@
   ],
   "client": [
     "MinecraftAccessor",
+    "MixinGameRenderer",
     "MixinIntegratedServer",
     "MixinJoinMultiplayerScreen",
     "MixinMinecraft",
+    "MixinMouseHandler",
     "MixinPauseScreen",
     "MixinShareToLanScreen",
-    "MixinSystemToast",
     "MixinTitleScreen",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor"

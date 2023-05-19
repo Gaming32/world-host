@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
+import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
@@ -18,7 +19,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
@@ -364,11 +364,7 @@ public class WorldHost
         if (uuid == null) {
             LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
             if (failureToast) {
-                DeferredToastManager.show(
-                    SystemToast.SystemToastIds.TUTORIAL_HINT,
-                    Components.translatable("world-host.wh_connect.not_available"),
-                    null
-                );
+                WHToast.builder("world-host.wh_connect.not_available").show();
             }
             return;
         }
@@ -443,24 +439,23 @@ public class WorldHost
         return CONFIG.isEnableFriends() && CONFIG.getFriends().contains(user);
     }
 
-    public static void showProfileToast(UUID user, String title, Component description) {
+    public static void showProfileToast(UUID user, String title, Component description, Runnable clickAction) {
         Util.backgroundExecutor().execute(() -> {
             final GameProfile profile = Minecraft.getInstance()
                 .getMinecraftSessionService()
                 .fillProfileProperties(new GameProfile(user, null), false);
             Minecraft.getInstance().execute(() -> {
                 final ResourceLocation skinTexture = getInsecureSkinLocation(profile);
-                DeferredToastManager.show(
-                    SystemToast.SystemToastIds.WORLD_ACCESS_FAILURE,
-                    (matrices, x, y) -> {
+                WHToast.builder(Components.translatable(title, getName(profile)))
+                    .description(description)
+                    .icon((matrices, x, y, width, height) -> {
                         texture(skinTexture);
                         RenderSystem.enableBlend();
-                        GuiComponent.blit(matrices, x, y, 20, 20, 8, 8, 8, 8, 64, 64);
-                        GuiComponent.blit(matrices, x, y, 20, 20, 40, 8, 8, 8, 64, 64);
-                    },
-                    Components.translatable(title, getName(profile)),
-                    description
-                );
+                        GuiComponent.blit(matrices, x, y, width, height, 8, 8, 8, 8, 64, 64);
+                        GuiComponent.blit(matrices, x, y, width, height, 40, 8, 8, 8, 64, 64);
+                    })
+                    .clickAction(clickAction)
+                    .show();
             });
         });
     }

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class FriendsScreen extends WorldHostScreen {
-    private static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
+    public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
     private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
     private static final Component BEDROCK_FRIENDS_TEXT = Components.translatable(
         "world-host.friends.bedrock_notice",
@@ -62,8 +62,8 @@ public class FriendsScreen extends WorldHostScreen {
         addRenderableWidget(
             button(ADD_FRIEND_TEXT, button -> {
                 assert minecraft != null;
-                minecraft.setScreen(new AddFriendScreen(this, ADD_FRIEND_TEXT, profile -> {
-                    addFriend(profile);
+                minecraft.setScreen(new AddFriendScreen(this, ADD_FRIEND_TEXT, null, profile -> {
+                    addFriendAndUpdate(profile);
                     if (WorldHost.protoClient != null) {
                         WorldHost.protoClient.friendRequest(profile.getId());
                     }
@@ -76,8 +76,9 @@ public class FriendsScreen extends WorldHostScreen {
         addRenderableWidget(
             button(ADD_SILENTLY_TEXT, button -> {
                 assert minecraft != null;
-                minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, this::addFriend));
+                minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, null, this::addFriendAndUpdate));
             }).pos(width / 2 - 152, height - 28)
+                .tooltip(Components.translatable("world-host.friends.add_silently.tooltip"))
                 .build()
         );
 
@@ -108,10 +109,14 @@ public class FriendsScreen extends WorldHostScreen {
         minecraft.setScreen(parent);
     }
 
-    private void addFriend(GameProfile profile) {
+    private void addFriendAndUpdate(GameProfile profile) {
+        addFriend(profile);
+        list.addEntry(new FriendsEntry(profile));
+    }
+
+    public static void addFriend(GameProfile profile) {
         WorldHost.CONFIG.getFriends().add(profile.getId());
         WorldHost.saveConfig();
-        list.addEntry(new FriendsEntry(profile));
     }
 
     @Override

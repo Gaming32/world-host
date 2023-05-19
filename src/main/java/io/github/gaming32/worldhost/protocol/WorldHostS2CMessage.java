@@ -2,6 +2,8 @@ package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.gui.AddFriendScreen;
+import io.github.gaming32.worldhost.gui.FriendsScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
@@ -64,9 +66,22 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (!WorldHost.CONFIG.isEnableFriends()) return;
+            final boolean isFriend = WorldHost.isFriend(fromUser);
             WorldHost.showProfileToast(
-                fromUser, "world-host.friend_added_you",
-                WorldHost.isFriend(fromUser) ? null : Components.translatable("world-host.need_add_back")
+                fromUser,
+                isFriend ? "world-host.friend_added_you.already" : "world-host.friend_added_you",
+                isFriend
+                    ? Components.translatable("world-host.friend_added_you.already.desc")
+                    : Components.translatable("world-host.need_add_back"),
+                isFriend ? null : () -> {
+                    final Minecraft minecraft = Minecraft.getInstance();
+                    minecraft.setScreen(new AddFriendScreen(
+                        minecraft.screen,
+                        FriendsScreen.ADD_FRIEND_TEXT,
+                        fromUser,
+                        FriendsScreen::addFriend
+                    ));
+                }
             );
         }
     }
@@ -79,7 +94,8 @@ public sealed interface WorldHostS2CMessage {
             WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
             WorldHost.showProfileToast(
                 user, "world-host.went_online",
-                Components.translatable("world-host.went_online.desc")
+                Components.translatable("world-host.went_online.desc"),
+                () -> client.requestJoin(user)
             );
         }
     }

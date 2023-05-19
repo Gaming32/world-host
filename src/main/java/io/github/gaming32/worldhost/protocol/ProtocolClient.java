@@ -1,11 +1,10 @@
 package io.github.gaming32.worldhost.protocol;
 
 import com.google.common.net.HostAndPort;
-import io.github.gaming32.worldhost.DeferredToastManager;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
+import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.versions.Components;
-import net.minecraft.client.gui.components.toasts.SystemToast;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CountingInputStream;
 
@@ -53,11 +52,9 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
                 if (failureToast) {
-                    DeferredToastManager.show(
-                        SystemToast.SystemToastIds.TUTORIAL_HINT,
-                        Components.translatable("world-host.wh_connect.connect_failed"),
-                        Components.immutable(e.getLocalizedMessage())
-                    );
+                    WHToast.builder("world-host.wh_connect.connect_failed")
+                        .description(Components.immutable(e.getLocalizedMessage()))
+                        .show();
                 }
                 if (socket != null) {
                     try {
@@ -65,11 +62,9 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                     } catch (IOException e1) {
                         WorldHost.LOGGER.error("Failed to close WH socket", e1);
                         if (failureToast) {
-                            DeferredToastManager.show(
-                                SystemToast.SystemToastIds.WORLD_BACKUP,
-                                Components.translatable("world-host.wh_connect.close_failed"),
-                                Components.immutable(e1.getLocalizedMessage())
-                            );
+                            WHToast.builder("world-host.wh_connect.close_failed")
+                                .description(Components.immutable(e1.getLocalizedMessage()))
+                                .show();
                         }
                     }
                     socket = null;
@@ -82,11 +77,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             }
             connectingFuture.complete(null);
             if (successToast) {
-                DeferredToastManager.show(
-                    SystemToast.SystemToastIds.TUTORIAL_HINT,
-                    Components.translatable("world-host.wh_connect.connected"),
-                    null
-                );
+                WHToast.builder("world-host.wh_connect.connected").show();
             }
             final Socket fSocket = socket;
 
@@ -115,6 +106,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             final Thread recvThread = new Thread(() -> {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
+                    new WorldHostS2CMessage.FriendRequest(UUID.fromString("fa68270b-1071-46c6-ac5c-6c4a0b777a96")).handle(this);
                     while (!closed) {
                         final int length = dis.readInt();
                         if (length < 1) {
@@ -168,11 +160,9 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             } catch (IOException e) {
                 WorldHost.LOGGER.error("Failed to close WH socket.", e);
                 if (WorldHost.CONFIG.isEnableReconnectionToasts()) {
-                    DeferredToastManager.show(
-                        SystemToast.SystemToastIds.WORLD_BACKUP,
-                        Components.translatable("world-host.wh_connect.close_failed"),
-                        Components.immutable(e.getLocalizedMessage())
-                    );
+                    WHToast.builder("world-host.wh_connect.close_failed")
+                        .description(Components.immutable(e.getLocalizedMessage()))
+                        .show();
                 }
             }
         }, "WH-ConnectionThread");

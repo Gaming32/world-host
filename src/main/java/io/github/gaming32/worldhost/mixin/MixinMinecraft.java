@@ -1,7 +1,7 @@
 package io.github.gaming32.worldhost.mixin;
 
-import io.github.gaming32.worldhost.DeferredToastManager;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Overlay;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,8 +14,13 @@ public class MixinMinecraft {
     @Inject(method = "setOverlay", at = @At("HEAD"))
     private void deferredToastReady(Overlay loadingGui, CallbackInfo ci) {
         if (loadingGui == null) {
-            DeferredToastManager.ready();
+            WHToast.ready();
         }
+    }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void toastTick(CallbackInfo ci) {
+        WHToast.tick();
     }
 
     @Inject(method = "tick", at = @At("RETURN"))
