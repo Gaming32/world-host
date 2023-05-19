@@ -5,7 +5,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,6 +14,12 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
+
+//#if MC >= 11605
+import net.minecraft.util.FormattedCharSequence;
+//#else
+//$$ import net.minecraft.network.chat.FormattedText;
+//#endif
 
 class ToastInstance {
     private static final int TEXT_WIDTH = 200;
@@ -33,10 +38,17 @@ class ToastInstance {
 
     private final Font font = Minecraft.getInstance().font;
 
+    //#if MC >= 11605
     @NotNull
     public final List<FormattedCharSequence> title;
     @NotNull
     public final List<FormattedCharSequence> description;
+    //#else
+    //$$ @NotNull
+    //$$ public final List<FormattedText> title;
+    //$$ @NotNull
+    //$$ public final List<FormattedText> description;
+    //#endif
     @Nullable
     public final IconRenderer iconRenderer;
     @Nullable
@@ -99,12 +111,12 @@ class ToastInstance {
 
         final float textX = x + BORDER_SIZE + (iconRenderer != null ? ICON_SIZE + BORDER_SIZE : 0);
         float textY = y + BORDER_SIZE;
-        for (final FormattedCharSequence line : title) {
+        for (final var line : title) {
             font.draw(poseStack, line, textX, textY, TITLE_COLOR);
             textY += font.lineHeight + LINE_BREAK;
         }
         textY += -LINE_BREAK + DESCRIPTION_BREAK;
-        for (final FormattedCharSequence line : description) {
+        for (final var line : description) {
             font.draw(poseStack, line, textX, textY, DESCRIPTION_COLOR);
             textY += font.lineHeight + LINE_BREAK;
         }
