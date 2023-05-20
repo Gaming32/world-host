@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
@@ -45,14 +44,6 @@ public class WHToast {
                 shift = toast.height + GAP + toast.yShift;
             }
         }
-
-        for (final ToastInstance toast : TOASTS) {
-            toast.prevYShift = toast.yShift;
-            toast.yShift = Mth.lerp(0.25f, toast.yShift, 0);
-            if (toast.yShift < 0.1f) {
-                toast.yShift = 0f;
-            }
-        }
     }
 
     public static void render(PoseStack poseStack, int mouseX, int mouseY, float tickDelta) {
@@ -71,7 +62,7 @@ public class WHToast {
             toast.render(
                 poseStack,
                 screenWidth - X_OFFSET - toast.width,
-                screenHeight - y - Mth.lerp(tickDelta, toast.prevYShift, toast.yShift) - toast.height,
+                screenHeight - y - toast.yShift - toast.height,
                 mouseX, mouseY, tickDelta
             );
             y += toast.height + GAP + toast.yShift;

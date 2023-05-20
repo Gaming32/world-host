@@ -5,7 +5,9 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.FriendsScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
+import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
+import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.server.IntegratedServer;
@@ -29,6 +31,9 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.LOGGER.error("Received protocol error: {}", message);
+            WHToast.builder("world-host.protocol_error_occurred")
+                .description(Components.immutable(message))
+                .show();
         }
     }
 

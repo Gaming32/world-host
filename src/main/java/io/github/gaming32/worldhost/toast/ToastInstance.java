@@ -59,7 +59,7 @@ class ToastInstance {
     public final int ticksTotal;
     public int ticksRemaining;
 
-    public float yShift, prevYShift;
+    public float yShift;
 
     private boolean clicked;
 
