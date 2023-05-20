@@ -10,6 +10,7 @@
   "world-host.config.noUPnP.tooltip": "UPnP is a mechanism that can be used for direct connection. However, it sometimes has weird issues.\nEnable this setting if people are having trouble connecting to you through the friends list or tempip.",
   "world-host.config.useShortIp": "Use Short IP",
   "world-host.config.useShortIp.tooltip": "These IPs are made up of nine letters and numbers instead of three words. This makes them shorter, but harder to remember.",
+  "world-host.config.showOutdatedWorldHost": "Version Check Popup",
   "world-host.friends": "Friends",
   "world-host.friends.add_silently": "Add Friend Silently",
   "world-host.friends.add_silently.tooltip": "This will add the person as a friend, without notifying them.\nNote that you must both friend each other in order to join each other's games.",

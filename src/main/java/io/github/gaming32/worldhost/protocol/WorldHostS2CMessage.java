@@ -216,6 +216,7 @@ public sealed interface WorldHostS2CMessage {
         public void handle(ProtocolClient client) {
             final String currentVersion = WorldHost.getModVersion(WorldHost.MOD_ID);
             WorldHost.LOGGER.info(I18n.get("world-host.outdated_world_host.desc", currentVersion, recommendedVersion));
+            if (!WorldHost.CONFIG.isShowOutdatedWorldHost()) return;
             WHToast.builder("world-host.outdated_world_host")
                 .description(Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion))
                 .clickAction(() -> Util.getPlatform().openUri(

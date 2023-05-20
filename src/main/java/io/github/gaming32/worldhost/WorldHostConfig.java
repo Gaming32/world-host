@@ -21,6 +21,8 @@ public class WorldHostConfig {
 
     private boolean useShortIp = false;
 
+    private boolean showOutdatedWorldHost = true;
+
     private final Set<UUID> friends = new LinkedHashSet<>();
 
     public void read(JsonReader reader) throws IOException {
@@ -48,6 +50,7 @@ public class WorldHostConfig {
                 case "enableReconnectionToasts" -> enableReconnectionToasts = reader.nextBoolean();
                 case "noUPnP" -> noUPnP = reader.nextBoolean();
                 case "useShortIp" -> useShortIp = reader.nextBoolean();
+                case "showOutdatedWorldHost" -> showOutdatedWorldHost = reader.nextBoolean();
                 case "friends" -> {
                     friends.clear();
                     reader.beginArray();
@@ -73,6 +76,7 @@ public class WorldHostConfig {
         writer.name("enableReconnectionToasts").value(enableReconnectionToasts);
         writer.name("noUPnP").value(noUPnP);
         writer.name("useShortIp").value(useShortIp);
+        writer.name("showOutdatedWorldHost").value(showOutdatedWorldHost);
 
         writer.name("friends").beginArray();
         for (final UUID friend : friends) {
@@ -129,6 +133,14 @@ public class WorldHostConfig {
 
     public void setUseShortIp(boolean useShortIp) {
         this.useShortIp = useShortIp;
+    }
+
+    public boolean isShowOutdatedWorldHost() {
+        return showOutdatedWorldHost;
+    }
+
+    public void setShowOutdatedWorldHost(boolean showOutdatedWorldHost) {
+        this.showOutdatedWorldHost = showOutdatedWorldHost;
     }
 
     public Set<UUID> getFriends() {

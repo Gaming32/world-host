@@ -19,6 +19,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component ENABLE_RECONNECTION_TOASTS = Components.translatable("world-host.config.enableReconnectionToasts");
     private static final Component NO_UPNP = Components.translatable("world-host.config.noUPnP");
     private static final Component USE_SHORT_IP = Components.translatable("world-host.config.useShortIp");
+    private static final Component SHOW_OUTDATED_WORLD_HOST = Components.translatable("world-host.config.showOutdatedWorldHost");
 
     private final Screen parent;
 
@@ -89,6 +90,15 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             }
         )).setToggled(WorldHost.CONFIG.isUseShortIp());
 
+        addRenderableWidget(new YesNoButton(
+            width / 2 + 5, yOffset + 144, 150, 20,
+            Components.translatable("world-host.config.showOutdatedWorldHost.tooltip"),
+            button -> {
+                WorldHost.CONFIG.setShowOutdatedWorldHost(button.isToggled());
+                WorldHost.saveConfig();
+            }
+        )).setToggled(WorldHost.CONFIG.isShowOutdatedWorldHost());
+
         addRenderableWidget(
             button(WorldHostComponents.FRIENDS, button -> {
                 assert minecraft != null;
@@ -126,6 +136,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         drawRightString(poseStack, font, ENABLE_RECONNECTION_TOASTS, width / 2 - 5, yOffset + 72, 0xffffff);
         drawRightString(poseStack, font, NO_UPNP, width / 2 - 5, yOffset + 96, 0xffffff);
         drawRightString(poseStack, font, USE_SHORT_IP, width / 2 - 5, yOffset + 120, 0xffffff);
+        drawRightString(poseStack, font, SHOW_OUTDATED_WORLD_HOST, width / 2 - 5, yOffset + 144, 0xffffff);
     }
 
     @Override
