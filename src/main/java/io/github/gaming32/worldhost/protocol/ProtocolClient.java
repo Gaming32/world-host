@@ -106,8 +106,6 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             final Thread recvThread = new Thread(() -> {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
-                    // TODO: Remove test code
-                    new WorldHostS2CMessage.FriendRequest(UUID.fromString("fa68270b-1071-46c6-ac5c-6c4a0b777a96")).handle(this);
                     while (!closed) {
                         final int length = dis.readInt();
                         if (length < 1) {
