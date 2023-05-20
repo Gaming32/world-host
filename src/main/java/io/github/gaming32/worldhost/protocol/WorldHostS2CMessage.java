@@ -51,9 +51,10 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record OnlineGame(String host, int port) implements WorldHostS2CMessage {
+    record OnlineGame(String host, int port, UUID owner) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
+            if (!WorldHost.isFriend(owner)) return;
             Minecraft.getInstance().execute(() -> {
                 final Minecraft minecraft = Minecraft.getInstance();
                 assert minecraft.screen != null;
@@ -243,7 +244,7 @@ public sealed interface WorldHostS2CMessage {
         return switch (typeId) {
             case 0 -> new Error(readString(dis));
             case 1 -> new IsOnlineTo(readUuid(dis));
-            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort());
+            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), readUuid(dis));
             case 3 -> new FriendRequest(readUuid(dis));
             case 4 -> new PublishedWorld(readUuid(dis));
             case 5 -> new ClosedWorld(readUuid(dis));
