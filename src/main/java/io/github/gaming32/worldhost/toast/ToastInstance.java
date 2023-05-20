@@ -55,7 +55,7 @@ class ToastInstance {
     //#if MC >= 11605
     public List<FormattedCharSequence> formattedTitle, formattedDescription;
     //#else
-    //$$ public final List<FormattedText> formattedTitle, formattedDescription;
+    //$$ public List<FormattedText> formattedTitle, formattedDescription;
     //#endif
 
     public float yShift;
