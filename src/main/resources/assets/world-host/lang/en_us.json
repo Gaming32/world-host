@@ -46,7 +46,8 @@
   "world-host.online_status.offline": "Offline",
   "world-host.online_status.connecting": "Connecting...",
   "world-host.online_status.online": "Online",
-  "world-host.outdated_world_host": "You are using an older version of World Host (%s). It is recommended to update to %s.",
+  "world-host.outdated_world_host": "Outdated World Host!",
+  "world-host.outdated_world_host.desc": "You are using an older version of World Host (%s). It is recommended to update to %s.",
   "world-host.protocol_error_occurred": "A World Host protocol error occurred",
   "chat.square_brackets": "[%s]"
 }

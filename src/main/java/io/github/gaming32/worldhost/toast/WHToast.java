@@ -15,7 +15,7 @@ public class WHToast {
     private static final int X_OFFSET = 4;
     private static final int Y_OFFSET = 4;
 
-    private static boolean ready = false;
+    static boolean ready = false;
     static final Deque<ToastInstance> TOASTS = new ArrayDeque<>();
 
     public static ToastBuilder builder(@NotNull Component title) {
@@ -27,6 +27,7 @@ public class WHToast {
     }
 
     public static void ready() {
+        TOASTS.forEach(ToastInstance::calculateText);
         ready = true;
     }
 

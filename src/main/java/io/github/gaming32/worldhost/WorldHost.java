@@ -74,6 +74,7 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.minecraft.server.packs.PackType;
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
+//$$ import net.minecraftforge.fml.ModList;
 //$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -112,6 +113,13 @@ public class WorldHost
         LogUtils.getLogger();
         //#else
         //$$ LogManager.getLogger();
+        //#endif
+
+    public static final String MOD_LOADER =
+        //#if FORGE
+        //$$ "forge";
+        //#else
+        "fabric";
         //#endif
 
     public static final File GAME_DIR = Minecraft.getInstance().gameDirectory;
@@ -446,7 +454,7 @@ public class WorldHost
             Minecraft.getInstance().execute(() -> {
                 final ResourceLocation skinTexture = getInsecureSkinLocation(profile);
                 WHToast.builder(Components.translatable(title, getName(profile)))
-                    .description(description)
+                    .description(Components.translatable(description))
                     .icon((matrices, x, y, width, height) -> {
                         texture(skinTexture);
                         RenderSystem.enableBlend();
@@ -593,6 +601,24 @@ public class WorldHost
         } else {
             WorldHost.LOGGER.warn("Received disconnect from unknown connection {}", connectionId);
         }
+    }
+
+    public static String getModVersion(String modId) {
+        //#if FABRIC
+        return FabricLoader.getInstance()
+            .getModContainer(modId)
+            .orElseThrow(() -> new IllegalStateException("Couldn't find mod " + modId))
+            .getMetadata()
+            .getVersion()
+            .getFriendlyString();
+        //#else
+        //$$ return ModList.get()
+        //$$     .getModContainerById(modId)
+        //$$     .orElseThrow(() -> new IllegalStateException("Couldn't find mod " + modId))
+        //$$     .getModInfo()
+        //$$     .getVersion()
+        //$$     .toString();
+        //#endif
     }
 
     //#if FORGE

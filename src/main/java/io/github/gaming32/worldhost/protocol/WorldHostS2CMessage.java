@@ -8,8 +8,10 @@ import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -31,9 +33,9 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.LOGGER.error("Received protocol error: {}", message);
-            WHToast.builder("world-host.protocol_error_occurred")
-                .description(Components.immutable(message))
-                .show();
+//            WHToast.builder("world-host.protocol_error_occurred")
+//                .description(Components.immutable(message))
+//                .show();
         }
     }
 
@@ -209,6 +211,22 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
+    record OutdatedWorldHost(String recommendedVersion) implements WorldHostS2CMessage {
+        @Override
+        public void handle(ProtocolClient client) {
+            final String currentVersion = WorldHost.getModVersion(WorldHost.MOD_ID);
+            WorldHost.LOGGER.info(I18n.get("world-host.outdated_world_host.desc", currentVersion, recommendedVersion));
+            WHToast.builder("world-host.outdated_world_host")
+                .description(Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion))
+                .clickAction(() -> Util.getPlatform().openUri(
+                    "https://modrinth.com/mod/world-host/version/" +
+                        recommendedVersion + '+' + WorldHost.getModVersion("minecraft") + '-' + WorldHost.MOD_LOADER
+                ))
+                .ticks(200)
+                .show();
+        }
+    }
+
     /**
      * NOTE: This method is called from the RecvThread, so it should be careful to not do anything that could
      * <ol>
@@ -252,6 +270,7 @@ public sealed interface WorldHostS2CMessage {
             case 13 -> new ExternalProxyServer(
                 readString(dis), dis.readUnsignedShort(), readString(dis), dis.readUnsignedShort()
             );
+            case 14 -> new OutdatedWorldHost(readString(dis));
             default -> new Error("Received packet with unknown type_id from server (outdated client?): " + typeId);
         };
     }

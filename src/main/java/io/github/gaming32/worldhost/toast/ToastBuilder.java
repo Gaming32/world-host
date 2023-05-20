@@ -1,6 +1,5 @@
 package io.github.gaming32.worldhost.toast;
 
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
@@ -24,10 +23,6 @@ public class ToastBuilder {
     public ToastBuilder description(@Nullable Component description) {
         this.description = description;
         return this;
-    }
-
-    public ToastBuilder description(@Nullable String translationKey) {
-        return description(Components.translatable(translationKey));
     }
 
     public ToastBuilder icon(IconRenderer iconRenderer) {

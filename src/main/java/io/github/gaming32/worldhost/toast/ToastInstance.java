@@ -36,28 +36,27 @@ class ToastInstance {
     private static final int TITLE_COLOR = 0xffd6d6d6;
     private static final int DESCRIPTION_COLOR = 0xffa3a3a3;
 
-    private final Font font = Minecraft.getInstance().font;
+    public final Font font = Minecraft.getInstance().font;
 
-    //#if MC >= 11605
     @NotNull
-    public final List<FormattedCharSequence> title;
-    @NotNull
-    public final List<FormattedCharSequence> description;
-    //#else
-    //$$ @NotNull
-    //$$ public final List<FormattedText> title;
-    //$$ @NotNull
-    //$$ public final List<FormattedText> description;
-    //#endif
+    public final Component title;
+    @Nullable
+    public final Component description;
     @Nullable
     public final IconRenderer iconRenderer;
     @Nullable
     public final Runnable clickAction;
 
     public final int width;
-    public final int height;
+    public int height;
     public final int ticksTotal;
     public int ticksRemaining;
+
+    //#if MC >= 11605
+    public List<FormattedCharSequence> formattedTitle, formattedDescription;
+    //#else
+    //$$ public final List<FormattedText> formattedTitle, formattedDescription;
+    //#endif
 
     public float yShift;
 
@@ -70,8 +69,8 @@ class ToastInstance {
         @Nullable Runnable clickAction,
         int ticks
     ) {
-        this.title = font.split(title, TEXT_WIDTH);
-        this.description = description != null ? font.split(description, TEXT_WIDTH) : Collections.emptyList();
+        this.title = title;
+        this.description = description;
         this.iconRenderer = iconRenderer;
         this.clickAction = clickAction;
 
@@ -79,17 +78,24 @@ class ToastInstance {
             + 2 * BORDER_SIZE
             + (iconRenderer != null ? ICON_SIZE + BORDER_SIZE : 0);
 
-        int height = BORDER_SIZE
-            + this.title.size() * (font.lineHeight + LINE_BREAK) - LINE_BREAK
+        if (WHToast.ready) {
+            calculateText();
+        }
+
+        ticksRemaining = ticksTotal = ticks;
+    }
+
+    public void calculateText() {
+        formattedTitle = font.split(title, TEXT_WIDTH);
+        formattedDescription = description != null ? font.split(description, TEXT_WIDTH) : Collections.emptyList();
+        height = BORDER_SIZE
+            + this.formattedTitle.size() * (font.lineHeight + LINE_BREAK) - LINE_BREAK
             + DESCRIPTION_BREAK
-            + this.description.size() * (font.lineHeight + LINE_BREAK) - LINE_BREAK
+            + this.formattedDescription.size() * (font.lineHeight + LINE_BREAK) - LINE_BREAK
             + (clickAction != null ? PROGRESS_BORDER_HEIGHT : BORDER_SIZE);
         if (iconRenderer != null) {
             height = Math.max(height, 2 * BORDER_SIZE + ICON_SIZE);
         }
-        this.height = height;
-
-        ticksRemaining = ticksTotal = ticks;
     }
 
     public void render(PoseStack poseStack, float x, float y, int mouseX, int mouseY, float tickDelta) {
@@ -111,12 +117,12 @@ class ToastInstance {
 
         final float textX = x + BORDER_SIZE + (iconRenderer != null ? ICON_SIZE + BORDER_SIZE : 0);
         float textY = y + BORDER_SIZE;
-        for (final var line : title) {
+        for (final var line : formattedTitle) {
             font.draw(poseStack, line, textX, textY, TITLE_COLOR);
             textY += font.lineHeight + LINE_BREAK;
         }
         textY += -LINE_BREAK + DESCRIPTION_BREAK;
-        for (final var line : description) {
+        for (final var line : formattedDescription) {
             font.draw(poseStack, line, textX, textY, DESCRIPTION_COLOR);
             textY += font.lineHeight + LINE_BREAK;
         }
