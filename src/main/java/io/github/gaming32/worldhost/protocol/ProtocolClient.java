@@ -215,6 +215,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         enqueue(new WorldHostC2SMessage.QueryRequest(friends));
     }
 
+    @Deprecated
     public void requestJoin(UUID friend) {
         enqueue(new WorldHostC2SMessage.RequestJoin(friend));
     }
@@ -227,6 +228,10 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     @Override
     public void proxyDisconnect(long connectionId) {
         enqueue(new WorldHostC2SMessage.ProxyDisconnect(connectionId));
+    }
+
+    public void requestDirectJoin(long connectionId) {
+        enqueue(new WorldHostC2SMessage.RequestDirectJoin(connectionId));
     }
 
     public Future<Void> getConnectingFuture() {

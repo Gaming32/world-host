@@ -49,7 +49,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         sendRepeatEvents(true);
         if (list == null) {
             list = new OnlineFriendsList(minecraft, width, height, 60, height - 64, 36);
-            WorldHost.ONLINE_FRIENDS.forEach(uuid -> list.addEntry(new OnlineFriendsListEntry(uuid)));
+            WorldHost.ONLINE_FRIENDS.forEach((u, c) -> list.addEntry(new OnlineFriendsListEntry(u, c)));
             WorldHost.pingFriends();
             WorldHost.ONLINE_FRIEND_UPDATES.add(this);
         } else {
@@ -149,7 +149,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         if (entry == null) return;
         WorldHost.LOGGER.info("Requesting to join {}", entry.profile.getId());
         if (WorldHost.protoClient != null) {
-            WorldHost.protoClient.requestJoin(entry.profile.getId());
+            WorldHost.protoClient.requestDirectJoin(entry.connectionId);
         }
     }
 
@@ -163,19 +163,19 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     }
 
     @Override
-    public void friendsListUpdate(Set<UUID> friends) {
-        final Set<UUID> newFriends = new HashSet<>(friends);
+    public void friendsListUpdate(Map<UUID, Long> friends) {
+        final var newFriends = new LinkedHashMap<>(friends);
         for (int i = list.children().size() - 1; i >= 0; i--) {
             final UUID uuid = list.children().get(i).profile.getId();
-            if (friends.contains(uuid)) {
+            if (friends.containsKey(uuid)) {
                 newFriends.remove(uuid);
             } else {
                 list.remove(i);
             }
         }
 
-        for (final UUID friend : newFriends) {
-            list.addEntry(new OnlineFriendsListEntry(friend));
+        for (final var friend : newFriends.entrySet()) {
+            list.addEntry(new OnlineFriendsListEntry(friend.getKey(), friend.getValue()));
         }
     }
 
@@ -226,6 +226,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     public class OnlineFriendsListEntry extends ObjectSelectionList.Entry<OnlineFriendsListEntry> {
         private final Minecraft minecraft;
         private final ServerData serverInfo = new ServerData("", "", false);
+        private final long connectionId;
         private GameProfile profile;
 
         private final ResourceLocation iconTextureId;
@@ -239,8 +240,9 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         private DynamicTexture icon;
         private long clickTime;
 
-        public OnlineFriendsListEntry(UUID friendUuid) {
+        public OnlineFriendsListEntry(UUID friendUuid, long connectionId) {
             minecraft = Minecraft.getInstance();
+            this.connectionId = connectionId;
             profile = new GameProfile(friendUuid, null);
             Util.backgroundExecutor().execute(
                 () -> profile = minecraft.getMinecraftSessionService().fillProfileProperties(profile, false)

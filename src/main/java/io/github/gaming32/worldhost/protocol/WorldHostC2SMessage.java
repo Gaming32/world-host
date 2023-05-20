@@ -53,6 +53,7 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
+    @Deprecated
     record RequestJoin(UUID friend) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
@@ -107,6 +108,14 @@ public sealed interface WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(9);
+            dos.writeLong(connectionId);
+        }
+    }
+
+    record RequestDirectJoin(long connectionId) implements WorldHostC2SMessage {
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(10);
             dos.writeLong(connectionId);
         }
     }

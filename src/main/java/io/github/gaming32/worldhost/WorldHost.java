@@ -134,7 +134,7 @@ public class WorldHost
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
 
-    public static final Set<UUID> ONLINE_FRIENDS = new HashSet<>();
+    public static final Map<UUID, Long> ONLINE_FRIENDS = new LinkedHashMap<>();
     public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 

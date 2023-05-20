@@ -10,7 +10,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 
 public class FriendsButton extends Button implements FriendsListUpdate {
@@ -27,7 +27,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     }
 
     @Override
-    public void friendsListUpdate(Set<UUID> friends) {
+    public void friendsListUpdate(Map<UUID, Long> friends) {
         final int online = friends.size();
         final Component baseText = WorldHostComponents.FRIENDS.copy().append("  " + online + " ");
         setMessage(baseText);

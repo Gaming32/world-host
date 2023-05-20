@@ -92,16 +92,18 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record PublishedWorld(UUID user) implements WorldHostS2CMessage {
+    record PublishedWorld(UUID user, long connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (!WorldHost.isFriend(user)) return;
-            WorldHost.ONLINE_FRIENDS.add(user);
-            WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
-            WorldHost.showProfileToast(
-                user, "world-host.went_online", "world-host.went_online.desc", 200,
-                () -> client.requestJoin(user)
-            );
+            Minecraft.getInstance().execute(() -> {
+                WorldHost.ONLINE_FRIENDS.put(user, connectionId);
+                WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
+                WorldHost.showProfileToast(
+                    user, "world-host.went_online", "world-host.went_online.desc", 200,
+                    () -> client.requestDirectJoin(connectionId)
+                );
+            });
         }
     }
 
@@ -246,7 +248,7 @@ public sealed interface WorldHostS2CMessage {
             case 1 -> new IsOnlineTo(readUuid(dis));
             case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), readUuid(dis));
             case 3 -> new FriendRequest(readUuid(dis));
-            case 4 -> new PublishedWorld(readUuid(dis));
+            case 4 -> new PublishedWorld(readUuid(dis), dis.readLong());
             case 5 -> new ClosedWorld(readUuid(dis));
             case 6 -> new RequestJoin(readUuid(dis), dis.readLong());
             case 7 -> new QueryRequest(readUuid(dis), dis.readLong());
