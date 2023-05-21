@@ -253,7 +253,11 @@ public sealed interface WorldHostS2CMessage {
                 //noinspection DataFlowIssue // Why do I care if parentScreen is null?
                 minecraft.setScreen(new DisconnectedScreen(
                     parentScreen,
+                    //#if MC > 11601
                     Components.translatable("world-host.connection_not_found"),
+                    //#else
+                    //$$ "world-host.connection_not_found",
+                    //#endif
                     Components.translatable("world-host.connection_not_found.desc", WorldHost.connectionIdToString(connectionId))
                 ));
             });
