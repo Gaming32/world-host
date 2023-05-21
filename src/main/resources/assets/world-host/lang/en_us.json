@@ -44,7 +44,7 @@
   "world-host.lan_opened.friends": "World hosted to friends on the friends tab. It's also available on LAN port %s.",
   "world-host.lan_opened.no_friends": "World hosted to IP %s. It's also available on LAN port %s.",
   "world-host.online_status": "%s World Host: %s",
-  "world-host.online_status.offline": "Offline",
+  "world-host.online_status.offline": "Offline (%ss)",
   "world-host.online_status.connecting": "Connecting...",
   "world-host.online_status.online": "Online",
   "world-host.outdated_world_host": "Outdated World Host!",

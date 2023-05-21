@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 //#if MC > 11605
 import net.minecraft.client.gui.components.PlainTextButton;
@@ -23,10 +24,12 @@ public class OnlineStatusButton extends PlainTextButton {
         ChatFormatting.GOLD,
         ChatFormatting.DARK_GREEN
     };
-    private static final Component[] TEXTS = {
-        Components.translatable("world-host.online_status.offline"),
-        Components.translatable("world-host.online_status.connecting"),
-        Components.translatable("world-host.online_status.online")
+
+    @SuppressWarnings("unchecked")
+    private static final Supplier<Component>[] TEXTS = new Supplier[] {
+        () -> Components.translatable("world-host.online_status.offline", WorldHost.reconnectDelay / 20 + 1),
+        () -> Components.translatable("world-host.online_status.connecting"),
+        () -> Components.translatable("world-host.online_status.online")
     };
 
     private final int rightX;
@@ -65,7 +68,7 @@ public class OnlineStatusButton extends PlainTextButton {
         return Components.translatable(
             "world-host.online_status",
             Components.literal("\u25cf").withStyle(COLORS[status]),
-            TEXTS[status]
+            TEXTS[status].get()
         );
     }
 
@@ -78,7 +81,7 @@ public class OnlineStatusButton extends PlainTextButton {
     //#endif
         (@NotNull PoseStack poseStack, int i, int j, float f) {
         final int status = getStatus();
-        if (status != currentStatus) {
+        if (status != currentStatus || (status == 0 && (WorldHost.reconnectDelay + 1) % 20 == 0)) {
             currentStatus = status;
             final var accessor = (PlainTextButtonAccessor)this;
             final Component message = generateStatusComponent();

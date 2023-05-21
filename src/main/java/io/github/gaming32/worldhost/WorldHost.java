@@ -124,6 +124,19 @@ public class WorldHost
         "fabric";
         //#endif
 
+    @SuppressWarnings("PointlessArithmeticExpression")
+    private static final int[] RECONNECT_DELAYS = {
+        1 * 20,
+        5 * 20,
+        10 * 20,
+        15 * 20,
+        30 * 20,
+        60 * 20,
+        90 * 20,
+        120 * 20,
+        300 * 20
+    };
+
     public static final File GAME_DIR = Minecraft.getInstance().gameDirectory;
     public static final File CACHE_DIR = new File(GAME_DIR, ".world-host-cache");
 
@@ -159,7 +172,8 @@ public class WorldHost
 
     public static ProtocolClient protoClient;
     public static ProxyProtocolClient proxyProtocolClient;
-    private static long lastReconnectTime;
+    public static int reconnectDelay = 0;
+    private static int delayIndex = 0;
     private static Future<Void> connectingFuture;
 
     //#if FABRIC
@@ -300,9 +314,13 @@ public class WorldHost
                 proxyProtocolClient = null;
             }
             connectingFuture = null;
-            final long time = Util.getMillis();
-            if (time - lastReconnectTime > 20_000) {
-                lastReconnectTime = time;
+            if (reconnectDelay == 0) {
+                if (delayIndex == RECONNECT_DELAYS.length) {
+                    reconnectDelay = RECONNECT_DELAYS[delayIndex - 1];
+                } else {
+                    reconnectDelay = RECONNECT_DELAYS[delayIndex++];
+                }
+            } else if (--reconnectDelay == 0) {
                 reconnect(CONFIG.isEnableReconnectionToasts(), false);
             }
         }
@@ -311,6 +329,7 @@ public class WorldHost
         }
         if (connectingFuture != null && connectingFuture.isDone()) {
             connectingFuture = null;
+            delayIndex = 0;
             LOGGER.info("Finished authenticating with WH server. Requesting friends list.");
             ONLINE_FRIENDS.clear();
             protoClient.listOnline(CONFIG.getFriends());
