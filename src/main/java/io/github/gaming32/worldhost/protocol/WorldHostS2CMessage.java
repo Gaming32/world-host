@@ -4,6 +4,7 @@ import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.FriendsScreen;
+import io.github.gaming32.worldhost.gui.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
@@ -11,6 +12,8 @@ import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
@@ -51,19 +54,24 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record OnlineGame(String host, int port, UUID owner) implements WorldHostS2CMessage {
+    record OnlineGame(String host, int port, long ownerCid) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            if (!WorldHost.isFriend(owner)) return;
             Minecraft.getInstance().execute(() -> {
+                final Long attemptingToJoin = client.getAttemptingToJoin();
+                if (attemptingToJoin == null || ownerCid != attemptingToJoin) return;
                 final Minecraft minecraft = Minecraft.getInstance();
                 assert minecraft.screen != null;
+                Screen parentScreen = minecraft.screen;
+                if (parentScreen instanceof JoiningWorldHostScreen joinScreen) {
+                    parentScreen = joinScreen.parent;
+                }
                 //#if MC > 11605
                 //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
-                ConnectScreen.startConnecting(minecraft.screen, minecraft, new ServerAddress(host, port), null);
+                ConnectScreen.startConnecting(parentScreen, minecraft, new ServerAddress(host, port), null);
                 //#else
                 //$$ minecraft.setCurrentServer(null);
-                //$$ minecraft.setScreen(new ConnectScreen(minecraft.screen, minecraft, host, port));
+                //$$ minecraft.setScreen(new ConnectScreen(parentScreen, minecraft, host, port));
                 //#endif
             });
         }
@@ -101,7 +109,7 @@ public sealed interface WorldHostS2CMessage {
                 WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
                 WorldHost.showProfileToast(
                     user, "world-host.went_online", "world-host.went_online.desc", 200,
-                    () -> client.requestDirectJoin(connectionId)
+                    () -> WorldHost.join(connectionId, null)
                 );
             });
         }
@@ -231,6 +239,27 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
+    record ConnectionNotFound(long connectionId) implements WorldHostS2CMessage {
+        @Override
+        public void handle(ProtocolClient client) {
+            Minecraft.getInstance().execute(() -> {
+                if (client.getAttemptingToJoin() == null || client.getAttemptingToJoin() != connectionId) return;
+                client.setAttemptingToJoin(null);
+                final Minecraft minecraft = Minecraft.getInstance();
+                Screen parentScreen = minecraft.screen;
+                if (parentScreen instanceof JoiningWorldHostScreen joinScreen) {
+                    parentScreen = joinScreen.parent;
+                }
+                //noinspection DataFlowIssue // Why do I care if parentScreen is null?
+                minecraft.setScreen(new DisconnectedScreen(
+                    parentScreen,
+                    Components.translatable("world-host.connection_not_found"),
+                    Components.translatable("world-host.connection_not_found.desc", WorldHost.connectionIdToString(connectionId))
+                ));
+            });
+        }
+    }
+
     /**
      * NOTE: This method is called from the RecvThread, so it should be careful to not do anything that could
      * <ol>
@@ -246,7 +275,7 @@ public sealed interface WorldHostS2CMessage {
         return switch (typeId) {
             case 0 -> new Error(readString(dis));
             case 1 -> new IsOnlineTo(readUuid(dis));
-            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), readUuid(dis));
+            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), dis.readLong());
             case 3 -> new FriendRequest(readUuid(dis));
             case 4 -> new PublishedWorld(readUuid(dis), dis.readLong());
             case 5 -> new ClosedWorld(readUuid(dis));
@@ -275,6 +304,7 @@ public sealed interface WorldHostS2CMessage {
                 readString(dis), dis.readUnsignedShort(), readString(dis), dis.readUnsignedShort()
             );
             case 14 -> new OutdatedWorldHost(readString(dis));
+            case 15 -> new ConnectionNotFound(dis.readLong());
             default -> new Error("Received packet with unknown type_id from server (outdated client?): " + typeId);
         };
     }

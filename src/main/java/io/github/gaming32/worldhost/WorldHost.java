@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import io.github.gaming32.worldhost.gui.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
@@ -19,6 +20,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
@@ -131,6 +133,7 @@ public class WorldHost
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
     private static List<String> wordsForCid;
+    private static Map<String, Integer> wordsForCidInverse;
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
 
@@ -216,6 +219,10 @@ public class WorldHost
 
         if (wordsForCid.size() != (1 << 14)) {
             throw new RuntimeException("Expected WORDS_FOR_CID to have " + (1 << 14) + " elements, but it has " + wordsForCid.size() + " elements.");
+        }
+        wordsForCidInverse = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        for (int i = 0; i < wordsForCid.size(); i++) {
+            wordsForCidInverse.put(wordsForCid.get(i), i);
         }
 
         LOGGER.info("Using client-generated connection ID {}", connectionIdToString(CONNECTION_ID));
@@ -541,6 +548,46 @@ public class WorldHost
         return wordsForCid.get(first) + '-' +
             wordsForCid.get(second) + '-' +
             wordsForCid.get(third);
+    }
+
+    @Nullable
+    public static Long tryParseConnectionId(String str) {
+        final String[] words = str.split("-");
+        if (words.length != 3) {
+            if (words.length == 1) {
+                final String word = words[0];
+                if (word.length() != 9) {
+                    return null;
+                }
+                return Long.parseLong(word, 36);
+            }
+            return null;
+        }
+        long result = 0L;
+        int shift = 0;
+        for (final String word : words) {
+            final Integer part = wordsForCidInverse.get(word);
+            if (part == null) {
+                return null;
+            }
+            result |= (long)part << shift;
+            shift += 14;
+        }
+        return result;
+    }
+
+    public static void join(long connectionId, @Nullable Screen parentScreen) {
+        if (protoClient == null) {
+            LOGGER.error("Tried to join {}, but protoClient == null!", connectionIdToString(connectionId));
+            return;
+        }
+        final Minecraft minecraft = Minecraft.getInstance();
+        if (parentScreen == null) {
+            parentScreen = minecraft.screen;
+        }
+        protoClient.setAttemptingToJoin(connectionId);
+        minecraft.setScreen(new JoiningWorldHostScreen(parentScreen));
+        protoClient.requestDirectJoin(connectionId);
     }
 
     private static int ipCommand(CommandContext<CommandSourceStack> ctx) {

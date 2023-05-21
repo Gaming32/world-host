@@ -149,7 +149,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         if (entry == null) return;
         WorldHost.LOGGER.info("Requesting to join {}", entry.profile.getId());
         if (WorldHost.protoClient != null) {
-            WorldHost.protoClient.requestDirectJoin(entry.connectionId);
+            WorldHost.join(entry.connectionId, this);
         }
     }
 

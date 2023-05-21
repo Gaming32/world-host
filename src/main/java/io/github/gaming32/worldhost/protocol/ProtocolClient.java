@@ -7,6 +7,7 @@ import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.versions.Components;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CountingInputStream;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.net.Socket;
@@ -33,6 +34,9 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     private String baseIp = "";
     private int basePort;
     private String userIp = "";
+
+    @Nullable
+    private Long attemptingToJoin;
 
     public ProtocolClient(String ip, boolean successToast, boolean failureToast) {
         final HostAndPort target = HostAndPort.fromString(ip).withDefaultPort(9646);
@@ -268,6 +272,15 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
     public void setUserIp(String userIp) {
         this.userIp = userIp;
+    }
+
+    @Nullable
+    public Long getAttemptingToJoin() {
+        return attemptingToJoin;
+    }
+
+    public void setAttemptingToJoin(@Nullable Long attemptingToJoin) {
+        this.attemptingToJoin = attemptingToJoin;
     }
 
     public boolean isClosed() {
