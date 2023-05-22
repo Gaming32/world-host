@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost;
 
+import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import org.quiltmc.json5.JsonReader;
 import org.quiltmc.json5.JsonWriter;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class WorldHostConfig {
     private String serverIp = "world-host.jemnetworks.com";
 
-    private boolean showOnlineStatus = true;
+    private OnlineStatusLocation onlineStatusLocation = OnlineStatusLocation.RIGHT;
 
     private boolean enableFriends = true;
 
@@ -45,7 +46,22 @@ public class WorldHostConfig {
                         serverIp = serverIp.substring(0, serverIp.length() - 5);
                     }
                 }
-                case "showOnlineStatus" -> showOnlineStatus = reader.nextBoolean();
+                case "onlineStatusLocation" -> {
+                    final String value;
+                    onlineStatusLocation = switch (value = reader.nextString()) {
+                        case "left" -> OnlineStatusLocation.LEFT;
+                        case "right" -> OnlineStatusLocation.RIGHT;
+                        case "off" -> OnlineStatusLocation.OFF;
+                        default -> {
+                            WorldHost.LOGGER.warn("Unknown value for showOnlineStatus {}. Defaulting to right.", value);
+                            yield OnlineStatusLocation.RIGHT;
+                        }
+                    };
+                }
+                case "showOnlineStatus" -> {
+                    WorldHost.LOGGER.info("Converting old showOnlineStatus to new onlineStatusLocation.");
+                    onlineStatusLocation = reader.nextBoolean() ? OnlineStatusLocation.RIGHT : OnlineStatusLocation.OFF;
+                }
                 case "enableFriends" -> enableFriends = reader.nextBoolean();
                 case "enableReconnectionToasts" -> enableReconnectionToasts = reader.nextBoolean();
                 case "noUPnP" -> noUPnP = reader.nextBoolean();
@@ -71,7 +87,7 @@ public class WorldHostConfig {
     public void write(JsonWriter writer) throws IOException {
         writer.beginObject();
         writer.name("serverIp").value(serverIp);
-        writer.name("showOnlineStatus").value(showOnlineStatus);
+        writer.name("onlineStatusLocation").value(onlineStatusLocation.getSerializedName());
         writer.name("enableFriends").value(enableFriends);
         writer.name("enableReconnectionToasts").value(enableReconnectionToasts);
         writer.name("noUPnP").value(noUPnP);
@@ -95,12 +111,12 @@ public class WorldHostConfig {
         this.serverIp = serverIp;
     }
 
-    public boolean isShowOnlineStatus() {
-        return showOnlineStatus;
+    public OnlineStatusLocation getOnlineStatusLocation() {
+        return onlineStatusLocation;
     }
 
-    public void setShowOnlineStatus(boolean showOnlineStatus) {
-        this.showOnlineStatus = showOnlineStatus;
+    public void setOnlineStatusLocation(OnlineStatusLocation onlineStatusLocation) {
+        this.onlineStatusLocation = onlineStatusLocation;
     }
 
     public boolean isEnableFriends() {

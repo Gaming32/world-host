@@ -20,6 +20,8 @@ repositories {
 
     maven("https://maven.terraformersmc.com/releases")
 
+    maven("https://maven.isxander.dev/releases")
+
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 
     maven("https://jitpack.io")
@@ -91,6 +93,10 @@ dependencies {
                 modImplementation(it)
                 bundle(it)
             }
+    }
+
+    if (mcData.isFabric && mcData.version >= 1_18_02) {
+        modCompileOnly("dev.isxander:main-menu-credits:1.1.2")
     }
 }
 

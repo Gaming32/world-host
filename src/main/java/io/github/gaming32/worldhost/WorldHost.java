@@ -70,6 +70,12 @@ import net.minecraft.server.Services;
 //#if FABRIC
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+//#if MC >= 11802
+import dev.isxander.mainmenucredits.MainMenuCredits;
+import dev.isxander.mainmenucredits.config.MMCConfig;
+import dev.isxander.mainmenucredits.config.MMCConfigEntry;
+import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
+//#endif
 //#else
 //$$ import io.github.gaming32.worldhost.gui.WorldHostConfigScreen;
 //$$ import net.minecraft.client.gui.screens.Screen;
@@ -117,11 +123,11 @@ public class WorldHost
         //$$ LogManager.getLogger();
         //#endif
 
-    public static final String MOD_LOADER =
+    public static final Loader MOD_LOADER =
         //#if FORGE
-        //$$ "forge";
+        //$$ Loader.FORGE;
         //#else
-        "fabric";
+        Loader.FABRIC;
         //#endif
 
     @SuppressWarnings("PointlessArithmeticExpression")
@@ -686,6 +692,17 @@ public class WorldHost
         //$$     .toString();
         //#endif
     }
+
+    //#if FABRIC && MC >= 11802
+    public static int getMMCLines(boolean isPause) {
+        if (FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
+            final MMCConfig baseConfig = MainMenuCredits.getInstance().getConfig();
+            final MMCConfigEntry config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
+            return (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
+        }
+        return 0;
+    }
+    //#endif
 
     //#if FORGE
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

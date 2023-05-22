@@ -15,7 +15,7 @@ import net.minecraft.client.gui.layouts.LayoutElement;
 //$$ import net.minecraft.client.gui.components.AbstractWidget;
 //#endif
 
-@Mixin(ModMenuEventHandler.class)
+@Mixin(value = ModMenuEventHandler.class, remap = false)
 public class MixinModMenuEventHandler {
     //#if MC >= 11904
     @Inject(method = "shiftButtons", at = @At("HEAD"), cancellable = true, require = 0)

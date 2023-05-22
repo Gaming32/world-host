@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.mixin;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.OnlineStatusButton;
+import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import net.minecraft.client.gui.screens.PauseScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -37,8 +38,24 @@ public class MixinPauseScreen extends Screen {
 
     @Inject(method = "init", at = @At("RETURN"))
     private void onlineStatus(CallbackInfo ci) {
-        if (!WorldHost.CONFIG.isShowOnlineStatus()) return;
-        addRenderableWidget(new OnlineStatusButton(width - 7, height - 15, 10, font));
+        final OnlineStatusLocation location = WorldHost.CONFIG.getOnlineStatusLocation();
+        if (location == OnlineStatusLocation.OFF) return;
+        int x = 7;
+        int y = 15;
+        //#if FABRIC && MC >= 11802
+        final int mmcLines = WorldHost.getMMCLines(true);
+        if (mmcLines > 0) {
+            x = 2;
+            y = 10 + mmcLines * 12;
+        }
+        //#endif
+        addRenderableWidget(new OnlineStatusButton(
+            location == OnlineStatusLocation.RIGHT ? width - x : x,
+            height - y,
+            10,
+            location == OnlineStatusLocation.RIGHT,
+            font
+        ));
     }
 
     //#if MC <= 11605

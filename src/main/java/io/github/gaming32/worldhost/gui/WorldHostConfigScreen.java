@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component TITLE = Components.translatable("world-host.config.title");
     private static final Component SERVER_IP = Components.translatable("world-host.config.serverIp");
-    private static final Component SHOW_ONLINE_STATUS = Components.translatable("world-host.config.showOnlineStatus");
+    private static final Component ONLINE_STATUS_LOCATION = Components.translatable("world-host.config.onlineStatusLocation");
     private static final Component ENABLE_FRIENDS = Components.translatable("world-host.config.enableFriends");
     private static final Component ENABLE_RECONNECTION_TOASTS = Components.translatable("world-host.config.enableReconnectionToasts");
     private static final Component NO_UPNP = Components.translatable("world-host.config.noUPnP");
@@ -45,14 +45,15 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         ));
         serverIpBox.setValue(WorldHost.CONFIG.getServerIp());
 
-        addRenderableWidget(new YesNoButton(
+        addRenderableWidget(new EnumButton<>(
             width / 2 + 5, yOffset + 24, 150, 20,
-            Components.translatable("world-host.config.showOnlineStatus.tooltip"),
+            "world-host.config.onlineStatusLocation",
+            OnlineStatusLocation.class,
             button -> {
-                WorldHost.CONFIG.setShowOnlineStatus(button.isToggled());
+                WorldHost.CONFIG.setOnlineStatusLocation(button.getValue());
                 WorldHost.saveConfig();
             }
-        )).setToggled(WorldHost.CONFIG.isShowOnlineStatus());
+        )).setValue(WorldHost.CONFIG.getOnlineStatusLocation());
 
         addRenderableWidget(new YesNoButton(
             width / 2 + 5, yOffset + 48, 150, 20,
@@ -131,7 +132,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
         final int yOffset = height / 6 + 10 - font.lineHeight / 2;
         drawRightString(poseStack, font, SERVER_IP, width / 2 - 5, yOffset, 0xffffff);
-        drawRightString(poseStack, font, SHOW_ONLINE_STATUS, width / 2 - 5, yOffset + 24, 0xffffff);
+        drawRightString(poseStack, font, ONLINE_STATUS_LOCATION, width / 2 - 5, yOffset + 24, 0xffffff);
         drawRightString(poseStack, font, ENABLE_FRIENDS, width / 2 - 5, yOffset + 48, 0xffffff);
         drawRightString(poseStack, font, ENABLE_RECONNECTION_TOASTS, width / 2 - 5, yOffset + 72, 0xffffff);
         drawRightString(poseStack, font, NO_UPNP, width / 2 - 5, yOffset + 96, 0xffffff);

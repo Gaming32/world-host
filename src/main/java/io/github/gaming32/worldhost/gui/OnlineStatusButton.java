@@ -32,26 +32,32 @@ public class OnlineStatusButton extends PlainTextButton {
         () -> Components.translatable("world-host.online_status.online")
     };
 
-    private final int rightX;
+    private final int alignedX;
+    private final boolean rightAlign;
     private final Font font;
 
     private int currentStatus = getStatus();
 
-    public OnlineStatusButton(int rightX, int y, int height, Font font) {
-        super(rightX, y, 0, height, generateStatusComponent(), b -> {
+    public OnlineStatusButton(int alignedX, int y, int height, boolean rightAlign, Font font) {
+        super(alignedX, y, 0, height, generateStatusComponent(), b -> {
             if (getStatus() != 1) {
                 WorldHost.reconnect(true, true);
             }
         }, font);
-        this.rightX = rightX;
+        this.alignedX = alignedX;
         this.font = font;
+        this.rightAlign = rightAlign;
         setWidth(font.width(getMessage()));
+        updateX();
+    }
+
+    private void updateX() {
         //#if MC >= 11904
         setX(
-        //#else
-        //$$ x = (
-        //#endif
-            rightX - getWidth()
+            //#else
+            //$$ x = (
+            //#endif
+            rightAlign ? alignedX - getWidth() : alignedX
         );
     }
 
@@ -89,13 +95,7 @@ public class OnlineStatusButton extends PlainTextButton {
             accessor.setPTBMessage(message);
             accessor.setUnderlinedMessage(ComponentUtils.mergeStyles(message.copy(), Style.EMPTY.applyFormat(ChatFormatting.UNDERLINE)));
             setWidth(font.width(message));
-            //#if MC >= 11904
-            setX(
-            //#else
-            //$$ x = (
-            //#endif
-                rightX - getWidth()
-            );
+            updateX();
         }
         super.
             //#if MC >= 11904
