@@ -16,6 +16,8 @@ import java.util.function.Supplier;
 
 //#if MC > 11605
 import net.minecraft.client.gui.components.PlainTextButton;
+//#else
+//$$ import io.github.gaming32.worldhost.gui.PlainTextButton;
 //#endif
 
 public class OnlineStatusButton extends PlainTextButton {

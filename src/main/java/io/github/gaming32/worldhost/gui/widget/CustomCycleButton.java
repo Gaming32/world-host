@@ -10,6 +10,8 @@ import java.util.function.Consumer;
 
 //#if MC >= 11904
 import net.minecraft.client.gui.components.Tooltip;
+//#else
+//$$ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 //#endif
 
 public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> extends Button {

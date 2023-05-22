@@ -15,10 +15,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //$$ import net.minecraft.client.gui.components.AbstractWidget;
 //#endif
 
-//#if FABRIC && MC <= 11601
+//#if FABRIC
+//#if MC <= 11601
 //$$ import net.fabricmc.loader.api.FabricLoader;
+//#endif
 //#else
+//#if MC > 11605
 //$$ import net.minecraftforge.internal.BrandingControl;
+//#else
+//$$ import net.minecraftforge.fml.BrandingControl;
+//#endif
 //$$ import java.util.function.BiConsumer;
 //#endif
 
