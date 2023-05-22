@@ -2,9 +2,9 @@ package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.gui.AddFriendScreen;
-import io.github.gaming32.worldhost.gui.FriendsScreen;
-import io.github.gaming32.worldhost.gui.JoiningWorldHostScreen;
+import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
+import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
+import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;

@@ -2,8 +2,8 @@ package io.github.gaming32.worldhost.mixin;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
-import io.github.gaming32.worldhost.gui.FriendsButton;
-import io.github.gaming32.worldhost.gui.OnlineFriendsScreen;
+import io.github.gaming32.worldhost.gui.widget.FriendsButton;
+import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
 import io.github.gaming32.worldhost.versions.ButtonBuilder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;

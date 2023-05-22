@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost.gui;
+package io.github.gaming32.worldhost.gui.screen;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.gui.widget.FriendsButton;
 import io.github.gaming32.worldhost.mixin.ServerStatusPingerAccessor;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;

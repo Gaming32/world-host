@@ -1,7 +1,7 @@
 package io.github.gaming32.worldhost.mixin;
 
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.gui.OnlineStatusButton;
+import io.github.gaming32.worldhost.gui.widget.OnlineStatusButton;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;

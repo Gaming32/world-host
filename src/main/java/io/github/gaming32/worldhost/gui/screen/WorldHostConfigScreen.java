@@ -1,8 +1,11 @@
-package io.github.gaming32.worldhost.gui;
+package io.github.gaming32.worldhost.gui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
+import io.github.gaming32.worldhost.gui.widget.EnumButton;
+import io.github.gaming32.worldhost.gui.widget.YesNoButton;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;

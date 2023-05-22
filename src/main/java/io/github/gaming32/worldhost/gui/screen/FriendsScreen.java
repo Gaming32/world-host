@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost.gui;
+package io.github.gaming32.worldhost.gui.screen;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;

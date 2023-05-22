@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost.gui;
+package io.github.gaming32.worldhost.gui.widget;
 
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.components.Button;

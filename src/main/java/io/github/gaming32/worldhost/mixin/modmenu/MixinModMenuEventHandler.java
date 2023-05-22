@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 //#if FABRIC && MC > 11601
 import com.terraformersmc.modmenu.event.ModMenuEventHandler;
-import io.github.gaming32.worldhost.gui.OnlineStatusButton;
+import io.github.gaming32.worldhost.gui.widget.OnlineStatusButton;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;

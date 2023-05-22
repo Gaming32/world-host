@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost.gui;
+package io.github.gaming32.worldhost.gui.widget;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.CommonComponents;

@@ -5,7 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
-import io.github.gaming32.worldhost.gui.JoiningWorldHostScreen;
+import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
@@ -77,7 +77,7 @@ import dev.isxander.mainmenucredits.config.MMCConfigEntry;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //#endif
 //#else
-//$$ import io.github.gaming32.worldhost.gui.WorldHostConfigScreen;
+//$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 //$$ import net.minecraft.client.gui.screens.Screen;
 //$$ import net.minecraft.server.packs.PackType;
 //$$ import net.minecraftforge.api.distmarker.Dist;

@@ -1,7 +1,7 @@
 //#if FABRIC
 package io.github.gaming32.worldhost.compat;
 
-import io.github.gaming32.worldhost.gui.WorldHostConfigScreen;
+import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 
 //#if MC > 11601
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
