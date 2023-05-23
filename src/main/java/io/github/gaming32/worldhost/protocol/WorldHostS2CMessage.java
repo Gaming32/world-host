@@ -314,7 +314,7 @@ public sealed interface WorldHostS2CMessage {
             );
             case 14 -> new OutdatedWorldHost(readString(dis));
             case 15 -> new ConnectionNotFound(dis.readLong());
-            default -> new Error("Received packet with unknown type_id from server (outdated client?): " + typeId);
+            default -> new Error("Received packet with unknown typeId from server (outdated client?): " + typeId);
         };
     }
 
