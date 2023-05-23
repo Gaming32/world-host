@@ -353,28 +353,33 @@ public class WorldHost
                 .executes(WorldHost::ipCommand)
             )
             .then(literal("tempip")
-                .requires(s -> !CONFIG.isNoUPnP() && s.getServer().isPublished())
+                .requires(s ->
+                    !CONFIG.isNoUPnP() &&
+                        s.getServer().isPublished() &&
+                        upnpGateway != null &&
+                        protoClient != null &&
+                        !protoClient.getUserIp().isEmpty()
+                )
                 .executes(ctx -> {
-                    if (upnpGateway != null && protoClient != null && !protoClient.getUserIp().isEmpty()) {
-                        try {
-                            final int port = ctx.getSource().getServer().getPort();
-                            final UPnPErrors.AddPortMappingErrors error = upnpGateway.openPort(port, 60, false);
-                            if (error == null) {
-                                ctx.getSource().sendSuccess(
-                                    Components.translatable(
-                                        "world-host.worldhost.tempip.success",
-                                        Components.copyOnClickText(protoClient.getUserIp() + ':' + port)
-                                    ),
-                                    false
-                                );
-                                return Command.SINGLE_SUCCESS;
-                            }
-                            WorldHost.LOGGER.info("Failed to use UPnP mode due to {}. Falling back to Proxy mode.", error);
-                        } catch (Exception e) {
-                            WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
+                    try {
+                        final int port = ctx.getSource().getServer().getPort();
+                        final UPnPErrors.AddPortMappingErrors error = upnpGateway.openPort(port, 60, false);
+                        if (error == null) {
+                            ctx.getSource().sendSuccess(
+                                Components.translatable(
+                                    "world-host.worldhost.tempip.success",
+                                    Components.copyOnClickText(protoClient.getUserIp() + ':' + port)
+                                ),
+                                false
+                            );
+                            return Command.SINGLE_SUCCESS;
                         }
+                        WorldHost.LOGGER.info("Failed to use UPnP mode due to {}. tempip not supported.", error);
+                    } catch (Exception e) {
+                        WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                     }
-                    return ipCommand(ctx);
+                    ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.tempip.failure"));
+                    return 0;
                 })
             )
         );
