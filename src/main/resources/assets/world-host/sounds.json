@@ -1,0 +1,26 @@
+{
+  "toast/important": {
+    "sounds": [
+      {
+        "name": "minecraft:note/icechime",
+        "volume": 0.5
+      }
+    ]
+  },
+  "toast/regular": {
+    "sounds": [
+      {
+        "name": "minecraft:ui.toast.in",
+        "type": "event"
+      }
+    ]
+  },
+  "toast/removed": {
+    "sounds": [
+      {
+        "name": "minecraft:ui.toast.out",
+        "type": "event"
+      }
+    ]
+  }
+}

@@ -478,7 +478,7 @@ public class WorldHost
         return CONFIG.isEnableFriends() && CONFIG.getFriends().contains(user);
     }
 
-    public static void showProfileToast(UUID user, String title, String description, int ticks, Runnable clickAction) {
+    public static void showFriendOrOnlineToast(UUID user, String title, String description, int ticks, Runnable clickAction) {
         Util.backgroundExecutor().execute(() -> {
             final GameProfile profile = Minecraft.getInstance()
                 .getMinecraftSessionService()
@@ -495,6 +495,7 @@ public class WorldHost
                     })
                     .clickAction(clickAction)
                     .ticks(ticks)
+                    .important()
                     .show();
             });
         });

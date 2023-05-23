@@ -46,6 +46,7 @@ class ToastInstance {
     public final IconRenderer iconRenderer;
     @Nullable
     public final Runnable clickAction;
+    public final boolean important;
 
     public final int width;
     public int height;
@@ -67,20 +68,18 @@ class ToastInstance {
         @Nullable Component description,
         @Nullable IconRenderer iconRenderer,
         @Nullable Runnable clickAction,
+        boolean important,
         int ticks
     ) {
         this.title = title;
         this.description = description;
         this.iconRenderer = iconRenderer;
         this.clickAction = clickAction;
+        this.important = important;
 
         width = TEXT_WIDTH
             + 2 * BORDER_SIZE
             + (iconRenderer != null ? ICON_SIZE + BORDER_SIZE : 0);
-
-        if (WHToast.ready) {
-            calculateText();
-        }
 
         ticksRemaining = ticksTotal = ticks;
     }

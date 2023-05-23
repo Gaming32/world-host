@@ -14,6 +14,7 @@ public class ToastBuilder {
     private IconRenderer iconRenderer = null;
     @Nullable
     private Runnable clickAction = null;
+    private boolean important = false;
     private int ticks = 100;
 
     ToastBuilder(@NotNull Component title) {
@@ -35,12 +36,23 @@ public class ToastBuilder {
         return this;
     }
 
+    public ToastBuilder important() {
+        return important(true);
+    }
+
+    public ToastBuilder important(boolean important) {
+        this.important = important;
+        return this;
+    }
+
     public ToastBuilder ticks(int ticks) {
         this.ticks = ticks;
         return this;
     }
 
     public void show() {
-        Minecraft.getInstance().execute(() -> WHToast.TOASTS.add(new ToastInstance(title, description, iconRenderer, clickAction, ticks)));
+        Minecraft.getInstance().execute(() -> WHToast.add(
+            new ToastInstance(title, description, iconRenderer, clickAction, important, ticks)
+        ));
     }
 }

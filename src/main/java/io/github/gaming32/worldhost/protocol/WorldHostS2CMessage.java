@@ -82,7 +82,7 @@ public sealed interface WorldHostS2CMessage {
         public void handle(ProtocolClient client) {
             if (!WorldHost.CONFIG.isEnableFriends()) return;
             final boolean isFriend = WorldHost.isFriend(fromUser);
-            WorldHost.showProfileToast(
+            WorldHost.showFriendOrOnlineToast(
                 fromUser,
                 isFriend ? "world-host.friend_added_you.already" : "world-host.friend_added_you",
                 isFriend ? "world-host.friend_added_you.already.desc" : "world-host.need_add_back",
@@ -107,7 +107,7 @@ public sealed interface WorldHostS2CMessage {
             Minecraft.getInstance().execute(() -> {
                 WorldHost.ONLINE_FRIENDS.put(user, connectionId);
                 WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
-                WorldHost.showProfileToast(
+                WorldHost.showFriendOrOnlineToast(
                     user, "world-host.went_online", "world-host.went_online.desc", 200,
                     () -> WorldHost.join(connectionId, null)
                 );

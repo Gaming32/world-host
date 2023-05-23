@@ -4,7 +4,10 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
@@ -15,8 +18,12 @@ public class WHToast {
     private static final int X_OFFSET = 4;
     private static final int Y_OFFSET = 4;
 
-    static boolean ready = false;
-    static final Deque<ToastInstance> TOASTS = new ArrayDeque<>();
+    private static final SoundEvent IMPORTANT = newSoundEvent("important");
+    private static final SoundEvent REGULAR = newSoundEvent("regular");
+    private static final SoundEvent REMOVED = newSoundEvent("removed");
+
+    private static boolean ready = false;
+    private static final Deque<ToastInstance> TOASTS = new ArrayDeque<>();
 
     public static ToastBuilder builder(@NotNull Component title) {
         return new ToastBuilder(title);
@@ -28,7 +35,22 @@ public class WHToast {
 
     public static void ready() {
         TOASTS.forEach(ToastInstance::calculateText);
+        if (!TOASTS.isEmpty()) {
+            if (TOASTS.stream().anyMatch(t -> t.important)) {
+                playSound(IMPORTANT);
+            } else {
+                playSound(REGULAR);
+            }
+        }
         ready = true;
+    }
+
+    static void add(ToastInstance toast) {
+        if (ready) {
+            toast.calculateText();
+            playSound(toast.important ? IMPORTANT : REGULAR);
+        }
+        TOASTS.add(toast);
     }
 
     public static void tick() {
@@ -40,7 +62,10 @@ public class WHToast {
             final ToastInstance toast = it.next();
             toast.yShift += shift;
             shift = 0;
-            if (--toast.ticksRemaining <= 0) {
+            toast.ticksRemaining--;
+            if (toast.ticksRemaining == 19) {
+                playSound(REMOVED);
+            } else if (toast.ticksRemaining <= 0) {
                 it.remove();
                 shift = toast.height + GAP + toast.yShift;
             }
@@ -96,5 +121,19 @@ public class WHToast {
         }
 
         return false;
+    }
+
+    private static SoundEvent newSoundEvent(String location) {
+        //#if MC >= 11904
+        return SoundEvent.createVariableRangeEvent(
+        //#else
+        //$$ return new SoundEvent(
+        //#endif
+            new ResourceLocation("world-host:toast/" + location)
+        );
+    }
+
+    private static void playSound(SoundEvent event) {
+        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(event, 1f, 1f));
     }
 }
