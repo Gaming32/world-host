@@ -96,7 +96,6 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
         addRenderableWidget(new YesNoButton(
             width / 2 + 5, yOffset + 144, 150, 20,
-            Components.translatable("world-host.config.showOutdatedWorldHost.tooltip"),
             button -> {
                 WorldHost.CONFIG.setShowOutdatedWorldHost(button.isToggled());
                 WorldHost.saveConfig();
