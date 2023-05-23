@@ -1,3 +1,16 @@
+import net.lenni0451.classtransform.TransformerManager
+import net.lenni0451.classtransform.utils.ASMUtils
+import net.lenni0451.classtransform.utils.tree.BasicClassProvider
+import net.lenni0451.classtransform.utils.tree.IClassProvider
+import net.raphimc.javadowngrader.JavaDowngrader
+import net.raphimc.javadowngrader.runtime.RuntimeRoot
+import org.jetbrains.kotlin.incremental.isClassFile
+import java.nio.ByteBuffer
+import java.nio.file.*
+import java.nio.file.Path
+import java.util.function.Supplier
+import kotlin.streams.asSequence
+
 plugins {
     java
     `maven-publish`
@@ -11,6 +24,17 @@ plugins {
 }
 
 version = "${modData.version}+${mcData.versionStr}-${mcData.loader.name}"
+
+buildscript {
+    repositories {
+        maven("https://maven.lenni0451.net/snapshots")
+    }
+
+    dependencies {
+        classpath("net.raphimc.javadowngrader:core:1.0.0-SNAPSHOT")
+        classpath("net.lenni0451.classtransform:core:1.9.1")
+    }
+}
 
 repositories {
     maven {
@@ -169,4 +193,145 @@ tasks.processResources {
             delete(file("$resources/pack.mcmeta"))
         }
     }
+}
+
+if (mcData.javaVersion < java.sourceCompatibility) {
+    // These ClassProviders are from
+    // https://github.com/RaphiMC/JavaDowngrader/tree/main/Standalone/src/main/java/net/raphimc/javadowngrader/standalone/transform
+    abstract class AbstractClassProvider(val parent: IClassProvider? = null) : IClassProvider {
+        override fun getClass(name: String): ByteArray =
+            parent?.getClass(name)
+                ?: throw NoSuchElementException("Unable to find class '$name'")
+
+        override fun getAllClasses(): Map<String, Supplier<ByteArray>> = parent?.allClasses ?: mapOf()
+    }
+
+    open class PathClassProvider(
+        private val root: Path, parent: IClassProvider? = null
+    ) : AbstractClassProvider(parent) {
+        override fun getClass(name: String): ByteArray {
+            val path = root.resolve(name.replace('.', '/') + ".class")
+            if (Files.exists(path)) {
+                return Files.readAllBytes(path)
+            }
+            return super.getClass(name)
+        }
+
+        override fun getAllClasses() = super.getAllClasses() + Files.walk(root)
+            .asSequence()
+            .filter(Files::isRegularFile)
+            .filter { it.toString().endsWith(".class") }
+            .map {
+                root.relativize(it)
+                    .toString()
+                    .removeSuffix(".class")
+                    .replace('/', '.')
+                    .replace('\\', '.') to Supplier { Files.readAllBytes(it) }
+            }
+    }
+
+    class ClosingFileSystemClassProvider(
+        private val fs: FileSystem, parent: IClassProvider? = null
+    ) : PathClassProvider(fs.rootDirectories.first(), parent), AutoCloseable {
+        override fun close() = fs.close()
+    }
+
+    class LazyFileClassProvider(
+        path: List<File>, parent: IClassProvider? = null
+    ) : AbstractClassProvider(parent), AutoCloseable {
+        val path: Array<Any> = path.toTypedArray()
+
+        override fun getClass(name: String): ByteArray {
+            repeat(path.size) {
+                var element = path[it]
+                if (element is File) {
+                    synchronized(path) {
+                        element = path[it]
+                        if (element is File) {
+                            element = open(element as File)
+                            path[it] = element
+                        }
+                    }
+                }
+                try {
+                    return (element as PathClassProvider).getClass(name)
+                } catch (_: NoSuchElementException) {
+                }
+            }
+            return super.getClass(name)
+        }
+
+        private fun open(file: File) = ClosingFileSystemClassProvider(FileSystems.newFileSystem(file.toPath()))
+
+        override fun close() = path.forEach { (it as? AutoCloseable)?.close() }
+    }
+
+    val targetClassVersion = mcData.javaVersion.ordinal + 45
+    println("Classes need downgrading to Java ${mcData.javaVersion} ($targetClassVersion)")
+
+    tasks.register("downgradeClasses") {
+        dependsOn("classes")
+        doLast {
+            val buildClasses = file("build/classes/java/main")
+            println("Downgrading classes")
+            run {
+                val transformerManager = TransformerManager(
+                    PathClassProvider(
+                        buildClasses.toPath(),
+                        LazyFileClassProvider(
+                            sourceSets.main.get().compileClasspath.toList(),
+                            BasicClassProvider()
+                        )
+                    )
+                )
+                transformerManager.addBytecodeTransformer { className, bytecode, calculateStackMapFrames ->
+                    if (ByteBuffer.wrap(bytecode, 4, 4).int <= targetClassVersion) {
+                        return@addBytecodeTransformer null
+                    }
+                    if (!buildClasses.resolve(className.replace('.', '/') + ".class").exists()) {
+                        return@addBytecodeTransformer null
+                    }
+                    val node = ASMUtils.fromBytes(bytecode)
+                    JavaDowngrader.downgrade(node, targetClassVersion)
+                    if (calculateStackMapFrames) {
+                        ASMUtils.toBytes(node, transformerManager.classTree, transformerManager.classProvider)
+                    } else {
+                        ASMUtils.toStacklessBytes(node)
+                    }
+                }
+                buildClasses.walk().forEach {
+                    if (!it.isClassFile()) return@forEach
+                    transformerManager.transform(
+                        it.toRelativeString(buildClasses)
+                            .removeSuffix(".class")
+                            .replace('/', '.')
+                            .replace('\\', '.'),
+                        it.readBytes()
+                    )?.let(it::writeBytes)
+                }
+            }
+            println("Copying JavaDowngrader runtime classes")
+            RuntimeRoot::class.java.getResource("RuntimeRoot.class")!!.let { url ->
+                FileSystems.newFileSystem(url.toURI(), mapOf<String, Any>()).use { fs ->
+                    val runtimePackage = RuntimeRoot::class.java.packageName.replace('.', '/')
+                    val runtimeRoot = fs.getPath("/$runtimePackage")
+                    Files.walk(runtimeRoot)
+                        .asSequence()
+                        .filter(Files::isRegularFile)
+                        .filter { it.startsWith(runtimeRoot) }
+                        .filter { it.toString().endsWith(".class") }
+                        .filter { it.fileName.toString() != "RuntimeRoot.class" }
+                        .forEach {
+                            val inClasses = buildClasses.toPath().resolve(
+                                "$runtimePackage/${runtimeRoot.relativize(it)}"
+                            )
+                            Files.createDirectories(inClasses.parent)
+                            Files.copy(it, inClasses, StandardCopyOption.REPLACE_EXISTING)
+                        }
+                }
+            }
+        }
+    }
+
+    tasks.fatJar.get().dependsOn += "downgradeClasses"
 }
