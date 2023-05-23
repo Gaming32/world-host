@@ -54,7 +54,7 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record OnlineGame(String host, int port, long ownerCid) implements WorldHostS2CMessage {
+    record OnlineGame(String host, int port, long ownerCid, boolean isPunchProtocol) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             Minecraft.getInstance().execute(() -> {
@@ -146,7 +146,10 @@ public sealed interface WorldHostS2CMessage {
                         WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                     }
                 }
-                client.enqueue(new WorldHostC2SMessage.JoinGranted(connectionId, JoinType.Proxy.INSTANCE));
+                client.enqueue(new WorldHostC2SMessage.JoinGranted(
+                    connectionId,
+                    client.getPunchPort() != 0 ? JoinType.Punch.INSTANCE : JoinType.Proxy.INSTANCE
+                ));
             }
         }
     }
@@ -194,14 +197,16 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record ConnectionInfo(
-        long connectionId, String baseIp, int basePort, String userIp, int protocolVersion
+        long connectionId, String baseIp, int basePort, String userIp, int protocolVersion, int punchPort
     ) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
+            WorldHost.LOGGER.info("Received {}", this);
             client.setConnectionId(connectionId);
             client.setBaseIp(baseIp);
             client.setBasePort(basePort);
             client.setUserIp(userIp);
+            client.setPunchPort(punchPort);
             if (ProtocolClient.PROTOCOL_VERSION < protocolVersion) {
                 WorldHost.LOGGER.warn(
                     "Client is out of date with server! Client version: {}. Server version: {}.",
@@ -279,7 +284,7 @@ public sealed interface WorldHostS2CMessage {
         return switch (typeId) {
             case 0 -> new Error(readString(dis));
             case 1 -> new IsOnlineTo(readUuid(dis));
-            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), dis.readLong());
+            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), dis.readLong(), dis.readBoolean());
             case 3 -> new FriendRequest(readUuid(dis));
             case 4 -> new PublishedWorld(readUuid(dis), dis.readLong());
             case 5 -> new ClosedWorld(readUuid(dis));
@@ -302,7 +307,7 @@ public sealed interface WorldHostS2CMessage {
             case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
             case 11 -> new ProxyDisconnect(dis.readLong());
             case 12 -> new ConnectionInfo(
-                dis.readLong(), readString(dis), dis.readUnsignedShort(), readString(dis), dis.readInt()
+                dis.readLong(), readString(dis), dis.readUnsignedShort(), readString(dis), dis.readInt(), dis.readUnsignedShort()
             );
             case 13 -> new ExternalProxyServer(
                 readString(dis), dis.readUnsignedShort(), readString(dis), dis.readUnsignedShort()

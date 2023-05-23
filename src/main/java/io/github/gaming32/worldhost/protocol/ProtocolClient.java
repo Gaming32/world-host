@@ -34,6 +34,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     private String baseIp = "";
     private int basePort;
     private String userIp = "";
+    private int punchPort;
 
     @Nullable
     private Long attemptingToJoin;
@@ -272,6 +273,14 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
     public void setUserIp(String userIp) {
         this.userIp = userIp;
+    }
+
+    public int getPunchPort() {
+        return punchPort;
+    }
+
+    public void setPunchPort(int punchPort) {
+        this.punchPort = punchPort;
     }
 
     @Nullable

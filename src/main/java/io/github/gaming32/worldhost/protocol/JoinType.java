@@ -21,5 +21,14 @@ public sealed interface JoinType {
         }
     }
 
+    enum Punch implements JoinType {
+        INSTANCE;
+
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(2);
+        }
+    }
+
     void encode(DataOutputStream dos) throws IOException;
 }
