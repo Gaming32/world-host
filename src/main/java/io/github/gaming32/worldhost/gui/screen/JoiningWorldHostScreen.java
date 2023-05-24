@@ -3,16 +3,22 @@ package io.github.gaming32.worldhost.gui.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class JoiningWorldHostScreen extends WorldHostScreen {
     public final Screen parent;
+    private Component status;
+    private Connection connection;
 
     public JoiningWorldHostScreen(Screen parent) {
-        super(Components.translatable("world-host.joining_world_host"));
+        super(GameNarrator.NO_TITLE);
         this.parent = parent;
+        this.status = Components.translatable("world-host.joining_world_host");
     }
 
     @Override
@@ -28,7 +34,7 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
     @Override
     public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
         renderBackground(poseStack);
-        drawCenteredString(poseStack, font, title, width / 2, height / 2 - 50, 0xffffff);
+        drawCenteredString(poseStack, font, status, width / 2, height / 2 - 50, 0xffffff);
         super.render(poseStack, mouseX, mouseY, partialTick);
     }
 
@@ -36,6 +42,36 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
     public void onClose() {
         assert minecraft != null;
         minecraft.setScreen(parent);
+        if (WorldHost.protoClient != null) {
+            WorldHost.protoClient.setAttemptingToJoin(null);
+        }
+        if (connection != null) {
+            connection.disconnect(Components.translatable("connect.aborted"));
+        }
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return connection == null;
+    }
+
+    @Override
+    public void tick() {
+        if (connection != null) {
+            if (connection.isConnected()) {
+                connection.tick();
+            } else {
+                connection.handleDisconnection();
+            }
+        }
+    }
+
+    public void setStatus(Component status) {
+        this.status = status;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
         if (WorldHost.protoClient != null) {
             WorldHost.protoClient.setAttemptingToJoin(null);
         }

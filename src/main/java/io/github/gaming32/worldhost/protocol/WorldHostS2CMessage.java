@@ -6,6 +6,7 @@ import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
+import io.github.gaming32.worldhost.protocol.punch.PunchClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
@@ -66,13 +67,23 @@ public sealed interface WorldHostS2CMessage {
                 if (parentScreen instanceof JoiningWorldHostScreen joinScreen) {
                     parentScreen = joinScreen.parent;
                 }
-                //#if MC > 11605
-                //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
-                ConnectScreen.startConnecting(parentScreen, minecraft, new ServerAddress(host, port), null);
-                //#else
-                //$$ minecraft.setCurrentServer(null);
-                //$$ minecraft.setScreen(new ConnectScreen(parentScreen, minecraft, host, port));
-                //#endif
+                if (isPunchProtocol) {
+                    new PunchClient(
+                        client.getOriginalHost(),
+                        client.getPunchPort(),
+                        false,
+                        client.getConnectionId(),
+                        ownerCid
+                    );
+                } else {
+                    //#if MC > 11605
+                    //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
+                    ConnectScreen.startConnecting(parentScreen, minecraft, new ServerAddress(host, port), null);
+                    //#else
+                    //$$ minecraft.setCurrentServer(null);
+                    //$$ minecraft.setScreen(new ConnectScreen(parentScreen, minecraft, host, port));
+                    //#endif
+                }
             });
         }
     }
@@ -146,10 +157,20 @@ public sealed interface WorldHostS2CMessage {
                         WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                     }
                 }
-                client.enqueue(new WorldHostC2SMessage.JoinGranted(
-                    connectionId,
-                    client.getPunchPort() != 0 ? JoinType.Punch.INSTANCE : JoinType.Proxy.INSTANCE
-                ));
+                final JoinType joinType;
+                if (client.getPunchPort() != 0) {
+                    new PunchClient(
+                        client.getOriginalHost(),
+                        client.getPunchPort(),
+                        true,
+                        client.getConnectionId(),
+                        connectionId
+                    ).start();
+                    joinType = JoinType.Punch.INSTANCE;
+                } else {
+                    joinType = JoinType.Proxy.INSTANCE;
+                }
+                client.enqueue(new WorldHostC2SMessage.JoinGranted(connectionId, joinType));
             }
         }
     }

@@ -23,6 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public static final int PROTOCOL_VERSION = 4;
 
+    private final String originalHost;
     private final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<Optional<WorldHostC2SMessage>> sendQueue = new LinkedBlockingQueue<>();
 
@@ -39,8 +40,9 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     @Nullable
     private Long attemptingToJoin;
 
-    public ProtocolClient(String ip, boolean successToast, boolean failureToast) {
-        final HostAndPort target = HostAndPort.fromString(ip).withDefaultPort(9646);
+    public ProtocolClient(String host, boolean successToast, boolean failureToast) {
+        this.originalHost = host;
+        final HostAndPort target = HostAndPort.fromString(host).withDefaultPort(9646);
         final Thread connectionThread = new Thread(() -> {
             Socket socket = null;
             try {
@@ -172,6 +174,10 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         }, "WH-ConnectionThread");
         connectionThread.setDaemon(true);
         connectionThread.start();
+    }
+
+    public String getOriginalHost() {
+        return originalHost;
     }
 
     public void authenticate(UUID userUuid) {
