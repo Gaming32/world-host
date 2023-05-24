@@ -1,6 +1,6 @@
 {
   "world-host.config.title": "World Host Config",
-  "world-host.config.serverIp": "Server URI",
+  "world-host.config.serverIp": "Server Address",
   "world-host.config.onlineStatusLocation": "Online Status Location",
   "world-host.config.onlineStatusLocation.left": "Left",
   "world-host.config.onlineStatusLocation.right": "Right",
