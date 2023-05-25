@@ -6,6 +6,7 @@
   "mixins": [
     "MixinCommands",
     "MixinPublishCommand",
+    "ServerConnectionListenerAccessor",
     "modmenu.MixinModMenuEventHandler"
   ],
   "client": [

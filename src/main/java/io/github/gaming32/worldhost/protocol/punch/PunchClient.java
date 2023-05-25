@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.protocol.punch;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
+import io.github.gaming32.worldhost.mixin.ServerConnectionListenerAccessor;
 import io.github.gaming32.worldhost.versions.Components;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelException;
@@ -13,10 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
-import net.minecraft.network.Connection;
-import net.minecraft.network.ConnectionProtocol;
-import net.minecraft.network.RateKickingConnection;
+import net.minecraft.network.*;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
@@ -26,13 +24,19 @@ import net.minecraft.server.network.LegacyQueryHandler;
 import net.minecraft.server.network.ServerConnectionListener;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+
+//#if MC >= 11902
+import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
+//#endif
 
 public class PunchClient extends Thread {
     private static final AtomicInteger ID_COUNTER = new AtomicInteger();
@@ -55,6 +59,9 @@ public class PunchClient extends Thread {
 
     @Override
     public void run() {
+        //#if MC == 11902
+        //$$ final var pkFuture = isServer ? null : Minecraft.getInstance().getProfileKeyPairManager().preparePublicKey();
+        //#endif
         Socket clientSocket = null;
         try {
             final Socket socket = new Socket(host, port);
@@ -101,10 +108,24 @@ public class PunchClient extends Thread {
                 final ChannelPipeline pipeline = channel.pipeline()
                     .addLast("timeout", new ReadTimeoutHandler(30))
                     .addLast("legacy_query", new LegacyQueryHandler(listener));
+                //#if MC >= 11904
                 Connection.configureSerialization(pipeline, PacketFlow.SERVERBOUND);
+                //#else
+                //$$ pipeline
+                //$$     .addLast("splitter", new Varint21FrameDecoder())
+                //$$     .addLast("decoder", new PacketDecoder(PacketFlow.SERVERBOUND))
+                //$$     .addLast("prepender", new Varint21LengthFieldPrepender())
+                //$$     .addLast("encoder", new PacketEncoder(PacketFlow.CLIENTBOUND));
+                //#endif
+                //#if MC >= 11605
                 final int pps = server.getRateLimitPacketsPerSecond();
-                final Connection connection = pps > 0 ? new RateKickingConnection(pps) : new Connection(PacketFlow.SERVERBOUND);
-                listener.getConnections().add(connection);
+                //#endif
+                final Connection connection =
+                    //#if MC >= 11605
+                    pps > 0 ? new RateKickingConnection(pps) :
+                    //#endif
+                    new Connection(PacketFlow.SERVERBOUND);
+                ((ServerConnectionListenerAccessor)listener).getConnections().add(connection);
                 pipeline.addLast("packet_handler", connection);
                 connection.setListener(new ServerHandshakePacketListenerImpl(server, connection));
             } else {
@@ -115,8 +136,14 @@ public class PunchClient extends Thread {
 
                 // The following is from ConnectScreen.startConnecting
                 minecraft.clearLevel();
+                //#if MC >= 11802
                 minecraft.prepareForMultiplayer();
+                //#endif
+                //#if MC >= 11904
                 minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(addrToConnect.getHostName()));
+                //#else
+                //$$ minecraft.setCurrentServer(null);
+                //#endif
 
                 // The following is from Connection.connectToServer
                 final Connection connection = new Connection(PacketFlow.CLIENTBOUND);
@@ -126,16 +153,45 @@ public class PunchClient extends Thread {
                 }
                 final ChannelPipeline pipeline = channel.pipeline()
                     .addLast("timeout", new ReadTimeoutHandler(30));
+                //#if MC >= 11904
                 Connection.configureSerialization(pipeline, PacketFlow.CLIENTBOUND);
+                //#else
+                //$$ pipeline
+                //$$     .addLast("splitter", new Varint21FrameDecoder())
+                //$$     .addLast("decoder", new PacketDecoder(PacketFlow.CLIENTBOUND))
+                //$$     .addLast("prepender", new Varint21LengthFieldPrepender())
+                //$$     .addLast("encoder", new PacketEncoder(PacketFlow.SERVERBOUND));
+                //#endif
                 pipeline.addLast("packet_handler", connection);
 
-                // The following is from Connection.connect
+                // The following is from ConnectScreen.connect
                 joinScreen.setConnection(connection);
                 connection.setListener(new ClientHandshakePacketListenerImpl(
-                    connection, minecraft, null, joinScreen.parent, false, null, joinScreen::setStatus
+                    connection, minecraft,
+                    //#if MC >= 11904
+                    null,
+                    //#endif
+                    joinScreen.parent,
+                    //#if MC >= 11904
+                    false, null,
+                    //#endif
+                    joinScreen::setStatus
                 ));
                 connection.send(new ClientIntentionPacket(addrToConnect.getHostName(), portToConnect, ConnectionProtocol.LOGIN));
-                connection.send(new ServerboundHelloPacket(minecraft.getUser().getName(), Optional.ofNullable(minecraft.getUser().getProfileId())));
+                connection.send(new ServerboundHelloPacket(
+                    minecraft.getUser()
+                        //#if MC >= 11902
+                        .getName(),
+                        //#else
+                        //$$ .getGameProfile()
+                        //#endif
+                    //#if MC == 11902
+                    //$$ pkFuture.join(),
+                    //#endif
+                    //#if MC >= 11902
+                    Optional.ofNullable(minecraft.getUser().getProfileId())
+                    //#endif
+                ));
             }
         } catch (Exception e) {
             WorldHost.LOGGER.error("Error in punch client", e);
@@ -144,7 +200,11 @@ public class PunchClient extends Thread {
                 //noinspection DataFlowIssue
                 minecraft.setScreen(new DisconnectedScreen(
                     minecraft.screen instanceof JoiningWorldHostScreen joinScreen ? joinScreen.parent : minecraft.screen,
+                    //#if MC >= 11605
                     CommonComponents.CONNECT_FAILED,
+                    //#else
+                    //$$ "connect.failed",
+                    //#endif
                     Components.translatable("disconnect.genericReason", e)
                 ));
             }
