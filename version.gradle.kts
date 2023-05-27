@@ -254,6 +254,7 @@ if (mcData.javaVersion < java.sourceCompatibility) {
                     }
                 }
                 try {
+                    @Suppress("KotlinConstantConditions")
                     return (element as PathClassProvider).getClass(name)
                 } catch (_: NoSuchElementException) {
                 }
