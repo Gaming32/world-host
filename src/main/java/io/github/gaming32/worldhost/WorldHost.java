@@ -91,11 +91,15 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
 //#elseif MC >= 11802
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
+//#elseif MC >= 11701
+//$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
 //#else
 //$$ import net.minecraftforge.fml.ExtensionPoint;
 //#endif
-//#if MC > 11605
+//#if MC > 11701
 //$$ import net.minecraftforge.resource.ResourcePackLoader;
+//#elseif MC > 11605
+//$$ import net.minecraftforge.fmllegacy.packs.ResourcePackLoader;
 //#else
 //$$ import net.minecraftforge.fml.packs.ResourcePackLoader;
 //#endif
@@ -725,7 +729,7 @@ public class WorldHost
                 //#if MC >= 11902
                 //$$ ConfigScreenHandler.ConfigScreenFactory.class,
                 //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
-                //#elseif MC >= 11802
+                //#elseif MC >= 11701
                 //$$ ConfigGuiHandler.ConfigGuiFactory.class,
                 //$$ () -> new ConfigGuiHandler.ConfigGuiFactory(screenFunction)
                 //#else

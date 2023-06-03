@@ -20,8 +20,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //$$ import net.fabricmc.loader.api.FabricLoader;
 //#endif
 //#else
-//#if MC > 11605
+//#if MC > 11701
 //$$ import net.minecraftforge.internal.BrandingControl;
+//#elseif MC > 11605
+//$$ import net.minecraftforge.fmllegacy.BrandingControl;
 //#else
 //$$ import net.minecraftforge.fml.BrandingControl;
 //#endif
