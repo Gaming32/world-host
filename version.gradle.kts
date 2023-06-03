@@ -77,7 +77,7 @@ dependencies {
     })
 
     if (mcData.isFabric) {
-        modImplementation("net.fabricmc:fabric-loader:0.14.19")
+        modImplementation("net.fabricmc:fabric-loader:0.14.21")
     }
 
     bundleImplementation("org.quiltmc:quilt-json5:1.0.2")
