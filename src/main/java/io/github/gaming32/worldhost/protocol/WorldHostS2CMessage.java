@@ -158,18 +158,18 @@ public sealed interface WorldHostS2CMessage {
                     }
                 }
                 final JoinType joinType;
-                if (client.getPunchPort() != 0) {
-                    new PunchClient(
-                        client.getOriginalHost(),
-                        client.getPunchPort(),
-                        true,
-                        client.getConnectionId(),
-                        connectionId
-                    ).start();
-                    joinType = JoinType.Punch.INSTANCE;
-                } else {
+//                if (client.getPunchPort() != 0) {
+//                    new PunchClient(
+//                        client.getOriginalHost(),
+//                        client.getPunchPort(),
+//                        true,
+//                        client.getConnectionId(),
+//                        connectionId
+//                    ).start();
+//                    joinType = JoinType.Punch.INSTANCE;
+//                } else {
                     joinType = JoinType.Proxy.INSTANCE;
-                }
+//                }
                 client.enqueue(new WorldHostC2SMessage.JoinGranted(connectionId, joinType));
             }
         }
