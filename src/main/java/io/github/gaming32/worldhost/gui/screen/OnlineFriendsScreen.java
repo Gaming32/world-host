@@ -251,7 +251,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             iconTextureId = new ResourceLocation(WorldHost.MOD_ID, "servers/" + friendUuid + "/icon");
         }
 
-        //#if MC >= 11802
+        //#if MC >= 11700
         @NotNull
         @Override
         public Component getNarration() {

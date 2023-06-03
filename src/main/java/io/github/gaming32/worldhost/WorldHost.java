@@ -49,7 +49,7 @@ import java.util.function.Supplier;
 
 import static net.minecraft.commands.Commands.literal;
 
-//#if MC >= 11700
+//#if MC >= 11800
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 //#else
@@ -117,7 +117,7 @@ public class WorldHost
         //#endif
 
     public static final Logger LOGGER =
-        //#if MC >= 11700
+        //#if MC >= 11800
         LogUtils.getLogger();
         //#else
         //$$ LogManager.getLogger();
