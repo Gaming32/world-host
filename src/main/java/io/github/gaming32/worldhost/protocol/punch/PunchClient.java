@@ -71,6 +71,7 @@ public class PunchClient extends Thread {
             socketOs.writeBoolean(isServer);
             socketOs.writeLong(myConnectionId);
             socketOs.writeLong(targetConnectionId);
+            socketOs.flush();
 
             final InetAddress addrToConnect = InetAddress.getByAddress(socketIs.readNBytes(socketIs.readUnsignedByte()));
             final int portToConnect = socketIs.readUnsignedShort();
@@ -196,17 +197,19 @@ public class PunchClient extends Thread {
         } catch (Exception e) {
             WorldHost.LOGGER.error("Error in punch client", e);
             if (!isServer) {
-                final Minecraft minecraft = Minecraft.getInstance();
-                //noinspection DataFlowIssue
-                minecraft.setScreen(new DisconnectedScreen(
-                    minecraft.screen instanceof JoiningWorldHostScreen joinScreen ? joinScreen.parent : minecraft.screen,
-                    //#if MC >= 11605
-                    CommonComponents.CONNECT_FAILED,
-                    //#else
-                    //$$ "connect.failed",
-                    //#endif
-                    Components.translatable("disconnect.genericReason", e)
-                ));
+                Minecraft.getInstance().execute(() -> {
+                    final Minecraft minecraft = Minecraft.getInstance();
+                    //noinspection DataFlowIssue
+                    minecraft.setScreen(new DisconnectedScreen(
+                        minecraft.screen instanceof JoiningWorldHostScreen joinScreen ? joinScreen.parent : minecraft.screen,
+                        //#if MC >= 11605
+                        CommonComponents.CONNECT_FAILED,
+                        //#else
+                        //$$ "connect.failed",
+                        //#endif
+                        Components.translatable("disconnect.genericReason", e)
+                    ));
+                });
             }
         } finally {
             if (clientSocket != null) {

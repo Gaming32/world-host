@@ -74,7 +74,7 @@ public sealed interface WorldHostS2CMessage {
                         false,
                         client.getConnectionId(),
                         ownerCid
-                    );
+                    ).start();
                 } else {
                     //#if MC > 11605
                     //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
