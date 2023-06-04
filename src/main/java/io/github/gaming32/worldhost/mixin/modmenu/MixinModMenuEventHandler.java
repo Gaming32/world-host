@@ -2,14 +2,14 @@ package io.github.gaming32.worldhost.mixin.modmenu;
 
 import org.spongepowered.asm.mixin.Mixin;
 
-//#if FABRIC && MC > 11601
+//#if FABRIC && MC > 1_16_01
 import com.terraformersmc.modmenu.event.ModMenuEventHandler;
 import io.github.gaming32.worldhost.gui.widget.OnlineStatusButton;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC >= 11904
+//#if MC >= 1_19_04
 import net.minecraft.client.gui.layouts.LayoutElement;
 //#else
 //$$ import net.minecraft.client.gui.components.AbstractWidget;
@@ -17,7 +17,7 @@ import net.minecraft.client.gui.layouts.LayoutElement;
 
 @Mixin(value = ModMenuEventHandler.class, remap = false)
 public class MixinModMenuEventHandler {
-    //#if MC >= 11904
+    //#if MC >= 1_19_04
     @Inject(method = "shiftButtons", at = @At("HEAD"), cancellable = true, require = 0)
     private static void dontShiftOnlineStatus(LayoutElement widget, boolean shiftUp, int spacing, CallbackInfo ci) {
         if (widget instanceof OnlineStatusButton) {

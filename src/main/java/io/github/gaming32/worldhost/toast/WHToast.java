@@ -124,7 +124,7 @@ public class WHToast {
     }
 
     private static SoundEvent newSoundEvent(String location) {
-        //#if MC >= 11904
+        //#if MC >= 1_19_04
         return SoundEvent.createVariableRangeEvent(
         //#else
         //$$ return new SoundEvent(

@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC > 11605
+//#if MC > 1_16_05
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 //#endif
 
@@ -21,7 +21,7 @@ public class MixinConnectScreen {
     @Shadow @Final Screen parent;
 
     @Inject(method = "connect", at = @At("HEAD"), cancellable = true)
-    //#if MC > 11605
+    //#if MC > 1_16_05
     private void overrideConnect(Minecraft minecraft, ServerAddress serverAddress, ServerData serverData, CallbackInfo ci) {
         final String host = serverAddress.getHost();
         final int port = serverAddress.getPort();

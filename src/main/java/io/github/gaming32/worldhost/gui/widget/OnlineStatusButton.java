@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
-//#if MC > 11701
+//#if MC > 1_17_01
 import net.minecraft.client.gui.components.PlainTextButton;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.PlainTextButton;
@@ -54,7 +54,7 @@ public class OnlineStatusButton extends PlainTextButton {
     }
 
     private void updateX() {
-        //#if MC >= 11904
+        //#if MC >= 1_19_04
         setX(
             //#else
             //$$ x = (
@@ -82,7 +82,7 @@ public class OnlineStatusButton extends PlainTextButton {
 
     @Override
     public void
-    //#if MC >= 11904
+    //#if MC >= 1_19_04
     renderWidget
     //#else
     //$$ renderButton
@@ -100,7 +100,7 @@ public class OnlineStatusButton extends PlainTextButton {
             updateX();
         }
         super.
-            //#if MC >= 11904
+            //#if MC >= 1_19_04
             renderWidget
             //#else
             //$$ renderButton
@@ -108,7 +108,7 @@ public class OnlineStatusButton extends PlainTextButton {
                 (poseStack, i, j, f);
     }
 
-    //#if MC >= 11800
+    //#if MC >= 1_18_00
     @Override
     public boolean isHoveredOrFocused() {
         return currentStatus != 1 && super.isHoveredOrFocused();

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC > 11802
+//#if MC > 1_18_02
 import net.minecraft.commands.CommandBuildContext;
 //#endif
 
@@ -22,7 +22,7 @@ public class MixinCommands {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void commandRegistrationEvent(
         Commands.CommandSelection commandSelection,
-        //#if MC > 11802
+        //#if MC > 1_18_02
         CommandBuildContext commandBuildContext,
         //#endif
         CallbackInfo ci

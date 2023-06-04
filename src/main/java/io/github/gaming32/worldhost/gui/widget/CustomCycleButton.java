@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-//#if MC >= 11904
+//#if MC >= 1_19_04
 import net.minecraft.client.gui.components.Tooltip;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
@@ -33,14 +33,14 @@ public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> ex
                 cycle.setValueIndex(Math.floorMod(cycle.getValueIndex() + add, cycle.getValues().length));
                 cycle.getOnUpdate().accept(cycle);
             },
-            //#if MC >= 11904
+            //#if MC >= 1_19_04
             DEFAULT_NARRATION
             //#else
             //$$ tooltip != null ? WorldHostScreen.onTooltip(tooltip) : NO_TOOLTIP
             //#endif
         );
         this.onUpdate = onUpdate;
-        //#if MC >= 11904
+        //#if MC >= 1_19_04
         if (tooltip != null) {
             setTooltip(Tooltip.create(tooltip));
         }

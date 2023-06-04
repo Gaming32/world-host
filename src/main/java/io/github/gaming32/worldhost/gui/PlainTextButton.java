@@ -1,4 +1,4 @@
-//#if MC <= 11701
+//#if MC <= 1_17_01
 //$$ package io.github.gaming32.worldhost.gui;
 //$$
 //$$ import com.mojang.blaze3d.vertex.PoseStack;

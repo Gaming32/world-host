@@ -34,7 +34,7 @@ import java.net.Socket;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//#if MC >= 11902
+//#if MC >= 1_19_02
 import net.minecraft.client.multiplayer.chat.report.ReportEnvironment;
 //#endif
 
@@ -59,7 +59,7 @@ public class PunchClient extends Thread {
 
     @Override
     public void run() {
-        //#if MC == 11902
+        //#if MC == 1_19_02
         //$$ final var pkFuture = isServer ? null : Minecraft.getInstance().getProfileKeyPairManager().preparePublicKey();
         //#endif
         Socket clientSocket = null;
@@ -109,7 +109,7 @@ public class PunchClient extends Thread {
                 final ChannelPipeline pipeline = channel.pipeline()
                     .addLast("timeout", new ReadTimeoutHandler(30))
                     .addLast("legacy_query", new LegacyQueryHandler(listener));
-                //#if MC >= 11904
+                //#if MC >= 1_19_04
                 Connection.configureSerialization(pipeline, PacketFlow.SERVERBOUND);
                 //#else
                 //$$ pipeline
@@ -118,11 +118,11 @@ public class PunchClient extends Thread {
                 //$$     .addLast("prepender", new Varint21LengthFieldPrepender())
                 //$$     .addLast("encoder", new PacketEncoder(PacketFlow.CLIENTBOUND));
                 //#endif
-                //#if MC >= 11605
+                //#if MC >= 1_16_05
                 final int pps = server.getRateLimitPacketsPerSecond();
                 //#endif
                 final Connection connection =
-                    //#if MC >= 11605
+                    //#if MC >= 1_16_05
                     pps > 0 ? new RateKickingConnection(pps) :
                     //#endif
                     new Connection(PacketFlow.SERVERBOUND);
@@ -137,10 +137,10 @@ public class PunchClient extends Thread {
 
                 // The following is from ConnectScreen.startConnecting
                 minecraft.clearLevel();
-                //#if MC >= 11802
+                //#if MC >= 1_18_02
                 minecraft.prepareForMultiplayer();
                 //#endif
-                //#if MC >= 11904
+                //#if MC >= 1_19_04
                 minecraft.updateReportEnvironment(ReportEnvironment.thirdParty(addrToConnect.getHostName()));
                 //#else
                 //$$ minecraft.setCurrentServer(null);
@@ -154,7 +154,7 @@ public class PunchClient extends Thread {
                 }
                 final ChannelPipeline pipeline = channel.pipeline()
                     .addLast("timeout", new ReadTimeoutHandler(30));
-                //#if MC >= 11904
+                //#if MC >= 1_19_04
                 Connection.configureSerialization(pipeline, PacketFlow.CLIENTBOUND);
                 //#else
                 //$$ pipeline
@@ -169,11 +169,11 @@ public class PunchClient extends Thread {
                 joinScreen.setConnection(connection);
                 connection.setListener(new ClientHandshakePacketListenerImpl(
                     connection, minecraft,
-                    //#if MC >= 11904
+                    //#if MC >= 1_19_04
                     null,
                     //#endif
                     joinScreen.parent,
-                    //#if MC >= 11904
+                    //#if MC >= 1_19_04
                     false, null,
                     //#endif
                     joinScreen::setStatus
@@ -181,15 +181,15 @@ public class PunchClient extends Thread {
                 connection.send(new ClientIntentionPacket(addrToConnect.getHostName(), portToConnect, ConnectionProtocol.LOGIN));
                 connection.send(new ServerboundHelloPacket(
                     minecraft.getUser()
-                        //#if MC >= 11902
+                        //#if MC >= 1_19_02
                         .getName(),
                         //#else
                         //$$ .getGameProfile()
                         //#endif
-                    //#if MC == 11902
+                    //#if MC == 1_19_02
                     //$$ pkFuture.join(),
                     //#endif
-                    //#if MC >= 11902
+                    //#if MC >= 1_19_02
                     Optional.ofNullable(minecraft.getUser().getProfileId())
                     //#endif
                 ));
@@ -202,7 +202,7 @@ public class PunchClient extends Thread {
                     //noinspection DataFlowIssue
                     minecraft.setScreen(new DisconnectedScreen(
                         minecraft.screen instanceof JoiningWorldHostScreen joinScreen ? joinScreen.parent : minecraft.screen,
-                        //#if MC >= 11605
+                        //#if MC >= 1_16_05
                         CommonComponents.CONNECT_FAILED,
                         //#else
                         //$$ "connect.failed",

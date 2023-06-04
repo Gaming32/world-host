@@ -6,7 +6,7 @@ import net.minecraft.server.commands.PublishCommand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-//#if MC >= 11904
+//#if MC >= 1_19_04
 import net.minecraft.network.chat.MutableComponent;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PublishCommand.class)
 public class MixinPublishCommand {
-    //#if MC >= 11904
+    //#if MC >= 1_19_04
     @Inject(method = "getSuccessMessage", at = @At("HEAD"), cancellable = true)
     private static void getSuccessMessage(int port, CallbackInfoReturnable<MutableComponent> cir) {
         if (WorldHost.CONFIG.isEnableFriends()) {
@@ -41,7 +41,7 @@ public class MixinPublishCommand {
     //$$     at = @At(
     //$$         value = "INVOKE",
     //$$         target =
-                //#if MC >= 11902
+                //#if MC >= 1_19_02
                 //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
                 //#else
                 //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"

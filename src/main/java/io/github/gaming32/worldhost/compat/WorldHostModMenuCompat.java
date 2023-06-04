@@ -3,7 +3,7 @@ package io.github.gaming32.worldhost.compat;
 
 import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 
-//#if MC > 11601
+//#if MC > 1_16_01
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 //#else

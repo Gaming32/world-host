@@ -50,7 +50,7 @@ public class FriendsScreen extends WorldHostScreen {
 
         if (list == null) {
             list = addWidget(new FriendsList(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64), 36));
-            //#if MC > 11601
+            //#if MC > 1_16_01
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
@@ -184,7 +184,7 @@ public class FriendsScreen extends WorldHostScreen {
             );
         }
 
-        //#if MC > 11605
+        //#if MC > 1_16_05
         @NotNull
         @Override
         public Component getNarration() {

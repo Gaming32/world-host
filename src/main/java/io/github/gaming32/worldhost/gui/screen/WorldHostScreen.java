@@ -7,7 +7,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 
-//#if MC < 11904
+//#if MC < 1_19_04
 //$$ import net.minecraft.client.Minecraft;
 //$$ import net.minecraft.client.gui.components.Button;
 //$$ import org.jetbrains.annotations.NotNull;
@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Component;
 //$$ import java.util.function.Consumer;
 //#endif
 
-//#if MC <= 11605
+//#if MC <= 1_16_05
 //$$ import net.minecraft.client.gui.components.AbstractWidget;
 //#endif
 
@@ -26,14 +26,14 @@ public abstract class WorldHostScreen extends Screen {
     }
 
     public
-    //#if MC > 11601
+    //#if MC > 1_16_01
     static
     //#endif
     void drawRightString(PoseStack poseStack, Font font, Component text, int x, int y, int color) {
         drawString(poseStack, font, text, x - font.width(text), y, color);
     }
 
-    //#if MC < 11904
+    //#if MC < 1_19_04
     //$$ public static Button.OnTooltip onTooltip(Component tooltip) {
     //$$     // 170 matches 1.19.4+
     //$$     final var lines = Minecraft.getInstance().font.split(tooltip, 170);
@@ -44,7 +44,7 @@ public abstract class WorldHostScreen extends Screen {
     //$$             Minecraft.getInstance().screen.renderTooltip(arg2, lines, i, j);
     //$$         }
     //$$
-            //#if MC > 11605
+            //#if MC > 1_16_05
             //$$ @Override
             //$$ public void narrateTooltip(@NotNull Consumer<Component> contents) {
             //$$     contents.accept(tooltip);
@@ -54,7 +54,7 @@ public abstract class WorldHostScreen extends Screen {
     //$$ }
     //#endif
 
-    //#if MC <= 11605
+    //#if MC <= 1_16_05
     //$$ protected <T extends AbstractWidget> T addRenderableWidget(T widget) {
     //$$     return addButton(widget);
     //$$ }
@@ -65,7 +65,7 @@ public abstract class WorldHostScreen extends Screen {
     }
 
     public static void sendRepeatEvents(@SuppressWarnings("unused") boolean sendRepeatEvents) {
-        //#if MC < 11904
+        //#if MC < 1_19_04
         //$$ Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(sendRepeatEvents);
         //#endif
     }

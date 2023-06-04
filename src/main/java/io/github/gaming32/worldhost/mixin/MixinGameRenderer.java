@@ -3,7 +3,7 @@ package io.github.gaming32.worldhost.mixin;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 
-//#if MC >= 11904
+//#if MC >= 1_19_04
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
-    //#if MC >= 11904
+    //#if MC >= 1_19_04
     @Shadow @Final Minecraft minecraft;
 
     @Inject(
