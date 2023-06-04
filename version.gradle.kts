@@ -90,6 +90,7 @@ dependencies {
 
     if (mcData.isFabric) {
         when (mcData.version) {
+            1_20_00 -> "7.0.0-beta.2"
             1_19_04 -> "6.2.1"
             1_19_02 -> "4.2.0-beta.2"
             1_18_02 -> "3.2.5"
@@ -108,6 +109,7 @@ dependencies {
 
     if (mcData.isFabric) {
         when (mcData.version) {
+            1_20_00 -> "0.83.0+1.20"
             1_19_04 -> "0.80.0+1.19.4"
             1_19_02 -> "0.76.0+1.19.2"
             1_18_02 -> "0.76.0+1.18.2"
@@ -168,6 +170,7 @@ toolkitReleases {
 tasks.processResources {
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
+            mcData.version >= 1_20_00 -> 15
             mcData.version >= 1_19_04 -> 13
             mcData.version >= 1_19_03 -> 12
             mcData.version >= 1_19_00 -> 9

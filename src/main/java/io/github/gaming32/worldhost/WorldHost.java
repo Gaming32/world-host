@@ -6,6 +6,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
+import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
@@ -19,9 +20,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
@@ -309,8 +308,11 @@ public class WorldHost
     }
 
     public static void saveConfig() {
-        try (JsonWriter writer = JsonWriter.json5(CONFIG_FILE)) {
-            CONFIG.write(writer);
+        try {
+            Files.createDirectories(CONFIG_FILE.getParent());
+            try (JsonWriter writer = JsonWriter.json5(CONFIG_FILE)) {
+                CONFIG.write(writer);
+            }
         } catch (IOException e) {
             LOGGER.error("Failed to write {}.", CONFIG_FILE.getFileName(), e);
         }
@@ -370,6 +372,9 @@ public class WorldHost
                         final UPnPErrors.AddPortMappingErrors error = upnpGateway.openPort(port, 60, false);
                         if (error == null) {
                             ctx.getSource().sendSuccess(
+                                //#if MC >= 1_20_00
+                                //$$ () ->
+                                //#endif
                                 Components.translatable(
                                     "world-host.worldhost.tempip.success",
                                     Components.copyOnClickText(protoClient.getUserIp() + ':' + port)
@@ -456,12 +461,6 @@ public class WorldHost
         //#endif
     }
 
-    public static void positionTexShader() {
-        //#if MC > 1_16_05
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        //#endif
-    }
-
     public static void texture(ResourceLocation texture) {
         //#if MC > 1_16_05
         RenderSystem.setShaderTexture(0, texture);
@@ -496,11 +495,10 @@ public class WorldHost
                 final ResourceLocation skinTexture = getInsecureSkinLocation(profile);
                 WHToast.builder(Components.translatable(title, getName(profile)))
                     .description(Components.translatable(description))
-                    .icon((matrices, x, y, width, height) -> {
-                        texture(skinTexture);
+                    .icon((context, x, y, width, height) -> {
                         RenderSystem.enableBlend();
-                        GuiComponent.blit(matrices, x, y, width, height, 8, 8, 8, 8, 64, 64);
-                        GuiComponent.blit(matrices, x, y, width, height, 40, 8, 8, 8, 64, 64);
+                        WorldHostScreen.blit(context, skinTexture, x, y, width, height, 8, 8, 8, 8, 64, 64);
+                        WorldHostScreen.blit(context, skinTexture, x, y, width, height, 40, 8, 8, 8, 64, 64);
                     })
                     .clickAction(clickAction)
                     .ticks(ticks)
@@ -639,6 +637,9 @@ public class WorldHost
             return 0;
         }
         ctx.getSource().sendSuccess(
+            //#if MC >= 1_20_00
+            //$$ () ->
+            //#endif
             Components.translatable(
                 "world-host.worldhost.ip.success",
                 Components.copyOnClickText(externalIp)

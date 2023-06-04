@@ -10,6 +10,10 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#endif
+
 public class JoiningWorldHostScreen extends WorldHostScreen {
     public final Screen parent;
     private Component status;
@@ -32,10 +36,18 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        renderBackground(poseStack);
-        drawCenteredString(poseStack, font, status, width / 2, height / 2 - 50, 0xffffff);
-        super.render(poseStack, mouseX, mouseY, partialTick);
+    public void render(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        int mouseX, int mouseY, float partialTick
+    ) {
+        renderBackground(context);
+        drawCenteredString(context, font, status, width / 2, height / 2 - 50, 0xffffff);
+        super.render(context, mouseX, mouseY, partialTick);
     }
 
     @Override

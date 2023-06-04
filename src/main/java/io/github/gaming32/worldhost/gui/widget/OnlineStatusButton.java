@@ -1,6 +1,5 @@
 package io.github.gaming32.worldhost.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.mixin.PlainTextButtonAccessor;
 import io.github.gaming32.worldhost.versions.Components;
@@ -13,6 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
+
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#else
+import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
 
 //#if MC > 1_17_01
 import net.minecraft.client.gui.components.PlainTextButton;
@@ -87,7 +92,15 @@ public class OnlineStatusButton extends PlainTextButton {
     //#else
     //$$ renderButton
     //#endif
-        (@NotNull PoseStack poseStack, int i, int j, float f) {
+        (
+            @NotNull
+            //#if MC < 1_20_00
+            PoseStack context,
+            //#else
+            //$$ GuiGraphics context,
+            //#endif
+            int i, int j, float f
+        ) {
         final int status = getStatus();
         if (status != currentStatus || (status == 0 && (WorldHost.reconnectDelay + 1) % 20 == 0)) {
             currentStatus = status;
@@ -105,7 +118,7 @@ public class OnlineStatusButton extends PlainTextButton {
             //#else
             //$$ renderButton
             //#endif
-                (poseStack, i, j, f);
+                (context, i, j, f);
     }
 
     //#if MC >= 1_18_00

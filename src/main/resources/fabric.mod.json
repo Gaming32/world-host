@@ -28,13 +28,13 @@
   ],
   "depends": {
     "fabricloader": "*",
-    "minecraft": "${mc_version == '1.19.4' ? '>=1.19.4 <1.20' /* 23w13a_or_b support */ : mc_version}",
+    "minecraft": "${mc_version == '1.19.4' ? '>=1.19.4 <1.20' /* 23w13a_or_b support */ : mc_version == '1.20' ? '>=1.20-' /* Release candidate support (TODO: remove) */ : mc_version}",
     "fabric-resource-loader-v0": "*"
   },
   "breaks": {
     ${mc_version == '1.19.4' ? '"modmenu": "<6.2.0"' : ''}
   },
   "suggests": {
-    ${mc_version == '1.19.4' ? '"world-host-bedrock": ">=0.3.1"' : ''}
+    ${mc_version == '1.20' ? '"world-host-bedrock": ">=0.3.1"' : ''}
   }
 }

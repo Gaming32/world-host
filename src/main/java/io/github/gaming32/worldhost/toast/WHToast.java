@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.toast;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -12,6 +13,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#endif
 
 public class WHToast {
     private static final int GAP = 4;
@@ -72,9 +77,18 @@ public class WHToast {
         }
     }
 
-    public static void render(PoseStack poseStack, int mouseX, int mouseY, float tickDelta) {
+    public static void render(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        int mouseX, int mouseY, float tickDelta
+    ) {
         if (!ready) return;
 
+        final PoseStack poseStack = WorldHostScreen.pose(context);
         poseStack.pushPose();
         poseStack.translate(0f, 0f, 100f);
 
@@ -86,7 +100,7 @@ public class WHToast {
 
         for (final ToastInstance toast : TOASTS) {
             toast.render(
-                poseStack,
+                context,
                 screenWidth - X_OFFSET - toast.width,
                 screenHeight - y - toast.yShift - toast.height,
                 mouseX, mouseY, tickDelta

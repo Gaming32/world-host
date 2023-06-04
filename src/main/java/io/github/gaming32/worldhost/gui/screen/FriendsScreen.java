@@ -9,7 +9,6 @@ import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
@@ -21,6 +20,10 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#endif
 
 public class FriendsScreen extends WorldHostScreen {
     public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
@@ -120,14 +123,22 @@ public class FriendsScreen extends WorldHostScreen {
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float delta) {
-        renderBackground(poseStack);
-        list.render(poseStack, mouseX, mouseY, delta);
-        drawCenteredString(poseStack, font, title, width / 2, 15, 0xffffff);
+    public void render(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        int mouseX, int mouseY, float delta
+    ) {
+        renderBackground(context);
+        list.render(context, mouseX, mouseY, delta);
+        drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
         if (WorldHost.BEDROCK_SUPPORT) {
-            drawCenteredString(poseStack, font, BEDROCK_FRIENDS_TEXT, width / 2, height - 66 - font.lineHeight / 2, 0xffffff);
+            drawCenteredString(context, font, BEDROCK_FRIENDS_TEXT, width / 2, height - 66 - font.lineHeight / 2, 0xffffff);
         }
-        super.render(poseStack, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
@@ -193,16 +204,22 @@ public class FriendsScreen extends WorldHostScreen {
         //#endif
 
         @Override
-        public void render(@NotNull PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        public void render(
+            @NotNull
+            //#if MC < 1_20_00
+            PoseStack context,
+            //#else
+            //$$ GuiGraphics context,
+            //#endif
+            int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
+        ) {
             final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(profile);
-            WorldHost.positionTexShader();
             WorldHost.color(1f, 1f, 1f, 1f);
-            WorldHost.texture(skinTexture);
             RenderSystem.enableBlend();
-            GuiComponent.blit(matrices, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
-            GuiComponent.blit(matrices, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
+            blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
+            blit(context, skinTexture, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
             RenderSystem.disableBlend();
-            drawCenteredString(matrices, minecraft.font, getName(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
+            drawCenteredString(context, minecraft.font, getName(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
         }
 
         public String getName() {

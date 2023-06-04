@@ -1,6 +1,5 @@
 package io.github.gaming32.worldhost.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
@@ -13,6 +12,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
+
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#else
+import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
 
 public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component TITLE = Components.translatable("world-host.config.title");
@@ -127,19 +132,27 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     }
 
     @Override
-    public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-        renderBackground(poseStack);
-        super.render(poseStack, mouseX, mouseY, partialTick);
-        drawCenteredString(poseStack, font, title, width / 2, 15, 0xffffff);
+    public void render(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        int mouseX, int mouseY, float partialTick
+    ) {
+        renderBackground(context);
+        super.render(context, mouseX, mouseY, partialTick);
+        drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
 
         final int yOffset = height / 6 + 10 - font.lineHeight / 2;
-        drawRightString(poseStack, font, SERVER_IP, width / 2 - 5, yOffset, 0xffffff);
-        drawRightString(poseStack, font, ONLINE_STATUS_LOCATION, width / 2 - 5, yOffset + 24, 0xffffff);
-        drawRightString(poseStack, font, ENABLE_FRIENDS, width / 2 - 5, yOffset + 48, 0xffffff);
-        drawRightString(poseStack, font, ENABLE_RECONNECTION_TOASTS, width / 2 - 5, yOffset + 72, 0xffffff);
-        drawRightString(poseStack, font, NO_UPNP, width / 2 - 5, yOffset + 96, 0xffffff);
-        drawRightString(poseStack, font, USE_SHORT_IP, width / 2 - 5, yOffset + 120, 0xffffff);
-        drawRightString(poseStack, font, SHOW_OUTDATED_WORLD_HOST, width / 2 - 5, yOffset + 144, 0xffffff);
+        drawRightString(context, font, SERVER_IP, width / 2 - 5, yOffset, 0xffffff);
+        drawRightString(context, font, ONLINE_STATUS_LOCATION, width / 2 - 5, yOffset + 24, 0xffffff);
+        drawRightString(context, font, ENABLE_FRIENDS, width / 2 - 5, yOffset + 48, 0xffffff);
+        drawRightString(context, font, ENABLE_RECONNECTION_TOASTS, width / 2 - 5, yOffset + 72, 0xffffff);
+        drawRightString(context, font, NO_UPNP, width / 2 - 5, yOffset + 96, 0xffffff);
+        drawRightString(context, font, USE_SHORT_IP, width / 2 - 5, yOffset + 120, 0xffffff);
+        drawRightString(context, font, SHOW_OUTDATED_WORLD_HOST, width / 2 - 5, yOffset + 144, 0xffffff);
     }
 
     @Override

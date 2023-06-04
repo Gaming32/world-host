@@ -1,8 +1,8 @@
 package io.github.gaming32.worldhost.gui.widget;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -12,6 +12,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.UUID;
+
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#else
+import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
 
 public class FriendsButton extends Button implements FriendsListUpdate {
     private int bgX, bgWidth;
@@ -48,15 +54,23 @@ public class FriendsButton extends Button implements FriendsListUpdate {
 
     @Override
     //#if MC >= 1_19_04
-    public void renderString(@NotNull PoseStack poseStack, @NotNull Font font, int i) {
+    public void renderString(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        @NotNull Font font, int i
+    ) {
     //#else
-    //$$ protected void renderBg(@NotNull PoseStack poseStack, @NotNull Minecraft minecraft, int mouseX, int mouseY) {
+    //$$ protected void renderBg(@NotNull PoseStack context, @NotNull Minecraft minecraft, int mouseX, int mouseY) {
     //#endif
         final int baseX = getX() + bgX;
         final int baseY = getY() + (height - 12) / 2;
-        fill(poseStack, baseX, baseY, baseX + bgWidth, baseY + 12, 0x80000000);
+        WorldHostScreen.fill(context, baseX, baseY, baseX + bgWidth, baseY + 12, 0x80000000);
         //#if MC >= 1_19_04
-        super.renderString(poseStack, font, i);
+        super.renderString(context, font, i);
         //#endif
     }
 }

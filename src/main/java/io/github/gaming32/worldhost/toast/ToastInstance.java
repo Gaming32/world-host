@@ -1,9 +1,9 @@
 package io.github.gaming32.worldhost.toast;
 
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +14,10 @@ import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
+
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#endif
 
 //#if MC >= 1_16_05
 import net.minecraft.util.FormattedCharSequence;
@@ -97,7 +101,17 @@ class ToastInstance {
         }
     }
 
-    public void render(PoseStack poseStack, float x, float y, int mouseX, int mouseY, float tickDelta) {
+    public void render(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        float x, float y, int mouseX, int mouseY, float tickDelta
+    ) {
+        final PoseStack poseStack = WorldHostScreen.pose(context);
+
         final float originalX = x;
 
         final float prevX;
@@ -112,30 +126,31 @@ class ToastInstance {
         }
         x = Mth.lerp(tickDelta, prevX, x);
 
-        fill(poseStack, x, y, x + width, y + height, BACKGROUND_COLOR);
+        fill(context, x, y, x + width, y + height, BACKGROUND_COLOR);
 
-        final float textX = x + BORDER_SIZE + (iconRenderer != null ? ICON_SIZE + BORDER_SIZE : 0);
-        float textY = y + BORDER_SIZE;
+        poseStack.pushPose();
+        poseStack.translate(x + BORDER_SIZE + (iconRenderer != null ? ICON_SIZE + BORDER_SIZE : 0), y + BORDER_SIZE, 0);
         for (final var line : formattedTitle) {
-            font.draw(poseStack, line, textX, textY, TITLE_COLOR);
-            textY += font.lineHeight + LINE_BREAK;
+            WorldHostScreen.drawString(context, font, line, 0, 0, TITLE_COLOR, false);
+            poseStack.translate(0, font.lineHeight + LINE_BREAK, 0);
         }
-        textY += -LINE_BREAK + DESCRIPTION_BREAK;
+        poseStack.translate(0, -LINE_BREAK + DESCRIPTION_BREAK, 0);
         for (final var line : formattedDescription) {
-            font.draw(poseStack, line, textX, textY, DESCRIPTION_COLOR);
-            textY += font.lineHeight + LINE_BREAK;
+            WorldHostScreen.drawString(context, font, line, 0, 0, DESCRIPTION_COLOR, false);
+            poseStack.translate(0, font.lineHeight + LINE_BREAK, 0);
         }
+        poseStack.popPose();
 
         if (iconRenderer != null) {
             poseStack.pushPose();
             poseStack.translate(x, y, 0);
-            iconRenderer.draw(poseStack, BORDER_SIZE, BORDER_SIZE, ICON_SIZE, ICON_SIZE);
+            iconRenderer.draw(context, BORDER_SIZE, BORDER_SIZE, ICON_SIZE, ICON_SIZE);
             poseStack.popPose();
         }
 
         if (clickAction != null && ticksRemaining > 20) {
             fill(
-                poseStack,
+                context,
                 x,
                 y + height - PROGRESS_HEIGHT,
                 x + Mth.lerp(tickDelta, ticksRemaining - 20, ticksRemaining - 21) / (ticksTotal - 20) * width,
@@ -165,11 +180,20 @@ class ToastInstance {
         return (float)(-Math.pow(ticks - 16, 2) + 16);
     }
 
-    private static void fill(PoseStack poseStack, float minX, float minY, float maxX, float maxY, int color) {
+    private static void fill(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        float minX, float minY, float maxX, float maxY, int color
+    ) {
+        final PoseStack poseStack = WorldHostScreen.pose(context);
         poseStack.pushPose();
         poseStack.translate(minX, minY, 0f);
         poseStack.scale(maxX - minX, maxY - minY, 1f);
-        GuiComponent.fill(poseStack, 0, 0, 1, 1, color);
+        WorldHostScreen.fill(context, 0, 0, 1, 1, color);
         poseStack.popPose();
     }
 }

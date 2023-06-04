@@ -78,7 +78,12 @@ public sealed interface WorldHostS2CMessage {
                 } else {
                     //#if MC > 1_16_05
                     //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
-                    ConnectScreen.startConnecting(parentScreen, minecraft, new ServerAddress(host, port), null);
+                    ConnectScreen.startConnecting(
+                        parentScreen, minecraft, new ServerAddress(host, port), null
+                        //#if MC >= 1_20_00
+                        //$$ , false // If the call came from Quick Play
+                        //#endif
+                    );
                     //#else
                     //$$ minecraft.setCurrentServer(null);
                     //$$ minecraft.setScreen(new ConnectScreen(parentScreen, minecraft, host, port));

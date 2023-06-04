@@ -4,7 +4,12 @@ import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 
 //#if MC >= 1_19_04
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//$$ import net.minecraft.client.renderer.RenderBuffers;
+//#else
 import com.mojang.blaze3d.vertex.PoseStack;
+//#endif
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Final;
@@ -19,6 +24,10 @@ public class MixinGameRenderer {
     //#if MC >= 1_19_04
     @Shadow @Final Minecraft minecraft;
 
+    //#if MC >= 1_20_00
+    //$$ @Shadow @Final private RenderBuffers renderBuffers;
+    //#endif
+
     @Inject(
         method = "render",
         at = @At(
@@ -28,13 +37,20 @@ public class MixinGameRenderer {
         )
     )
     private void toastRender(float partialTicks, long nanoTime, boolean renderLevel, CallbackInfo ci) {
-        int i = (int)(
+        int mouseX = (int)(
             this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
         );
-        int j = (int)(
+        int mouseY = (int)(
             this.minecraft.mouseHandler.ypos() * (double)this.minecraft.getWindow().getGuiScaledHeight() / (double)this.minecraft.getWindow().getScreenHeight()
         );
-        WHToast.render(new PoseStack(), i, j, partialTicks);
+        WHToast.render(
+            //#if MC < 1_20_00
+            new PoseStack(),
+            //#else
+            //$$ new GuiGraphics(minecraft, renderBuffers.bufferSource()),
+            //#endif
+            mouseX, mouseY, partialTicks
+        );
     }
     //#endif
 }

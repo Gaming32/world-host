@@ -7,7 +7,6 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -21,6 +20,10 @@ import org.lwjgl.glfw.GLFW;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#endif
 
 public class AddFriendScreen extends WorldHostScreen {
     public static final Pattern VALID_USERNAME = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
@@ -142,24 +145,30 @@ public class AddFriendScreen extends WorldHostScreen {
     }
 
     @Override
-    public void render(@NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
-        renderBackground(matrices);
-        drawCenteredString(matrices, font, title, width / 2, 20, 0xffffff);
-        drawString(matrices, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, 0xa0a0a0);
-        usernameField.render(matrices, mouseX, mouseY, delta);
-        super.render(matrices, mouseX, mouseY, delta);
+    public void render(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        int mouseX, int mouseY, float delta
+    ) {
+        renderBackground(context);
+        drawCenteredString(context, font, title, width / 2, 20, 0xffffff);
+        drawString(context, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, 0xa0a0a0);
+        usernameField.render(context, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
 
         if (friendProfile != null) {
             assert minecraft != null;
             final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(friendProfile);
-            WorldHost.positionTexShader();
             WorldHost.color(1f, 1f, 1f, 1f);
-            WorldHost.texture(skinTexture);
             RenderSystem.enableBlend();
             final int size = addFriendButton.getY() - 110;
             final int x = width / 2 - size / 2;
-            GuiComponent.blit(matrices, x, 98, size, size, 8, 8, 8, 8, 64, 64);
-            GuiComponent.blit(matrices, x, 98, size, size, 40, 8, 8, 8, 64, 64);
+            blit(context, skinTexture, x, 98, size, size, 8, 8, 8, 8, 64, 64);
+            blit(context, skinTexture, x, 98, size, size, 40, 8, 8, 8, 64, 64);
             RenderSystem.disableBlend();
         }
     }

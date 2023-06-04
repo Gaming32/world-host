@@ -14,7 +14,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
@@ -32,7 +31,14 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
+//#if MC >= 1_20_00
+//$$ import net.minecraft.client.gui.GuiGraphics;
+//#endif
+
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
+    private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
+    private static final ResourceLocation GUI_SERVER_SELECTION_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+
     private final Screen parent;
     private OnlineFriendsList list;
     private Button joinButton;
@@ -129,19 +135,22 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     }
 
     @Override
-    public void render(@NotNull PoseStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(
+        @NotNull
+        //#if MC < 1_20_00
+        PoseStack context,
+        //#else
+        //$$ GuiGraphics context,
+        //#endif
+        int mouseX, int mouseY, float delta
+    ) {
         tooltip = null;
-        renderBackground(matrices);
-        list.render(matrices, mouseX, mouseY, delta);
-        drawCenteredString(matrices, font, title, width / 2, 15, 0xffffff);
-        super.render(matrices, mouseX, mouseY, delta);
+        renderBackground(context);
+        list.render(context, mouseX, mouseY, delta);
+        drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
+        super.render(context, mouseX, mouseY, delta);
         if (tooltip != null) {
-            //#if MC > 1_16_01
-            renderComponentTooltip
-            //#else
-            //$$ renderTooltip
-            //#endif
-                (matrices, tooltip, mouseX, mouseY);
+            renderComponentTooltip(context, tooltip, mouseX, mouseY);
         }
     }
 
@@ -260,29 +269,35 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         //#endif
 
         @Override
-        public void render(@NotNull PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        public void render(
+            @NotNull
+            //#if MC < 1_20_00
+            PoseStack context,
+            //#else
+            //$$ GuiGraphics context,
+            //#endif
+            int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
+        ) {
             updateServerInfo();
 
             final boolean incompatibleVersion = serverInfo.protocol != SharedConstants.getCurrentVersion().getProtocolVersion();
-            minecraft.font.draw(matrices, serverInfo.name, x + 35, y + 1, 0xffffff);
+            WorldHostScreen.drawString(context, font, serverInfo.name, x + 35, y + 1, 0xffffff, false);
 
-            final var lines = minecraft.font.split(serverInfo.motd, entryWidth - 34);
+            final var lines = font.split(serverInfo.motd, entryWidth - 34);
             for (int i = 0; i < Math.min(lines.size(), 2); i++) {
-                minecraft.font.draw(matrices, lines.get(i), x + 35, y + 12 + 9 * i, 0x808080);
+                WorldHostScreen.drawString(context, font, lines.get(i), x + 35, y + 12 + 9 * i, 0x808080, false);
             }
 
             final Component sideLabel = incompatibleVersion
                 ? serverInfo.version.copy().withStyle(ChatFormatting.RED)
                 : serverInfo.status;
-            final int labelWidth = minecraft.font.width(sideLabel);
-            minecraft.font.draw(matrices, sideLabel, x + entryWidth - labelWidth - 17, y + 1, 0x808080);
+            final int labelWidth = font.width(sideLabel);
+            WorldHostScreen.drawString(context, font, sideLabel, x + entryWidth - labelWidth - 17, y + 1, 0x808080, false);
 
-            WorldHost.positionTexShader();
             WorldHost.color(1.0F, 1.0F, 1.0F, 1.0F);
             if (incompatibleVersion) {
-                WorldHost.texture(GuiComponent.GUI_ICONS_LOCATION);
                 RenderSystem.enableBlend();
-                GuiComponent.blit(matrices, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
+                blit(context, GUI_ICONS_LOCATION, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
                 RenderSystem.disableBlend();
             }
 
@@ -309,15 +324,15 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             // Since when does a value marked as @Nullable never satisfy == null?
             //noinspection ConstantValue
             if (icon == null) {
-                WorldHost.texture(WorldHost.getInsecureSkinLocation(profile));
+                final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(profile);
                 RenderSystem.enableBlend();
-                GuiComponent.blit(matrices, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
-                GuiComponent.blit(matrices, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
+                blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
+                blit(context, skinTexture, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
                 RenderSystem.disableBlend();
             } else {
                 WorldHost.texture(iconTextureId);
                 RenderSystem.enableBlend();
-                GuiComponent.blit(matrices, x, y, 0, 0, 32, 32, 32, 32);
+                blit(context, iconTextureId, x, y, 0, 0, 32, 32, 32, 32);
                 RenderSystem.disableBlend();
             }
 
@@ -338,14 +353,12 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                     //#endif
                     || hovered
             ) {
-                WorldHost.texture(new ResourceLocation("textures/gui/server_selection.png"));
-                GuiComponent.fill(matrices, x, y, x + 32, y + 32, 0xa0909090);
-                WorldHost.positionTexShader();
+                fill(context, x, y, x + 32, y + 32, 0xa0909090);
                 WorldHost.color(1.0F, 1.0F, 1.0F, 1.0F);
                 if (relX < 32 && relX > 16) {
-                    GuiComponent.blit(matrices, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
+                    blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
                 } else {
-                    GuiComponent.blit(matrices, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
+                    blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
                 }
             }
         }
