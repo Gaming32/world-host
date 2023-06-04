@@ -13,9 +13,7 @@ jobs:
         uses: actions/cache@v3
         with:
           key: ${{ steps.cache_key.outputs.gradle_key }}-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**') }}
-          restore-keys: |
-            ${{ steps.cache_key.outputs.gradle_key }}-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**') }}
-            ${{ steps.cache_key.outputs.gradle_key }}-
+          restore-keys: ${{ steps.cache_key.outputs.gradle_key }}-
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
