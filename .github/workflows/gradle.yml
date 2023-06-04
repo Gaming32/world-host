@@ -6,13 +6,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Get cache key
+        id: cache_key
+        run: echo "gradle_key=gradle-`cat versions/mainProject`" >> $GITHUB_OUTPUT
       - name: Cache Gradle stuff
         uses: actions/cache@v3
         with:
-          key: gradle-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**', 'versions/*') }}
+          key: ${{ steps.cache_key.outputs.gradle_key }}-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**') }}
           restore-keys: |
-            gradle-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**', 'versions/*') }}
-            gradle-
+            ${{ steps.cache_key.outputs.gradle_key }}-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**') }}
+            ${{ steps.cache_key.outputs.gradle_key }}-
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
