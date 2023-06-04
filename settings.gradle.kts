@@ -5,13 +5,14 @@ pluginManagement {
         maven("https://maven.architectury.dev/")
         maven("https://maven.minecraftforge.net")
         maven("https://repo.essential.gg/repository/maven-public")
+        maven("https://maven.jab125.dev/")
 
         gradlePluginPortal()
         mavenCentral()
     }
 
     plugins {
-        id("xyz.deftu.gradle.multiversion-root") version("1.11.0")
+        id("xyz.deftu.gradle.multiversion-root") version("1.16.0")
     }
 }
 
