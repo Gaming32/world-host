@@ -1,7 +1,6 @@
 package io.github.gaming32.worldhost.gui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.ButtonBuilder;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -13,9 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 //#if MC >= 1_20_00
-//$$ import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 //#else
-import net.minecraft.client.gui.GuiComponent;
+//$$ import io.github.gaming32.worldhost.WorldHost;
+//$$ import net.minecraft.client.gui.GuiComponent;
 //#endif
 
 //#if MC < 1_19_04
@@ -44,9 +44,9 @@ public abstract class WorldHostScreen extends Screen {
 
     public static void drawRightString(
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         Font font, Component text, int x, int y, int color
     ) {
@@ -61,22 +61,22 @@ public abstract class WorldHostScreen extends Screen {
     public void drawCenteredString(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         Font font, @NotNull Component text, int x, int y, int color
     ) {
         //#if MC >= 1_20_00
-        //$$ context.
+        context.
         //#elseif MC > 1_16_01
-        GuiComponent.
+        //$$ GuiComponent.
         //#else
         //$$ super.
         //#endif
             drawCenteredString(
                 //#if MC < 1_20_00
-                context,
+                //$$ context,
                 //#endif
                 font, text, x, y, color
             );
@@ -90,51 +90,51 @@ public abstract class WorldHostScreen extends Screen {
     public void drawCenteredString(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         Font font, @NotNull String text, int x, int y, int color
     ) {
         //#if MC >= 1_20_00
-        //$$ context.
+        context.
         //#elseif MC > 1_16_01
-        GuiComponent.
+        //$$ GuiComponent.
         //#else
         //$$ super.
         //#endif
             drawCenteredString(
                 //#if MC < 1_20_00
-                context,
+                //$$ context,
                 //#endif
                 font, text, x, y, color
             );
     }
 
     //#if MC < 1_20_00
-    @Override
+    //$$ @Override
     //#endif
     public void renderComponentTooltip(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         @NotNull List<Component> tooltips, int mouseX, int mouseY
     ) {
         //#if MC >= 1_20_00
-        //$$ context.renderComponentTooltip
+        context.renderComponentTooltip
         //#elseif MC > 1_16_01
-        super.renderComponentTooltip
+        //$$ super.renderComponentTooltip
         //#else
         //$$ renderTooltip
         //#endif
             (
                 //#if MC < 1_20_00
-                context,
+                //$$ context,
                 //#else
-                //$$ font,
+                font,
                 //#endif
                 tooltips, mouseX, mouseY
             );
@@ -148,22 +148,22 @@ public abstract class WorldHostScreen extends Screen {
     public void drawString(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         Font font, @NotNull Component text, int x, int y, int color
     ) {
         //#if MC >= 1_20_00
-        //$$ context.
+        context.
         //#elseif MC > 1_16_01
-        GuiComponent.
+        //$$ GuiComponent.
         //#else
         //$$ super.
         //#endif
             drawString(
                 //#if MC < 1_20_00
-                context,
+                //$$ context,
                 //#endif
                 font, text, x, y, color
             );
@@ -172,23 +172,23 @@ public abstract class WorldHostScreen extends Screen {
     public static void blit(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         ResourceLocation texture, int x, int y, int width, int height, float uOffset, float vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight
     ) {
         //#if MC >= 1_20_00
-        //$$ context.
+        context.
         //#else
-        WorldHost.texture(texture);
-        GuiComponent.
+        //$$ WorldHost.texture(texture);
+        //$$ GuiComponent.
         //#endif
         blit(
             //#if MC < 1_20_00
-            context,
+            //$$ context,
             //#else
-            //$$ texture,
+            texture,
             //#endif
             x, y, width, height, uOffset, vOffset, uWidth, vHeight, textureWidth, textureHeight
         );
@@ -197,23 +197,23 @@ public abstract class WorldHostScreen extends Screen {
     public static void blit(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         ResourceLocation texture, int x, int y, float uOffset, float vOffset, int width, int height, int textureWidth, int textureHeight
     ) {
         //#if MC >= 1_20_00
-        //$$ context.
+        context.
         //#else
-        WorldHost.texture(texture);
-        GuiComponent.
+        //$$ WorldHost.texture(texture);
+        //$$ GuiComponent.
         //#endif
         blit(
             //#if MC < 1_20_00
-            context,
+            //$$ context,
             //#else
-            //$$ texture,
+            texture,
             //#endif
             x, y, uOffset, vOffset, width, height, textureWidth, textureHeight
         );
@@ -222,9 +222,9 @@ public abstract class WorldHostScreen extends Screen {
     public static void drawString(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         Font font,
         @NotNull
@@ -236,69 +236,69 @@ public abstract class WorldHostScreen extends Screen {
         int x, int y, int color, boolean dropShadow
     ) {
         //#if MC < 1_20_00
-        if (dropShadow) {
-            font.drawShadow(context, text, x, y, color);
-        } else {
-            font.draw(context, text, x, y, color);
-        }
+        //$$ if (dropShadow) {
+        //$$     font.drawShadow(context, text, x, y, color);
+        //$$ } else {
+        //$$     font.draw(context, text, x, y, color);
+        //$$ }
         //#else
-        //$$ context.drawString(font, text, x, y, color, dropShadow);
+        context.drawString(font, text, x, y, color, dropShadow);
         //#endif
     }
 
     public static void drawString(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         Font font, @NotNull String text, int x, int y, int color, boolean dropShadow
     ) {
         //#if MC < 1_20_00
-        if (dropShadow) {
-            font.drawShadow(context, text, x, y, color);
-        } else {
-            font.draw(context, text, x, y, color);
-        }
+        //$$ if (dropShadow) {
+        //$$     font.drawShadow(context, text, x, y, color);
+        //$$ } else {
+        //$$     font.draw(context, text, x, y, color);
+        //$$ }
         //#else
-        //$$ context.drawString(font, text, x, y, color, dropShadow);
+        context.drawString(font, text, x, y, color, dropShadow);
         //#endif
     }
 
     public static void drawString(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         Font font, @NotNull Component text, int x, int y, int color, boolean dropShadow
     ) {
         //#if MC < 1_20_00
-        if (dropShadow) {
-            font.drawShadow(context, text, x, y, color);
-        } else {
-            font.draw(context, text, x, y, color);
-        }
+        //$$ if (dropShadow) {
+        //$$     font.drawShadow(context, text, x, y, color);
+        //$$ } else {
+        //$$     font.draw(context, text, x, y, color);
+        //$$ }
         //#else
-        //$$ context.drawString(font, text, x, y, color, dropShadow);
+        context.drawString(font, text, x, y, color, dropShadow);
         //#endif
     }
 
     public static void fill(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         int minX, int minY, int maxX, int maxY, int color
     ) {
         //#if MC < 1_20_00
-        GuiComponent.fill(context,
+        //$$ GuiComponent.fill(context,
         //#else
-        //$$ context.fill(
+        context.fill(
         //#endif
             minX, minY, maxX, maxY, color
         );
@@ -307,14 +307,14 @@ public abstract class WorldHostScreen extends Screen {
     public static PoseStack pose(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context
+        //$$ PoseStack context
         //#else
-        //$$ GuiGraphics context
+        GuiGraphics context
         //#endif
     ) {
         return context
         //#if MC >= 1_20_00
-        //$$ .pose()
+        .pose()
         //#endif
         ;
     }

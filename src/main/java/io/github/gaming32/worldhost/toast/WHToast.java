@@ -15,7 +15,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 //#if MC >= 1_20_00
-//$$ import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 public class WHToast {
@@ -80,9 +80,9 @@ public class WHToast {
     public static void render(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         int mouseX, int mouseY, float tickDelta
     ) {

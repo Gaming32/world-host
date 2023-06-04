@@ -373,7 +373,7 @@ public class WorldHost
                         if (error == null) {
                             ctx.getSource().sendSuccess(
                                 //#if MC >= 1_20_00
-                                //$$ () ->
+                                () ->
                                 //#endif
                                 Components.translatable(
                                     "world-host.worldhost.tempip.success",
@@ -638,7 +638,7 @@ public class WorldHost
         }
         ctx.getSource().sendSuccess(
             //#if MC >= 1_20_00
-            //$$ () ->
+            () ->
             //#endif
             Components.translatable(
                 "world-host.worldhost.ip.success",

@@ -81,7 +81,7 @@ public sealed interface WorldHostS2CMessage {
                     ConnectScreen.startConnecting(
                         parentScreen, minecraft, new ServerAddress(host, port), null
                         //#if MC >= 1_20_00
-                        //$$ , false // If the call came from Quick Play
+                        , false // If the call came from Quick Play
                         //#endif
                     );
                     //#else

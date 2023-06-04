@@ -1,6 +1,5 @@
 package io.github.gaming32.worldhost.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.GameNarrator;
@@ -11,7 +10,9 @@ import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 //#if MC >= 1_20_00
-//$$ import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
+//#else
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
 public class JoiningWorldHostScreen extends WorldHostScreen {
@@ -39,9 +40,9 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
     public void render(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         int mouseX, int mouseY, float partialTick
     ) {

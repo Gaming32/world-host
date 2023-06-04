@@ -3,7 +3,6 @@ package io.github.gaming32.worldhost.gui.screen;
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
@@ -32,7 +31,9 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 
 //#if MC >= 1_20_00
-//$$ import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
+//#else
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
@@ -138,9 +139,9 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     public void render(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         int mouseX, int mouseY, float delta
     ) {
@@ -272,9 +273,9 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         public void render(
             @NotNull
             //#if MC < 1_20_00
-            PoseStack context,
+            //$$ PoseStack context,
             //#else
-            //$$ GuiGraphics context,
+            GuiGraphics context,
             //#endif
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {

@@ -5,10 +5,10 @@ import org.spongepowered.asm.mixin.Mixin;
 
 //#if MC >= 1_19_04
 //#if MC >= 1_20_00
-//$$ import net.minecraft.client.gui.GuiGraphics;
-//$$ import net.minecraft.client.renderer.RenderBuffers;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderBuffers;
 //#else
-import com.mojang.blaze3d.vertex.PoseStack;
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
@@ -25,14 +25,18 @@ public class MixinGameRenderer {
     @Shadow @Final Minecraft minecraft;
 
     //#if MC >= 1_20_00
-    //$$ @Shadow @Final private RenderBuffers renderBuffers;
+    @Shadow @Final private RenderBuffers renderBuffers;
     //#endif
 
     @Inject(
         method = "render",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;render(Lcom/mojang/blaze3d/vertex/PoseStack;)V",
+            //#if MC >= 1_20_00
+            target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;render(Lnet/minecraft/client/gui/GuiGraphics;)V",
+            //#else
+            //$$ target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;render(Lcom/mojang/blaze3d/vertex/PoseStack;)V",
+            //#endif
             shift = At.Shift.AFTER
         )
     )
@@ -45,9 +49,9 @@ public class MixinGameRenderer {
         );
         WHToast.render(
             //#if MC < 1_20_00
-            new PoseStack(),
+            //$$ new PoseStack(),
             //#else
-            //$$ new GuiGraphics(minecraft, renderBuffers.bufferSource()),
+            new GuiGraphics(minecraft, renderBuffers.bufferSource()),
             //#endif
             mouseX, mouseY, partialTicks
         );

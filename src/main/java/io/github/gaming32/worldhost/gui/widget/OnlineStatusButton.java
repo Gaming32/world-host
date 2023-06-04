@@ -14,9 +14,9 @@ import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 //#if MC >= 1_20_00
-//$$ import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 //#else
-import com.mojang.blaze3d.vertex.PoseStack;
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
 //#if MC > 1_17_01
@@ -95,9 +95,9 @@ public class OnlineStatusButton extends PlainTextButton {
         (
             @NotNull
             //#if MC < 1_20_00
-            PoseStack context,
+            //$$ PoseStack context,
             //#else
-            //$$ GuiGraphics context,
+            GuiGraphics context,
             //#endif
             int i, int j, float f
         ) {

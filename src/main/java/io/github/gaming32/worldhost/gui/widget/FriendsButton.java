@@ -14,9 +14,9 @@ import java.util.Map;
 import java.util.UUID;
 
 //#if MC >= 1_20_00
-//$$ import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphics;
 //#else
-import com.mojang.blaze3d.vertex.PoseStack;
+//$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
 public class FriendsButton extends Button implements FriendsListUpdate {
@@ -57,9 +57,9 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     public void renderString(
         @NotNull
         //#if MC < 1_20_00
-        PoseStack context,
+        //$$ PoseStack context,
         //#else
-        //$$ GuiGraphics context,
+        GuiGraphics context,
         //#endif
         @NotNull Font font, int i
     ) {
