@@ -42,7 +42,10 @@ public abstract class WorldHostScreen extends Screen {
         super(component);
     }
 
-    public static void drawRightString(
+    //#if MC > 1_16_01
+    static
+    //#endif
+    public void drawRightString(
         //#if MC < 1_20_00
         //$$ PoseStack context,
         //#else
@@ -65,7 +68,14 @@ public abstract class WorldHostScreen extends Screen {
         //#else
         GuiGraphics context,
         //#endif
-        Font font, @NotNull Component text, int x, int y, int color
+        Font font,
+        @NotNull
+        //#if MC > 11601
+        Component text,
+        //#else
+        //$$ FormattedText text,
+        //#endif
+        int x, int y, int color
     ) {
         //#if MC >= 1_20_00
         context.
@@ -111,7 +121,7 @@ public abstract class WorldHostScreen extends Screen {
             );
     }
 
-    //#if MC < 1_20_00
+    //#if MC < 1_20_00 && MC > 1_16_01
     //$$ @Override
     //#endif
     public void renderComponentTooltip(
@@ -152,7 +162,14 @@ public abstract class WorldHostScreen extends Screen {
         //#else
         GuiGraphics context,
         //#endif
-        Font font, @NotNull Component text, int x, int y, int color
+        Font font,
+        @NotNull
+        //#if MC > 11601
+        Component text,
+        //#else
+        //$$ FormattedText text,
+        //#endif
+        int x, int y, int color
     ) {
         //#if MC >= 1_20_00
         context.
