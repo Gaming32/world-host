@@ -1,8 +1,8 @@
 package io.github.gaming32.worldhost;
 
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
-import org.quiltmc.json5.JsonReader;
-import org.quiltmc.json5.JsonWriter;
+import org.quiltmc.qup.json.JsonReader;
+import org.quiltmc.qup.json.JsonWriter;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
