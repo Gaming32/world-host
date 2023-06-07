@@ -120,7 +120,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
         }
-        if (keyCode == GLFW.GLFW_KEY_5) {
+        if (keyCode == GLFW.GLFW_KEY_F5) {
             assert minecraft != null;
             minecraft.setScreen(new OnlineFriendsScreen(parent));
             return true;
