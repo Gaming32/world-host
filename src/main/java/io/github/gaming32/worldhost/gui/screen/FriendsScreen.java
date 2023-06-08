@@ -21,10 +21,10 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
-
-import java.util.Collections;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
