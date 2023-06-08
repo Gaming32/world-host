@@ -12,6 +12,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -22,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 
 //#if MC >= 1_20_00
 import net.minecraft.client.gui.GuiGraphics;
+
+import java.util.Collections;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
@@ -121,6 +124,10 @@ public class FriendsScreen extends WorldHostScreen {
     public static void addFriend(GameProfile profile) {
         WorldHost.CONFIG.getFriends().add(profile.getId());
         WorldHost.saveConfig();
+        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+        if (server != null && server.isPublished() && WorldHost.protoClient != null) {
+            WorldHost.protoClient.publishedWorld(Collections.singleton(profile.getId()));
+        }
     }
 
     @Override
@@ -235,6 +242,10 @@ public class FriendsScreen extends WorldHostScreen {
                         WorldHost.CONFIG.getFriends().remove(profile.getId());
                         WorldHost.saveConfig();
                         FriendsScreen.this.list.updateEntries();
+                        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                        if (server != null && server.isPublished() && WorldHost.protoClient != null) {
+                            WorldHost.protoClient.closedWorld(Collections.singleton(profile.getId()));
+                        }
                     }
                     minecraft.setScreen(FriendsScreen.this);
                 },
