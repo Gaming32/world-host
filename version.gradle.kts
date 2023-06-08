@@ -76,10 +76,6 @@ dependencies {
         }
     })
 
-    if (mcData.isFabric) {
-        modImplementation("net.fabricmc:fabric-loader:0.14.21")
-    }
-
     bundleImplementation("org.quiltmc.qup:json:0.2.0")
 
 //    includeImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-${mcData.loader.name}:0.2.0-beta.6")
