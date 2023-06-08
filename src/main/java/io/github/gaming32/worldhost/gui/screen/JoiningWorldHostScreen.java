@@ -9,7 +9,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
-//#if MC >= 1_20_00
+//#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
@@ -39,7 +39,7 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
     @Override
     public void render(
         @NotNull
-        //#if MC < 1_20_00
+        //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,

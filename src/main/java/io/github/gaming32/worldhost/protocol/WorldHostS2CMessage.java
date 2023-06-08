@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
-//#if MC > 1_16_05
+//#if MC > 1.16.5
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 //#endif
 
@@ -84,11 +84,11 @@ public sealed interface WorldHostS2CMessage {
                         ownerCid
                     ).start();
                 } else {
-                    //#if MC > 1_16_05
+                    //#if MC > 1.16.5
                     //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
                     ConnectScreen.startConnecting(
                         parentScreen, minecraft, new ServerAddress(host, port), null
-                        //#if MC >= 1_20_00
+                        //#if MC >= 1.20.0
                         , false // If the call came from Quick Play
                         //#endif
                     );
@@ -294,7 +294,7 @@ public sealed interface WorldHostS2CMessage {
                 //noinspection DataFlowIssue // Why do I care if parentScreen is null?
                 minecraft.setScreen(new DisconnectedScreen(
                     parentScreen,
-                    //#if MC > 1_16_01
+                    //#if MC > 1.16.1
                     Components.translatable("world-host.connection_not_found"),
                     //#else
                     //$$ "world-host.connection_not_found",

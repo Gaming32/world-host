@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-//#if MC < 1_19_04
+//#if MC < 1.19.4
 //$$ import io.github.gaming32.worldhost.versions.Components;
 //$$ import org.spongepowered.asm.mixin.injection.At;
 //$$ import org.spongepowered.asm.mixin.injection.ModifyArgs;
@@ -25,10 +25,10 @@ public class MixinShareToLanScreen {
         return WorldHost.CONFIG.isEnableFriends() ? "world-host.open_world" : "world-host.open_world_no_friends";
     }
 
-    //#if MC < 1_19_04
+    //#if MC < 1.19.4
     //$$ @ModifyArgs(
     //$$     method =
-            //#if MC < 1_18_02
+            //#if MC < 1.18.2
             //#if FABRIC
             //$$ "lambda$init$0",
             //#else
@@ -40,7 +40,7 @@ public class MixinShareToLanScreen {
     //$$     at = @At(
     //$$         value = "INVOKE",
     //$$         target =
-                //#if MC >= 1_19_02
+                //#if MC >= 1.19.2
                 //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
                 //#else
                 //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"

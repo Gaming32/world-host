@@ -7,7 +7,7 @@ import net.minecraft.network.chat.Component;
 
 import java.util.List;
 
-//#if MC >= 1_16_05
+//#if MC >= 1.16.5
 import net.minecraft.util.FormattedCharSequence;
 //#else
 //$$ import net.minecraft.network.chat.FormattedText;
@@ -16,7 +16,7 @@ import net.minecraft.util.FormattedCharSequence;
 public class Patterns {
     @Pattern
     public static void setFocused(EditBox editBox, boolean focus) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         editBox.setFocused(focus);
         //#else
         //$$ editBox.setFocus(focus);
@@ -25,7 +25,7 @@ public class Patterns {
 
     @Pattern
     public static int getY(AbstractWidget widget) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         return widget.getY();
         //#else
         //$$ return widget.y;
@@ -34,13 +34,13 @@ public class Patterns {
 
     @Pattern
     public static List<
-        //#if MC >= 1_16_05
+        //#if MC >= 1.16.5
         FormattedCharSequence
         //#else
         //$$ FormattedText
         //#endif
     > split(Font font, Component text, int width) {
-        //#if MC >= 1_16_05
+        //#if MC >= 1.16.5
         return font.split(text, width);
         //#else
         //$$ return font.getSplitter().splitLines(text, width, net.minecraft.network.chat.Style.EMPTY);

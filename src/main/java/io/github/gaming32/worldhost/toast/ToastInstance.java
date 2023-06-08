@@ -15,11 +15,11 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
-//#if MC >= 1_20_00
+//#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
-//#if MC >= 1_16_05
+//#if MC >= 1.16.5
 import net.minecraft.util.FormattedCharSequence;
 //#else
 //$$ import net.minecraft.network.chat.FormattedText;
@@ -57,7 +57,7 @@ class ToastInstance {
     public final int ticksTotal;
     public int ticksRemaining;
 
-    //#if MC >= 1_16_05
+    //#if MC >= 1.16.5
     public List<FormattedCharSequence> formattedTitle, formattedDescription;
     //#else
     //$$ public List<FormattedText> formattedTitle, formattedDescription;
@@ -103,7 +103,7 @@ class ToastInstance {
 
     public void render(
         @NotNull
-        //#if MC < 1_20_00
+        //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,
@@ -182,7 +182,7 @@ class ToastInstance {
 
     private static void fill(
         @NotNull
-        //#if MC < 1_20_00
+        //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,

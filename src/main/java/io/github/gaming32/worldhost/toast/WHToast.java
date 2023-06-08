@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-//#if MC >= 1_20_00
+//#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
@@ -79,7 +79,7 @@ public class WHToast {
 
     public static void render(
         @NotNull
-        //#if MC < 1_20_00
+        //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,
@@ -138,7 +138,7 @@ public class WHToast {
     }
 
     private static SoundEvent newSoundEvent(String location) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         return SoundEvent.createVariableRangeEvent(
         //#else
         //$$ return new SoundEvent(

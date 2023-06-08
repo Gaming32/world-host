@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-//#if MC >= 1_20_00
+//#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Collections;
@@ -57,7 +57,7 @@ public class FriendsScreen extends WorldHostScreen {
 
         if (list == null) {
             list = addWidget(new FriendsList(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64), 36));
-            //#if MC > 1_16_01
+            //#if MC > 1.16.1
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
@@ -133,7 +133,7 @@ public class FriendsScreen extends WorldHostScreen {
     @Override
     public void render(
         @NotNull
-        //#if MC < 1_20_00
+        //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,
@@ -203,7 +203,7 @@ public class FriendsScreen extends WorldHostScreen {
             );
         }
 
-        //#if MC > 1_16_05
+        //#if MC > 1.16.5
         @NotNull
         @Override
         public Component getNarration() {
@@ -214,7 +214,7 @@ public class FriendsScreen extends WorldHostScreen {
         @Override
         public void render(
             @NotNull
-            //#if MC < 1_20_00
+            //#if MC < 1.20.0
             //$$ PoseStack context,
             //#else
             GuiGraphics context,

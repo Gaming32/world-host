@@ -12,13 +12,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-//#if MC >= 1_20_00
+//#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
-//#if MC > 1_17_01
+//#if MC > 1.17.1
 import net.minecraft.client.gui.components.PlainTextButton;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.PlainTextButton;
@@ -58,7 +58,7 @@ public class OnlineStatusButton extends PlainTextButton {
     }
 
     private void updateX() {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         setX(
             //#else
             //$$ x = (
@@ -85,14 +85,14 @@ public class OnlineStatusButton extends PlainTextButton {
 
     @Override
     public void
-    //#if MC >= 1_19_04
+    //#if MC >= 1.19.4
     renderWidget
     //#else
     //$$ renderButton
     //#endif
         (
             @NotNull
-            //#if MC < 1_20_00
+            //#if MC < 1.20.0
             //$$ PoseStack context,
             //#else
             GuiGraphics context,
@@ -111,7 +111,7 @@ public class OnlineStatusButton extends PlainTextButton {
             updateX();
         }
         super.
-            //#if MC >= 1_19_04
+            //#if MC >= 1.19.4
             renderWidget
             //#else
             //$$ renderButton
@@ -119,7 +119,7 @@ public class OnlineStatusButton extends PlainTextButton {
                 (context, i, j, f);
     }
 
-    //#if MC >= 1_18_00
+    //#if MC >= 1.18.0
     @Override
     public boolean isHoveredOrFocused() {
         return currentStatus != 1 && super.isHoveredOrFocused();

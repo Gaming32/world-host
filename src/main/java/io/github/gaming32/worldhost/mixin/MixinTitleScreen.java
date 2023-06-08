@@ -11,18 +11,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC <= 1_16_05
+//#if MC <= 1.16.5
 //$$ import net.minecraft.client.gui.components.AbstractWidget;
 //#endif
 
 //#if FABRIC
-//#if MC <= 1_16_01
+//#if MC <= 1.16.1
 //$$ import net.fabricmc.loader.api.FabricLoader;
 //#endif
 //#else
-//#if MC > 1_17_01
+//#if MC > 1.17.1
 //$$ import net.minecraftforge.internal.BrandingControl;
-//#elseif MC > 1_16_05
+//#elseif MC > 1.16.5
 //$$ import net.minecraftforge.fmllegacy.BrandingControl;
 //#else
 //$$ import net.minecraftforge.fml.BrandingControl;
@@ -42,13 +42,13 @@ public class MixinTitleScreen extends Screen {
         if (location == OnlineStatusLocation.OFF) return;
         int y = 20;
         //#if FABRIC
-        //#if MC >= 1_18_02
+        //#if MC >= 1.18.2
         final int mmcLines = WorldHost.getMMCLines(false);
         if (mmcLines > 0) {
             y += mmcLines * 12;
         }
         //#endif
-        //#if MC <= 1_16_01
+        //#if MC <= 1.16.1
         //$$ if (FabricLoader.getInstance().isModLoaded("modmenu")) {
         //$$     y += 12;
         //$$ }
@@ -71,7 +71,7 @@ public class MixinTitleScreen extends Screen {
         ));
     }
 
-    //#if MC <= 1_16_05
+    //#if MC <= 1.16.5
     //$$ protected <T extends AbstractWidget> T addRenderableWidget(T widget) {
     //$$     return addButton(widget);
     //$$ }

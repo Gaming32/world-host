@@ -48,7 +48,7 @@ import java.util.function.Supplier;
 
 import static net.minecraft.commands.Commands.literal;
 
-//#if MC >= 1_18_00
+//#if MC >= 1.18.0
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 //#else
@@ -56,7 +56,7 @@ import org.slf4j.Logger;
 //$$ import org.apache.logging.log4j.Logger;
 //#endif
 
-//#if MC >= 1_19_02
+//#if MC >= 1.19.2
 import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
 import net.minecraft.server.Services;
 //#else
@@ -69,7 +69,7 @@ import net.minecraft.server.Services;
 //#if FABRIC
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-//#if MC >= 1_18_02
+//#if MC >= 1.18.2
 import dev.isxander.mainmenucredits.MainMenuCredits;
 import dev.isxander.mainmenucredits.config.MMCConfig;
 import dev.isxander.mainmenucredits.config.MMCConfigEntry;
@@ -86,18 +86,18 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 //$$ import java.util.function.BiFunction;
-//#if MC >= 1_19_02
+//#if MC >= 1.19.2
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
-//#elseif MC >= 1_18_02
+//#elseif MC >= 1.18.2
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
-//#elseif MC >= 1_17_01
+//#elseif MC >= 1.17.1
 //$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
 //#else
 //$$ import net.minecraftforge.fml.ExtensionPoint;
 //#endif
-//#if MC > 1_17_01
+//#if MC > 1.17.1
 //$$ import net.minecraftforge.resource.ResourcePackLoader;
-//#elseif MC > 1_16_05
+//#elseif MC > 1.16.5
 //$$ import net.minecraftforge.fmllegacy.packs.ResourcePackLoader;
 //#else
 //$$ import net.minecraftforge.fml.packs.ResourcePackLoader;
@@ -120,7 +120,7 @@ public class WorldHost
         //#endif
 
     public static final Logger LOGGER =
-        //#if MC >= 1_18_00
+        //#if MC >= 1.18.0
         LogUtils.getLogger();
         //#else
         //$$ LogManager.getLogger();
@@ -207,23 +207,23 @@ public class WorldHost
                 })
             //#else
             //$$ ResourcePackLoader
-                //#if MC > 1_16_05
+                //#if MC > 1.16.5
                 //$$ .getPackFor(MOD_ID)
                 //#else
                 //$$ .getResourcePackFor(MOD_ID)
                 //#endif
             //$$     .map(c -> {
-                    //#if MC <= 1_19_02
+                    //#if MC <= 1.19.2
                     //$$ try {
                     //#endif
             //$$             return c.getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k.txt"));
-                    //#if MC <= 1_19_02
+                    //#if MC <= 1.19.2
                     //$$ } catch (IOException e) {
                     //$$     throw new UncheckedIOException(e);
                     //$$ }
                     //#endif
             //$$     })
-                //#if MC > 1_19_02
+                //#if MC > 1.19.2
                 //$$ .map(i -> {
                 //$$     try {
                 //$$         return i.get();
@@ -254,7 +254,7 @@ public class WorldHost
 
         //noinspection ResultOfMethodCallIgnored
         CACHE_DIR.mkdirs();
-        //#if MC >= 1_19_02
+        //#if MC >= 1.19.2
         profileCache = Services.create(
             ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService(),
             CACHE_DIR
@@ -263,7 +263,7 @@ public class WorldHost
         //$$ profileCache = new GameProfileCache(
         //$$     new YggdrasilAuthenticationService(
         //$$         Minecraft.getInstance().getProxy()
-                //#if MC <= 1_16_01
+                //#if MC <= 1.16.1
                 //$$ , UUID.randomUUID().toString()
                 //#endif
         //$$     )
@@ -271,7 +271,7 @@ public class WorldHost
         //$$     new File(CACHE_DIR, "usercache.json")
         //$$ );
         //#endif
-        //#if MC > 1_16_05
+        //#if MC > 1.16.5
         profileCache.setExecutor(Util.backgroundExecutor());
         //#endif
 
@@ -372,7 +372,7 @@ public class WorldHost
                         final UPnPErrors.AddPortMappingErrors error = upnpGateway.openPort(port, 60, false);
                         if (error == null) {
                             ctx.getSource().sendSuccess(
-                                //#if MC >= 1_20_00
+                                //#if MC >= 1.20.0
                                 () ->
                                 //#endif
                                 Components.translatable(
@@ -442,7 +442,7 @@ public class WorldHost
 
     public static ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
         final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
-        //#if MC >= 1_19_02
+        //#if MC >= 1.19.2
         return skinManager.getInsecureSkinLocation(gameProfile);
         //#else
         //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
@@ -454,7 +454,7 @@ public class WorldHost
     }
 
     public static void getMaybeAsync(GameProfileCache cache, String name, Consumer<Optional<GameProfile>> action) {
-        //#if MC > 1_16_05
+        //#if MC > 1.16.5
         cache.getAsync(name, action);
         //#else
         //$$ action.accept(Optional.ofNullable(cache.get(name)));
@@ -462,19 +462,19 @@ public class WorldHost
     }
 
     public static void texture(ResourceLocation texture) {
-        //#if MC > 1_16_05
+        //#if MC > 1.16.5
         RenderSystem.setShaderTexture(0, texture);
         //#else
         //$$ Minecraft.getInstance().getTextureManager().bind(texture);
         //#endif
     }
 
-    //#if MC <= 1_16_05
+    //#if MC <= 1.16.5
     //$$ @SuppressWarnings("deprecation")
     //#endif
     public static void color(float r, float g, float b, float a) {
         RenderSystem.
-            //#if MC > 1_16_05
+            //#if MC > 1.16.5
             setShaderColor
             //#else
             //$$ color4f
@@ -514,9 +514,9 @@ public class WorldHost
 
     @SuppressWarnings("RedundantThrows")
     public static ServerStatus parseServerStatus(FriendlyByteBuf buf) throws IOException {
-        //#if MC > 1_16_05
+        //#if MC > 1.16.5
         return new ClientboundStatusResponsePacket(buf)
-            //#if MC >= 1_19_04
+            //#if MC >= 1.19.4
             .status();
             //#else
             //$$ .getStatus();
@@ -529,7 +529,7 @@ public class WorldHost
     }
 
     public static ServerStatus createEmptyServerStatus() {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         return new ServerStatus(
             Components.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
             //#if FORGE
@@ -637,7 +637,7 @@ public class WorldHost
             return 0;
         }
         ctx.getSource().sendSuccess(
-            //#if MC >= 1_20_00
+            //#if MC >= 1.20.0
             () ->
             //#endif
             Components.translatable(
@@ -707,7 +707,7 @@ public class WorldHost
         //#endif
     }
 
-    //#if FABRIC && MC >= 1_18_02
+    //#if FABRIC && MC >= 1.18.2
     public static int getMMCLines(boolean isPause) {
         if (FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
             final MMCConfig baseConfig = MainMenuCredits.getInstance().getConfig();
@@ -727,10 +727,10 @@ public class WorldHost
     //$$         final BiFunction<Minecraft, Screen, Screen> screenFunction =
     //$$             (mc, screen) -> new WorldHostConfigScreen(screen);
     //$$         ModLoadingContext.get().registerExtensionPoint(
-                //#if MC >= 1_19_02
+                //#if MC >= 1.19.2
                 //$$ ConfigScreenHandler.ConfigScreenFactory.class,
                 //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
-                //#elseif MC >= 1_17_01
+                //#elseif MC >= 1.17.1
                 //$$ ConfigGuiHandler.ConfigGuiFactory.class,
                 //$$ () -> new ConfigGuiHandler.ConfigGuiFactory(screenFunction)
                 //#else

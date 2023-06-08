@@ -30,7 +30,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
-//#if MC >= 1_20_00
+//#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
@@ -138,7 +138,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     @Override
     public void render(
         @NotNull
-        //#if MC < 1_20_00
+        //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,
@@ -241,7 +241,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         private GameProfile profile;
 
         private final ResourceLocation iconTextureId;
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         private byte @Nullable [] iconData;
         //#else
         //$$ @Nullable
@@ -261,7 +261,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             iconTextureId = new ResourceLocation(WorldHost.MOD_ID, "servers/" + friendUuid + "/icon");
         }
 
-        //#if MC >= 1_17_00
+        //#if MC >= 1.17.0
         @NotNull
         @Override
         public Component getNarration() {
@@ -272,7 +272,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         @Override
         public void render(
             @NotNull
-            //#if MC < 1_20_00
+            //#if MC < 1.20.0
             //$$ PoseStack context,
             //#else
             GuiGraphics context,
@@ -302,7 +302,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 RenderSystem.disableBlend();
             }
 
-            //#if MC >= 1_19_04
+            //#if MC >= 1.19.4
             final byte @Nullable [] icon = serverInfo.getIconBytes();
             if (!Arrays.equals(icon, iconData)) {
             //#else
@@ -312,7 +312,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 if (uploadServerIcon(icon)) {
                     iconData = icon;
                 } else {
-                    //#if MC >= 1_19_04
+                    //#if MC >= 1.19.4
                     // Mojang did "@Nullable byte[]" instead of "byte @Nullable []"
                     //noinspection DataFlowIssue
                     serverInfo.setIconBytes(null);
@@ -349,7 +349,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
             if (
                 minecraft.options.touchscreen
-                    //#if MC >= 1_19_00
+                    //#if MC >= 1.19.0
                     ().get()
                     //#endif
                     || hovered
@@ -373,7 +373,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 return;
             }
 
-            //#if MC >= 1_19_04
+            //#if MC >= 1.19.4
             serverInfo.motd = metadata.description();
             metadata.version().ifPresentOrElse(version -> {
                 serverInfo.version = Components.literal(version.name());
@@ -464,7 +464,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         }
 
         private boolean uploadServerIcon(
-            //#if MC >= 1_19_04
+            //#if MC >= 1.19.4
             byte @Nullable [] newIconData
             //#else
             //$$ @Nullable String newIconData
@@ -479,7 +479,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 icon = null;
             } else {
                 try {
-                    //#if MC >= 1_19_04
+                    //#if MC >= 1.19.4
                     NativeImage image = NativeImage.read(newIconData);
                     //#else
                     //$$ NativeImage image = NativeImage.fromBase64(newIconData);
@@ -507,7 +507,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             select(this);
 
-            //#if MC > 1_16_01
+            //#if MC > 1.16.1
             final double relX = mouseX - list.getRowLeft();
             if (relX < 32.0 && relX > 16.0) {
                 connect();

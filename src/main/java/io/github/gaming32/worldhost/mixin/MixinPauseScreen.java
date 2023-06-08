@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC <= 1_16_05
+//#if MC <= 1.16.5
 //$$ import net.minecraft.client.gui.components.AbstractWidget;
 //#endif
 
@@ -25,7 +25,7 @@ public class MixinPauseScreen extends Screen {
 
     @ModifyConstant(
         method =
-            //#if MC >= 1_19_04
+            //#if MC >= 1.19.4
             "<clinit>",
             //#else
             //$$ "createPauseMenu",
@@ -42,7 +42,7 @@ public class MixinPauseScreen extends Screen {
         if (location == OnlineStatusLocation.OFF) return;
         int x = 7;
         int y = 15;
-        //#if FABRIC && MC >= 1_18_02
+        //#if FABRIC && MC >= 1.18.2
         final int mmcLines = WorldHost.getMMCLines(true);
         if (mmcLines > 0) {
             x = 2;
@@ -58,7 +58,7 @@ public class MixinPauseScreen extends Screen {
         ));
     }
 
-    //#if MC <= 1_16_05
+    //#if MC <= 1.16.5
     //$$ protected <T extends AbstractWidget> T addRenderableWidget(T widget) {
     //$$     return addButton(widget);
     //$$ }

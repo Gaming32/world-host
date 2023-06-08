@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Map;
 import java.util.UUID;
 
-//#if MC >= 1_20_00
+//#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
@@ -25,7 +25,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     public FriendsButton(int x, int y, int width, int height, OnPress onPress) {
         super(
             x, y, width, height, Components.EMPTY, onPress
-            //#if MC >= 1_19_04
+            //#if MC >= 1.19.4
             , DEFAULT_NARRATION
             //#endif
         );
@@ -42,7 +42,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
         bgWidth = textRenderer.width(" " + online + " ");
     }
 
-    //#if MC < 1_19_04
+    //#if MC < 1.19.4
     //$$ private int getX() {
     //$$     return x;
     //$$ }
@@ -53,10 +53,10 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     //#endif
 
     @Override
-    //#if MC >= 1_19_04
+    //#if MC >= 1.19.4
     public void renderString(
         @NotNull
-        //#if MC < 1_20_00
+        //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,
@@ -69,7 +69,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
         final int baseX = getX() + bgX;
         final int baseY = getY() + (height - 12) / 2;
         WorldHostScreen.fill(context, baseX, baseY, baseX + bgWidth, baseY + 12, 0x80000000);
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         super.renderString(context, font, i);
         //#endif
     }

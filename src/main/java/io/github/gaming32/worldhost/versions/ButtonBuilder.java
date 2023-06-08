@@ -3,14 +3,14 @@ package io.github.gaming32.worldhost.versions;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 
-//#if MC >= 1_19_04
+//#if MC >= 1.19.4
 import net.minecraft.client.gui.components.Tooltip;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 //#endif
 
 public class ButtonBuilder {
-    //#if MC >= 1_19_04
+    //#if MC >= 1.19.4
     private final Button.Builder builder;
     //#else
     //$$ private final Component message;
@@ -24,7 +24,7 @@ public class ButtonBuilder {
     //#endif
 
     public ButtonBuilder(Component message, Button.OnPress onPress) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         builder = Button.builder(message, onPress);
         //#else
         //$$ this.message = message;
@@ -33,7 +33,7 @@ public class ButtonBuilder {
     }
 
     public ButtonBuilder pos(int x, int y) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         builder.pos(x, y);
         //#else
         //$$ this.x = x;
@@ -43,7 +43,7 @@ public class ButtonBuilder {
     }
 
     public ButtonBuilder width(int width) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         builder.width(width);
         //#else
         //$$ this.width = width;
@@ -52,7 +52,7 @@ public class ButtonBuilder {
     }
 
     public ButtonBuilder size(int width, int height) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         builder.size(width, height);
         //#else
         //$$ this.width = width;
@@ -62,7 +62,7 @@ public class ButtonBuilder {
     }
 
     public ButtonBuilder bounds(int x, int y, int width, int height) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         builder.bounds(x, y, width, height);
         //#else
         //$$ pos(x, y).size(width, height);
@@ -71,7 +71,7 @@ public class ButtonBuilder {
     }
 
     public ButtonBuilder tooltip(Component tooltip) {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         builder.tooltip(Tooltip.create(tooltip));
         //#else
         //$$ onTooltip = WorldHostScreen.onTooltip(tooltip);
@@ -80,7 +80,7 @@ public class ButtonBuilder {
     }
 
     public Button build() {
-        //#if MC >= 1_19_04
+        //#if MC >= 1.19.4
         return builder.build();
         //#else
         //$$ return new Button(x, y, width, height, message, onPress, onTooltip);

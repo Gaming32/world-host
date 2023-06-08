@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC < 1_19_04
+//#if MC < 1.19.4
 //$$ import com.mojang.blaze3d.platform.Window;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //$$ import net.minecraft.client.MouseHandler;
@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public abstract class MixinMinecraft {
-    //#if MC < 1_19_04
+    //#if MC < 1.19.4
     //$$ @Shadow @Final public MouseHandler mouseHandler;
     //$$
     //$$ @Shadow private boolean pause;
@@ -49,7 +49,7 @@ public abstract class MixinMinecraft {
         WorldHost.tickHandler();
     }
 
-    //#if MC < 1_19_04
+    //#if MC < 1.19.4
     //$$ @Inject(
     //$$     method = "runTick",
     //$$     at = @At(

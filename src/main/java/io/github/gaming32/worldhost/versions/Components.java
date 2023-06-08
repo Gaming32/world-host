@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 
-//#if MC < 1_19_02
+//#if MC < 1.19.2
 //$$ import net.minecraft.network.chat.TextComponent;
 //$$ import net.minecraft.network.chat.TranslatableComponent;
 //#endif
@@ -15,7 +15,7 @@ public class Components {
     public static final Component EMPTY = immutable("");
 
     public static MutableComponent literal(String text) {
-        //#if MC >= 1_19_01
+        //#if MC >= 1.19.1
         return Component.literal(text);
         //#else
         //$$ return new TextComponent(text);
@@ -23,7 +23,7 @@ public class Components {
     }
 
     public static MutableComponent translatable(String key) {
-        //#if MC >= 1_19_01
+        //#if MC >= 1.19.1
         return Component.translatable(key);
         //#else
         //$$ return new TranslatableComponent(key);
@@ -31,7 +31,7 @@ public class Components {
     }
 
     public static MutableComponent translatable(String key, Object... args) {
-        //#if MC >= 1_19_01
+        //#if MC >= 1.19.1
         return Component.translatable(key, args);
         //#else
         //$$ return new TranslatableComponent(key, args);
