@@ -79,7 +79,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             }
 
             if (socket == null) {
-                closed = true;
+                close();
                 return;
             }
             if (successToast) {
@@ -106,7 +106,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 } catch (Exception e) {
                     WorldHost.LOGGER.error("Critical error in WH send thread", e);
                 }
-                closed = true;
+                close();
             }, "WH-SendThread");
 
             final Thread recvThread = new Thread(() -> {
@@ -146,7 +146,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         WorldHost.LOGGER.error("Critical error in WH recv thread", e);
                     }
                 }
-                closed = true;
+                close();
             }, "WH-RecvThread");
 
             sendThread.start();
