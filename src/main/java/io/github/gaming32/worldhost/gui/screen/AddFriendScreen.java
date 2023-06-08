@@ -16,6 +16,7 @@ import net.minecraft.server.players.GameProfileCache;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -28,6 +29,7 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class AddFriendScreen extends WorldHostScreen {
     public static final Pattern VALID_USERNAME = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
+    public static final Pattern VALID_UUID = Pattern.compile("^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$");
     private static final Component FRIEND_USERNAME_TEXT = Components.translatable("world-host.add_friend.enter_username");
 
     private final Screen parent;
@@ -76,7 +78,7 @@ public class AddFriendScreen extends WorldHostScreen {
         );
 
         usernameField = addWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, FRIEND_USERNAME_TEXT));
-        usernameField.setMaxLength(16);
+        usernameField.setMaxLength(36);
         usernameField.setFocused(true);
         if (friendProfile != null) {
             usernameField.setValue(friendProfile.getName());
@@ -141,6 +143,13 @@ public class AddFriendScreen extends WorldHostScreen {
                         friendProfile = null;
                     }
                 });
+            } else if (VALID_UUID.matcher(username).matches()) {
+                friendProfile = new GameProfile(UUID.fromString(username), null);
+                addFriendButton.active = true;
+            } else if (username.startsWith("o:")) {
+                final String actualName = username.substring(2);
+                friendProfile = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName);
+                addFriendButton.active = true;
             }
         }
     }
