@@ -10,7 +10,6 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 //#if MC >= 1_20_00
@@ -72,8 +71,7 @@ public class OnlineStatusButton extends PlainTextButton {
         if (WorldHost.protoClient == null) {
             return 0;
         }
-        final Future<Void> connectingFuture = WorldHost.protoClient.getConnectingFuture();
-        return connectingFuture.isDone() ? 2 : 1;
+        return WorldHost.protoClient.getConnectingFuture().isDone() ? 2 : 1;
     }
 
     private static Component generateStatusComponent() {

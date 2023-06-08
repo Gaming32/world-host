@@ -24,7 +24,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public static final int PROTOCOL_VERSION = 4;
 
     private final String originalHost;
-    private final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
+    final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<Optional<WorldHostC2SMessage>> sendQueue = new LinkedBlockingQueue<>();
 
     private BlockingQueue<UUID> authUuid = new LinkedBlockingQueue<>(1);
@@ -82,7 +82,6 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 closed = true;
                 return;
             }
-            connectingFuture.complete(null);
             if (successToast) {
                 WHToast.builder("world-host.wh_connect.connected").show();
             }
@@ -127,7 +126,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         try {
                             message = WorldHostS2CMessage.decode(new DataInputStream(cis));
                         } catch (EOFException e) {
-                            WorldHost.LOGGER.error("Message decoder read past end!");
+                            WorldHost.LOGGER.error("Message decoder read past end (length {})!", length);
                         } catch (Exception e) {
                             WorldHost.LOGGER.error("Error decoding WH message", e);
                         }

@@ -35,7 +35,7 @@
   "world-host.friend_added_you.already": "%s added you back as a friend",
   "world-host.friend_added_you.already.desc": "You can now join each other's games.",
   "world-host.need_add_back": "Click here to add them back to become friends.",
-  "world-host.error_in_connection": "Error occurred in connection to World Host server.",
+  "world-host.error_in_connection": "Critical error in connection to World Host server.",
   "world-host.went_online": "%s went online",
   "world-host.went_online.desc": "Click here or go to the Multiplayer menu to join them",
   "world-host.online_friends.title": "Online Friends",

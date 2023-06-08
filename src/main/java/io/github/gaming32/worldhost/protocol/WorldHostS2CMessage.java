@@ -15,9 +15,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataInputStream;
@@ -33,13 +33,21 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 
 // Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostS2CMessage.kt
 public sealed interface WorldHostS2CMessage {
-    record Error(String message) implements WorldHostS2CMessage {
+    record Error(String message, boolean critical) implements WorldHostS2CMessage {
+        public Error(String message) {
+            this(message, false);
+        }
+
         @Override
         public void handle(ProtocolClient client) {
-            WorldHost.LOGGER.error("Received protocol error: {}", message);
-//            WHToast.builder("world-host.protocol_error_occurred")
-//                .description(Components.immutable(message))
-//                .show();
+            if (critical) {
+                WHToast.builder("world-host.protocol_error_occurred")
+                    .description(Components.immutable(message))
+                    .show();
+                throw new RuntimeException(message);
+            } else {
+                WorldHost.LOGGER.error("Received protocol error: {}", message);
+            }
         }
     }
 
@@ -228,6 +236,7 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.LOGGER.info("Received {}", this);
+            client.connectingFuture.complete(null);
             client.setConnectionId(connectionId);
             client.setBaseIp(baseIp);
             client.setBasePort(basePort);
@@ -257,10 +266,11 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             final String currentVersion = WorldHost.getModVersion(WorldHost.MOD_ID);
-            WorldHost.LOGGER.info(I18n.get("world-host.outdated_world_host.desc", currentVersion, recommendedVersion));
+            final Component message = Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion);
+            WorldHost.LOGGER.info(message.getString());
             if (!WorldHost.CONFIG.isShowOutdatedWorldHost()) return;
             WHToast.builder("world-host.outdated_world_host")
-                .description(Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion))
+                .description(message)
                 .clickAction(() -> Util.getPlatform().openUri(
                     "https://modrinth.com/mod/world-host/version/" +
                         recommendedVersion + '+' + WorldHost.getModVersion("minecraft") + '-' + WorldHost.MOD_LOADER
@@ -308,7 +318,7 @@ public sealed interface WorldHostS2CMessage {
     static WorldHostS2CMessage decode(DataInputStream dis) throws IOException {
         final int typeId = dis.readUnsignedByte();
         return switch (typeId) {
-            case 0 -> new Error(readString(dis));
+            case 0 -> new Error(readString(dis), dis.read() > 0); // -1 means that there was no critical flag sent
             case 1 -> new IsOnlineTo(readUuid(dis));
             case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), dis.readLong(), dis.readBoolean());
             case 3 -> new FriendRequest(readUuid(dis));
