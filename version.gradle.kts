@@ -154,12 +154,8 @@ toolkitReleases {
     }
     describeFabricWithQuilt.set(true)
     useSourcesJar.set(true)
-    if (mcData.isFabric) {
-        loaders.add("fabric")
-        if (mcData.version == 1_19_04) {
-            gameVersions.add("1.19.4")
-            gameVersions.add("23w13a_or_b")
-        }
+    if (mcData.isFabric && mcData.version == 1_19_04) {
+        gameVersions.add("23w13a_or_b")
     }
 }
 
