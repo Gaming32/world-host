@@ -50,10 +50,6 @@ repositories {
 
     maven("https://repo.viaversion.com")
 
-    maven("https://maven.lenni0451.net/snapshots")
-
-    maven("https://repo.opencollab.dev/maven-snapshots")
-
     maven("https://jitpack.io")
 }
 
@@ -135,7 +131,9 @@ dependencies {
             mcData.version >= 1_19_04 -> "2.7.5"
             else -> null
         }?.let {
-            modCompileOnly("de.florianmichael:viafabricplus:$it")
+            modCompileOnly("de.florianmichael:viafabricplus:$it") {
+                isTransitive = false
+            }
         }
     }
 }
