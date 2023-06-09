@@ -48,6 +48,12 @@ repositories {
 
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
 
+    maven("https://repo.viaversion.com")
+
+    maven("https://maven.lenni0451.net/snapshots")
+
+    maven("https://repo.opencollab.dev/maven-snapshots")
+
     maven("https://jitpack.io")
 }
 
@@ -121,6 +127,16 @@ dependencies {
 
     if (mcData.isFabric && mcData.version >= 1_18_02) {
         modCompileOnly("dev.isxander:main-menu-credits:1.1.2")
+    }
+
+    if (mcData.isFabric) {
+        when {
+            mcData.version >= 1_20_00 -> "2.7.6"
+            mcData.version >= 1_19_04 -> "2.7.5"
+            else -> null
+        }?.let {
+            modCompileOnly("de.florianmichael:viafabricplus:$it")
+        }
     }
 }
 

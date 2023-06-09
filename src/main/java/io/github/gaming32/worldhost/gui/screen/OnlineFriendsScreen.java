@@ -36,6 +36,13 @@ import net.minecraft.client.gui.GuiGraphics;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
+//#if MC >= 1.19.4
+import de.florianmichael.viafabricplus.base.settings.groups.GeneralSettings;
+import de.florianmichael.viafabricplus.screen.impl.base.ProtocolSelectionScreen;
+import io.github.gaming32.worldhost.versions.ButtonBuilder;
+import net.fabricmc.loader.api.FabricLoader;
+//#endif
+
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
     private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
     private static final ResourceLocation GUI_SERVER_SELECTION_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
@@ -106,7 +113,29 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         )).active = false;
 
         updateButtonActivationStates();
+
+        //#if MC >= 1.19.4
+        if (FabricLoader.getInstance().isModLoaded("viafabricplus")) {
+            vfpInit();
+        }
+        //#endif
     }
+
+    //#if MC >= 1.19.4
+    // Based on https://github.com/ViaVersion/ViaFabricPlus/blob/main/src/main/java/de/florianmichael/viafabricplus/injection/mixin/base/MixinMultiplayerScreen.java
+    private void vfpInit() {
+        final ButtonBuilder builder = button(Components.literal("ViaFabricPlus"), b -> ProtocolSelectionScreen.INSTANCE.open(this));
+
+        switch (GeneralSettings.INSTANCE.mainButtonOrientation.getIndex()) {
+            case 0 -> builder.pos(5, 5);
+            case 1 -> builder.pos(width - 98 - 5, 5);
+            case 2 -> builder.pos(5, height - 20 - 5);
+            case 3 -> builder.pos(width - 95 - 5, height - 20 - 5);
+        }
+
+        addRenderableWidget(builder.width(98).build());
+    }
+    //#endif
 
     @Override
     public void removed() {
