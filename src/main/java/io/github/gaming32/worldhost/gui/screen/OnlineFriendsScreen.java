@@ -36,7 +36,7 @@ import net.minecraft.client.gui.GuiGraphics;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
-//#if MC >= 1.19.4
+//#if MC >= 1.19.4 && FABRIC
 import de.florianmichael.viafabricplus.base.settings.groups.GeneralSettings;
 import de.florianmichael.viafabricplus.screen.impl.base.ProtocolSelectionScreen;
 import io.github.gaming32.worldhost.versions.ButtonBuilder;
@@ -114,14 +114,14 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
         updateButtonActivationStates();
 
-        //#if MC >= 1.19.4
+        //#if MC >= 1.19.4 && FABRIC
         if (FabricLoader.getInstance().isModLoaded("viafabricplus")) {
             vfpInit();
         }
         //#endif
     }
 
-    //#if MC >= 1.19.4
+    //#if MC >= 1.19.4 && FABRIC
     // Based on https://github.com/ViaVersion/ViaFabricPlus/blob/main/src/main/java/de/florianmichael/viafabricplus/injection/mixin/base/MixinMultiplayerScreen.java
     private void vfpInit() {
         final ButtonBuilder builder = button(
