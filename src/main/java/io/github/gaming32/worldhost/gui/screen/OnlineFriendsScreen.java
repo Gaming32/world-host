@@ -124,7 +124,10 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     //#if MC >= 1.19.4
     // Based on https://github.com/ViaVersion/ViaFabricPlus/blob/main/src/main/java/de/florianmichael/viafabricplus/injection/mixin/base/MixinMultiplayerScreen.java
     private void vfpInit() {
-        final ButtonBuilder builder = button(Components.literal("ViaFabricPlus"), b -> ProtocolSelectionScreen.INSTANCE.open(this));
+        final ButtonBuilder builder = button(
+            Components.literal("ViaFabricPlus"),
+            b -> ProtocolSelectionScreen.INSTANCE.open(this)
+        );
 
         switch (GeneralSettings.INSTANCE.mainButtonOrientation.getIndex()) {
             case 0 -> builder.pos(5, 5);
