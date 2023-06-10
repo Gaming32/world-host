@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -85,11 +86,13 @@ public sealed interface WorldHostS2CMessage {
                     ).start();
                 } else {
                     //#if MC > 1.16.5
-                    //noinspection DataFlowIssue // IntelliJ, it's literally marked @Nullable :clown:
+                    final ServerAddress serverAddress = new ServerAddress(host, port);
                     ConnectScreen.startConnecting(
-                        parentScreen, minecraft, new ServerAddress(host, port), null
-                        //#if MC >= 1.20.0
-                        , false // If the call came from Quick Play
+                        parentScreen, minecraft, serverAddress,
+                        //#if MC < 1.20.0
+                        //$$ null
+                        //#else
+                        new ServerData(WorldHost.connectionIdToString(ownerCid), serverAddress.toString(), false), false
                         //#endif
                     );
                     //#else
