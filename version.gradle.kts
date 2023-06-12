@@ -88,8 +88,8 @@ dependencies {
 
     if (mcData.isFabric) {
         when (mcData.version) {
-            1_20_00 -> "7.0.0-beta.2"
-            1_19_04 -> "6.2.1"
+            1_20_01 -> "7.0.1"
+            1_19_04 -> "6.2.3"
             1_19_02 -> "4.2.0-beta.2"
             1_18_02 -> "3.2.5"
             1_17_01 -> "2.0.17"
@@ -107,7 +107,7 @@ dependencies {
 
     if (mcData.isFabric) {
         when (mcData.version) {
-            1_20_00 -> "0.83.0+1.20"
+            1_20_01 -> "0.83.0+1.20.1"
             1_19_04 -> "0.80.0+1.19.4"
             1_19_02 -> "0.76.0+1.19.2"
             1_18_02 -> "0.76.0+1.18.2"
@@ -168,8 +168,12 @@ toolkitReleases {
     }
     describeFabricWithQuilt.set(true)
     useSourcesJar.set(true)
-    if (mcData.isFabric && mcData.version == 1_19_04) {
-        gameVersions.add("23w13a_or_b")
+    if (mcData.isFabric) {
+        if (mcData.version == 1_19_04) {
+            gameVersions.add("23w13a_or_b")
+        } else if (mcData.version == 1_20_01) {
+            gameVersions.add("1.20")
+        }
     }
 }
 
