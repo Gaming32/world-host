@@ -18,6 +18,7 @@ import io.github.gaming32.worldhost.versions.Components;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -25,6 +26,7 @@ import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
@@ -387,7 +389,13 @@ public class WorldHost
                     } catch (Exception e) {
                         WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                     }
-                    ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.tempip.failure"));
+                    ctx.getSource().sendFailure(Components.translatable(
+                        "world-host.worldhost.tempip.failure",
+                        Components.wrapInSquareBrackets(Components.literal("/worldhost ip")).withStyle(style -> style
+                            .withColor(ChatFormatting.GREEN)
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/worldhost ip"))
+                        )
+                    ));
                     return 0;
                 })
             )

@@ -43,7 +43,7 @@
   "world-host.worldhost.ip.no_server_support": "This World Host server does not support public proxy IPs.",
   "world-host.worldhost.ip.not_connected": "Not connected to World Host server.",
   "world-host.worldhost.tempip.success": "The low-ping temporary IP for your world is %s.",
-  "world-host.worldhost.tempip.failure": "An error occurred while trying to obtain a temporary IP. See the game log for details.",
+  "world-host.worldhost.tempip.failure": "An error occurred while trying to obtain a temporary IP. Try using %s.",
   "world-host.lan_opened.friends": "World hosted to friends on the friends tab. It's also available on LAN port %s.",
   "world-host.lan_opened.no_friends": "World hosted to IP %s. It's also available on LAN port %s.",
   "world-host.online_status": "%s World Host: %s",
