@@ -35,6 +35,6 @@
     ${mc_version == '1.19.4' ? '"modmenu": "<6.2.0"' : ''}
   },
   "suggests": {
-    ${mc_version == '1.20' ? '"world-host-bedrock": ">=0.3.1"' : ''}
+    ${mc_version == '1.20.1' ? '"world-host-bedrock": ">=0.4.2"' : ''}
   }
 }
