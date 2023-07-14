@@ -60,7 +60,7 @@ public class WHToast {
             toast.calculateText();
             playSound(toast.important ? IMPORTANT : REGULAR);
             if (!TOASTS.isEmpty()) {
-                if (Y_OFFSET + toast.height + GAP <= TOASTS.get(0).y) {
+                if (Y_OFFSET + 2 * toast.height + GAP <= TOASTS.get(0).y) {
                     toast.y = Y_OFFSET;
                     TOASTS.add(0, toast);
                     return;
@@ -68,7 +68,7 @@ public class WHToast {
                 for (int i = 0; i < TOASTS.size() - 1; i++) {
                     final ToastInstance prevToast = TOASTS.get(i);
                     final ToastInstance nextToast = TOASTS.get(i + 1);
-                    if (prevToast.y + prevToast.height + GAP + toast.height + GAP <= nextToast.y) {
+                    if (prevToast.y + prevToast.height + GAP + 2 * toast.height + GAP <= nextToast.y) {
                         toast.y = prevToast.y + prevToast.height + GAP;
                         TOASTS.add(i + 1, toast);
                         return;
