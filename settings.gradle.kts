@@ -12,7 +12,7 @@ pluginManagement {
     }
 
     plugins {
-        id("xyz.deftu.gradle.multiversion-root") version("1.17.1")
+        id("xyz.deftu.gradle.multiversion-root") version("1.18.0")
     }
 }
 
