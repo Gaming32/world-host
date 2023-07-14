@@ -63,7 +63,7 @@ class ToastInstance {
     //$$ public List<FormattedText> formattedTitle, formattedDescription;
     //#endif
 
-    public float yShift;
+    public float y;
 
     private boolean clicked;
 

@@ -11,8 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.List;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,7 +28,7 @@ public class WHToast {
     private static final SoundEvent REMOVED = newSoundEvent("removed");
 
     private static boolean ready = false;
-    private static final Deque<ToastInstance> TOASTS = new ArrayDeque<>();
+    private static final List<ToastInstance> TOASTS = new ArrayList<>();
 
     public static ToastBuilder builder(@NotNull Component title) {
         return new ToastBuilder(title);
@@ -39,7 +39,12 @@ public class WHToast {
     }
 
     public static void ready() {
-        TOASTS.forEach(ToastInstance::calculateText);
+        float y = Y_OFFSET;
+        for (final ToastInstance toast : TOASTS) {
+            toast.calculateText();
+            toast.y = y;
+            y += toast.height + GAP;
+        }
         if (!TOASTS.isEmpty()) {
             if (TOASTS.stream().anyMatch(t -> t.important)) {
                 playSound(IMPORTANT);
@@ -54,6 +59,26 @@ public class WHToast {
         if (ready) {
             toast.calculateText();
             playSound(toast.important ? IMPORTANT : REGULAR);
+            if (!TOASTS.isEmpty()) {
+                if (Y_OFFSET + toast.height + GAP <= TOASTS.get(0).y) {
+                    toast.y = Y_OFFSET;
+                    TOASTS.add(0, toast);
+                    return;
+                }
+                for (int i = 0; i < TOASTS.size() - 1; i++) {
+                    final ToastInstance prevToast = TOASTS.get(i);
+                    final ToastInstance nextToast = TOASTS.get(i + 1);
+                    if (prevToast.y + prevToast.height + GAP + toast.height + GAP <= nextToast.y) {
+                        toast.y = prevToast.y + prevToast.height + GAP;
+                        TOASTS.add(i + 1, toast);
+                        return;
+                    }
+                }
+                final ToastInstance lastToast = TOASTS.get(TOASTS.size() - 1);
+                toast.y = lastToast.y + lastToast.height + GAP;
+            } else {
+                toast.y = Y_OFFSET;
+            }
         }
         TOASTS.add(toast);
     }
@@ -62,17 +87,13 @@ public class WHToast {
         if (!ready) return;
 
         final var it = TOASTS.iterator();
-        float shift = 0;
         while (it.hasNext()) {
             final ToastInstance toast = it.next();
-            toast.yShift += shift;
-            shift = 0;
             toast.ticksRemaining--;
             if (toast.ticksRemaining == 19) {
                 playSound(REMOVED);
             } else if (toast.ticksRemaining <= 0) {
                 it.remove();
-                shift = toast.height + GAP + toast.yShift;
             }
         }
     }
@@ -96,16 +117,13 @@ public class WHToast {
         final int screenWidth = window.getGuiScaledWidth();
         final int screenHeight = window.getGuiScaledHeight();
 
-        float y = Y_OFFSET;
-
         for (final ToastInstance toast : TOASTS) {
             toast.render(
                 context,
                 screenWidth - X_OFFSET - toast.width,
-                screenHeight - y - toast.yShift - toast.height,
+                screenHeight - toast.y - toast.height,
                 mouseX, mouseY, tickDelta
             );
-            y += toast.height + GAP + toast.yShift;
         }
 
         poseStack.popPose();
@@ -120,10 +138,9 @@ public class WHToast {
         final int screenWidth = window.getGuiScaledWidth();
         final int screenHeight = window.getGuiScaledHeight();
 
-        float y = Y_OFFSET;
         for (final ToastInstance toast : TOASTS) {
             final float toastX = screenWidth - X_OFFSET - toast.width;
-            final float toastY = screenHeight - y - toast.height - toast.yShift;
+            final float toastY = screenHeight - toast.height - toast.y;
             if (
                 mouseX >= toastX && mouseX <= toastX + toast.width &&
                     mouseY >= toastY && mouseY <= toastY + toast.height &&
@@ -131,7 +148,6 @@ public class WHToast {
             ) {
                 return true;
             }
-            y += toast.height + GAP + toast.yShift;
         }
 
         return false;
