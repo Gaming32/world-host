@@ -638,10 +638,11 @@ public class WorldHost
     }
 
     public static void connect(Screen parentScreen, long cid, String host, int port) {
+        final Minecraft minecraft = Minecraft.getInstance();
         //#if MC > 1.16.5
         final ServerAddress serverAddress = new ServerAddress(host, port);
         ConnectScreen.startConnecting(
-            parentScreen, Minecraft.getInstance(), serverAddress,
+            parentScreen, minecraft, serverAddress,
             //#if MC < 1.20.0
             //$$ null
             //#else
