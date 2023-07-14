@@ -85,6 +85,7 @@ public sealed interface WorldHostS2CMessage {
                         ownerCid
                     ).start();
                 } else {
+                    // TODO: Try to connect with proxy if direct connection fails
                     //#if MC > 1.16.5
                     final ServerAddress serverAddress = new ServerAddress(host, port);
                     ConnectScreen.startConnecting(
@@ -197,7 +198,7 @@ public sealed interface WorldHostS2CMessage {
             if (WorldHost.isFriend(friend)) {
                 final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
                 if (server != null) {
-                    client.enqueue(new WorldHostC2SMessage.QueryResponse(connectionId, server.getStatus()));
+                    client.enqueue(new WorldHostC2SMessage.NewQueryResponse(connectionId, server.getStatus()));
                 }
             }
         }
@@ -308,6 +309,15 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
+    record NewQueryResponse(UUID friend, ServerStatus metadata) implements WorldHostS2CMessage {
+        @Override
+        public void handle(ProtocolClient client) {
+            if (WorldHost.isFriend(friend)) {
+                WorldHost.ONLINE_FRIEND_PINGS.put(friend, metadata);
+            }
+        }
+    }
+
     /**
      * NOTE: This method is called from the RecvThread, so it should be careful to not do anything that could
      * <ol>
@@ -353,6 +363,19 @@ public sealed interface WorldHostS2CMessage {
             );
             case 14 -> new OutdatedWorldHost(readString(dis));
             case 15 -> new ConnectionNotFound(dis.readLong());
+            case 16 -> {
+                final UUID friend = readUuid(dis);
+                final FriendlyByteBuf buf = WorldHost.createByteBuf();
+                buf.writeBytes(dis.readAllBytes());
+                ServerStatus serverStatus;
+                try {
+                    serverStatus = WorldHost.parseServerStatus(buf);
+                } catch (Exception e) {
+                    WorldHost.LOGGER.error("Failed to parse server status", e);
+                    serverStatus = WorldHost.createEmptyServerStatus();
+                }
+                yield new NewQueryResponse(friend, serverStatus);
+            }
             default -> new Error("Received packet with unknown typeId from server (outdated client?): " + typeId);
         };
     }

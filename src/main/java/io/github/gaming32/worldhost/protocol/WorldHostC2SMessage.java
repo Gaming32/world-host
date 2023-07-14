@@ -82,6 +82,7 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
+    @Deprecated
     record QueryResponse(long connectionId, ServerStatus metadata) implements WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
@@ -117,6 +118,18 @@ public sealed interface WorldHostC2SMessage {
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(10);
             dos.writeLong(connectionId);
+        }
+    }
+
+    record NewQueryResponse(long connectionId, ServerStatus metadata) implements WorldHostC2SMessage {
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeByte(11);
+            dos.writeLong(connectionId);
+            final FriendlyByteBuf buf = WorldHost.createByteBuf();
+            new ClientboundStatusResponsePacket(metadata != null ? metadata : WorldHost.createEmptyServerStatus())
+                .write(buf);
+            buf.readBytes(dos, buf.readableBytes());
         }
     }
 
