@@ -13,6 +13,8 @@
   "world-host.config.useShortIp": "Use Short IP",
   "world-host.config.useShortIp.tooltip": "These IPs are made up of nine letters and numbers instead of three words. This makes them shorter, but harder to remember.",
   "world-host.config.showOutdatedWorldHost": "Version Check Popup",
+  "world-host.config.shareButton": "Share Button",
+  "world-host.config.shareButton.tooltip": "Show a \"Share World\" button next to the \"Play World\" button on the Singleplayer menu.\nThis also enables Shift+Double Clicking to share a world.",
   "world-host.friends": "Friends",
   "world-host.friends.add_silently": "Add Friend Silently",
   "world-host.friends.add_silently.tooltip": "This will add the person as a friend, without notifying them.\nNote that you must both friend each other in order to join each other's games.",
@@ -56,5 +58,8 @@
   "world-host.joining_world_host": "Joining World Host world...",
   "world-host.connection_not_found": "World not found",
   "world-host.connection_not_found.desc": "World Host world %s not found.",
+  "world-host.play_world": "Play World",
+  "world-host.share_world": "Share World",
+  "world-host.share_world.failed": "Failed to share world",
   "chat.square_brackets": "[%s]"
 }

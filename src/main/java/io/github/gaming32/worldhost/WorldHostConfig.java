@@ -26,6 +26,8 @@ public class WorldHostConfig {
 
     private boolean showOutdatedWorldHost = true;
 
+    private boolean shareButton = true;
+
     private final Set<UUID> friends = new LinkedHashSet<>();
 
     public void read(JsonReader reader) throws IOException {
@@ -69,6 +71,7 @@ public class WorldHostConfig {
                 case "noUPnP" -> noUPnP = reader.nextBoolean();
                 case "useShortIp" -> useShortIp = reader.nextBoolean();
                 case "showOutdatedWorldHost" -> showOutdatedWorldHost = reader.nextBoolean();
+                case "shareButton" -> shareButton = reader.nextBoolean();
                 case "friends" -> {
                     friends.clear();
                     reader.beginArray();
@@ -95,6 +98,7 @@ public class WorldHostConfig {
         writer.name("noUPnP").value(noUPnP);
         writer.name("useShortIp").value(useShortIp);
         writer.name("showOutdatedWorldHost").value(showOutdatedWorldHost);
+        writer.name("shareButton").value(shareButton);
 
         writer.name("friends").beginArray();
         for (final UUID friend : friends) {
@@ -159,6 +163,14 @@ public class WorldHostConfig {
 
     public void setShowOutdatedWorldHost(boolean showOutdatedWorldHost) {
         this.showOutdatedWorldHost = showOutdatedWorldHost;
+    }
+
+    public boolean isShareButton() {
+        return shareButton;
+    }
+
+    public void setShareButton(boolean shareButton) {
+        this.shareButton = shareButton;
     }
 
     public Set<UUID> getFriends() {

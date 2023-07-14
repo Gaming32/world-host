@@ -19,8 +19,10 @@
     "MixinMinecraft",
     "MixinMouseHandler",
     "MixinPauseScreen",
+    "MixinSelectWorldScreen",
     "MixinShareToLanScreen",
     "MixinTitleScreen",
+    "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor"
   ],

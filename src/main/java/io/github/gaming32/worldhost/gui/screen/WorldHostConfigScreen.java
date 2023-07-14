@@ -116,6 +116,16 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             }
         )).setToggled(WorldHost.CONFIG.isShowOutdatedWorldHost());
 
+        addRenderableWidget(new YesNoButton(
+            width / 2 - 155, yOffset + 96, 150, 20,
+            Components.translatable("world-host.config.shareButton"),
+            Components.translatable("world-host.config.shareButton.tooltip"),
+            button -> {
+                WorldHost.CONFIG.setShareButton(button.isToggled());
+                WorldHost.saveConfig();
+            }
+        )).setToggled(WorldHost.CONFIG.isShareButton());
+
         addRenderableWidget(
             button(WorldHostComponents.FRIENDS, button -> {
                 assert minecraft != null;

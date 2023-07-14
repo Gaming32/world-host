@@ -190,6 +190,9 @@ public class WorldHost
     private static int delayIndex = 0;
     private static Future<Void> connectingFuture;
 
+    public static boolean shareWorldOnLoadUi;
+    public static boolean shareWorldOnLoadReal;
+
     //#if FABRIC
     @Override
     public void onInitializeClient() {
