@@ -10,7 +10,9 @@ import java.util.Set;
 import java.util.UUID;
 
 public class WorldHostConfig {
-    private String serverIp = "world-host.jemnetworks.com";
+    public static final String DEFAULT_SERVER_IP = "world-host.jemnetworks.com";
+
+    private String serverIp = DEFAULT_SERVER_IP;
 
     private OnlineStatusLocation onlineStatusLocation = OnlineStatusLocation.RIGHT;
 

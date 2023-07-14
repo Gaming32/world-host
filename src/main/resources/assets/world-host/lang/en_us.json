@@ -7,7 +7,7 @@
   "world-host.config.onlineStatusLocation.off": "Off",
   "world-host.config.enableFriends": "Enable Friends",
   "world-host.config.enableFriends.tooltip": "Enable all friends-related GUIs and the entire friends system.\nIf you disable this and re-enable it, all your friends will still be there.",
-  "world-host.config.enableReconnectionToasts": "Enable Reconnection Toasts",
+  "world-host.config.enableReconnectionToasts": "Reconnection Toasts",
   "world-host.config.noUPnP": "Don't Try UPnP",
   "world-host.config.noUPnP.tooltip": "UPnP is a mechanism that can be used for direct connection. However, it sometimes has weird issues.\nEnable this setting if people are having trouble connecting to you through the friends list or tempip.",
   "world-host.config.useShortIp": "Use Short IP",

@@ -13,12 +13,22 @@ public class YesNoButton extends CustomCycleButton<Boolean, YesNoButton> {
     private static final Component YES = CommonComponents.GUI_YES.copy().withStyle(ChatFormatting.GREEN);
     private static final Component NO = CommonComponents.GUI_NO.copy().withStyle(ChatFormatting.RED);
 
-    public YesNoButton(int x, int y, int width, int height, Consumer<YesNoButton> onToggle) {
-        super(x, y, width, height, onToggle, VALUES);
+    public YesNoButton(
+        int x, int y,
+        int width, int height,
+        @Nullable Component title,
+        Consumer<YesNoButton> onToggle
+    ) {
+        super(x, y, width, height, title, onToggle, VALUES);
     }
 
-    public YesNoButton(int x, int y, int width, int height, @Nullable Component tooltip, Consumer<YesNoButton> onToggle) {
-        super(x, y, width, height, tooltip, onToggle, VALUES);
+    public YesNoButton(
+        int x, int y,
+        int width, int height,
+        @Nullable Component title, @Nullable Component tooltip,
+        Consumer<YesNoButton> onToggle
+    ) {
+        super(x, y, width, height, title, tooltip, onToggle, VALUES);
     }
 
     public boolean isToggled() {
@@ -31,7 +41,7 @@ public class YesNoButton extends CustomCycleButton<Boolean, YesNoButton> {
 
     @NotNull
     @Override
-    public Component getMessage() {
+    public Component getValueMessage() {
         return isToggled() ? YES : NO;
     }
 }

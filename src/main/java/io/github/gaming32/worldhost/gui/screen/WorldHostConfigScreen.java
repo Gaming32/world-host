@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.gui.screen;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.WorldHostConfig;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.widget.EnumButton;
 import io.github.gaming32.worldhost.gui.widget.YesNoButton;
@@ -22,12 +23,6 @@ import net.minecraft.client.gui.GuiGraphics;
 public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component TITLE = Components.translatable("world-host.config.title");
     private static final Component SERVER_IP = Components.translatable("world-host.config.serverIp");
-    private static final Component ONLINE_STATUS_LOCATION = Components.translatable("world-host.config.onlineStatusLocation");
-    private static final Component ENABLE_FRIENDS = Components.translatable("world-host.config.enableFriends");
-    private static final Component ENABLE_RECONNECTION_TOASTS = Components.translatable("world-host.config.enableReconnectionToasts");
-    private static final Component NO_UPNP = Components.translatable("world-host.config.noUPnP");
-    private static final Component USE_SHORT_IP = Components.translatable("world-host.config.useShortIp");
-    private static final Component SHOW_OUTDATED_WORLD_HOST = Components.translatable("world-host.config.showOutdatedWorldHost");
 
     private final Screen parent;
 
@@ -53,9 +48,18 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         ));
         serverIpBox.setValue(WorldHost.CONFIG.getServerIp());
 
+        final int serverAddressResetX = 145 - font.width(SERVER_IP);
+        addRenderableWidget(
+            button(Components.translatable("controls.reset"), b -> serverIpBox.setValue(WorldHostConfig.DEFAULT_SERVER_IP))
+                .pos(width / 2 - serverAddressResetX, yOffset)
+                .width(serverAddressResetX - 5)
+                .build()
+        );
+
         addRenderableWidget(new EnumButton<>(
-            width / 2 + 5, yOffset + 24, 150, 20,
+            width / 2 - 155, yOffset + 24, 150, 20,
             "world-host.config.onlineStatusLocation",
+            Components.translatable("world-host.config.onlineStatusLocation"),
             OnlineStatusLocation.class,
             button -> {
                 WorldHost.CONFIG.setOnlineStatusLocation(button.getValue());
@@ -64,7 +68,8 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         )).setValue(WorldHost.CONFIG.getOnlineStatusLocation());
 
         addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 48, 150, 20,
+            width / 2 + 5, yOffset + 24, 150, 20,
+            Components.translatable("world-host.config.enableFriends"),
             Components.translatable("world-host.config.enableFriends.tooltip"),
             button -> {
                 WorldHost.CONFIG.setEnableFriends(button.isToggled());
@@ -73,7 +78,8 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         )).setToggled(WorldHost.CONFIG.isEnableFriends());
 
         addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 72, 150, 20,
+            width / 2 - 155, yOffset + 48, 150, 20,
+            Components.translatable("world-host.config.enableReconnectionToasts"),
             button -> {
                 WorldHost.CONFIG.setEnableReconnectionToasts(button.isToggled());
                 WorldHost.saveConfig();
@@ -81,7 +87,8 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         )).setToggled(WorldHost.CONFIG.isEnableReconnectionToasts());
 
         addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 96, 150, 20,
+            width / 2 + 5, yOffset + 48, 150, 20,
+            Components.translatable("world-host.config.noUPnP"),
             Components.translatable("world-host.config.noUPnP.tooltip"),
             button -> {
                 WorldHost.CONFIG.setNoUPnP(button.isToggled());
@@ -91,7 +98,8 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         )).setToggled(WorldHost.CONFIG.isNoUPnP());
 
         addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 120, 150, 20,
+            width / 2 - 155, yOffset + 72, 150, 20,
+            Components.translatable("world-host.config.useShortIp"),
             Components.translatable("world-host.config.useShortIp.tooltip"),
             button -> {
                 WorldHost.CONFIG.setUseShortIp(button.isToggled());
@@ -100,7 +108,8 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         )).setToggled(WorldHost.CONFIG.isUseShortIp());
 
         addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 144, 150, 20,
+            width / 2 + 5, yOffset + 72, 150, 20,
+            Components.translatable("world-host.config.showOutdatedWorldHost"),
             button -> {
                 WorldHost.CONFIG.setShowOutdatedWorldHost(button.isToggled());
                 WorldHost.saveConfig();
@@ -146,13 +155,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
 
         final int yOffset = height / 6 + 10 - font.lineHeight / 2;
-        drawRightString(context, font, SERVER_IP, width / 2 - 5, yOffset, 0xffffff);
-        drawRightString(context, font, ONLINE_STATUS_LOCATION, width / 2 - 5, yOffset + 24, 0xffffff);
-        drawRightString(context, font, ENABLE_FRIENDS, width / 2 - 5, yOffset + 48, 0xffffff);
-        drawRightString(context, font, ENABLE_RECONNECTION_TOASTS, width / 2 - 5, yOffset + 72, 0xffffff);
-        drawRightString(context, font, NO_UPNP, width / 2 - 5, yOffset + 96, 0xffffff);
-        drawRightString(context, font, USE_SHORT_IP, width / 2 - 5, yOffset + 120, 0xffffff);
-        drawRightString(context, font, SHOW_OUTDATED_WORLD_HOST, width / 2 - 5, yOffset + 144, 0xffffff);
+        drawString(context, font, SERVER_IP, width / 2 - 150, yOffset, 0xffffff);
     }
 
     @Override
