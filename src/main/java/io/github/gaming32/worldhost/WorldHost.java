@@ -21,7 +21,10 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
@@ -632,6 +635,23 @@ public class WorldHost
         protoClient.setAttemptingToJoin(connectionId);
         minecraft.setScreen(new JoiningWorldHostScreen(parentScreen));
         protoClient.requestDirectJoin(connectionId);
+    }
+
+    public static void connect(Screen parentScreen, long cid, String host, int port) {
+        //#if MC > 1.16.5
+        final ServerAddress serverAddress = new ServerAddress(host, port);
+        ConnectScreen.startConnecting(
+            parentScreen, Minecraft.getInstance(), serverAddress,
+            //#if MC < 1.20.0
+            //$$ null
+            //#else
+            new ServerData(WorldHost.connectionIdToString(cid), serverAddress.toString(), false), false
+            //#endif
+        );
+        //#else
+        //$$ minecraft.setCurrentServer(null);
+        //$$ minecraft.setScreen(new ConnectScreen(parentScreen, minecraft, host, port));
+        //#endif
     }
 
     private static int ipCommand(CommandContext<CommandSourceStack> ctx) {

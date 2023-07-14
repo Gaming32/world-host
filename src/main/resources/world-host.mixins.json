@@ -12,6 +12,7 @@
   "client": [
     "MinecraftAccessor",
     "MixinConnectScreen",
+    "MixinConnectScreen_1",
     "MixinGameRenderer",
     "MixinIntegratedServer",
     "MixinJoinMultiplayerScreen",

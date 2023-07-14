@@ -34,11 +34,7 @@ public class MixinConnectScreen {
     //#else
     //$$ private void overrideConnect(String host, int port, CallbackInfo ci) {
     //#endif
-        if (WorldHost.protoClient == null) return;
-        if (WorldHost.protoClient.getAttemptingToJoin() != null) {
-            WorldHost.protoClient.setAttemptingToJoin(null);
-            return;
-        }
+        if (WorldHost.protoClient == null || WorldHost.protoClient.getAttemptingToJoin() != null) return;
 
         final String targetBaseAddr;
         final int targetBasePort;

@@ -12,10 +12,8 @@ import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -27,10 +25,6 @@ import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
-
-//#if MC > 1.16.5
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
-//#endif
 
 // Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostS2CMessage.kt
 public sealed interface WorldHostS2CMessage {
@@ -85,21 +79,7 @@ public sealed interface WorldHostS2CMessage {
                         ownerCid
                     ).start();
                 } else {
-                    // TODO: Try to connect with proxy if direct connection fails
-                    //#if MC > 1.16.5
-                    final ServerAddress serverAddress = new ServerAddress(host, port);
-                    ConnectScreen.startConnecting(
-                        parentScreen, minecraft, serverAddress,
-                        //#if MC < 1.20.0
-                        //$$ null
-                        //#else
-                        new ServerData(WorldHost.connectionIdToString(ownerCid), serverAddress.toString(), false), false
-                        //#endif
-                    );
-                    //#else
-                    //$$ minecraft.setCurrentServer(null);
-                    //$$ minecraft.setScreen(new ConnectScreen(parentScreen, minecraft, host, port));
-                    //#endif
+                    WorldHost.connect(parentScreen, ownerCid, host, port);
                 }
             });
         }

@@ -1,9 +1,12 @@
 package io.github.gaming32.worldhost.mixin;
 
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Overlay;
+import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -68,4 +71,11 @@ public abstract class MixinMinecraft {
     //$$     WHToast.render(new PoseStack(), i, j, pause ? pausePartialTick : timer.partialTick);
     //$$ }
     //#endif
+
+    @Inject(method = "setScreen", at = @At("HEAD"))
+    private void clearCurrentlyConnecting(Screen guiScreen, CallbackInfo ci) {
+        if (!(guiScreen instanceof ConnectScreen) && !(guiScreen instanceof JoiningWorldHostScreen) && WorldHost.protoClient != null) {
+            WorldHost.protoClient.setAttemptingToJoin(null);
+        }
+    }
 }
