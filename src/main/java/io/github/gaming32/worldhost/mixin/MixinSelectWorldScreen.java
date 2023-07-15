@@ -80,6 +80,11 @@ public class MixinSelectWorldScreen extends Screen {
         return WorldHost.CONFIG.isShareButton() ? 100 : constant;
     }
 
+    @ModifyConstant(method = "init", constant = @Constant(stringValue = "selectWorld.create"))
+    private String changeCreateButtonText(String constant) {
+        return WorldHost.CONFIG.isShareButton() ? "world-host.create_world" : constant;
+    }
+
     @Inject(method = "updateButtonStatus", at = @At("TAIL"))
     private void updateShareButtonStatus(
         boolean active,

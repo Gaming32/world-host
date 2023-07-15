@@ -61,5 +61,6 @@
   "world-host.play_world": "Play World",
   "world-host.share_world": "Share World",
   "world-host.share_world.failed": "Failed to share world",
+  "world-host.create_world": "Create World",
   "chat.square_brackets": "[%s]"
 }
