@@ -11,6 +11,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//#if MC <= 1.16.5
+//$$ import org.lwjgl.glfw.GLFW;
+//#endif
+
 @Mixin(WorldSelectionList.WorldListEntry.class)
 public class MixinWorldSelectionList_WorldListEntry {
     @Shadow @Final private Minecraft minecraft;
@@ -20,7 +24,14 @@ public class MixinWorldSelectionList_WorldListEntry {
         if (
             !WorldHost.CONFIG.isShareButton() ||
                 WorldHost.shareWorldOnLoadUi ||
-                !InputConstants.isKeyDown(minecraft.getWindow().getWindow(), InputConstants.KEY_LSHIFT)
+                !InputConstants.isKeyDown(
+                    minecraft.getWindow().getWindow(),
+                    //#if MC > 1.16.5
+                    InputConstants.KEY_LSHIFT
+                    //#else
+                    //$$ GLFW.GLFW_KEY_LEFT_SHIFT
+                    //#endif
+                )
         ) return;
         WorldHost.shareWorldOnLoadUi = true;
     }

@@ -9,8 +9,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.Services;
-import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.util.HttpUtil;
@@ -28,10 +26,69 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.net.Proxy;
 import java.util.UUID;
 
+//#if MC > 1.18.2
+import net.minecraft.server.Services;
+//#else
+//$$ import com.mojang.authlib.GameProfileRepository;
+//$$ import com.mojang.authlib.minecraft.MinecraftSessionService;
+//$$ import net.minecraft.Util;
+//$$ import net.minecraft.network.chat.ChatType;
+//$$ import net.minecraft.server.players.GameProfileCache;
+//#endif
+
+//#if MC < 1.18.2
+//$$ import net.minecraft.core.RegistryAccess;
+//$$ import net.minecraft.server.ServerResources;
+//$$ import net.minecraft.world.level.storage.WorldData;
+//#else
+import net.minecraft.server.WorldStem;
+//#endif
+
 @Mixin(IntegratedServer.class)
 public abstract class MixinIntegratedServer extends MinecraftServer {
-    public MixinIntegratedServer(Thread thread, LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, Proxy proxy, DataFixer dataFixer, Services services, ChunkProgressListenerFactory chunkProgressListenerFactory) {
+    public MixinIntegratedServer(
+        //#if MC > 1.18.2
+        Thread thread,
+        LevelStorageSource.LevelStorageAccess levelStorageAccess,
+        PackRepository packRepository,
+        WorldStem worldStem,
+        Proxy proxy,
+        DataFixer dataFixer,
+        Services services,
+        ChunkProgressListenerFactory chunkProgressListenerFactory
+        //#elseif MC > 1.17.1
+        //$$ Thread thread,
+        //$$ LevelStorageSource.LevelStorageAccess levelStorageAccess,
+        //$$ PackRepository packRepository,
+        //$$ WorldStem worldStem,
+        //$$ Proxy proxy,
+        //$$ DataFixer dataFixer,
+        //$$ MinecraftSessionService minecraftSessionService,
+        //$$ GameProfileRepository gameProfileRepository,
+        //$$ GameProfileCache gameProfileCache,
+        //$$ ChunkProgressListenerFactory chunkProgressListenerFactory
+        //#else
+        //$$ Thread thread,
+        //$$ RegistryAccess.RegistryHolder registryHolder,
+        //$$ LevelStorageSource.LevelStorageAccess levelStorageAccess,
+        //$$ WorldData worldData,
+        //$$ PackRepository packRepository,
+        //$$ Proxy proxy,
+        //$$ DataFixer dataFixer,
+        //$$ ServerResources serverResources,
+        //$$ MinecraftSessionService minecraftSessionService,
+        //$$ GameProfileRepository gameProfileRepository,
+        //$$ GameProfileCache gameProfileCache,
+        //$$ ChunkProgressListenerFactory chunkProgressListenerFactory
+        //#endif
+    ) {
+        //#if MC > 1.18.2
         super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, services, chunkProgressListenerFactory);
+        //#elseif MC > 1.17.1
+        //$$ super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
+        //#else
+        //$$ super(thread, registryHolder, levelStorageAccess, worldData, packRepository, proxy, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
+        //#endif
     }
 
     @Shadow @Final private Minecraft minecraft;
@@ -58,13 +115,17 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
     private void shareWorldOnLoad(UUID uuid, CallbackInfo ci) {
         if (!WorldHost.shareWorldOnLoadReal) return;
         WorldHost.shareWorldOnLoadReal = false;
+        final Component message;
         if (publishServer(worldData.getGameType(), worldData.getAllowCommands(), HttpUtil.getAvailablePort())) {
-            minecraft.getChatListener().handleSystemMessage(wh$getOpenedMessage(), false);
+            message = wh$getOpenedMessage();
         } else {
-            minecraft.getChatListener().handleSystemMessage(
-                Components.translatable("world-host.share_world.failed").withStyle(ChatFormatting.RED), false
-            );
+            message = Components.translatable("world-host.share_world.failed").withStyle(ChatFormatting.RED);
         }
+        //#if MC > 1.18.2
+        minecraft.getChatListener().handleSystemMessage(message, false);
+        //#else
+        //$$ minecraft.gui.handleChat(ChatType.SYSTEM, message, Util.NIL_UUID);
+        //#endif
     }
 
     @Unique

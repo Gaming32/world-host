@@ -42,7 +42,11 @@ public class MixinSelectWorldScreen extends Screen {
         method = "init",
         at = @At(
             value = "INVOKE",
+            //#if MC > 1.16.5
             target = "Lnet/minecraft/client/gui/screens/worldselection/SelectWorldScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;",
+            //#else
+            //$$ target = "Lnet/minecraft/client/gui/screens/worldselection/SelectWorldScreen;addButton(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;",
+            //#endif
             ordinal = 0,
             shift = At.Shift.AFTER
         )
@@ -52,7 +56,11 @@ public class MixinSelectWorldScreen extends Screen {
             wh$shareButton = null;
             return;
         }
+        //#if MC > 1.16.5
         wh$shareButton = addRenderableWidget(
+        //#else
+        //$$ wh$shareButton = addButton(
+        //#endif
             WorldHostScreen.button(Components.translatable("world-host.share_world"), b -> {
                 WorldHost.shareWorldOnLoadUi = true;
                 list.getSelectedOpt().ifPresent(WorldSelectionList.WorldListEntry::joinWorld);
@@ -73,9 +81,15 @@ public class MixinSelectWorldScreen extends Screen {
     }
 
     @Inject(method = "updateButtonStatus", at = @At("TAIL"))
-    private void updateShareButtonStatus(boolean bl, boolean bl2, CallbackInfo ci) {
+    private void updateShareButtonStatus(
+        boolean active,
+        //#if MC > 1.19.2
+        boolean bl2,
+        //#endif
+        CallbackInfo ci
+    ) {
         if (wh$shareButton != null) {
-            wh$shareButton.active = bl;
+            wh$shareButton.active = active;
         }
     }
 }
