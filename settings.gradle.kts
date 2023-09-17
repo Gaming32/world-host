@@ -39,6 +39,7 @@ listOf(
     include(":$version")
     project(":$version").apply {
         projectDir = file("versions/$version")
+        projectDir.mkdirs()
         buildFileName = "../../version.gradle.kts"
     }
 }
