@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "id": "$mod_id",
-  "name": "$mod_name",
-  "version": "$mod_version",
+  "id": "world-host",
+  "name": "World Host",
+  "version": "$version",
   "description": "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser.",
   "authors": [
     "Gaming32"
@@ -28,13 +28,23 @@
   ],
   "depends": {
     "fabricloader": "*",
-    "minecraft": "${mc_version == '1.19.4' ? '>=1.19.4 <1.20' : mc_version == '1.20.1' ? '>=1.20- <1.20.2' : mc_version}",
+    //#if MC == 1.19.4
+    //?? "minecraft": ">=1.19.4 <1.20",
+    //#elseif MC == 1.20.1
+    //?? "minecraft": ">=1.20- <1.20.2",
+    //#else
+    "minecraft": "$mc_version",
+    //#endif
     "fabric-resource-loader-v0": "*"
   },
   "breaks": {
-    ${mc_version == '1.19.4' ? '"modmenu": "<6.2.0"' : ''}
+    //#if MC == 1.19.4
+    "modmenu": "<6.2.0"
+    //#endif
   },
   "suggests": {
-    ${mc_version == '1.20.1' ? '"world-host-bedrock": ">=0.4.2"' : ''}
+    //#if MC == 1.20.1 && 0
+    "world-host-bedrock": ">=0.4.2"
+    //#endif
   }
 }

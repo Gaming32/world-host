@@ -1,10 +1,3 @@
-import groovy.lang.GroovyObjectSupport
-import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
-import xyz.wagyourtail.unimined.api.task.ExportMappingsTask
-import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
-import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
-import java.nio.file.Path
-
 plugins {
 //    `kotlin-dsl`
     id("xyz.deftu.gradle.preprocess-root") version "0.4.1"

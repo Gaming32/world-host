@@ -77,7 +77,7 @@ unimined.minecraft {
     } else {
         forge {
             loader(when(mcVersion) {
-                1_20_01 -> "47.1.0"
+                1_20_01 -> "47.1.3"
                 1_19_04 -> "45.1.0"
                 1_19_02 -> "43.2.0"
                 1_18_02 -> "40.2.0"
@@ -261,6 +261,7 @@ preprocess {
     ))
 
     patternAnnotation.set("io.github.gaming32.worldhost.versions.Pattern")
+    keywords.put(".json", keywords.get().getValue(".json").copy(eval = "//??"))
 }
 // TODO: fix
 //
@@ -307,9 +308,29 @@ tasks.processResources {
         })
     }
 
+    filesMatching("fabric.mod.json") {
+        filter {
+            if (it.trim().startsWith("//")) "" else it
+        }
+    }
+
+    filesMatching(listOf(
+        "mcmod.info",
+        "fabric.mod.json",
+        "quilt.mod.json",
+        "META-INF/mods.toml",
+        "mixins.*.json",
+        "*.mixins.json"
+    )) {
+        expand(mapOf(
+            "version" to project.version,
+            "mc_version" to mcVersionString,
+            "java_version" to "JAVA_${mcJavaVersion.majorVersion}"
+        ))
+    }
 
     doLast {
-        val resources = "$buildDir/resources/main"
+        val resources = "${layout.buildDirectory.get()}/resources/main"
         if (loaderName == "forge") {
             copy {
                 from(file("$resources/assets/world-host/icon.png"))
