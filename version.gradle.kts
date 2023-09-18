@@ -261,6 +261,7 @@ preprocess {
     ))
 
     patternAnnotation.set("io.github.gaming32.worldhost.versions.Pattern")
+    keywords.value(keywords.get())
     keywords.put(".json", keywords.get().getValue(".json").copy(eval = "//??"))
 }
 // TODO: fix
