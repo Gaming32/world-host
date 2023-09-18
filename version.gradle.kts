@@ -53,6 +53,7 @@ repositories {
 lateinit var minecraft: MinecraftConfig
 unimined.minecraft {
     version(mcVersionString)
+    side("client")
 
     mappings {
         intermediary()
