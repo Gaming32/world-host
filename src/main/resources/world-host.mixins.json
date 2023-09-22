@@ -6,8 +6,7 @@
   "mixins": [
     "MixinCommands",
     "MixinPublishCommand",
-    "ServerConnectionListenerAccessor",
-    "modmenu.MixinModMenuEventHandler"
+    "ServerConnectionListenerAccessor"
   ],
   "client": [
     "MinecraftAccessor",
@@ -25,6 +24,9 @@
     "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor"
+    //#if FABRIC && MC > 1.16.1
+    , "modmenu.MixinModMenuEventHandler"
+    //#endif
   ],
   "injectors": {
     "defaultRequire": 1
