@@ -1,10 +1,9 @@
+//#if FABRIC && MC > 1.16.1
 package io.github.gaming32.worldhost.mixin.modmenu;
 
-import org.spongepowered.asm.mixin.Mixin;
-
-//#if FABRIC && MC > 1.16.1
 import com.terraformersmc.modmenu.event.ModMenuEventHandler;
 import io.github.gaming32.worldhost.gui.widget.OnlineStatusButton;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,11 +32,4 @@ public class MixinModMenuEventHandler {
     //$$ }
     //#endif
 }
-//#else
-//$$ // Fallback so that there is *some* mixin class to load
-//$$ import net.minecraft.client.Minecraft;
-//$$
-//$$ @Mixin(Minecraft.class)
-//$$ public class MixinModMenuEventHandler {
-//$$ }
 //#endif

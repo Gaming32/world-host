@@ -4,22 +4,22 @@ issueTrackerURL = "https://github.com/Gaming32/world-host/issues"
 license = "MIT"
 
 [[mods]]
-modId = "${mod_id.replace('-', '_')}"
-version = "$mod_version"
-displayName = "$mod_name"
+modId = "world_host"
+version = "$version"
+displayName = "World Host"
 displayURL = "https://modrinth.com/mod/world-host"
 logoFile = "icon.png"
 authors = "Gaming32"
 description = "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser."
 
-[[dependencies.$mod_id]]
+[[dependencies.world_host]]
 modId = "forge"
 mandatory = true
 versionRange = "[32,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.$mod_id]]
+[[dependencies.world_host]]
 modId = "minecraft"
 mandatory = true
 versionRange = "$mc_version"

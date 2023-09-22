@@ -1,5 +1,11 @@
 plugins {
-    id("xyz.deftu.gradle.multiversion-root")
+//    `kotlin-dsl`
+    id("xyz.deftu.gradle.preprocess-root") version "0.4.1"
+    id("xyz.wagyourtail.unimined") version "1.0.6-SNAPSHOT" apply false
+}
+
+repositories {
+    mavenCentral()
 }
 
 preprocess {
@@ -28,4 +34,16 @@ preprocess {
     fabric11701.link(fabric11605)
     fabric11605.link(forge11605)
     fabric11605.link(fabric11601)
+
+//    subprojects {
+//        apply(plugin = "java")
+//        if (name == "1.20.1-fabric") {
+//            sourceSets.main {
+//                java {
+//                    srcDir("$rootDir/src/main/java")
+//                }
+//            }
+//        }
+//    }
 }
+
