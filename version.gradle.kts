@@ -43,7 +43,7 @@ val mcVersion by extra(mcVersionString.split(".").map { it.toInt() }
         it[0] * 1_00_00 + it[1] * 1_00 + (if (it.size == 2 || it[2] == 0) 0 else it[2])
     })
 
-println("MC_VERSION: " + mcVersionString + " " + mcVersion)
+println("MC_VERSION: $mcVersionString $mcVersion")
 version = "${vers}+${mcVersionString}-${loaderName}"
 
 repositories {
@@ -68,6 +68,15 @@ unimined.minecraft {
             else -> null
         }?.let {
             parchment(it.substringBefore(":"), it.substringAfter(":"))
+        }
+
+        stub.withMappings("searge", listOf("mojmap")) {
+            if (mcVersion <= 1_19_00) {
+                c("net/minecraft/client/gui/chat/NarratorChatListener", "net/minecraft/client/GameNarrator")
+            }
+            if (mcVersion < 1_17_00) {
+                c("net/minecraft/client/multiplayer/ServerAddress", "net/minecraft/client/multiplayer/resolver/ServerAddress")
+            }
         }
     }
 
@@ -163,10 +172,6 @@ println("mcVersion: $mcVersion")
 
 val shade by configurations.creating
 
-val bundle: Configuration by configurations.creating {
-    configurations.getByName(if (loaderName == "fabric") "include" else "shade").extendsFrom(this)
-}
-
 val modCompileOnly: Configuration by configurations.creating {
     configurations.getByName("compileOnly").extendsFrom(this)
 }
@@ -181,11 +186,18 @@ minecraft.apply {
 }
 
 dependencies {
+    fun bundle(dependency: Any) {
+        if (loaderName == "fabric") {
+            "include"(dependency)
+        } else {
+            "shade"(dependency)
+        }
+    }
+
     fun bundleImplementation(dependency: Any) {
         implementation(dependency)
         bundle(dependency)
     }
-
 
     bundleImplementation("org.quiltmc.qup:json:0.2.0")
 
@@ -288,7 +300,7 @@ preprocess {
 //}
 
 tasks.shadowJar {
-    configurations = listOf(bundle)
+    configurations = listOf(shade)
 }
 
 tasks.processResources {
@@ -329,6 +341,12 @@ tasks.processResources {
             "mc_version" to mcVersionString,
             "java_version" to "JAVA_${mcJavaVersion.majorVersion}"
         ))
+    }
+
+    if (loaderName == "fabric") {
+        exclude("pack.mcmeta", "META-INF/mods.toml")
+    } else {
+        exclude("fabric.mod.json")
     }
 
     doLast {

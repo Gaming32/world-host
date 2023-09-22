@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(ShareToLanScreen.class)
 public class MixinShareToLanScreen {
-    @ModifyConstant(method = "<init>", constant = @Constant(stringValue = "lanServer.title"))
+    @ModifyConstant(method = "<init>*", constant = @Constant(stringValue = "lanServer.title"))
     private static String changeLabelI1(String constant) {
         return WorldHost.CONFIG.isEnableFriends() ? "world-host.open_world" : "world-host.open_world_no_friends";
     }
 
-    @ModifyConstant(method = "init", constant = @Constant(stringValue = "lanServer.start"))
+    @ModifyConstant(method = "init*", constant = @Constant(stringValue = "lanServer.start"))
     private String changeLabelI2(String constant) {
         return WorldHost.CONFIG.isEnableFriends() ? "world-host.open_world" : "world-host.open_world_no_friends";
     }

@@ -28,18 +28,18 @@ public class MixinSelectWorldScreen extends Screen {
         super(component);
     }
 
-    @ModifyConstant(method = "init", constant = @Constant(stringValue = "selectWorld.select"))
+    @ModifyConstant(method = "init*", constant = @Constant(stringValue = "selectWorld.select"))
     private String changePlayButtonText(String constant) {
         return WorldHost.CONFIG.isShareButton() ? "world-host.play_world" : constant;
     }
 
-    @ModifyConstant(method = "init", constant = @Constant(intValue = 150, ordinal = 0))
+    @ModifyConstant(method = "init*", constant = @Constant(intValue = 150, ordinal = 0))
     private int shrinkPlayButton(int constant) {
         return WorldHost.CONFIG.isShareButton() ? 100 : constant;
     }
 
     @Inject(
-        method = "init",
+        method = "init*",
         at = @At(
             value = "INVOKE",
             //#if MC > 1.16.5
@@ -70,17 +70,17 @@ public class MixinSelectWorldScreen extends Screen {
         );
     }
 
-    @ModifyConstant(method = "init", constant = @Constant(intValue = 4, ordinal = 0))
+    @ModifyConstant(method = "init*", constant = @Constant(intValue = 4, ordinal = 0))
     private int moveCreateButton(int constant) {
         return WorldHost.CONFIG.isShareButton() ? 54 : constant;
     }
 
-    @ModifyConstant(method = "init", constant = @Constant(intValue = 150, ordinal = 1))
+    @ModifyConstant(method = "init*", constant = @Constant(intValue = 150, ordinal = 1))
     private int shrinkCreateButton(int constant) {
         return WorldHost.CONFIG.isShareButton() ? 100 : constant;
     }
 
-    @ModifyConstant(method = "init", constant = @Constant(stringValue = "selectWorld.create"))
+    @ModifyConstant(method = "init*", constant = @Constant(stringValue = "selectWorld.create"))
     private String changeCreateButtonText(String constant) {
         return WorldHost.CONFIG.isShareButton() ? "world-host.create_world" : constant;
     }

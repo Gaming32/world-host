@@ -33,11 +33,4 @@ public class MixinModMenuEventHandler {
     //$$ }
     //#endif
 }
-//#else
-//$$ // Fallback so that there is *some* mixin class to load
-//$$ import net.minecraft.client.Minecraft;
-//$$
-//$$ @Mixin(Minecraft.class)
-//$$ public class MixinModMenuEventHandler {
-//$$ }
 //#endif
