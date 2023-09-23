@@ -1,10 +1,13 @@
 package io.github.gaming32.worldhost.gui.widget;
 
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 import io.github.gaming32.worldhost.mixin.PlainTextButtonAccessor;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
@@ -46,8 +49,13 @@ public class OnlineStatusButton extends PlainTextButton {
 
     public OnlineStatusButton(int alignedX, int y, int height, boolean rightAlign, Font font) {
         super(alignedX, y, 0, height, generateStatusComponent(), b -> {
-            if (getStatus() != 1) {
-                WorldHost.reconnect(true, true);
+            if (Screen.hasShiftDown()) {
+                if (getStatus() != 1) {
+                    WorldHost.reconnect(true, true);
+                }
+            } else {
+                final Minecraft minecraft = Minecraft.getInstance();
+                minecraft.setScreen(new WorldHostConfigScreen(minecraft.screen));
             }
         }, font);
         this.alignedX = alignedX;

@@ -53,7 +53,7 @@ public class MixinGameRenderer {
             //#else
             new GuiGraphics(minecraft, renderBuffers.bufferSource()),
             //#endif
-            mouseX, mouseY, partialTicks
+            mouseX, mouseY, minecraft.getFrameTime()
         );
     }
     //#endif
