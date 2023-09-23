@@ -186,7 +186,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         int mouseX, int mouseY, float delta
     ) {
         tooltip = null;
-        //#if MC < 1.20.1
+        //#if MC < 1.20.2
         //$$ renderBackground(context);
         //#else
         renderBackground(context, mouseX, mouseY, delta);
