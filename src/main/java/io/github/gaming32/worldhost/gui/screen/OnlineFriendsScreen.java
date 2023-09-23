@@ -187,9 +187,9 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     ) {
         tooltip = null;
         //#if MC < 1.20.1
-        renderBackground(context);
+        //$$ renderBackground(context);
         //#else
-        //$$ renderBackground(context, mouseX, mouseY, delta);
+        renderBackground(context, mouseX, mouseY, delta);
         //#endif
         list.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
@@ -283,9 +283,9 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         private final ServerData serverInfo = new ServerData(
             "", "",
             //#if MC < 1.20.2
-            false
+            //$$ false
             //#else
-            //$$ ServerData.Type.OTHER
+            ServerData.Type.OTHER
             //#endif
         );
         private final long connectionId;

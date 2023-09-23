@@ -146,9 +146,9 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         int mouseX, int mouseY, float delta
     ) {
         //#if MC < 1.20.2
-        renderBackground(context);
+        //$$ renderBackground(context);
         //#else
-        //$$ renderBackground(context, mouseX, mouseY, delta);
+        renderBackground(context, mouseX, mouseY, delta);
         //#endif
         super.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
@@ -172,10 +172,10 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     }
 
     //#if MC < 1.20.2
-    @Override
-    public void tick() {
-        serverIpBox.tick();
-    }
+    //$$ @Override
+    //$$ public void tick() {
+    //$$     serverIpBox.tick();
+    //$$ }
     //#endif
 
     private interface ConfigOption {

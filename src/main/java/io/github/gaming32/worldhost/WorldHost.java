@@ -73,7 +73,7 @@ import net.minecraft.server.Services;
 //#endif
 
 //#if MC >= 1.20.2
-//$$ import com.mojang.authlib.yggdrasil.ProfileResult;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 //#endif
 
 //#if FABRIC
@@ -433,6 +433,7 @@ public class WorldHost
             proxyProtocolClient = null;
         }
         final UUID uuid = Minecraft.getInstance().getUser().getProfileId();
+        //noinspection ConstantValue
         if (uuid == null) {
             LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
             if (failureToast) {
@@ -462,9 +463,9 @@ public class WorldHost
     public static ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
         final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
         //#if MC >= 1.20.2
-        //$$ return skinManager.getInsecureSkin(gameProfile).texture();
+        return skinManager.getInsecureSkin(gameProfile).texture();
         //#elseif MC >= 1.19.2
-        return skinManager.getInsecureSkinLocation(gameProfile);
+        //$$ return skinManager.getInsecureSkinLocation(gameProfile);
         //#else
         //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
         //$$     .get(MinecraftProfileTexture.Type.SKIN);
@@ -476,9 +477,9 @@ public class WorldHost
 
     public static void getMaybeAsync(GameProfileCache cache, String name, Consumer<Optional<GameProfile>> action) {
         //#if MC >= 1.20.2
-        //$$ cache.getAsync(name).thenAccept(action);
+        cache.getAsync(name).thenAccept(action);
         //#elseif MC > 1.16.5
-        cache.getAsync(name, action);
+        //$$ cache.getAsync(name, action);
         //#else
         //$$ action.accept(Optional.ofNullable(cache.get(name)));
         //#endif
@@ -486,13 +487,13 @@ public class WorldHost
 
     public static GameProfile fetchProfile(MinecraftSessionService sessionService, UUID uuid, GameProfile fallback) {
         //#if MC < 1.20.2
-        return sessionService.fillProfileProperties(fallback != null ? fallback : new GameProfile(uuid, null), false);
+        //$$ return sessionService.fillProfileProperties(fallback != null ? fallback : new GameProfile(uuid, null), false);
         //#else
-        //$$ final ProfileResult result = sessionService.fetchProfile(uuid, false);
-        //$$ if (result == null) {
-        //$$     return fallback != null ? fallback : new GameProfile(uuid, null);
-        //$$ }
-        //$$ return result.profile();
+        final ProfileResult result = sessionService.fetchProfile(uuid, false);
+        if (result == null) {
+            return fallback != null ? fallback : new GameProfile(uuid, null);
+        }
+        return result.profile();
         //#endif
     }
 
@@ -677,9 +678,9 @@ public class WorldHost
             new ServerData(
                 WorldHost.connectionIdToString(cid), serverAddress.toString(),
                 //#if MC < 1.20.2
-                false
+                //$$ false
                 //#else
-                //$$ ServerData.Type.OTHER
+                ServerData.Type.OTHER
                 //#endif
             ), false
             //#endif

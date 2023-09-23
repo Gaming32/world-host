@@ -47,9 +47,9 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
         int mouseX, int mouseY, float delta
     ) {
         //#if MC < 1.20.2
-        renderBackground(context);
+        //$$ renderBackground(context);
         //#else
-        //$$ renderBackground(context, mouseX, mouseY, delta);
+        renderBackground(context, mouseX, mouseY, delta);
         //#endif
         drawCenteredString(context, font, status, width / 2, height / 2 - 50, 0xffffff);
         super.render(context, mouseX, mouseY, delta);
