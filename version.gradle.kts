@@ -53,7 +53,9 @@ repositories {
 lateinit var minecraft: MinecraftConfig
 unimined.minecraft {
     version(mcVersionString)
-    side("client")
+    if (mcVersion != 1_20_01 || loaderName != "forge") {
+        side("client")
+    }
 
     mappings {
         intermediary()
@@ -200,6 +202,9 @@ dependencies {
     }
 
     bundleImplementation("org.quiltmc.qup:json:0.2.0")
+    if (loaderName == "forge") {
+        "minecraftLibraries"("org.quiltmc.qup:json:0.2.0")
+    }
 
     //TODO: bump to unimined 1.1.0+ to use these, also enable the processor in unimined's mixin config settings
 //    includeImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-${mcData.loader.name}:0.2.0-beta.6")h
