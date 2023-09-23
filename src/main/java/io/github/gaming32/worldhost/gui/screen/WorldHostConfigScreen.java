@@ -143,10 +143,14 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         //#else
         GuiGraphics context,
         //#endif
-        int mouseX, int mouseY, float partialTick
+        int mouseX, int mouseY, float delta
     ) {
+        //#if MC < 1.20.2
         renderBackground(context);
-        super.render(context, mouseX, mouseY, partialTick);
+        //#else
+        //$$ renderBackground(context, mouseX, mouseY, delta);
+        //#endif
+        super.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
 
         final int yOffset = height / 6 + 10 - font.lineHeight / 2;
@@ -167,10 +171,12 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         }
     }
 
+    //#if MC < 1.20.2
     @Override
     public void tick() {
         serverIpBox.tick();
     }
+    //#endif
 
     private interface ConfigOption {
         Button createButton(int x, int y, int width, int height);

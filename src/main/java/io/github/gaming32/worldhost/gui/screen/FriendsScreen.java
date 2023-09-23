@@ -140,7 +140,11 @@ public class FriendsScreen extends WorldHostScreen {
         //#endif
         int mouseX, int mouseY, float delta
     ) {
+        //#if MC < 1.20.2
         renderBackground(context);
+        //#else
+        //$$ renderBackground(context, mouseX, mouseY, delta);
+        //#endif
         list.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
         if (WorldHost.BEDROCK_SUPPORT) {
@@ -199,7 +203,7 @@ public class FriendsScreen extends WorldHostScreen {
             minecraft = Minecraft.getInstance();
             this.profile = profile;
             Util.backgroundExecutor().execute(
-                () -> this.profile = minecraft.getMinecraftSessionService().fillProfileProperties(profile, false)
+                () -> this.profile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), profile)
             );
         }
 

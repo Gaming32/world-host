@@ -44,11 +44,15 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
         //#else
         GuiGraphics context,
         //#endif
-        int mouseX, int mouseY, float partialTick
+        int mouseX, int mouseY, float delta
     ) {
+        //#if MC < 1.20.2
         renderBackground(context);
+        //#else
+        //$$ renderBackground(context, mouseX, mouseY, delta);
+        //#endif
         drawCenteredString(context, font, status, width / 2, height / 2 - 50, 0xffffff);
-        super.render(context, mouseX, mouseY, partialTick);
+        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.github.gaming32.worldhost;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -69,6 +70,10 @@ import net.minecraft.server.Services;
 //$$ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 //$$ import net.minecraft.client.resources.DefaultPlayerSkin;
 //$$ import net.minecraft.world.entity.player.Player;
+//#endif
+
+//#if MC >= 1.20.2
+//$$ import com.mojang.authlib.yggdrasil.ProfileResult;
 //#endif
 
 //#if FABRIC
@@ -427,7 +432,7 @@ public class WorldHost
             proxyProtocolClient.close();
             proxyProtocolClient = null;
         }
-        final UUID uuid = Minecraft.getInstance().getUser().getGameProfile().getId();
+        final UUID uuid = Minecraft.getInstance().getUser().getProfileId();
         if (uuid == null) {
             LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
             if (failureToast) {
@@ -456,7 +461,9 @@ public class WorldHost
 
     public static ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
         final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
-        //#if MC >= 1.19.2
+        //#if MC >= 1.20.2
+        //$$ return skinManager.getInsecureSkin(gameProfile).texture();
+        //#elseif MC >= 1.19.2
         return skinManager.getInsecureSkinLocation(gameProfile);
         //#else
         //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
@@ -468,11 +475,33 @@ public class WorldHost
     }
 
     public static void getMaybeAsync(GameProfileCache cache, String name, Consumer<Optional<GameProfile>> action) {
-        //#if MC > 1.16.5
+        //#if MC >= 1.20.2
+        //$$ cache.getAsync(name).thenAccept(action);
+        //#elseif MC > 1.16.5
         cache.getAsync(name, action);
         //#else
         //$$ action.accept(Optional.ofNullable(cache.get(name)));
         //#endif
+    }
+
+    public static GameProfile fetchProfile(MinecraftSessionService sessionService, UUID uuid, GameProfile fallback) {
+        //#if MC < 1.20.2
+        return sessionService.fillProfileProperties(fallback != null ? fallback : new GameProfile(uuid, null), false);
+        //#else
+        //$$ final ProfileResult result = sessionService.fetchProfile(uuid, false);
+        //$$ if (result == null) {
+        //$$     return fallback != null ? fallback : new GameProfile(uuid, null);
+        //$$ }
+        //$$ return result.profile();
+        //#endif
+    }
+
+    public static GameProfile fetchProfile(MinecraftSessionService sessionService, UUID uuid) {
+        return fetchProfile(sessionService, uuid, null);
+    }
+
+    public static GameProfile fetchProfile(MinecraftSessionService sessionService, GameProfile profile) {
+        return fetchProfile(sessionService, profile.getId(), profile);
     }
 
     public static void texture(ResourceLocation texture) {
@@ -487,13 +516,11 @@ public class WorldHost
     //$$ @SuppressWarnings("deprecation")
     //#endif
     public static void color(float r, float g, float b, float a) {
-        RenderSystem.
-            //#if MC > 1.16.5
-            setShaderColor
-            //#else
-            //$$ color4f
-            //#endif
-                (r, g, b, a);
+        //#if MC > 1.16.5
+        RenderSystem.setShaderColor(r, g, b, a);
+        //#else
+        //$$ RenderSystem.color4f(r, g, b, a);
+        //#endif
     }
 
     public static boolean isFriend(UUID user) {
@@ -502,9 +529,7 @@ public class WorldHost
 
     public static void showFriendOrOnlineToast(UUID user, String title, String description, int ticks, Runnable clickAction) {
         Util.backgroundExecutor().execute(() -> {
-            final GameProfile profile = Minecraft.getInstance()
-                .getMinecraftSessionService()
-                .fillProfileProperties(new GameProfile(user, null), false);
+            final GameProfile profile = fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), user);
             Minecraft.getInstance().execute(() -> {
                 final ResourceLocation skinTexture = getInsecureSkinLocation(profile);
                 WHToast.builder(Components.translatable(title, getName(profile)))
@@ -649,7 +674,14 @@ public class WorldHost
             //#if MC < 1.20.0
             //$$ null
             //#else
-            new ServerData(WorldHost.connectionIdToString(cid), serverAddress.toString(), false), false
+            new ServerData(
+                WorldHost.connectionIdToString(cid), serverAddress.toString(),
+                //#if MC < 1.20.2
+                false
+                //#else
+                //$$ ServerData.Type.OTHER
+                //#endif
+            ), false
             //#endif
         );
         //#else

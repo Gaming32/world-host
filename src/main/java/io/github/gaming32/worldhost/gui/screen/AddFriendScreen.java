@@ -47,8 +47,7 @@ public class AddFriendScreen extends WorldHostScreen {
         this.parent = parent;
         this.addAction = addAction;
         if (prefilledUser != null) {
-            friendProfile = Minecraft.getInstance().getMinecraftSessionService()
-                .fillProfileProperties(new GameProfile(prefilledUser, null), false);
+            friendProfile = WorldHost.fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), prefilledUser);
         }
     }
 
@@ -129,7 +128,9 @@ public class AddFriendScreen extends WorldHostScreen {
 
     @Override
     public void tick() {
+        //#if MC < 1.20.2
         usernameField.tick();
+        //#endif
         if (Util.getMillis() - 300 > lastTyping && usernameUpdate) {
             usernameUpdate = false;
             final String username = usernameField.getValue();
@@ -137,7 +138,7 @@ public class AddFriendScreen extends WorldHostScreen {
                 WorldHost.getMaybeAsync(WorldHost.getProfileCache(), username, p -> {
                     if (p.isPresent()) {
                         assert minecraft != null;
-                        friendProfile = minecraft.getMinecraftSessionService().fillProfileProperties(p.get(), false);
+                        friendProfile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), p.get());
                         addFriendButton.active = true;
                     } else {
                         friendProfile = null;
@@ -164,7 +165,11 @@ public class AddFriendScreen extends WorldHostScreen {
         //#endif
         int mouseX, int mouseY, float delta
     ) {
+        //#if MC < 1.20.2
         renderBackground(context);
+        //#else
+        //$$ renderBackground(context, mouseX, mouseY, delta);
+        //#endif
         drawCenteredString(context, font, title, width / 2, 20, 0xffffff);
         drawString(context, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, 0xa0a0a0);
         usernameField.render(context, mouseX, mouseY, delta);

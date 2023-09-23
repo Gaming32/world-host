@@ -62,7 +62,9 @@ unimined.minecraft {
         searge()
         mojmap()
         when {
-            mcVersion >= 1_19_03 -> "1.19.3:2023.03.12"
+            mcVersion >= 1_20_01 -> "1.20.1:2023.09.03"
+            mcVersion >= 1_19_04 -> "1.19.4:2023.06.26"
+            mcVersion >= 1_19_03 -> "1.19.3:2023.06.25"
             mcVersion >= 1_19_00 -> "1.19.2:2022.11.27"
             mcVersion >= 1_18_00 -> "1.18.2:2022.11.06"
             mcVersion >= 1_17_00 -> "1.17.1:2021.12.12"
@@ -214,6 +216,7 @@ dependencies {
 
     if (loaderName == "fabric") {
         when (mcVersion) {
+            1_20_02 -> "8.0.0-beta.2" // TODO: Update out of beta
             1_20_01 -> "7.0.1"
             1_19_04 -> "6.2.3"
             1_19_02 -> "4.2.0-beta.2"
@@ -233,9 +236,10 @@ dependencies {
 
     if (loaderName == "fabric") {
         when (mcVersion) {
-            1_20_01 -> "0.83.0+1.20.1"
-            1_19_04 -> "0.80.0+1.19.4"
-            1_19_02 -> "0.76.0+1.19.2"
+            1_20_02 -> "0.89.2+1.20.2"
+            1_20_01 -> "0.89.0+1.20.1"
+            1_19_04 -> "0.87.0+1.19.4"
+            1_19_02 -> "0.76.1+1.19.2"
             1_18_02 -> "0.76.0+1.18.2"
             1_17_01 -> "0.46.1+1.17"
             1_16_05, 1_16_01 -> "0.42.0+1.16"
@@ -253,6 +257,8 @@ dependencies {
 
     if (loaderName == "fabric") {
         when {
+            mcVersion >= 1_20_02 -> "2.9.0"
+            mcVersion >= 1_20_01 -> "2.8.5" // TODO: Bump to 2.8.7
             mcVersion >= 1_20_00 -> "2.7.6"
             mcVersion >= 1_19_04 -> "2.7.5"
             else -> null
@@ -311,6 +317,7 @@ tasks.shadowJar {
 tasks.processResources {
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
+            mcVersion >= 1_20_02 -> 18
             mcVersion >= 1_20_00 -> 15
             mcVersion >= 1_19_04 -> 13
             mcVersion >= 1_19_03 -> 12

@@ -6,7 +6,6 @@ import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
-import io.github.gaming32.worldhost.protocol.punch.PunchClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
@@ -71,13 +70,7 @@ public sealed interface WorldHostS2CMessage {
                     parentScreen = joinScreen.parent;
                 }
                 if (isPunchProtocol) {
-                    new PunchClient(
-                        client.getOriginalHost(),
-                        client.getPunchPort(),
-                        false,
-                        client.getConnectionId(),
-                        ownerCid
-                    ).start();
+                    WorldHost.LOGGER.error("Punch is not supported!");
                 } else {
                     WorldHost.connect(parentScreen, ownerCid, host, port);
                 }

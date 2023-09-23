@@ -38,9 +38,13 @@ import net.minecraft.client.gui.GuiGraphics;
 
 //#if MC >= 1.19.4 && FABRIC
 import de.florianmichael.viafabricplus.base.settings.groups.GeneralSettings;
-import de.florianmichael.viafabricplus.screen.impl.base.ProtocolSelectionScreen;
 import io.github.gaming32.worldhost.versions.ButtonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
+//#if MC >= 1.20.1
+import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
+//#else
+//$$ import de.florianmichael.viafabricplus.screen.impl.base.ProtocolSelectionScreen;
+//#endif
 //#endif
 
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
@@ -129,7 +133,11 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             b -> ProtocolSelectionScreen.INSTANCE.open(this)
         );
 
-        switch (GeneralSettings.INSTANCE.mainButtonOrientation.getIndex()) {
+        //#if MC >= 1.20.1
+        switch (GeneralSettings.INSTANCE.multiplayerScreenButtonOrientation.getIndex()) {
+        //#else
+        //$$ switch (GeneralSettings.INSTANCE.mainButtonOrientation.getIndex()) {
+        //#endif
             case 0 -> builder.pos(5, 5);
             case 1 -> builder.pos(width - 98 - 5, 5);
             case 2 -> builder.pos(5, height - 20 - 5);
@@ -178,7 +186,11 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         int mouseX, int mouseY, float delta
     ) {
         tooltip = null;
+        //#if MC < 1.20.1
         renderBackground(context);
+        //#else
+        //$$ renderBackground(context, mouseX, mouseY, delta);
+        //#endif
         list.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
         super.render(context, mouseX, mouseY, delta);
@@ -268,7 +280,14 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
     public class OnlineFriendsListEntry extends ObjectSelectionList.Entry<OnlineFriendsListEntry> {
         private final Minecraft minecraft;
-        private final ServerData serverInfo = new ServerData("", "", false);
+        private final ServerData serverInfo = new ServerData(
+            "", "",
+            //#if MC < 1.20.2
+            false
+            //#else
+            //$$ ServerData.Type.OTHER
+            //#endif
+        );
         private final long connectionId;
         private GameProfile profile;
 
@@ -288,7 +307,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             this.connectionId = connectionId;
             profile = new GameProfile(friendUuid, null);
             Util.backgroundExecutor().execute(
-                () -> profile = minecraft.getMinecraftSessionService().fillProfileProperties(profile, false)
+                () -> profile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), profile)
             );
             iconTextureId = new ResourceLocation(WorldHost.MOD_ID, "servers/" + friendUuid + "/icon");
         }

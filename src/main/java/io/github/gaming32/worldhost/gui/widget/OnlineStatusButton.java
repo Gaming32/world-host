@@ -68,9 +68,9 @@ public class OnlineStatusButton extends PlainTextButton {
     private void updateX() {
         //#if MC >= 1.19.4
         setX(
-            //#else
-            //$$ x = (
-            //#endif
+        //#else
+        //$$ x = (
+        //#endif
             rightAlign ? alignedX - getWidth() : alignedX
         );
     }

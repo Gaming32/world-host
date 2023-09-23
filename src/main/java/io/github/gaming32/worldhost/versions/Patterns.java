@@ -1,11 +1,13 @@
 package io.github.gaming32.worldhost.versions;
 
+import net.minecraft.client.User;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 //#if MC >= 1.16.5
 import net.minecraft.util.FormattedCharSequence;
@@ -44,6 +46,15 @@ public class Patterns {
         return font.split(text, width);
         //#else
         //$$ return font.getSplitter().splitLines(text, width, net.minecraft.network.chat.Style.EMPTY);
+        //#endif
+    }
+
+    @Pattern
+    public static UUID getProfileId(User user) {
+        //#if MC >= 1.19.2
+        return user.getProfileId();
+        //#else
+        //$$ return user.getGameProfile().getId();
         //#endif
     }
 }
