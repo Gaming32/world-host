@@ -23,6 +23,7 @@ import net.minecraft.client.gui.GuiGraphics;
 public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component TITLE = Components.translatable("world-host.config.title");
     private static final Component SERVER_IP = Components.translatable("world-host.config.serverIp");
+    private static final Component UPNP = Components.literal("UPnP");
 
     private final Screen parent;
 
@@ -166,6 +167,8 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
         final int yOffset = height / 6 + 10 - font.lineHeight / 2;
         drawString(context, font, SERVER_IP, width / 2 - 150, yOffset, 0xffffff);
+
+        drawRightString(context, font, UPNP, width - 7, height - 15, WorldHost.upnpGateway != null ? 0x55ff55 : 0xff5555);
     }
 
     @Override
