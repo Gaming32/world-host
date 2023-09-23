@@ -3,16 +3,22 @@ package io.github.gaming32.worldhost.gui.screen;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.WorldHostConfig;
-import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.widget.EnumButton;
 import io.github.gaming32.worldhost.gui.widget.YesNoButton;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,6 +30,46 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component TITLE = Components.translatable("world-host.config.title");
     private static final Component SERVER_IP = Components.translatable("world-host.config.serverIp");
     private static final Component UPNP = Components.literal("UPnP");
+
+    private static final ConfigOption[] OPTIONS = {
+        new EnumOption<>(
+            "world-host.config.onlineStatusLocation",
+            WorldHostConfig::getOnlineStatusLocation, WorldHostConfig::setOnlineStatusLocation
+        ),
+        new YesNoOption(
+            "world-host.config.enableFriends",
+            WorldHostConfig::isEnableFriends, WorldHostConfig::setEnableFriends
+        ),
+        new YesNoOption(
+            "world-host.config.enableReconnectionToasts",
+            WorldHostConfig::isEnableReconnectionToasts, WorldHostConfig::setEnableReconnectionToasts
+        ),
+        new YesNoOption(
+            "world-host.config.noUPnP",
+            WorldHostConfig::isNoUPnP, WorldHostConfig::setNoUPnP,
+            WorldHost::scanUpnp
+        ),
+        new YesNoOption(
+            "world-host.config.useShortIp",
+            WorldHostConfig::isUseShortIp, WorldHostConfig::setUseShortIp
+        ),
+        new YesNoOption(
+            "world-host.config.showOutdatedWorldHost",
+            WorldHostConfig::isShowOutdatedWorldHost, WorldHostConfig::setShowOutdatedWorldHost
+        ),
+        new YesNoOption(
+            "world-host.config.shareButton",
+            WorldHostConfig::isShareButton, WorldHostConfig::setShareButton
+        ),
+        new YesNoOption(
+            "world-host.config.allowFriendRequests",
+            WorldHostConfig::isAllowFriendRequests, WorldHostConfig::setAllowFriendRequests
+        ),
+        new YesNoOption(
+            "world-host.config.announceFriendsOnline",
+            WorldHostConfig::isAnnounceFriendsOnline, WorldHostConfig::setAnnounceFriendsOnline
+        ),
+    };
 
     private final Screen parent;
 
@@ -57,75 +103,13 @@ public class WorldHostConfigScreen extends WorldHostScreen {
                 .build()
         );
 
-        addRenderableWidget(new EnumButton<>(
-            width / 2 - 155, yOffset + 24, 150, 20,
-            "world-host.config.onlineStatusLocation",
-            Components.translatable("world-host.config.onlineStatusLocation"),
-            OnlineStatusLocation.class,
-            button -> {
-                WorldHost.CONFIG.setOnlineStatusLocation(button.getValue());
-                WorldHost.saveConfig();
-            }
-        )).setValue(WorldHost.CONFIG.getOnlineStatusLocation());
-
-        addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 24, 150, 20,
-            Components.translatable("world-host.config.enableFriends"),
-            Components.translatable("world-host.config.enableFriends.tooltip"),
-            button -> {
-                WorldHost.CONFIG.setEnableFriends(button.isToggled());
-                WorldHost.saveConfig();
-            }
-        )).setToggled(WorldHost.CONFIG.isEnableFriends());
-
-        addRenderableWidget(new YesNoButton(
-            width / 2 - 155, yOffset + 48, 150, 20,
-            Components.translatable("world-host.config.enableReconnectionToasts"),
-            button -> {
-                WorldHost.CONFIG.setEnableReconnectionToasts(button.isToggled());
-                WorldHost.saveConfig();
-            }
-        )).setToggled(WorldHost.CONFIG.isEnableReconnectionToasts());
-
-        addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 48, 150, 20,
-            Components.translatable("world-host.config.noUPnP"),
-            Components.translatable("world-host.config.noUPnP.tooltip"),
-            button -> {
-                WorldHost.CONFIG.setNoUPnP(button.isToggled());
-                WorldHost.saveConfig();
-                WorldHost.scanUpnp();
-            }
-        )).setToggled(WorldHost.CONFIG.isNoUPnP());
-
-        addRenderableWidget(new YesNoButton(
-            width / 2 - 155, yOffset + 72, 150, 20,
-            Components.translatable("world-host.config.useShortIp"),
-            Components.translatable("world-host.config.useShortIp.tooltip"),
-            button -> {
-                WorldHost.CONFIG.setUseShortIp(button.isToggled());
-                WorldHost.saveConfig();
-            }
-        )).setToggled(WorldHost.CONFIG.isUseShortIp());
-
-        addRenderableWidget(new YesNoButton(
-            width / 2 + 5, yOffset + 72, 150, 20,
-            Components.translatable("world-host.config.showOutdatedWorldHost"),
-            button -> {
-                WorldHost.CONFIG.setShowOutdatedWorldHost(button.isToggled());
-                WorldHost.saveConfig();
-            }
-        )).setToggled(WorldHost.CONFIG.isShowOutdatedWorldHost());
-
-        addRenderableWidget(new YesNoButton(
-            width / 2 - 155, yOffset + 96, 150, 20,
-            Components.translatable("world-host.config.shareButton"),
-            Components.translatable("world-host.config.shareButton.tooltip"),
-            button -> {
-                WorldHost.CONFIG.setShareButton(button.isToggled());
-                WorldHost.saveConfig();
-            }
-        )).setToggled(WorldHost.CONFIG.isShareButton());
+        for (int i = 0; i < OPTIONS.length; i++) {
+            addRenderableWidget(OPTIONS[i].createButton(
+                width / 2 - 155 + 160 * (i % 2),
+                yOffset + 24 + 24 * (i / 2),
+                150, 20
+            ));
+        }
 
         addRenderableWidget(
             button(WorldHostComponents.FRIENDS, button -> {
@@ -186,5 +170,75 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     @Override
     public void tick() {
         serverIpBox.tick();
+    }
+
+    private interface ConfigOption {
+        Button createButton(int x, int y, int width, int height);
+    }
+
+    private record YesNoOption(
+        String translationBase,
+        Function<WorldHostConfig, Boolean> get,
+        BiConsumer<WorldHostConfig, Boolean> set,
+        @Nullable Runnable onSet
+    ) implements ConfigOption {
+        YesNoOption(
+            String translationBase,
+            Function<WorldHostConfig, Boolean> get,
+            BiConsumer<WorldHostConfig, Boolean> set
+        ) {
+            this(translationBase, get, set, null);
+        }
+
+        @Override
+        public Button createButton(int x, int y, int width, int height) {
+            final String tooltipKey = translationBase + ".tooltip";
+            final YesNoButton button = new YesNoButton(
+                x, y, width, height,
+                Components.translatable(translationBase),
+                I18n.exists(tooltipKey) ? Components.translatable(tooltipKey) : null,
+                b -> {
+                    set.accept(WorldHost.CONFIG, b.isToggled());
+                    WorldHost.saveConfig();
+                    if (onSet != null) {
+                        onSet.run();
+                    }
+                }
+            );
+            button.setToggled(get.apply(WorldHost.CONFIG));
+            return button;
+        }
+    }
+
+    private record EnumOption<E extends Enum<E> & StringRepresentable>(
+        String translationBase,
+        Function<WorldHostConfig, E> get,
+        BiConsumer<WorldHostConfig, E> set,
+        E... typeGetter
+    ) implements ConfigOption {
+        @SafeVarargs
+        EnumOption {
+            if (typeGetter.length != 0) {
+                throw new IllegalArgumentException("typeGetter.length != 0");
+            }
+        }
+
+        @Override
+        public Button createButton(int x, int y, int width, int height) {
+            final String tooltipKey = translationBase + ".tooltip";
+            @SuppressWarnings("unchecked") final EnumButton<E> button = new EnumButton<>(
+                x, y, width, height,
+                translationBase,
+                Components.translatable(translationBase),
+                I18n.exists(tooltipKey) ? Components.translatable(tooltipKey) : null,
+                (Class<E>)typeGetter.getClass().getComponentType(),
+                b -> {
+                    set.accept(WorldHost.CONFIG, b.getValue());
+                    WorldHost.saveConfig();
+                }
+            );
+            button.setValue(get.apply(WorldHost.CONFIG));
+            return button;
+        }
     }
 }

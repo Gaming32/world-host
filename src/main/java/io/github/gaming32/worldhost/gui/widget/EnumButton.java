@@ -16,9 +16,10 @@ public class EnumButton<E extends Enum<E> & StringRepresentable> extends CustomC
         int width, int height,
         String translationBase,
         @Nullable Component title,
+        @Nullable Component tooltip,
         Class<E> clazz, Consumer<EnumButton<E>> onToggle
     ) {
-        super(x, y, width, height, title, onToggle, clazz.getEnumConstants());
+        super(x, y, width, height, title, tooltip, onToggle, clazz.getEnumConstants());
         translations = getTranslations(translationBase);
     }
 

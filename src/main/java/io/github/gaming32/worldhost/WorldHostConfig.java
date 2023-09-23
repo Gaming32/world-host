@@ -28,6 +28,10 @@ public class WorldHostConfig {
 
     private boolean shareButton = true;
 
+    private boolean allowFriendRequests = true;
+
+    private boolean announceFriendsOnline = true;
+
     private final Set<UUID> friends = new LinkedHashSet<>();
 
     public void read(JsonReader reader) throws IOException {
@@ -72,6 +76,8 @@ public class WorldHostConfig {
                 case "useShortIp" -> useShortIp = reader.nextBoolean();
                 case "showOutdatedWorldHost" -> showOutdatedWorldHost = reader.nextBoolean();
                 case "shareButton" -> shareButton = reader.nextBoolean();
+                case "allowFriendRequests" -> allowFriendRequests = reader.nextBoolean();
+                case "announceFriendsOnline" -> announceFriendsOnline = reader.nextBoolean();
                 case "friends" -> {
                     friends.clear();
                     reader.beginArray();
@@ -99,6 +105,8 @@ public class WorldHostConfig {
         writer.name("useShortIp").value(useShortIp);
         writer.name("showOutdatedWorldHost").value(showOutdatedWorldHost);
         writer.name("shareButton").value(shareButton);
+        writer.name("allowFriendRequests").value(allowFriendRequests);
+        writer.name("announceFriendsOnline").value(announceFriendsOnline);
 
         writer.name("friends").beginArray();
         for (final UUID friend : friends) {
@@ -171,6 +179,22 @@ public class WorldHostConfig {
 
     public void setShareButton(boolean shareButton) {
         this.shareButton = shareButton;
+    }
+
+    public boolean isAllowFriendRequests() {
+        return allowFriendRequests;
+    }
+
+    public void setAllowFriendRequests(boolean allowFriendRequests) {
+        this.allowFriendRequests = allowFriendRequests;
+    }
+
+    public boolean isAnnounceFriendsOnline() {
+        return announceFriendsOnline;
+    }
+
+    public void setAnnounceFriendsOnline(boolean announceFriendsOnline) {
+        this.announceFriendsOnline = announceFriendsOnline;
     }
 
     public Set<UUID> getFriends() {
