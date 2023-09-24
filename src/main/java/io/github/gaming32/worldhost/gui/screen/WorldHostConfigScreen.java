@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.gui.screen;
 
+import com.demonwav.mcdev.annotations.Translatable;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.WorldHostConfig;
@@ -183,7 +184,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     }
 
     private record YesNoOption(
-        String name,
+        @Translatable(prefix = "world-host.config.") String name,
         Function<WorldHostConfig, Boolean> get,
         BiConsumer<WorldHostConfig, Boolean> set,
         @Nullable Runnable onSet
@@ -218,7 +219,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     }
 
     private record EnumOption<E extends Enum<E> & StringRepresentable>(
-        String name,
+        @Translatable(prefix = "world-host.config.") String name,
         Function<WorldHostConfig, E> get,
         BiConsumer<WorldHostConfig, E> set,
         E... typeGetter

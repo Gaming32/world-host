@@ -258,6 +258,8 @@ dependencies {
             }
         }
     }
+
+    compileOnly("com.demonwav.mcdev:annotations:2.0.0")
 }
 
 java {

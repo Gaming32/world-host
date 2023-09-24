@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.versions;
 
+import com.demonwav.mcdev.annotations.Translatable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -22,7 +23,7 @@ public class Components {
         //#endif
     }
 
-    public static MutableComponent translatable(String key) {
+    public static MutableComponent translatable(@Translatable(foldMethod = true) String key) {
         //#if MC >= 1.19.1
         return Component.translatable(key);
         //#else
@@ -30,7 +31,7 @@ public class Components {
         //#endif
     }
 
-    public static MutableComponent translatable(String key, Object... args) {
+    public static MutableComponent translatable(@Translatable(foldMethod = true) String key, Object... args) {
         //#if MC >= 1.19.1
         return Component.translatable(key, args);
         //#else
