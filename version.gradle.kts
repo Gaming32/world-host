@@ -1,3 +1,4 @@
+import com.modrinth.minotaur.ModrinthExtension
 import groovy.lang.GroovyObjectSupport
 import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
@@ -14,6 +15,7 @@ plugins {
     id("xyz.deftu.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.modrinth.minotaur") version "2.+"
 }
 
 
@@ -276,27 +278,48 @@ preprocess {
     keywords.value(keywords.get())
     keywords.put(".json", keywords.get().getValue(".json").copy(eval = "//??"))
 }
-// TODO: fix
-//
-//toolkitReleases {
-//    modrinth {
-//        projectId.set("world-host")
-//    }
-//    rootProject.file("changelogs/${modData.version}.md").let {
-//        if (it.exists()) {
-//            changelogFile.set(it)
-//        }
-//    }
-//    describeFabricWithQuilt.set(true)
-//    useSourcesJar.set(true)
-//    if (mcData.isFabric) {
-//        if (mcVersion == 1_19_04) {
-//            gameVersions.add("23w13a_or_b")
-//        } else if (mcVersion == 1_20_01) {
-//            gameVersions.add("1.20")
-//        }
-//    }
-//}
+
+//println("Parallel: ${gradle.startParameter.isParallelProjectExecutionEnabled}")
+
+modrinth {
+    val isStaging = (project.properties["modrinth.staging"] as String?)?.toBoolean()
+        ?: (System.getenv("MODRINTH_STAGING") == "1")
+    token.set(
+        project.properties["modrinth.token${".staging".takeIf { isStaging }}"] as String?
+            ?: System.getenv("MODRINTH_TOKEN${"_STAGING".takeIf { isStaging }}")
+    )
+    if (isStaging) {
+        apiUrl.set(ModrinthExtension.STAGING_API_URL)
+    }
+    projectId.set("world-host")
+    versionNumber.set(version.toString())
+    versionName.set("[${if (loaderName == "fabric") "Fabric/Quilt" else "Forge"} $mcVersionString] World Host $vers")
+    uploadFile.set(tasks.shadowJar)
+    additionalFiles.add(tasks.named("sourcesJar"))
+    gameVersions.add(mcVersionString)
+    if (mcVersion == 1_19_04) {
+        gameVersions.add("23w13a_or_b")
+    } else if (mcVersion == 1_20_01) {
+        gameVersions.add("1.20")
+    }
+    loaders.add(loaderName)
+    if (loaderName == "fabric") {
+        loaders.add("quilt")
+    }
+    dependencies {
+        if (loaderName == "fabric") {
+            optional.project(if (isStaging) "fred-3" else "modmenu")
+        }
+    }
+    rootProject.file("changelogs/$version.md").let {
+        if (it.exists()) {
+            println("Setting changelog file to $it")
+            changelog.set(it.readText())
+        } else {
+            println("Changelog file $it does not exist!")
+        }
+    }
+}
 
 tasks.shadowJar {
     configurations = listOf(shade)
@@ -337,7 +360,7 @@ tasks.processResources {
         "*.mixins.json"
     )) {
         expand(mapOf(
-            "version" to project.version,
+            "version" to vers,
             "mc_version" to mcVersionString,
             "java_version" to "JAVA_${mcJavaVersion.majorVersion}"
         ))

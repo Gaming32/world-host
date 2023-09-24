@@ -33,40 +33,40 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
     private static final ConfigOption[] OPTIONS = {
         new EnumOption<>(
-            "world-host.config.onlineStatusLocation",
+            "onlineStatusLocation",
             WorldHostConfig::getOnlineStatusLocation, WorldHostConfig::setOnlineStatusLocation
         ),
         new YesNoOption(
-            "world-host.config.enableFriends",
+            "enableFriends",
             WorldHostConfig::isEnableFriends, WorldHostConfig::setEnableFriends
         ),
         new YesNoOption(
-            "world-host.config.enableReconnectionToasts",
+            "enableReconnectionToasts",
             WorldHostConfig::isEnableReconnectionToasts, WorldHostConfig::setEnableReconnectionToasts
         ),
         new YesNoOption(
-            "world-host.config.noUPnP",
+            "noUPnP",
             WorldHostConfig::isNoUPnP, WorldHostConfig::setNoUPnP,
             WorldHost::scanUpnp
         ),
         new YesNoOption(
-            "world-host.config.useShortIp",
+            "useShortIp",
             WorldHostConfig::isUseShortIp, WorldHostConfig::setUseShortIp
         ),
         new YesNoOption(
-            "world-host.config.showOutdatedWorldHost",
+            "showOutdatedWorldHost",
             WorldHostConfig::isShowOutdatedWorldHost, WorldHostConfig::setShowOutdatedWorldHost
         ),
         new YesNoOption(
-            "world-host.config.shareButton",
+            "shareButton",
             WorldHostConfig::isShareButton, WorldHostConfig::setShareButton
         ),
         new YesNoOption(
-            "world-host.config.allowFriendRequests",
+            "allowFriendRequests",
             WorldHostConfig::isAllowFriendRequests, WorldHostConfig::setAllowFriendRequests
         ),
         new YesNoOption(
-            "world-host.config.announceFriendsOnline",
+            "announceFriendsOnline",
             WorldHostConfig::isAnnounceFriendsOnline, WorldHostConfig::setAnnounceFriendsOnline
         ),
     };
@@ -183,7 +183,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     }
 
     private record YesNoOption(
-        String translationBase,
+        String name,
         Function<WorldHostConfig, Boolean> get,
         BiConsumer<WorldHostConfig, Boolean> set,
         @Nullable Runnable onSet
@@ -198,6 +198,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
         @Override
         public Button createButton(int x, int y, int width, int height) {
+            final String translationBase = "world-host.config." + name;
             final String tooltipKey = translationBase + ".tooltip";
             final YesNoButton button = new YesNoButton(
                 x, y, width, height,
@@ -217,7 +218,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     }
 
     private record EnumOption<E extends Enum<E> & StringRepresentable>(
-        String translationBase,
+        String name,
         Function<WorldHostConfig, E> get,
         BiConsumer<WorldHostConfig, E> set,
         E... typeGetter
@@ -231,6 +232,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
 
         @Override
         public Button createButton(int x, int y, int width, int height) {
+            final String translationBase = "world-host.config." + name;
             final String tooltipKey = translationBase + ".tooltip";
             @SuppressWarnings("unchecked") final EnumButton<E> button = new EnumButton<>(
                 x, y, width, height,
