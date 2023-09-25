@@ -3,6 +3,7 @@ import groovy.lang.GroovyObjectSupport
 import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
 import xyz.wagyourtail.unimined.api.task.ExportMappingsTask
+import xyz.wagyourtail.unimined.api.task.RemapJarTask
 import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
 import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
 import xyz.wagyourtail.unimined.internal.minecraft.MinecraftProvider
@@ -14,7 +15,6 @@ plugins {
     `maven-publish`
     id("xyz.deftu.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
-    id("com.github.johnrengelman.shadow") version "8.1.1"
     id("com.modrinth.minotaur") version "2.+"
 }
 
@@ -26,6 +26,8 @@ fun Any.getGroovyProperty(name: String): Any = withGroovyBuilder { metaClass }.g
 val vers = project.properties["mod.version"] as String
 val mcVersionString by extra(name.substringBefore("-"))
 val loaderName by extra(name.substringAfter("-"))
+
+base.archivesName.set(rootProject.name)
 
 // major.minor.?patch
 // to MMmmPP
@@ -164,7 +166,9 @@ repositories {
 println("loaderName: $loaderName")
 println("mcVersion: $mcVersion")
 
-val shade: Configuration by configurations.creating
+val shade: Configuration by configurations.creating {
+    isTransitive = false
+}
 
 val modCompileOnly: Configuration by configurations.creating {
     configurations.getByName("compileOnly").extendsFrom(this)
@@ -296,7 +300,7 @@ modrinth {
     projectId.set("world-host")
     versionNumber.set(version.toString())
     versionName.set("[${if (loaderName == "fabric") "Fabric/Quilt" else "Forge"} $mcVersionString] World Host $vers")
-    uploadFile.set(tasks.shadowJar)
+    uploadFile.set(tasks.named("remapJar"))
     additionalFiles.add(tasks.named("sourcesJar"))
     gameVersions.add(mcVersionString)
     if (mcVersion == 1_19_04) {
@@ -321,10 +325,6 @@ modrinth {
             println("Changelog file $it does not exist!")
         }
     }
-}
-
-tasks.shadowJar {
-    configurations = listOf(shade)
 }
 
 tasks.processResources {
@@ -386,6 +386,10 @@ tasks.processResources {
             delete(file("$resources/pack.mcmeta"))
         }
     }
+}
+
+tasks.withType<RemapJarTask> {
+    shade.files.forEach { from(project.zipTree(it)) }
 }
 
 val mcJavaVersion = (minecraft as MinecraftProvider).minecraftData.metadata.javaVersion

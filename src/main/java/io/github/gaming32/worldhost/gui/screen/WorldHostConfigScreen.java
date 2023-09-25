@@ -190,7 +190,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         @Nullable Runnable onSet
     ) implements ConfigOption {
         YesNoOption(
-            String translationBase,
+            @Translatable(prefix = "world-host.config.") String translationBase,
             Function<WorldHostConfig, Boolean> get,
             BiConsumer<WorldHostConfig, Boolean> set
         ) {
