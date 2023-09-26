@@ -291,8 +291,8 @@ modrinth {
     val isStaging = (project.properties["modrinth.staging"] as String?)?.toBoolean()
         ?: (System.getenv("MODRINTH_STAGING") == "1")
     token.set(
-        project.properties["modrinth.token${".staging".takeIf { isStaging }}"] as String?
-            ?: System.getenv("MODRINTH_TOKEN${"_STAGING".takeIf { isStaging }}")
+        project.properties["modrinth.token${if (isStaging) ".staging" else ""}"] as String?
+            ?: System.getenv("MODRINTH_TOKEN${if (isStaging) "_STAGING" else ""}")
     )
     if (isStaging) {
         apiUrl.set(ModrinthExtension.STAGING_API_URL)
