@@ -23,7 +23,7 @@ fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaCl
 fun Any.getGroovyProperty(name: String): Any = withGroovyBuilder { metaClass }.getProperty(this, name)!!
 
 
-val vers = project.properties["mod.version"] as String
+val modVersion = project.properties["mod.version"] as String
 val mcVersionString by extra(name.substringBefore("-"))
 val loaderName by extra(name.substringAfter("-"))
 
@@ -37,7 +37,7 @@ val mcVersion by extra(mcVersionString.split(".").map { it.toInt() }
     })
 
 println("MC_VERSION: $mcVersionString $mcVersion")
-version = "${vers}+${mcVersionString}-${loaderName}"
+version = "${modVersion}+${mcVersionString}-${loaderName}"
 
 repositories {
     mavenCentral()
@@ -299,7 +299,7 @@ modrinth {
     }
     projectId.set("world-host")
     versionNumber.set(version.toString())
-    versionName.set("[${if (loaderName == "fabric") "Fabric/Quilt" else "Forge"} $mcVersionString] World Host $vers")
+    versionName.set("[${if (loaderName == "fabric") "Fabric/Quilt" else "Forge"} $mcVersionString] World Host $modVersion")
     uploadFile.set(tasks.named("remapJar"))
     additionalFiles.add(tasks.named("sourcesJar"))
     gameVersions.add(mcVersionString)
@@ -317,7 +317,7 @@ modrinth {
             optional.project(if (isStaging) "fred-3" else "modmenu")
         }
     }
-    rootProject.file("changelogs/$version.md").let {
+    rootProject.file("changelogs/$modVersion.md").let {
         if (it.exists()) {
             println("Setting changelog file to $it")
             changelog.set(it.readText())
@@ -362,7 +362,7 @@ tasks.processResources {
         "*.mixins.json"
     )) {
         expand(mapOf(
-            "version" to vers,
+            "version" to modVersion,
             "mc_version" to mcVersionString,
             "java_version" to "JAVA_${mcJavaVersion.majorVersion}"
         ))
