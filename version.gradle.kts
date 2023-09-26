@@ -226,7 +226,7 @@ dependencies {
         }
     }
 
-//    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (mcData.isFabric) "fabric" else "forge-latest"}:1.1.2")
+    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (loaderName == "fabric") "fabric" else "forge-latest"}:1.1.2")
 
     if (loaderName == "fabric") {
         when (mcVersion) {
