@@ -3,13 +3,16 @@ package io.github.gaming32.worldhost.mixin;
 import io.github.gaming32.worldhost.WorldHost;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
-import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+//#if MC > 1.16.5
+import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
+//#endif
 
 @Mixin(targets = "net.minecraft.client.gui.screens.ConnectScreen$1")
 public class MixinConnectScreen_1 {
@@ -17,13 +20,24 @@ public class MixinConnectScreen_1 {
     private ConnectScreen wh$parent;
 
     @Unique
-    private ServerAddress wh$address;
+    private String wh$host;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    @SuppressWarnings("InvalidInjectorMethodSignature") // mcdev thinks that the ServerData should be a CompletableFuture for some reason
-    private void initRefs(ConnectScreen connectScreen, String string, ServerAddress serverAddress, Minecraft minecraft, ServerData serverData, CallbackInfo ci) {
+    private void initRefs(
+        ConnectScreen connectScreen, String string,
+        //#if MC > 1.16.5
+        ServerAddress serverAddress, Minecraft minecraft, ServerData serverData,
+        //#else
+        //$$ String host, int port,
+        //#endif
+        CallbackInfo ci
+    ) {
         wh$parent = connectScreen;
-        wh$address = serverAddress;
+        //#if MC > 1.16.5
+        wh$host = serverAddress.getHost();
+        //#else
+        //$$ wh$host = host;
+        //#endif
     }
 
     @Inject(
@@ -35,7 +49,7 @@ public class MixinConnectScreen_1 {
         cancellable = true
     )
     private void overrideError(CallbackInfo ci) {
-        if (WorldHost.protoClient == null || wh$address.getHost().endsWith(WorldHost.protoClient.getBaseIp())) {
+        if (WorldHost.protoClient == null || wh$host.endsWith(WorldHost.protoClient.getBaseIp())) {
             return;
         }
         final Long attemptingToJoin = WorldHost.protoClient.getAttemptingToJoin();
