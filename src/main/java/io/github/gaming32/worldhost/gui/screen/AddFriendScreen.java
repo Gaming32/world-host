@@ -145,7 +145,7 @@ public class AddFriendScreen extends WorldHostScreen {
                     }
                 });
             } else if (VALID_UUID.matcher(username).matches()) {
-                friendProfile = new GameProfile(UUID.fromString(username), null);
+                friendProfile = new GameProfile(UUID.fromString(username), "");
                 addFriendButton.active = true;
             } else if (username.startsWith("o:")) {
                 final String actualName = username.substring(2);

@@ -60,7 +60,7 @@ public class FriendsScreen extends WorldHostScreen {
         super.init();
 
         if (list == null) {
-            list = addWidget(new FriendsList(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64), 36));
+            list = new FriendsList(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64), 36);
             //#if MC > 1.16.1
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
@@ -69,6 +69,7 @@ public class FriendsScreen extends WorldHostScreen {
         } else {
             list.updateSize(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64));
         }
+        addWidget(list);
 
         addRenderableWidget(
             button(ADD_FRIEND_TEXT, button -> {
@@ -200,7 +201,7 @@ public class FriendsScreen extends WorldHostScreen {
 
         private void updateEntries() {
             clearEntries();
-            WorldHost.CONFIG.getFriends().forEach(uuid -> addEntry(new FriendsEntry(new GameProfile(uuid, null))));
+            WorldHost.CONFIG.getFriends().forEach(uuid -> addEntry(new FriendsEntry(new GameProfile(uuid, ""))));
         }
 
         @Override

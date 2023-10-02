@@ -301,7 +301,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         public OnlineFriendsListEntry(UUID friendUuid, long connectionId) {
             minecraft = Minecraft.getInstance();
             this.connectionId = connectionId;
-            profile = new GameProfile(friendUuid, null);
+            profile = new GameProfile(friendUuid, "");
             Util.backgroundExecutor().execute(
                 () -> profile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), profile)
             );

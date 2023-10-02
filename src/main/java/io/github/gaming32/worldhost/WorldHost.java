@@ -491,7 +491,7 @@ public class WorldHost
         //#else
         final ProfileResult result = sessionService.fetchProfile(uuid, false);
         if (result == null) {
-            return fallback != null ? fallback : new GameProfile(uuid, null);
+            return fallback != null ? fallback : new GameProfile(uuid, "");
         }
         return result.profile();
         //#endif
