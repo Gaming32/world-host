@@ -165,11 +165,7 @@ public class AddFriendScreen extends WorldHostScreen {
         //#endif
         int mouseX, int mouseY, float delta
     ) {
-        //#if MC < 1.20.2
-        //$$ renderBackground(context);
-        //#else
-        renderBackground(context, mouseX, mouseY, delta);
-        //#endif
+        whRenderBackground(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 20, 0xffffff);
         drawString(context, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, 0xa0a0a0);
         usernameField.render(context, mouseX, mouseY, delta);

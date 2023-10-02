@@ -372,4 +372,34 @@ public abstract class WorldHostScreen extends Screen {
         //$$ Minecraft.getInstance().keyboardHandler.setSendRepeatsToGui(sendRepeatEvents);
         //#endif
     }
+
+    @Override
+    public void renderBackground(
+        @NotNull
+        //#if MC < 1.20.0
+        //$$ PoseStack context
+        //#else
+        GuiGraphics context
+        //#endif
+        //#if MC >= 1.20.2
+        , int mouseX, int mouseY, float delta
+        //#endif
+    ) {
+    }
+
+    public void whRenderBackground(
+        @NotNull
+        //#if MC < 1.20.0
+        //$$ PoseStack context,
+        //#else
+        GuiGraphics context,
+        //#endif
+        int mouseX, int mouseY, float delta
+    ) {
+        //#if MC < 1.20.2
+        //$$ super.renderBackground(context);
+        //#else
+        super.renderBackground(context, mouseX, mouseY, delta);
+        //#endif
+    }
 }

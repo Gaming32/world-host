@@ -146,11 +146,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         //#endif
         int mouseX, int mouseY, float delta
     ) {
-        //#if MC < 1.20.2
-        //$$ renderBackground(context);
-        //#else
-        renderBackground(context, mouseX, mouseY, delta);
-        //#endif
+        whRenderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
 

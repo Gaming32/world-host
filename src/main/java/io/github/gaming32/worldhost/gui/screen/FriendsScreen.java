@@ -29,6 +29,10 @@ import net.minecraft.client.gui.GuiGraphics;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
+//#if MC >= 1.20.2
+import net.minecraft.client.renderer.RenderType;
+//#endif
+
 public class FriendsScreen extends WorldHostScreen {
     public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
     private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
@@ -140,11 +144,7 @@ public class FriendsScreen extends WorldHostScreen {
         //#endif
         int mouseX, int mouseY, float delta
     ) {
-        //#if MC < 1.20.2
-        //$$ renderBackground(context);
-        //#else
-        renderBackground(context, mouseX, mouseY, delta);
-        //#endif
+        whRenderBackground(context, mouseX, mouseY, delta);
         list.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
         if (WorldHost.BEDROCK_SUPPORT) {
@@ -177,6 +177,20 @@ public class FriendsScreen extends WorldHostScreen {
             //noinspection DataFlowIssue
             super(FriendsScreen.this.minecraft, i, j, k, l, m);
         }
+
+        //#if MC >= 1.20.2
+        @Override
+        protected void renderDecorations(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
+            super.renderDecorations(graphics, mouseX, mouseY);
+            graphics.setColor(0.25f, 0.25f, 0.25f, 1f);
+            graphics.blit(BACKGROUND_LOCATION, x0, 0, 0f, 0f, width, y0, 32, 32);
+            graphics.blit(BACKGROUND_LOCATION, x0, y1, 0f, y1, width, height - y1, 32, 32);
+            graphics.setColor(1f, 1f, 1f, 1f);
+            graphics.fillGradient(RenderType.guiOverlay(), x0, y0, x1, y0 + 4, 0xff000000, 0, 0);
+            graphics.fillGradient(RenderType.guiOverlay(), x0, y1 - 4, x1, y1, 0, 0xff000000, 0);
+        }
+
+        //#endif
 
         @Override
         public void setSelected(@Nullable FriendsEntry entry) {
