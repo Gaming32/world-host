@@ -20,7 +20,7 @@ public class MixinShareToLanScreen {
         return WorldHost.CONFIG.isEnableFriends() ? "world-host.open_world" : "world-host.open_world_no_friends";
     }
 
-    @ModifyConstant(method = "init*", constant = @Constant(stringValue = "lanServer.start"))
+    @ModifyConstant(method = "init()V", constant = @Constant(stringValue = "lanServer.start"))
     private String changeLabelI2(String constant) {
         return WorldHost.CONFIG.isEnableFriends() ? "world-host.open_world" : "world-host.open_world_no_friends";
     }

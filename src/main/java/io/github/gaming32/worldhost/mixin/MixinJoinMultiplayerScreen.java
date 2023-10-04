@@ -31,7 +31,7 @@ public class MixinJoinMultiplayerScreen extends Screen {
         super(component);
     }
 
-    @Inject(method = "init*", at = @At("TAIL"))
+    @Inject(method = "init()V", at = @At("TAIL"))
     private void tabs(CallbackInfo ci) {
         if (!WorldHost.CONFIG.isEnableFriends()) return;
 
@@ -51,7 +51,7 @@ public class MixinJoinMultiplayerScreen extends Screen {
         ));
     }
 
-    @ModifyConstant(method = "init*", constant = @Constant(intValue = 32))
+    @ModifyConstant(method = "init()V", constant = @Constant(intValue = 32))
     private int makeTopBigger(int constant) {
         return WorldHost.CONFIG.isEnableFriends() ? 60 : constant;
     }

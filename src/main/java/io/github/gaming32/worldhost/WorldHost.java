@@ -89,6 +89,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 //$$ import net.minecraft.client.gui.screens.Screen;
 //$$ import net.minecraft.server.packs.PackType;
+//$$ import net.minecraft.server.packs.PackResources;
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
 //$$ import net.minecraftforge.fml.ModList;
@@ -229,7 +230,7 @@ public class WorldHost
                     //#if MC <= 1.19.2
                     //$$ try {
                     //#endif
-            //$$             return c.getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k.txt"));
+            //$$             return ((PackResources)c).getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k.txt"));
                     //#if MC <= 1.19.2
                     //$$ } catch (IOException e) {
                     //$$     throw new UncheckedIOException(e);

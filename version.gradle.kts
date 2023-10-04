@@ -390,6 +390,11 @@ tasks.processResources {
 
 tasks.withType<RemapJarTask> {
     shade.files.forEach { from(project.zipTree(it)) }
+    manifest {
+        if (loaderName == "forge") {
+            attributes["MixinConfigs"] = "world-host.mixins.json"
+        }
+    }
 }
 
 val mcJavaVersion = (minecraft as MinecraftProvider).minecraftData.metadata.javaVersion
