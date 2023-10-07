@@ -1,6 +1,6 @@
 pluginManagement {
     repositories {
-        maven("https://maven.deftu.xyz/releases")
+        maven("https://maven.deftu.dev/releases")
         maven("https://maven.fabricmc.net")
         maven("https://maven.architectury.dev/")
         maven("https://maven.minecraftforge.net")
@@ -14,7 +14,7 @@ pluginManagement {
     }
 
     plugins {
-        id("xyz.deftu.gradle.multiversion-root") version("1.18.0")
+        id("dev.deftu.gradle.multiversion-root") version("1.18.0")
     }
 }
 

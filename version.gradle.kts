@@ -13,7 +13,7 @@ import java.nio.file.Path
 plugins {
     java
     `maven-publish`
-    id("xyz.deftu.gradle.preprocess")
+    id("dev.deftu.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.modrinth.minotaur") version "2.+"
 }
