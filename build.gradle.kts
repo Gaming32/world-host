@@ -50,8 +50,8 @@ preprocess {
 //    }
 }
 
-gradle.projectsEvaluated {
-    subprojects.asSequence().zipWithNext().forEach { (left, right) ->
-        right.tasks.named("modrinth").get().mustRunAfter(left.tasks.named("modrinth"))
-    }
-}
+//gradle.projectsEvaluated {
+//    subprojects.asSequence().zipWithNext().forEach { (left, right) ->
+//        right.tasks.named("modrinth").get().mustRunAfter(left.tasks.named("modrinth"))
+//    }
+//}

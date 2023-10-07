@@ -50,7 +50,7 @@
   "world-host.worldhost.ip.not_connected": "Не далучана да сервера World Host.",
   "world-host.worldhost.tempip.success": "Часовы IP з нізкім пінгам для вашага свету %s.",
   "world-host.worldhost.tempip.failure": "Узнікла памылка падчас атрымання часовага IP. Паспрабуйце выкарыстоўваць %s.",
-  "world-host.lan_opened.friends": Свет размешчаны для сяброў у укладцы Сябры. Ён даступны праз LAN-порт: %s.",
+  "world-host.lan_opened.friends": "Свет размешчаны для сяброў у укладцы Сябры. Ён даступны праз LAN-порт: %s.",
   "world-host.lan_opened.no_friends": "Свет размешчаны па IP %s. Ён даступны праз LAN-порт: %s.",
   "world-host.online_status": "%s World Host: %s",
   "world-host.online_status.offline": "Па-за сеткай (%ss)",

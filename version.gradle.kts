@@ -145,7 +145,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("net.raphimc.javadowngrader:gradle-plugin:1.0.1-SNAPSHOT")
+        classpath("net.raphimc.javadowngrader:gradle-plugin:1.1.1-SNAPSHOT")
     }
 }
 
@@ -288,8 +288,7 @@ preprocess {
 //println("Parallel: ${gradle.startParameter.isParallelProjectExecutionEnabled}")
 
 modrinth {
-    val isStaging = (project.properties["modrinth.staging"] as String?)?.toBoolean()
-        ?: (System.getenv("MODRINTH_STAGING") == "1")
+    val isStaging = true
     token.set(
         project.properties["modrinth.token${if (isStaging) ".staging" else ""}"] as String?
             ?: System.getenv("MODRINTH_TOKEN${if (isStaging) "_STAGING" else ""}")
