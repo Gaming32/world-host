@@ -26,7 +26,10 @@ public class MixinConnectScreen_1 {
     private void initRefs(
         ConnectScreen connectScreen, String string,
         //#if MC > 1.16.5
-        ServerAddress serverAddress, Minecraft minecraft, ServerData serverData,
+        ServerAddress serverAddress, Minecraft minecraft,
+        //#if MC > 1.19.2
+        ServerData serverData,
+        //#endif
         //#else
         //$$ String host, int port,
         //#endif
