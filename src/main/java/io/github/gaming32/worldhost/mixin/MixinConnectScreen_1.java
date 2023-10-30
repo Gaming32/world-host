@@ -14,6 +14,10 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 //#endif
 
+//#if MC > 1.18.2 && MC < 1.19.4
+//$$ import java.util.concurrent.CompletableFuture;
+//#endif
+
 @Mixin(targets = "net.minecraft.client.gui.screens.ConnectScreen$1")
 public class MixinConnectScreen_1 {
     @Unique
@@ -29,6 +33,8 @@ public class MixinConnectScreen_1 {
         ServerAddress serverAddress, Minecraft minecraft,
         //#if MC > 1.19.2
         ServerData serverData,
+        //#elseif MC > 1.18.2
+        //$$ CompletableFuture<?> completableFuture,
         //#endif
         //#else
         //$$ String host, int port,
