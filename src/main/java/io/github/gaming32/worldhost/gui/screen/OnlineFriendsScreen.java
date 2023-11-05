@@ -289,7 +289,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
         private final ResourceLocation iconTextureId;
         //#if MC >= 1.19.4
-        private byte @Nullable [] iconData;
+        private byte[] iconData;
         //#else
         //$$ @Nullable
         //$$ private String iconData;
@@ -350,7 +350,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             }
 
             //#if MC >= 1.19.4
-            final byte @Nullable [] icon = serverInfo.getIconBytes();
+            final byte[] icon = serverInfo.getIconBytes();
             if (!Arrays.equals(icon, iconData)) {
             //#else
             //$$ final String icon = serverInfo.getIconB64();
@@ -512,7 +512,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
         private boolean uploadServerIcon(
             //#if MC >= 1.19.4
-            byte @Nullable [] newIconData
+            byte[] newIconData
             //#else
             //$$ @Nullable String newIconData
             //#endif

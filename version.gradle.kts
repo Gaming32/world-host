@@ -1,4 +1,5 @@
 import com.modrinth.minotaur.ModrinthExtension
+import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
 import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
 import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
@@ -27,6 +28,11 @@ val modVersion = project.properties["mod.version"] as String
 val mcVersionString by extra(name.substringBefore("-"))
 val loaderName by extra(name.substringAfter("-"))
 
+val isFabric = loaderName == "fabric"
+val isForge = loaderName == "forge"
+val isNeoForge = loaderName == "neoforge"
+val isForgeLike = isForge || isNeoForge
+
 base.archivesName.set(rootProject.name)
 
 // major.minor.?patch
@@ -46,7 +52,7 @@ repositories {
 lateinit var minecraft: MinecraftConfig
 unimined.minecraft {
     version(mcVersionString)
-    if (mcVersion != 1_20_01 || loaderName != "forge") {
+    if (mcVersion != 1_20_01 || !isForge) {
         side("client")
     }
 
@@ -77,12 +83,11 @@ unimined.minecraft {
         }
     }
 
-    if (loaderName == "fabric") {
-        fabric {
+    when {
+        isFabric -> fabric {
             loader("0.14.22")
         }
-    } else {
-        minecraftForge {
+        isForge -> minecraftForge {
             loader(when(mcVersion) {
                 1_20_01 -> "47.1.3"
                 1_19_04 -> "45.1.0"
@@ -90,10 +95,17 @@ unimined.minecraft {
                 1_18_02 -> "40.2.0"
                 1_17_01 -> "37.1.1"
                 1_16_05 -> "36.2.34"
-                else -> throw IllegalArgumentException("unknown forge version for $mcVersionString")
+                else -> throw IllegalStateException("Unknown Forge version for $mcVersionString")
             })
             mixinConfig("world-host.mixins.json")
         }
+        isNeoForge -> neoForged {
+            loader(when (mcVersion) {
+                1_20_02 -> "35-beta"
+                else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
+            })
+        }
+        else -> throw IllegalStateException()
     }
 
     minecraft = this
@@ -123,7 +135,7 @@ val tinyMappings: File = file("${projectDir}/build/tmp/tinyMappings.tiny").also 
     export.exportFunc((minecraft.mappings as MappingsProvider).mappingTree)
 }
 mappingsConfig.setGroovyProperty("tinyMappings", tinyMappings.toPath())
-if (loaderName == "forge") {
+if (isForge) {
     val tinyMappingsWithSrg: File = file("${projectDir}/build/tmp/tinyMappingsWithSrg.tiny").also { file ->
         val export = ExportMappingsTaskImpl.ExportImpl(minecraft.mappings as MappingsProvider).apply {
             location = file
@@ -185,7 +197,7 @@ minecraft.apply {
 
 dependencies {
     fun bundle(dependency: Any) {
-        if (loaderName == "fabric") {
+        if (isFabric) {
             "include"(dependency)
         } else {
             "shade"(dependency)
@@ -198,7 +210,7 @@ dependencies {
     }
 
     bundleImplementation("org.quiltmc.qup:json:0.2.0")
-    if (loaderName == "forge") {
+    if (isForgeLike) {
         "minecraftLibraries"("org.quiltmc.qup:json:0.2.0")
     }
 
@@ -208,7 +220,7 @@ dependencies {
 //        implementation("com.github.LlamaLad7.MixinExtras:mixinextras-common:0.2.0-beta.6")
 //    }
 
-    if (loaderName == "fabric") {
+    if (isFabric) {
         when (mcVersion) {
             1_20_02 -> "8.0.0-beta.2" // TODO: Update out of beta
             1_20_01 -> "7.0.1"
@@ -226,9 +238,11 @@ dependencies {
         }
     }
 
-    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (loaderName == "fabric") "fabric" else "forge-latest"}:1.1.2")
+    if (!isNeoForge) { // TODO: Remove check when DevAuth for NeoForge is released (which depends on Arch)
+        modRuntimeOnly("me.djtheredstoner:DevAuth-${if (isFabric) "fabric" else "forge-latest"}:1.1.2")
+    }
 
-    if (loaderName == "fabric") {
+    if (isFabric) {
         when (mcVersion) {
             1_20_02 -> "0.89.2+1.20.2"
             1_20_01 -> "0.89.0+1.20.1"
@@ -245,11 +259,11 @@ dependencies {
             }
     }
 
-    if (loaderName == "fabric" && mcVersion >= 1_18_02) {
+    if (isFabric && mcVersion >= 1_18_02) {
         modCompileOnly("dev.isxander:main-menu-credits:1.1.2")
     }
 
-    if (loaderName == "fabric") {
+    if (isFabric) {
         when {
             mcVersion >= 1_20_02 -> "2.9.0"
             mcVersion >= 1_20_01 -> "2.8.7-SNAPSHOT"
@@ -271,18 +285,20 @@ java {
 }
 
 preprocess {
+    fun Boolean.toInt() = if (this) 1 else 0
+
     vars.putAll(mapOf(
-        "FORGE" to 0,
-        "FABRIC" to 0,
-    ))
-    vars.putAll(mapOf(
-        loaderName.uppercase() to 1,
-        "MC" to mcVersion
+        "FABRIC" to isFabric.toInt(),
+        "FORGE" to isForge.toInt(),
+        "NEOFORGE" to isNeoForge.toInt(),
+        "FORGELIKE" to isForgeLike.toInt(),
+        "MC" to mcVersion,
     ))
 
     patternAnnotation.set("io.github.gaming32.worldhost.versions.Pattern")
     keywords.value(keywords.get())
-    keywords.put(".json", keywords.get().getValue(".json").copy(eval = "//??"))
+    keywords.put(".json", PreprocessTask.DEFAULT_KEYWORDS.copy(eval = "//??"))
+    keywords.put(".toml", PreprocessTask.CFG_KEYWORDS.copy(eval = "#??"))
 }
 
 //println("Parallel: ${gradle.startParameter.isParallelProjectExecutionEnabled}")
@@ -298,7 +314,13 @@ modrinth {
     }
     projectId.set("world-host")
     versionNumber.set(version.toString())
-    versionName.set("[${if (loaderName == "fabric") "Fabric/Quilt" else "Forge"} $mcVersionString] World Host $modVersion")
+    val loadersText = when {
+        isFabric -> "Fabric/Quilt"
+        isForge -> "Forge"
+        isNeoForge -> "NeoForge"
+        else -> throw IllegalStateException()
+    }
+    versionName.set("[$loadersText $mcVersionString] World Host $modVersion")
     uploadFile.set(tasks.named("remapJar"))
     additionalFiles.add(tasks.named("sourcesJar"))
     gameVersions.add(mcVersionString)
@@ -308,11 +330,11 @@ modrinth {
         gameVersions.add("1.20")
     }
     loaders.add(loaderName)
-    if (loaderName == "fabric") {
+    if (isFabric) {
         loaders.add("quilt")
     }
     dependencies {
-        if (loaderName == "fabric") {
+        if (isFabric) {
             optional.project(if (isStaging) "fred-3" else "modmenu")
         }
     }
@@ -367,7 +389,7 @@ tasks.processResources {
         ))
     }
 
-    if (loaderName == "fabric") {
+    if (isFabric) {
         exclude("pack.mcmeta", "META-INF/mods.toml")
     } else {
         exclude("fabric.mod.json")
@@ -375,7 +397,7 @@ tasks.processResources {
 
     doLast {
         val resources = "${layout.buildDirectory.get()}/resources/main"
-        if (loaderName == "forge") {
+        if (isForgeLike) {
             copy {
                 from(file("$resources/assets/world-host/icon.png"))
                 into(resources)
@@ -390,7 +412,7 @@ tasks.processResources {
 tasks.withType<RemapJarTask> {
     shade.files.forEach { from(project.zipTree(it)) }
     manifest {
-        if (loaderName == "forge") {
+        if (isForge) {
             attributes["MixinConfigs"] = "world-host.mixins.json"
         }
     }

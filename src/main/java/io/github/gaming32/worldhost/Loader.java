@@ -3,12 +3,16 @@ package io.github.gaming32.worldhost;
 import java.util.Locale;
 
 public enum Loader {
-    FABRIC, FORGE;
+    FABRIC, FORGE, NEOFORGE;
 
     private final String lowercase = name().toLowerCase(Locale.ROOT);
 
     @Override
     public String toString() {
         return lowercase;
+    }
+
+    public boolean isForgeLike() {
+        return this == FORGE || this == NEOFORGE;
     }
 }

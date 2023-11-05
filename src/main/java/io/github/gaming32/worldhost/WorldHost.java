@@ -90,14 +90,25 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraft.client.gui.screens.Screen;
 //$$ import net.minecraft.server.packs.PackType;
 //$$ import net.minecraft.server.packs.PackResources;
+//#if FORGE
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
 //$$ import net.minecraftforge.fml.ModList;
 //$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+//#else
+//$$ import net.neoforged.api.distmarker.Dist;
+//$$ import net.neoforged.bus.api.SubscribeEvent;
+//$$ import net.neoforged.fml.ModList;
+//$$ import net.neoforged.fml.ModLoadingContext;
+//$$ import net.neoforged.fml.common.Mod;
+//$$ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+//#endif
 //$$ import java.util.function.BiFunction;
-//#if MC >= 1.19.2
+//#if NEOFORGE
+//$$ import net.neoforged.neoforge.client.ConfigScreenHandler;
+//#elseif MC >= 1.19.2
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
 //#elseif MC >= 1.18.2
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
@@ -106,7 +117,9 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //#else
 //$$ import net.minecraftforge.fml.ExtensionPoint;
 //#endif
-//#if MC > 1.17.1
+//#if NEOFORGE
+//$$ import net.neoforged.neoforge.resource.ResourcePackLoader;
+//#elseif MC > 1.17.1
 //$$ import net.minecraftforge.resource.ResourcePackLoader;
 //#elseif MC > 1.16.5
 //$$ import net.minecraftforge.fmllegacy.packs.ResourcePackLoader;
@@ -115,7 +128,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //#endif
 //#endif
 
-//#if FORGE
+//#if FORGELIKE
 //$$ @Mod(WorldHost.MOD_ID)
 //#endif
 public class WorldHost
@@ -124,7 +137,7 @@ public class WorldHost
     //#endif
 {
     public static final String MOD_ID =
-        //#if FORGE
+        //#if FORGELIKE
         //$$ "world_host";
         //#else
         "world-host";
@@ -138,7 +151,9 @@ public class WorldHost
         //#endif
 
     public static final Loader MOD_LOADER =
-        //#if FORGE
+        //#if NEOFORGE
+        //$$ Loader.NEOFORGE;
+        //#elseif FORGE
         //$$ Loader.FORGE;
         //#else
         Loader.FABRIC;
@@ -573,7 +588,7 @@ public class WorldHost
         //#if MC >= 1.19.4
         return new ServerStatus(
             Components.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
-            //#if FORGE
+            //#if FORGELIKE
             //$$ , Optional.empty()
             //#endif
         );
@@ -784,7 +799,7 @@ public class WorldHost
     }
     //#endif
 
-    //#if FORGE
+    //#if FORGELIKE
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     //$$ public static class ClientModEvents {
     //$$     @SubscribeEvent

@@ -1,5 +1,9 @@
 modLoader = "javafml"
-loaderVersion = "[32,)"
+##if FORGE
+#?? loaderVersion = "[32,)"
+##else
+loaderVersion = "[1,)"
+##endif
 issueTrackerURL = "https://github.com/Gaming32/world-host/issues"
 license = "MIT"
 
@@ -12,10 +16,20 @@ logoFile = "icon.png"
 authors = "Gaming32"
 description = "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser."
 
+##if NEOFORGE
+#?? [[mixins]]
+#?? config = "world-host.mixins.json"
+##endif
+
 [[dependencies.world_host]]
-modId = "forge"
+##if FORGE
+#?? modId = "forge"
+#?? versionRange = "[32,)"
+##else
+modId = "neoforge"
+versionRange = "[20,)"
+##endif
 mandatory = true
-versionRange = "[32,)"
 ordering = "NONE"
 side = "BOTH"
 
