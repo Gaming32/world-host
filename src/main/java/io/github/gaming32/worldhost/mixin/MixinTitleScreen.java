@@ -20,7 +20,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //$$ import net.fabricmc.loader.api.FabricLoader;
 //#endif
 //#else
-//#if MC > 1.17.1
+//#if NEOFORGE
+//$$ import net.neoforged.neoforge.internal.BrandingControl;
+//#elseif MC > 1.17.1
 //$$ import net.minecraftforge.internal.BrandingControl;
 //#elseif MC > 1.16.5
 //$$ import net.minecraftforge.fmllegacy.BrandingControl;
