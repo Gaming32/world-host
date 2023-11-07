@@ -1,4 +1,3 @@
-import com.modrinth.minotaur.ModrinthExtension
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
 import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
@@ -305,14 +304,8 @@ preprocess {
 
 modrinth {
     val isStaging = true
-    token.set(
-        project.properties["modrinth.token${if (isStaging) ".staging" else ""}"] as String?
-            ?: System.getenv("MODRINTH_TOKEN${if (isStaging) "_STAGING" else ""}")
-    )
-    if (isStaging) {
-        apiUrl.set(ModrinthExtension.STAGING_API_URL)
-    }
-    projectId.set("world-host")
+    token.set(project.properties["modrinth.token"] as String? ?: System.getenv("MODRINTH_TOKEN"))
+    projectId.set(if (isStaging) "world-host-staging" else "world-host")
     versionNumber.set(version.toString())
     val loadersText = when {
         isFabric -> "Fabric/Quilt"
@@ -335,7 +328,7 @@ modrinth {
     }
     dependencies {
         if (isFabric) {
-            optional.project(if (isStaging) "fred-3" else "modmenu")
+            optional.project("modmenu")
         }
     }
     rootProject.file("changelogs/$modVersion.md").let {
