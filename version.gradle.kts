@@ -409,6 +409,7 @@ tasks.withType<RemapJarTask> {
             attributes["MixinConfigs"] = "world-host.mixins.json"
         }
     }
+    from("$rootDir/LICENSE")
 }
 
 val mcJavaVersion = (minecraft as MinecraftProvider).minecraftData.metadata.javaVersion
