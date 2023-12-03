@@ -1,7 +1,6 @@
 plugins {
-//    `kotlin-dsl`
     id("dev.deftu.gradle.preprocess-root") version "0.4.2"
-    id("xyz.wagyourtail.unimined") version "1.1.0-SNAPSHOT" apply false
+    id("xyz.wagyourtail.unimined") version "1.1.0" apply false
 }
 
 repositories {
