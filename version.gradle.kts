@@ -1,7 +1,6 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
 import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
-import xyz.wagyourtail.unimined.api.minecraft.MinecraftConfig
 import xyz.wagyourtail.unimined.api.task.ExportMappingsTask
 import xyz.wagyourtail.unimined.api.task.RemapJarTask
 import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
