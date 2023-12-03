@@ -48,7 +48,6 @@ repositories {
     mavenCentral()
 }
 
-lateinit var minecraft: MinecraftConfig
 unimined.minecraft {
     version(mcVersionString)
     if (mcVersion != 1_20_01 || !isForge) {
@@ -106,9 +105,8 @@ unimined.minecraft {
         }
         else -> throw IllegalStateException()
     }
-
-    minecraft = this
 }
+val minecraft = unimined.minecrafts[sourceSets.main.get()]
 
 // jank hax to pretend to be arch-loom
 class LoomGradleExtension : GroovyObjectSupport() {
