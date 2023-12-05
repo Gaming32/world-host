@@ -58,6 +58,7 @@ unimined.minecraft {
         searge()
         mojmap()
         when {
+            mcVersion >= 1_20_02 -> "1.20.2:2023.10.22"
             mcVersion >= 1_20_01 -> "1.20.1:2023.09.03"
             mcVersion >= 1_19_04 -> "1.19.4:2023.06.26"
             mcVersion >= 1_19_03 -> "1.19.3:2023.06.25"
@@ -98,9 +99,13 @@ unimined.minecraft {
         }
         isNeoForge -> neoForged {
             loader(when (mcVersion) {
-                1_20_02 -> "35-beta"
+                1_20_02 -> "86"
+                1_20_03 -> "1-beta"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
             })
+            minecraftRemapper.config {
+                ignoreConflicts(true)
+            }
         }
         else -> throw IllegalStateException()
     }
@@ -205,9 +210,9 @@ dependencies {
         bundle(dependency)
     }
 
-    bundleImplementation("org.quiltmc.qup:json:0.2.0")
+    bundleImplementation("org.quiltmc.parsers:json:0.2.1")
     if (isForgeLike) {
-        "minecraftLibraries"("org.quiltmc.qup:json:0.2.0")
+        "minecraftLibraries"("org.quiltmc.parsers:json:0.2.1")
     }
 
     //TODO: bump to unimined 1.1.0+ to use these, also enable the processor in unimined's mixin config settings
@@ -218,9 +223,10 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_20_02 -> "8.0.0-beta.2" // TODO: Update out of beta
-            1_20_01 -> "7.0.1"
-            1_19_04 -> "6.2.3"
+            1_20_03 -> "9.0.0-pre.1" // TODO: Update out of pre
+            1_20_02 -> "8.0.0"
+            1_20_01 -> "7.2.2"
+            1_19_04 -> "6.3.1"
             1_19_02 -> "4.2.0-beta.2"
             1_18_02 -> "3.2.5"
             1_17_01 -> "2.0.17"
@@ -234,17 +240,16 @@ dependencies {
         }
     }
 
-    if (!isNeoForge) { // TODO: Remove check when DevAuth for NeoForge is released (which depends on Arch)
-        modRuntimeOnly("me.djtheredstoner:DevAuth-${if (isFabric) "fabric" else "forge-latest"}:1.1.2")
-    }
+    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (isFabric) "fabric" else "forge-latest"}:1.1.2")
 
     if (isFabric) {
         when (mcVersion) {
-            1_20_02 -> "0.89.2+1.20.2"
-            1_20_01 -> "0.89.0+1.20.1"
-            1_19_04 -> "0.87.0+1.19.4"
-            1_19_02 -> "0.76.1+1.19.2"
-            1_18_02 -> "0.76.0+1.18.2"
+            1_20_03 -> "0.91.1+1.20.3"
+            1_20_02 -> "0.91.1+1.20.2"
+            1_20_01 -> "0.91.0+1.20.1"
+            1_19_04 -> "0.87.2+1.19.4"
+            1_19_02 -> "0.77.0+1.19.2"
+            1_18_02 -> "0.77.0+1.18.2"
             1_17_01 -> "0.46.1+1.17"
             1_16_05, 1_16_01 -> "0.42.0+1.16"
             else -> null

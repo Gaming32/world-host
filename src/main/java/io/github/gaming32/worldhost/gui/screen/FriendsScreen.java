@@ -60,15 +60,14 @@ public class FriendsScreen extends WorldHostScreen {
         super.init();
 
         if (list == null) {
-            list = new FriendsList(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64), 36);
+            list = new FriendsList();
             //#if MC > 1.16.1
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
             //#endif
-        } else {
-            list.updateSize(width, height, 32, height - (WorldHost.BEDROCK_SUPPORT ? 80 : 64));
         }
+        setListSize(list, 32, WorldHost.BEDROCK_SUPPORT ? 80 : 64);
         addWidget(list);
 
         addRenderableWidget(
@@ -174,9 +173,17 @@ public class FriendsScreen extends WorldHostScreen {
     }
 
     public class FriendsList extends ObjectSelectionList<FriendsEntry> {
-        public FriendsList(int i, int j, int k, int l, int m) {
+        public FriendsList() {
             //noinspection DataFlowIssue
-            super(FriendsScreen.this.minecraft, i, j, k, l, m);
+            super(
+                FriendsScreen.this.minecraft,
+                //#if MC >= 1.20.3
+                0, 0, 0,
+                //#else
+                //$$ 0, 0, 0, 0,
+                //#endif
+                36
+            );
         }
 
         //#if MC >= 1.20.2
@@ -184,6 +191,17 @@ public class FriendsScreen extends WorldHostScreen {
         protected void renderDecorations(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
             super.renderDecorations(graphics, mouseX, mouseY);
             graphics.setColor(0.25f, 0.25f, 0.25f, 1f);
+            //#if MC >= 1.20.3
+            final int x0 = getX();
+            final int x1 = getRight();
+            final int y0 = getY();
+            final int y1 = getBottom();
+            //#else
+            //$$ final int x0 = this.x0;
+            //$$ final int x1 = this.x1;
+            //$$ final int y0 = this.y0;
+            //$$ final int y1 = this.y1;
+            //#endif
             graphics.blit(BACKGROUND_LOCATION, x0, 0, 0f, 0f, width, y0, 32, 32);
             graphics.blit(BACKGROUND_LOCATION, x0, y1, 0f, y1, width, height - y1, 32, 32);
             graphics.setColor(1f, 1f, 1f, 1f);

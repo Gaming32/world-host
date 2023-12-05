@@ -37,8 +37,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.quiltmc.qup.json.JsonReader;
-import org.quiltmc.qup.json.JsonWriter;
+import org.quiltmc.parsers.json.JsonReader;
+import org.quiltmc.parsers.json.JsonWriter;
 
 import java.io.*;
 import java.net.InetAddress;

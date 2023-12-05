@@ -67,13 +67,12 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         assert minecraft != null;
         sendRepeatEvents(true);
         if (list == null) {
-            list = new OnlineFriendsList(minecraft, width, height, 60, height - 64, 36);
+            list = new OnlineFriendsList();
             WorldHost.ONLINE_FRIENDS.forEach((u, c) -> list.addEntry(new OnlineFriendsListEntry(u, c)));
             WorldHost.pingFriends();
             WorldHost.ONLINE_FRIEND_UPDATES.add(this);
-        } else {
-            list.updateSize(width, height, 60, height - 64);
         }
+        setListSize(list, 60, 64);
         addWidget(list);
 
         joinButton = addRenderableWidget(
@@ -231,8 +230,17 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     }
 
     public class OnlineFriendsList extends ObjectSelectionList<OnlineFriendsListEntry> {
-        public OnlineFriendsList(Minecraft minecraftClient, int i, int j, int k, int l, int m) {
-            super(minecraftClient, i, j, k, l, m);
+        public OnlineFriendsList() {
+            //noinspection DataFlowIssue
+            super(
+                OnlineFriendsScreen.this.minecraft,
+                //#if MC >= 1.20.3
+                0, 0, 0,
+                //#else
+                //$$ 0, 0, 0, 0,
+                //#endif
+                36
+            );
         }
 
         @Nullable

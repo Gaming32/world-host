@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.gui.screen;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.versions.ButtonBuilder;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -400,6 +401,14 @@ public abstract class WorldHostScreen extends Screen {
         //$$ super.renderBackground(context);
         //#else
         super.renderBackground(context, mouseX, mouseY, delta);
+        //#endif
+    }
+
+    public void setListSize(AbstractSelectionList<?> list, int topMargin, int bottomMargin) {
+        //#if MC >= 1.20.3
+        list.setRectangle(width, height - bottomMargin - topMargin, 0, topMargin);
+        //#else
+        //$$ list.updateSize(width, height, topMargin, height - bottomMargin);
         //#endif
     }
 }
