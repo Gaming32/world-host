@@ -23,7 +23,7 @@ jobs:
         with:
           java-version: 17
       - name: Build with Gradle
-        run: ./gradlew build --info --stacktrace
+        run: ./gradlew build --stacktrace
       - name: Capture build artifacts
         uses: actions/upload-artifact@v2
         with:
