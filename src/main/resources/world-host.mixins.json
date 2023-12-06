@@ -5,6 +5,7 @@
   "compatibilityLevel": "$java_version",
   "mixins": [
     "MixinCommands",
+    "MixinLevelSummary",
     "MixinPublishCommand",
     "ServerConnectionListenerAccessor"
   ],
@@ -23,9 +24,9 @@
     "MixinTitleScreen",
     "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
-    "ServerStatusPingerAccessor"
+    "ServerStatusPingerAccessor",
     //#if FABRIC && MC > 1.16.1
-    , "modmenu.MixinModMenuEventHandler"
+    "modmenu.MixinModMenuEventHandler"
     //#endif
   ],
   "injectors": {

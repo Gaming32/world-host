@@ -113,8 +113,8 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
 
     @Inject(method = "setUUID", at = @At("TAIL"))
     private void shareWorldOnLoad(UUID uuid, CallbackInfo ci) {
-        if (!WorldHost.shareWorldOnLoadReal) return;
-        WorldHost.shareWorldOnLoadReal = false;
+        if (!WorldHost.shareWorldOnLoad) return;
+        WorldHost.shareWorldOnLoad = false;
         final Component message;
         if (publishServer(worldData.getGameType(), worldData.getAllowCommands(), HttpUtil.getAvailablePort())) {
             message = wh$getOpenedMessage();

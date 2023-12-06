@@ -211,8 +211,7 @@ public class WorldHost
     private static int delayIndex = 0;
     private static Future<Void> connectingFuture;
 
-    public static boolean shareWorldOnLoadUi;
-    public static boolean shareWorldOnLoadReal;
+    public static boolean shareWorldOnLoad;
 
     //#if FABRIC
     @Override

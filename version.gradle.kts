@@ -240,7 +240,10 @@ dependencies {
         }
     }
 
-    modRuntimeOnly("me.djtheredstoner:DevAuth-${if (isFabric) "fabric" else "forge-latest"}:1.1.2")
+    // TODO: Remove this if when DevAuth gets Neo support on Maven
+    if (!isNeoForge) {
+        modRuntimeOnly("me.djtheredstoner:DevAuth-${if (isFabric) "fabric" else "forge-latest"}:1.1.2")
+    }
 
     if (isFabric) {
         when (mcVersion) {
