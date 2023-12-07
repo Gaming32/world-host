@@ -322,11 +322,12 @@ modrinth {
     uploadFile.set(tasks.named("remapJar"))
     additionalFiles.add(tasks.named("sourcesJar"))
     gameVersions.add(mcVersionString)
-    if (mcVersion == 1_19_04) {
-        gameVersions.add("23w13a_or_b")
-    } else if (mcVersion == 1_20_01) {
-        gameVersions.add("1.20")
-    }
+    when (mcVersion) {
+        1_19_04 -> "23w13a_or_b"
+        1_20_01 -> "1.20"
+        1_20_03 -> "1.20.4" // TODO: Invert this when 1.20.4 is buildable
+        else -> null
+    }?.let(gameVersions::add)
     loaders.add(loaderName)
     if (isFabric) {
         loaders.add("quilt")

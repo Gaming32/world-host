@@ -35,7 +35,7 @@ public class Components {
         //#if MC >= 1.20.3
         return Component.translatableEscape(key, args);
         //#elseif MC >= 1.19.1
-        //$$return Component.translatable(key, args);
+        //$$ return Component.translatable(key, args);
         //#else
         //$$ return new TranslatableComponent(key, args);
         //#endif

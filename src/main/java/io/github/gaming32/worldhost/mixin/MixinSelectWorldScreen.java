@@ -78,12 +78,12 @@ public class MixinSelectWorldScreen extends Screen implements SelectWorldScreenE
         //#else
         //$$ wh$shareButton = addButton(
         //#endif
-            WorldHostScreen.button(Components.translatable("world-host.share_world"), b -> {
+            WorldHostScreen.button(Components.translatable("world-host.share_world"), b ->
                 list.getSelectedOpt().ifPresent(worldListEntry -> {
                     wh$shareButtonPressed = true;
                     worldListEntry.joinWorld();
-                });
-            }).pos(width / 2 - 50, height - 52)
+                })
+            ).pos(width / 2 - 50, height - 52)
                 .width(100)
                 .build()
         );
@@ -128,9 +128,9 @@ public class MixinSelectWorldScreen extends Screen implements SelectWorldScreenE
     //#else
     //$$ private void updateShareButtonStatus(
     //$$     boolean active,
-    //$$     //#if MC > 1.19.2
-    //$$     boolean bl2,
-    //$$     //#endif
+        //#if MC > 1.19.2
+        //$$ boolean bl2,
+        //#endif
     //$$     CallbackInfo ci
     //$$ ) {
     //$$     if (wh$shareButton != null) {
