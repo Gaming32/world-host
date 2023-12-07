@@ -100,7 +100,7 @@ unimined.minecraft {
         isNeoForge -> neoForged {
             loader(when (mcVersion) {
                 1_20_02 -> "86"
-                1_20_03 -> "1-beta"
+                1_20_04 -> "2-beta"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
             })
             minecraftRemapper.config {
@@ -223,7 +223,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_20_03 -> "9.0.0-pre.1" // TODO: Update out of pre
+            1_20_04 -> "9.0.0-pre.1" // TODO: Update out of pre
             1_20_02 -> "8.0.0"
             1_20_01 -> "7.2.2"
             1_19_04 -> "6.3.1"
@@ -247,7 +247,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_20_03 -> "0.91.1+1.20.3"
+            1_20_04 -> "0.91.1+1.20.3"
             1_20_02 -> "0.91.1+1.20.2"
             1_20_01 -> "0.91.0+1.20.1"
             1_19_04 -> "0.87.2+1.19.4"
@@ -325,7 +325,7 @@ modrinth {
     when (mcVersion) {
         1_19_04 -> "23w13a_or_b"
         1_20_01 -> "1.20"
-        1_20_03 -> "1.20.4" // TODO: Invert this when 1.20.4 is buildable
+        1_20_04 -> "1.20.3"
         else -> null
     }?.let(gameVersions::add)
     loaders.add(loaderName)
