@@ -36,9 +36,9 @@ import net.minecraft.client.gui.GuiGraphics;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
-//#if MC >= 1.19.4 && FABRIC
-import de.florianmichael.viafabricplus.base.settings.groups.GeneralSettings;
-import io.github.gaming32.worldhost.versions.ButtonBuilder;
+//#if MC >= 1.20.4 && FABRIC
+import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
+import de.florianmichael.viafabricplus.settings.impl.GeneralSettings;
 import net.fabricmc.loader.api.FabricLoader;
 //#if MC >= 1.20.1
 import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
@@ -117,33 +117,24 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
         updateButtonActivationStates();
 
-        //#if MC >= 1.19.4 && FABRIC
+        //#if MC >= 1.20.4 && FABRIC
         if (FabricLoader.getInstance().isModLoaded("viafabricplus")) {
             vfpInit();
         }
         //#endif
     }
 
-    //#if MC >= 1.19.4 && FABRIC
-    // Based on https://github.com/ViaVersion/ViaFabricPlus/blob/main/src/main/java/de/florianmichael/viafabricplus/injection/mixin/base/MixinMultiplayerScreen.java
+    //#if MC >= 1.20.4 && FABRIC
+    // Based on https://github.com/ViaVersion/ViaFabricPlus/blob/main/src/main/java/de/florianmichael/viafabricplus/injection/mixin/base/integration/MixinMultiplayerScreen.java
     private void vfpInit() {
-        final ButtonBuilder builder = button(
-            Components.literal("ViaFabricPlus"),
-            b -> ProtocolSelectionScreen.INSTANCE.open(this)
+        Button.Builder builder = Button.builder(
+            Component.literal("ViaFabricPlus"),
+            button -> ProtocolSelectionScreen.INSTANCE.open(this)
+        ).size(98, 20);
+        builder = GeneralSettings.withOrientation(
+            builder, GeneralSettings.global().multiplayerScreenButtonOrientation.getIndex(), width, height
         );
-
-        //#if MC >= 1.20.1
-        switch (GeneralSettings.INSTANCE.multiplayerScreenButtonOrientation.getIndex()) {
-        //#else
-        //$$ switch (GeneralSettings.INSTANCE.mainButtonOrientation.getIndex()) {
-        //#endif
-            case 0 -> builder.pos(5, 5);
-            case 1 -> builder.pos(width - 98 - 5, 5);
-            case 2 -> builder.pos(5, height - 20 - 5);
-            case 3 -> builder.pos(width - 95 - 5, height - 20 - 5);
-        }
-
-        addRenderableWidget(builder.width(98).build());
+        addRenderableWidget(builder.build());
     }
     //#endif
 

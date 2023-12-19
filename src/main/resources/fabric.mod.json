@@ -42,8 +42,6 @@
   "breaks": {
     //#if MC == 1.19.4
     //?? "modmenu": "<6.2.0"
-    //#elseif MC == 1.20.1
-    //?? "viafabricplus": "<2.8.5"
     //#endif
   },
   "suggests": {

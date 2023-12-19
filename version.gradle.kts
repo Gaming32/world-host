@@ -267,17 +267,9 @@ dependencies {
         modCompileOnly("dev.isxander:main-menu-credits:1.1.2")
     }
 
-    if (isFabric) {
-        when {
-            mcVersion >= 1_20_02 -> "2.9.0"
-            mcVersion >= 1_20_01 -> "2.8.7-SNAPSHOT"
-            mcVersion >= 1_20_00 -> "2.7.6"
-            mcVersion >= 1_19_04 -> "2.7.5"
-            else -> null
-        }?.let {
-            modCompileOnly("de.florianmichael:viafabricplus:$it") {
-                isTransitive = false
-            }
+    if (isFabric && mcVersion >= 1_20_04) {
+        modCompileOnly("de.florianmichael:viafabricplus:3.0.2") {
+            isTransitive = false
         }
     }
 
