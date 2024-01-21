@@ -27,7 +27,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
@@ -71,12 +70,12 @@ import net.minecraft.server.Services;
 //#else
 //$$ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 //$$ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-//$$ import net.minecraft.client.resources.DefaultPlayerSkin;
 //$$ import net.minecraft.world.entity.player.Player;
 //#endif
 
 //#if MC >= 1.20.2
 import com.mojang.authlib.yggdrasil.ProfileResult;
+import net.minecraft.client.resources.PlayerSkin;
 //#endif
 
 //#if FABRIC
@@ -499,25 +498,27 @@ public class WorldHost
         final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
         //#if MC >= 1.20.2
         return skinManager.getOrLoad(gameProfile).thenApply(PlayerSkin::texture);
+        //#elseif MC >= 1.19.2
+        //$$ return CompletableFuture.completedFuture(skinManager.getInsecureSkinLocation(gameProfile));
         //#else
-        //$$ return CompletableFuture.supplyAsync(() -> {
-        //$$     //#if MC >= 1.19.2
-        //$$     //$$ return skinManager.getInsecureSkinLocation(gameProfile);
-        //$$     //#else
-        //$$     //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
-        //$$     //$$     .get(MinecraftProfileTexture.Type.SKIN);
-        //$$     //$$ return texture != null
-        //$$     //$$     ? skinManager.registerTexture(texture, MinecraftProfileTexture.Type.SKIN)
-        //$$     //$$     : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
-        //$$     //#endif
-        //$$ }, Util.backgroundExecutor());
+        //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
+        //$$     .get(MinecraftProfileTexture.Type.SKIN);
+        //$$ return CompletableFuture.completedFuture(
+        //$$     texture != null
+        //$$         ? skinManager.registerTexture(texture, MinecraftProfileTexture.Type.SKIN)
+        //$$         : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile))
+        //$$ );
         //#endif
     }
 
     public static ResourceLocation getSkinLocationNow(GameProfile gameProfile) {
         final ResourceLocation location = getInsecureSkinLocation(gameProfile).getNow(null);
         if (location == null) {
+            //#if MC >= 1.20.2
             return DefaultPlayerSkin.get(gameProfile).texture();
+            //#else
+            //$$ return DefaultPlayerSkin.getDefaultSkin(gameProfile.getId());
+            //#endif
         }
         return location;
     }
