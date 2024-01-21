@@ -258,7 +258,7 @@ public class FriendsScreen extends WorldHostScreen {
             //#endif
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {
-            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(profile);
+            final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(profile);
             WorldHost.color(1f, 1f, 1f, 1f);
             RenderSystem.enableBlend();
             blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);

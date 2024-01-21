@@ -26,6 +26,8 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
+import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
@@ -48,6 +50,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -492,19 +495,31 @@ public class WorldHost
         return profileCache;
     }
 
-    public static ResourceLocation getInsecureSkinLocation(GameProfile gameProfile) {
+    public static CompletableFuture<ResourceLocation> getInsecureSkinLocation(GameProfile gameProfile) {
         final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
         //#if MC >= 1.20.2
-        return skinManager.getInsecureSkin(gameProfile).texture();
-        //#elseif MC >= 1.19.2
-        //$$ return skinManager.getInsecureSkinLocation(gameProfile);
+        return skinManager.getOrLoad(gameProfile).thenApply(PlayerSkin::texture);
         //#else
-        //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
-        //$$     .get(MinecraftProfileTexture.Type.SKIN);
-        //$$ return texture != null
-        //$$     ? skinManager.registerTexture(texture, MinecraftProfileTexture.Type.SKIN)
-        //$$     : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
+        //$$ return CompletableFuture.supplyAsync(() -> {
+        //$$     //#if MC >= 1.19.2
+        //$$     //$$ return skinManager.getInsecureSkinLocation(gameProfile);
+        //$$     //#else
+        //$$     //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
+        //$$     //$$     .get(MinecraftProfileTexture.Type.SKIN);
+        //$$     //$$ return texture != null
+        //$$     //$$     ? skinManager.registerTexture(texture, MinecraftProfileTexture.Type.SKIN)
+        //$$     //$$     : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile));
+        //$$     //#endif
+        //$$ }, Util.backgroundExecutor());
         //#endif
+    }
+
+    public static ResourceLocation getSkinLocationNow(GameProfile gameProfile) {
+        final ResourceLocation location = getInsecureSkinLocation(gameProfile).getNow(null);
+        if (location == null) {
+            return DefaultPlayerSkin.get(gameProfile).texture();
+        }
+        return location;
     }
 
     public static void getMaybeAsync(GameProfileCache cache, String name, Consumer<Optional<GameProfile>> action) {
@@ -563,8 +578,7 @@ public class WorldHost
     public static void showFriendOrOnlineToast(UUID user, String title, String description, int ticks, Runnable clickAction) {
         Util.backgroundExecutor().execute(() -> {
             final GameProfile profile = fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), user);
-            Minecraft.getInstance().execute(() -> {
-                final ResourceLocation skinTexture = getInsecureSkinLocation(profile);
+            getInsecureSkinLocation(profile).thenAcceptAsync(skinTexture -> {
                 WHToast.builder(Components.translatable(title, getName(profile)))
                     .description(Components.translatable(description))
                     .icon((context, x, y, width, height) -> {
@@ -576,7 +590,7 @@ public class WorldHost
                     .ticks(ticks)
                     .important()
                     .show();
-            });
+            }, Minecraft.getInstance());
         });
     }
 

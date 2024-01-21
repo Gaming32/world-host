@@ -375,7 +375,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             // Since when does a value marked as @Nullable never satisfy == null?
             //noinspection ConstantValue
             if (icon == null) {
-                final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(profile);
+                final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(profile);
                 RenderSystem.enableBlend();
                 blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
                 blit(context, skinTexture, x, y, 32, 32, 40, 8, 8, 8, 64, 64);

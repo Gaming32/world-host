@@ -173,7 +173,7 @@ public class AddFriendScreen extends WorldHostScreen {
 
         if (friendProfile != null) {
             assert minecraft != null;
-            final ResourceLocation skinTexture = WorldHost.getInsecureSkinLocation(friendProfile);
+            final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(friendProfile);
             WorldHost.color(1f, 1f, 1f, 1f);
             RenderSystem.enableBlend();
             final int size = addFriendButton.getY() - 110;
