@@ -48,7 +48,12 @@ import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
     private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
-    private static final ResourceLocation GUI_SERVER_SELECTION_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+    //#if MC >= 1.20.2
+    private static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/join_highlighted");
+    private static final ResourceLocation JOIN_SPRITE = new ResourceLocation("server_list/join");
+    //#else
+    //$$ private static final ResourceLocation GUI_SERVER_SELECTION_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+    //#endif
 
     private final Screen parent;
     private OnlineFriendsList list;
@@ -401,11 +406,19 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             ) {
                 fill(context, x, y, x + 32, y + 32, 0xa0909090);
                 WorldHost.color(1.0F, 1.0F, 1.0F, 1.0F);
+                //#if MC >= 1.20.2
                 if (relX < 32 && relX > 16) {
-                    blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
+                    context.blitSprite(JOIN_HIGHLIGHTED_SPRITE, x, y, 32, 32);
                 } else {
-                    blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
+                    context.blitSprite(JOIN_SPRITE, x, y, 32, 32);
                 }
+                //#else
+                //$$ if (relX < 32 && relX > 16) {
+                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
+                //$$ } else {
+                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
+                //$$ }
+                //#endif
             }
         }
 
