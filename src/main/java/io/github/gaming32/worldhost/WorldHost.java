@@ -87,7 +87,6 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //#endif
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
-//$$ import net.minecraft.client.gui.screens.Screen;
 //$$ import net.minecraft.server.packs.PackType;
 //$$ import net.minecraft.server.packs.PackResources;
 //#if FORGE
@@ -239,6 +238,9 @@ public class WorldHost
                 //$$ .getPackFor(MOD_ID)
                 //#else
                 //$$ .getResourcePackFor(MOD_ID)
+                //#endif
+                //#if MC >= 1.20.4
+                //$$ .map(c -> c.openPrimary("worldhost"))
                 //#endif
             //$$     .map(c -> {
                     //#if MC <= 1.19.2

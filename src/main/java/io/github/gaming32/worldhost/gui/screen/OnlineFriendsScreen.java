@@ -37,7 +37,6 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 //#if MC >= 1.20.4 && FABRIC
-import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 import de.florianmichael.viafabricplus.settings.impl.GeneralSettings;
 import net.fabricmc.loader.api.FabricLoader;
 //#if MC >= 1.20.1

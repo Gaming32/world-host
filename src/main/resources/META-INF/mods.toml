@@ -29,19 +29,27 @@ description = "Host your singleplayer worlds without having to run a server or s
 modId = "neoforge"
 versionRange = "[20,)"
 ##endif
-mandatory = true
+##if MC < 1.20.4
+#?? mandatory = true
+##else
+type = "required"
+##endif
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.world_host]]
 modId = "minecraft"
-mandatory = true
 ##if MC == 1.20.1
 #?? versionRange = "[1.20,1.20.2)"
 ##elseif MC == 1.20.4
 versionRange = "[1.20.3,1.20.5)"
 ##else
 #?? versionRange = "$mc_version"
+##endif
+##if MC < 1.20.4
+#?? mandatory = true
+##else
+type = "required"
 ##endif
 ordering = "NONE"
 side = "BOTH"
