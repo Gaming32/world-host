@@ -79,8 +79,9 @@ public class WorldHostConfig {
                 case "allowFriendRequests" -> allowFriendRequests = reader.nextBoolean();
                 case "announceFriendsOnline" -> announceFriendsOnline = reader.nextBoolean();
                 case "friends" -> {
-                    friends.clear();
+                    WorldHost.LOGGER.info("Found old friends list.");
                     reader.beginArray();
+                    friends.clear();
                     while (reader.hasNext()) {
                         friends.add(UUID.fromString(reader.nextString()));
                     }
@@ -95,6 +96,15 @@ public class WorldHostConfig {
         reader.endObject();
     }
 
+    public void readFriends(JsonReader reader) throws IOException {
+        reader.beginArray();
+        friends.clear();
+        while (reader.hasNext()) {
+            friends.add(UUID.fromString(reader.nextString()));
+        }
+        reader.endArray();
+    }
+
     public void write(JsonWriter writer) throws IOException {
         writer.beginObject();
         writer.name("serverIp").value(serverIp);
@@ -107,14 +117,15 @@ public class WorldHostConfig {
         writer.name("shareButton").value(shareButton);
         writer.name("allowFriendRequests").value(allowFriendRequests);
         writer.name("announceFriendsOnline").value(announceFriendsOnline);
+        writer.endObject();
+    }
 
-        writer.name("friends").beginArray();
+    public void writeFriends(JsonWriter writer) throws IOException {
+        writer.beginArray();
         for (final UUID friend : friends) {
             writer.value(friend.toString());
         }
         writer.endArray();
-
-        writer.endObject();
     }
 
     public String getServerIp() {

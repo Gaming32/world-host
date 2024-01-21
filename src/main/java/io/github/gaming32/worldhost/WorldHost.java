@@ -176,6 +176,7 @@ public class WorldHost
 
     public static final File CONFIG_DIR = new File(GAME_DIR, "config");
     public static final Path CONFIG_FILE = new File(CONFIG_DIR, "world-host.json5").toPath();
+    public static final Path FRIENDS_FILE = new File(CONFIG_DIR, "world-host-friends.json").toPath();
     public static final Path OLD_CONFIG_FILE = new File(CONFIG_DIR, "world-host.json").toPath();
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
@@ -331,8 +332,14 @@ public class WorldHost
             } catch (IOException e1) {
                 LOGGER.error("Failed to load old {}.", OLD_CONFIG_FILE.getFileName(), e1);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to load {}.", CONFIG_FILE.getFileName(), e);
+        }
+        try (JsonReader reader = JsonReader.json(FRIENDS_FILE)) {
+            CONFIG.readFriends(reader);
+        } catch (NoSuchFileException ignored) {
+        } catch (Exception e) {
+            LOGGER.error("Failed to load {}.", FRIENDS_FILE.getFileName(), e);
         }
         saveConfig();
     }
@@ -343,8 +350,16 @@ public class WorldHost
             try (JsonWriter writer = JsonWriter.json5(CONFIG_FILE)) {
                 CONFIG.write(writer);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to write {}.", CONFIG_FILE.getFileName(), e);
+        }
+        try {
+            Files.createDirectories(FRIENDS_FILE.getParent());
+            try (JsonWriter writer = JsonWriter.json(FRIENDS_FILE)) {
+                CONFIG.writeFriends(writer);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to write {}.", FRIENDS_FILE.getFileName(), e);
         }
     }
 
