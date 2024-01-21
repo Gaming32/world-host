@@ -37,7 +37,7 @@ base.archivesName.set(rootProject.name)
 // to MMmmPP
 val mcVersion by extra(mcVersionString.split(".").map { it.toInt() }
     .let {
-        it[0] * 1_00_00 + it[1] * 1_00 + (if (it.size == 2 || it[2] == 0) 0 else it[2])
+        it[0] * 1_00_00 + it[1] * 1_00 + it.getOrElse(2) { 0 }
     })
 
 println("MC_VERSION: $mcVersionString $mcVersion")
