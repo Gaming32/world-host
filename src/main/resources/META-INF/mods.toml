@@ -9,6 +9,7 @@ license = "MIT"
 
 [[mods]]
 modId = "world_host"
+namespace = "world-host"
 version = "$version"
 displayName = "World Host"
 displayURL = "https://modrinth.com/mod/world-host"

@@ -303,7 +303,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             Util.backgroundExecutor().execute(
                 () -> profile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), profile)
             );
-            iconTextureId = new ResourceLocation(WorldHost.MOD_ID, "servers/" + friendUuid + "/icon");
+            iconTextureId = new ResourceLocation("world-host", "servers/" + friendUuid + "/icon");
         }
 
         //#if MC >= 1.17.0
