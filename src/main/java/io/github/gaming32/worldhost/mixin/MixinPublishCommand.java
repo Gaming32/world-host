@@ -11,8 +11,7 @@ import net.minecraft.network.chat.MutableComponent;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 //#else
-//$$ import org.spongepowered.asm.mixin.injection.ModifyArgs;
-//$$ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+//$$ import org.spongepowered.asm.mixin.injection.ModifyArg;
 //#endif
 
 @Mixin(PublishCommand.class)
@@ -36,7 +35,7 @@ public class MixinPublishCommand {
         ));
     }
     //#else
-    //$$ @ModifyArgs(
+    //$$ @ModifyArg(
     //$$     method = "publish",
     //$$     at = @At(
     //$$         value = "INVOKE",
@@ -48,27 +47,44 @@ public class MixinPublishCommand {
                 //#endif
     //$$     )
     //$$ )
-    //$$ private static void getSuccessMessage(Args args) {
-    //$$     final Object[] tArgs = args.get(1);
-    //$$     final Object port = tArgs[0];
+    //$$ private static String getSuccessMessage(String key) {
     //$$     if (WorldHost.CONFIG.isEnableFriends()) {
-    //$$         args.setAll(
-    //$$             "world-host.lan_opened.friends",
-    //$$             new Object[] {
-    //$$                 Components.copyOnClickText(port)
-    //$$             }
-    //$$         );
-    //$$         return;
+    //$$         return "world-host.lan_opened.friends";
     //$$     }
     //$$     final String externalIp = WorldHost.getExternalIp();
-    //$$     if (externalIp == null) return;
-    //$$     args.setAll(
-    //$$         "world-host.lan_opened.no_friends",
-    //$$         new Object[] {
-    //$$             Components.copyOnClickText(externalIp),
+    //$$     if (externalIp == null) {
+    //$$         return key;
+    //$$     }
+    //$$     return "world-host.lan_opened.no_friends";
+    //$$ }
+    //$$
+    //$$ @ModifyArg(
+    //$$     method = "publish",
+    //$$     at = @At(
+    //$$         value = "INVOKE",
+    //$$         target =
+                //#if MC >= 1.19.2
+                //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
+                //#else
+                //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"
+                //#endif
+    //$$     )
+    //$$ )
+    //$$ private static Object[] getSuccessMessage(Object[] args) {
+    //$$     final Object port = args[0];
+    //$$     if (WorldHost.CONFIG.isEnableFriends()) {
+    //$$         return new Object[] {
     //$$             Components.copyOnClickText(port)
-    //$$         }
-    //$$     );
+    //$$         };
+    //$$     }
+    //$$     final String externalIp = WorldHost.getExternalIp();
+    //$$     if (externalIp == null) {
+    //$$         return args;
+    //$$     }
+    //$$     return new Object[] {
+    //$$         Components.copyOnClickText(externalIp),
+    //$$         Components.copyOnClickText(port)
+    //$$     };
     //$$ }
     //#endif
 }
