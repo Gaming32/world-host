@@ -1,3 +1,4 @@
+import com.google.gson.stream.JsonWriter
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
 import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
@@ -17,10 +18,8 @@ plugins {
     id("com.modrinth.minotaur") version "2.+"
 }
 
-
 fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
 fun Any.getGroovyProperty(name: String): Any = withGroovyBuilder { metaClass }.getProperty(this, name)!!
-
 
 val modVersion = project.properties["mod.version"] as String
 val mcVersionString by extra(name.substringBefore("-"))
@@ -179,7 +178,7 @@ repositories {
 println("loaderName: $loaderName")
 println("mcVersion: $mcVersion")
 
-val shade: Configuration by configurations.creating {
+val forgeJarJar: Configuration by configurations.creating {
     isTransitive = false
 }
 
@@ -201,7 +200,7 @@ dependencies {
         if (isFabric) {
             "include"(dependency)
         } else {
-            "shade"(dependency)
+            forgeJarJar(dependency)
         }
     }
 
@@ -402,7 +401,45 @@ tasks.processResources {
 }
 
 tasks.withType<RemapJarTask> {
-    shade.files.forEach { from(project.zipTree(it)) }
+    if (isForgeLike && !forgeJarJar.isEmpty) {
+        if (mcVersion >= 11800) {
+            val jarJarMetadata = temporaryDir.resolve("jarjar").resolve("metadata.json")
+            doFirst {
+                jarJarMetadata.parentFile.mkdirs()
+                jarJarMetadata.bufferedWriter().let(::JsonWriter).use { writer ->
+                    writer.setIndent("  ")
+                    writer.beginObject()
+                    writer.name("jars").beginArray()
+                    forgeJarJar.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+                        writer.beginObject()
+                        writer.name("identifier").beginObject()
+                        writer.name("group").value(artifact.moduleVersion.id.group)
+                        writer.name("artifact").value(artifact.moduleVersion.id.name)
+                        writer.endObject()
+                        writer.name("version").beginObject()
+                        writer.name("range").value("[${artifact.moduleVersion.id.version},)")
+                        writer.name("artifactVersion").value(artifact.moduleVersion.id.version)
+                        writer.endObject()
+                        writer.name("path").value("META-INF/jarjar/${artifact.file.name}")
+                        writer.name("isObfuscated").value(false)
+                        writer.endObject()
+                    }
+                    writer.endArray()
+                    writer.endObject()
+                }
+            }
+            forgeJarJar.files.forEach { file ->
+                from(file) {
+                    into("META-INF/jarjar")
+                }
+            }
+            from(jarJarMetadata) {
+                into("META-INF/jarjar")
+            }
+        } else {
+            forgeJarJar.files.forEach { from(zipTree(it)) }
+        }
+    }
     manifest {
         if (isForge) {
             attributes["MixinConfigs"] = "world-host.mixins.json"
