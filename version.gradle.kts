@@ -1,4 +1,3 @@
-import com.google.gson.stream.JsonWriter
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
 import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
@@ -197,7 +196,7 @@ minecraft.apply {
 
 dependencies {
     fun bundle(dependency: Any) {
-        if (isFabric) {
+        if (isFabric || mcVersion >= 1_18_00) {
             "include"(dependency)
         } else {
             forgeJarJar(dependency)
@@ -402,43 +401,7 @@ tasks.processResources {
 
 tasks.withType<RemapJarTask> {
     if (isForgeLike && !forgeJarJar.isEmpty) {
-        if (mcVersion >= 11800) {
-            val jarJarMetadata = temporaryDir.resolve("jarjar").resolve("metadata.json")
-            doFirst {
-                jarJarMetadata.parentFile.mkdirs()
-                jarJarMetadata.bufferedWriter().let(::JsonWriter).use { writer ->
-                    writer.setIndent("  ")
-                    writer.beginObject()
-                    writer.name("jars").beginArray()
-                    forgeJarJar.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
-                        writer.beginObject()
-                        writer.name("identifier").beginObject()
-                        writer.name("group").value(artifact.moduleVersion.id.group)
-                        writer.name("artifact").value(artifact.moduleVersion.id.name)
-                        writer.endObject()
-                        writer.name("version").beginObject()
-                        writer.name("range").value("[${artifact.moduleVersion.id.version},)")
-                        writer.name("artifactVersion").value(artifact.moduleVersion.id.version)
-                        writer.endObject()
-                        writer.name("path").value("META-INF/jarjar/${artifact.file.name}")
-                        writer.name("isObfuscated").value(false)
-                        writer.endObject()
-                    }
-                    writer.endArray()
-                    writer.endObject()
-                }
-            }
-            forgeJarJar.files.forEach { file ->
-                from(file) {
-                    into("META-INF/jarjar")
-                }
-            }
-            from(jarJarMetadata) {
-                into("META-INF/jarjar")
-            }
-        } else {
-            forgeJarJar.files.forEach { from(zipTree(it)) }
-        }
+        forgeJarJar.files.forEach { from(zipTree(it)) }
     }
     manifest {
         if (isForge) {
