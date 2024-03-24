@@ -28,7 +28,7 @@ public class MixinShareToLanScreen {
     //#if MC < 1.19.4
     //$$ @ModifyArgs(
     //$$     method =
-            //#if MC < 1.18.2
+            //#if MC < 1.17.1
             //#if FABRIC
             //$$ "lambda$init$0",
             //#else

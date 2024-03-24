@@ -247,14 +247,16 @@ public sealed interface WorldHostS2CMessage {
             final Component message = Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion);
             WorldHost.LOGGER.info(message.getString());
             if (!WorldHost.CONFIG.isShowOutdatedWorldHost()) return;
-            WHToast.builder("world-host.outdated_world_host")
-                .description(message)
-                .clickAction(() -> Util.getPlatform().openUri(
-                    "https://modrinth.com/mod/world-host/version/" +
-                        recommendedVersion + '+' + WorldHost.getModVersion("minecraft") + '-' + WorldHost.MOD_LOADER
-                ))
-                .ticks(200)
-                .show();
+            WorldHost.checkForUpdates().thenAcceptAsync(version -> {
+                if (version.isEmpty()) return;
+                WHToast.builder("world-host.outdated_world_host")
+                    .description(message)
+                    .clickAction(() -> Util.getPlatform().openUri(
+                        "https://modrinth.com/mod/world-host/version/" + version.get()
+                    ))
+                    .ticks(200)
+                    .show();
+            }, Minecraft.getInstance());
         }
     }
 
@@ -269,7 +271,6 @@ public sealed interface WorldHostS2CMessage {
                 if (parentScreen instanceof JoiningWorldHostScreen joinScreen) {
                     parentScreen = joinScreen.parent;
                 }
-                //noinspection DataFlowIssue // Why do I care if parentScreen is null?
                 minecraft.setScreen(new DisconnectedScreen(
                     parentScreen,
                     //#if MC > 1.16.1

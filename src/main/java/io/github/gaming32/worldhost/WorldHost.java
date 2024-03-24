@@ -36,13 +36,23 @@ import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
+import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -58,6 +68,7 @@ import static net.minecraft.commands.Commands.literal;
 
 //#if MC >= 1.18.0
 import com.mojang.logging.LogUtils;
+import org.semver4j.Semver;
 import org.slf4j.Logger;
 //#else
 //$$ import org.apache.logging.log4j.LogManager;
@@ -829,6 +840,78 @@ public class WorldHost
         return 0;
     }
     //#endif
+
+    public static <T> T httpGet(
+        CloseableHttpClient client,
+        String baseUri,
+        Consumer<URIBuilder> buildAction,
+        IOFunction<InputStream, T> handler
+    ) throws IOException {
+        final URI uri;
+        try {
+            final URIBuilder uriBuilder = new URIBuilder(baseUri);
+            buildAction.accept(uriBuilder);
+            uri = uriBuilder.build();
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+        try (CloseableHttpResponse response = client.execute(new HttpGet(uri))) {
+            final StatusLine status = response.getStatusLine();
+            if (status.getStatusCode() != 200) {
+                throw new IOException("Failed to GET " + uri + ": " + status.getStatusCode() + " " + status.getReasonPhrase());
+            }
+            final HttpEntity entity = response.getEntity();
+            if (entity == null) {
+                throw new IOException("GET " + uri + " returned no body.");
+            }
+            try (InputStream is = response.getEntity().getContent()) {
+                return handler.apply(is);
+            }
+        }
+    }
+
+    public static CompletableFuture<Optional<String>> checkForUpdates() {
+        return CompletableFuture.<Optional<String>>supplyAsync(() -> {
+            try (CloseableHttpClient client = HttpClients.createMinimal()) {
+                final String latestVersion = httpGet(
+                    client, "https://api.modrinth.com/v2/project/world-host/version",
+                    builder -> builder
+                        .addParameter("game_versions", "[\"" + WorldHost.getModVersion("minecraft") + "\"]")
+                        .addParameter("loaders", "[\"" + MOD_LOADER + "\"]"),
+                    input -> {
+                        try (JsonReader reader = JsonReader.json(new InputStreamReader(input, StandardCharsets.UTF_8))) {
+                            reader.beginArray();
+                            if (!reader.hasNext()) {
+                                return null;
+                            }
+                            reader.beginObject();
+                            while (reader.hasNext()) {
+                                final String key = reader.nextName();
+                                if (!key.equals("version_number")) {
+                                    reader.skipValue();
+                                    continue;
+                                }
+                                return reader.nextString();
+                            }
+                            return null;
+                        }
+                    }
+                );
+                if (latestVersion == null) {
+                    return Optional.empty();
+                }
+                if (new Semver(getModVersion(MOD_ID)).compareTo(new Semver(latestVersion)) >= 0) {
+                    return Optional.empty();
+                }
+                return Optional.of(latestVersion);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }, Util.ioPool()).exceptionally(t -> {
+            LOGGER.error("Failed to check for updates", t);
+            return Optional.empty();
+        });
+    }
 
     //#if FORGELIKE
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)

@@ -211,6 +211,7 @@ dependencies {
     }
 
     bundleImplementation("org.quiltmc.parsers:json:0.2.1")
+    bundleImplementation("org.semver4j:semver4j:5.2.2")
     if (isForgeLike) {
         "minecraftLibraries"("org.quiltmc.parsers:json:0.2.1")
     }
