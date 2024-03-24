@@ -36,7 +36,6 @@ import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
-import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
@@ -48,6 +47,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
+import org.semver4j.Semver;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -68,7 +68,6 @@ import static net.minecraft.commands.Commands.literal;
 
 //#if MC >= 1.18.0
 import com.mojang.logging.LogUtils;
-import org.semver4j.Semver;
 import org.slf4j.Logger;
 //#else
 //$$ import org.apache.logging.log4j.LogManager;
