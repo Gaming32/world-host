@@ -222,8 +222,8 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_20_04 -> "9.0.0-pre.1" // TODO: Update out of pre
-            1_20_02 -> "8.0.0"
+            1_20_04 -> "9.0.0"
+            1_20_02 -> "8.0.1"
             1_20_01 -> "7.2.2"
             1_19_04 -> "6.3.1"
             1_19_02 -> "4.2.0-beta.2"
@@ -239,10 +239,12 @@ dependencies {
         }
     }
 
-    // TODO: Remove this if when DevAuth gets Neo support on Maven
-    if (!isNeoForge) {
-        modRuntimeOnly("me.djtheredstoner:DevAuth-${if (isFabric) "fabric" else "forge-latest"}:1.1.2")
-    }
+    when {
+        isFabric -> "fabric"
+        isForge -> "forge-latest"
+        isNeoForge -> "neoforge"
+        else -> null
+    }?.let { modRuntimeOnly("me.djtheredstoner:DevAuth-$it:1.2.0") }
 
     if (isFabric) {
         when (mcVersion) {
@@ -253,7 +255,8 @@ dependencies {
             1_19_02 -> "0.77.0+1.19.2"
             1_18_02 -> "0.77.0+1.18.2"
             1_17_01 -> "0.46.1+1.17"
-            1_16_05, 1_16_01 -> "0.42.0+1.16"
+            1_16_05 -> "0.42.0+1.16"
+            1_16_01 -> "0.18.0+build.387-1.16.1"
             else -> null
         }?.let { fabricApi.fabricModule("fabric-resource-loader-v0", it) }
             ?.let {

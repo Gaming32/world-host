@@ -644,7 +644,6 @@ public class WorldHost
             return null;
         }
         if (proxyProtocolClient != null) {
-            LOGGER.info("Using external proxy for external IP");
             return getExternalIp0(proxyProtocolClient.getBaseAddr(), proxyProtocolClient.getMcPort());
         }
         if (protoClient.getBaseIp().isEmpty()) {
