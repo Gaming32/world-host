@@ -60,7 +60,7 @@ public abstract class WorldHostScreen extends Screen {
         //#if MC >= 1.20.0
         context.
         //#else
-        //$$ GuiComponent
+        //$$ GuiComponent.
         //#endif
             drawCenteredString(
                 //#if MC < 1.20.0
