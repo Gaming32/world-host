@@ -26,12 +26,7 @@ public class MixinShareToLanScreen {
 
     //#if MC < 1.19.4
     //$$ @ModifyArg(
-    //$$     method =
-            //#if MC < 1.17.1
-            //$$ {"lambda$init$0*", "func_213082_d"}, // Mixin can't find lambda$init$0 for some reason, so have an obfuscated method name :)
-            //#else
-            //$$ "lambda$init$2",
-            //#endif
+    //$$     method = "lambda$init$2",
     //$$     at = @At(
     //$$         value = "INVOKE",
     //$$         target =
@@ -51,16 +46,7 @@ public class MixinShareToLanScreen {
     //$$ }
     //$$
     //$$ @ModifyArg(
-    //$$     method =
-            //#if MC < 1.17.1
-            //#if FABRIC
-            //$$ "lambda$init$0",
-            //#else
-            //$$ {"lambda$init$0*", "func_213082_d"}, // Mixin can't find lambda$init$0 for some reason, so have an obfuscated method name :)
-            //#endif
-            //#else
-            //$$ "lambda$init$2",
-            //#endif
+    //$$     method = "lambda$init$2",
     //$$     at = @At(
     //$$         value = "INVOKE",
     //$$         target =

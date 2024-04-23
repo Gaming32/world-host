@@ -61,11 +61,9 @@ public class FriendsScreen extends WorldHostScreen {
 
         if (list == null) {
             list = new FriendsList();
-            //#if MC > 1.16.1
             if (minecraft != null && minecraft.level != null) {
                 list.setRenderBackground(false);
             }
-            //#endif
         }
         setListSize(list, 32, WorldHost.BEDROCK_SUPPORT ? 80 : 64);
         addWidget(list);
@@ -174,7 +172,6 @@ public class FriendsScreen extends WorldHostScreen {
 
     public class FriendsList extends ObjectSelectionList<FriendsEntry> {
         public FriendsList() {
-            //noinspection DataFlowIssue
             super(
                 FriendsScreen.this.minecraft,
                 //#if MC >= 1.20.3
@@ -240,13 +237,11 @@ public class FriendsScreen extends WorldHostScreen {
             );
         }
 
-        //#if MC > 1.16.5
         @NotNull
         @Override
         public Component getNarration() {
             return Components.immutable(getName());
         }
-        //#endif
 
         @Override
         public void render(
@@ -259,7 +254,7 @@ public class FriendsScreen extends WorldHostScreen {
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {
             final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(profile);
-            WorldHost.color(1f, 1f, 1f, 1f);
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.enableBlend();
             blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
             blit(context, skinTexture, x, y, 32, 32, 40, 8, 8, 8, 64, 64);

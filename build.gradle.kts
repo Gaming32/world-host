@@ -22,9 +22,6 @@ preprocess {
     val forge11802 = createNode("1.18.2-forge", 1_18_02, "srg")
     val fabric11701 = createNode("1.17.1-fabric", 1_17_01, "yarn")
     val forge11701 = createNode("1.17.1-forge", 1_17_01, "srg")
-    val fabric11605 = createNode("1.16.5-fabric", 1_16_05, "yarn")
-    val forge11605 = createNode("1.16.5-forge", 1_16_05, "srg")
-    val fabric11601 = createNode("1.16.1-fabric", 1_16_01, "yarn")
 
     fabric12004.link(neoforge12004)
     neoforge12004.link(neoforge12002)
@@ -39,9 +36,6 @@ preprocess {
     forge11802.link(fabric11802)
     fabric11802.link(fabric11701)
     fabric11701.link(forge11701)
-    forge11701.link(forge11605)
-    forge11605.link(fabric11605)
-    fabric11605.link(fabric11601)
 
 //    subprojects {
 //        apply(plugin = "java")

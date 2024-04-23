@@ -17,10 +17,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC <= 1.16.5
-//$$ import net.minecraft.client.gui.components.AbstractWidget;
-//#endif
-
 @Mixin(JoinMultiplayerScreen.class)
 public class MixinJoinMultiplayerScreen extends Screen {
     @Shadow
@@ -60,10 +56,4 @@ public class MixinJoinMultiplayerScreen extends Screen {
     private int moveTitleUp(int constant) {
         return WorldHost.CONFIG.isEnableFriends() ? 15 : constant;
     }
-
-    //#if MC <= 1.16.5
-    //$$ protected <T extends AbstractWidget> T addRenderableWidget(T widget) {
-    //$$     return addButton(widget);
-    //$$ }
-    //#endif
 }

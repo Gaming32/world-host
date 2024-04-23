@@ -13,10 +13,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC <= 1.16.5
-//$$ import net.minecraft.client.gui.components.AbstractWidget;
-//#endif
-
 @Mixin(PauseScreen.class)
 public class MixinPauseScreen extends Screen {
     protected MixinPauseScreen(Component component) {
@@ -57,10 +53,4 @@ public class MixinPauseScreen extends Screen {
             font
         ));
     }
-
-    //#if MC <= 1.16.5
-    //$$ protected <T extends AbstractWidget> T addRenderableWidget(T widget) {
-    //$$     return addButton(widget);
-    //$$ }
-    //#endif
 }

@@ -19,11 +19,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
-//#if MC >= 1.16.5
 import net.minecraft.util.FormattedCharSequence;
-//#else
-//$$ import net.minecraft.network.chat.FormattedText;
-//#endif
 
 class ToastInstance {
     private static final int TEXT_WIDTH = 200;
@@ -57,11 +53,8 @@ class ToastInstance {
     public final int ticksTotal;
     public int ticksRemaining;
 
-    //#if MC >= 1.16.5
-    public List<FormattedCharSequence> formattedTitle, formattedDescription;
-    //#else
-    //$$ public List<FormattedText> formattedTitle, formattedDescription;
-    //#endif
+    public List<FormattedCharSequence> formattedTitle;
+    public List<FormattedCharSequence> formattedDescription;
 
     public float y;
 

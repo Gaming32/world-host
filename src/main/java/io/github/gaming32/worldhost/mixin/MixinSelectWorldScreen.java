@@ -59,11 +59,7 @@ public class MixinSelectWorldScreen extends Screen implements SelectWorldScreenE
         method = "init()V",
         at = @At(
             value = "INVOKE",
-            //#if MC > 1.16.5
             target = "Lnet/minecraft/client/gui/screens/worldselection/SelectWorldScreen;addRenderableWidget(Lnet/minecraft/client/gui/components/events/GuiEventListener;)Lnet/minecraft/client/gui/components/events/GuiEventListener;",
-            //#else
-            //$$ target = "Lnet/minecraft/client/gui/screens/worldselection/SelectWorldScreen;addButton(Lnet/minecraft/client/gui/components/AbstractWidget;)Lnet/minecraft/client/gui/components/AbstractWidget;",
-            //#endif
             ordinal = 0,
             shift = At.Shift.AFTER
         )
@@ -73,11 +69,7 @@ public class MixinSelectWorldScreen extends Screen implements SelectWorldScreenE
             wh$shareButton = null;
             return;
         }
-        //#if MC > 1.16.5
         wh$shareButton = addRenderableWidget(
-        //#else
-        //$$ wh$shareButton = addButton(
-        //#endif
             WorldHostScreen.button(Components.translatable("world-host.share_world"), b ->
                 list.getSelectedOpt().ifPresent(worldListEntry -> {
                     wh$shareButtonPressed = true;

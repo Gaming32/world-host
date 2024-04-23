@@ -15,7 +15,7 @@ import java.util.List;
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
-//$$ import io.github.gaming32.worldhost.WorldHost;
+//$$ import com.mojang.blaze3d.systems.RenderSystem;
 //$$ import net.minecraft.client.gui.GuiComponent;
 //#endif
 
@@ -28,25 +28,14 @@ import net.minecraft.client.gui.GuiGraphics;
 //$$ import java.util.function.Consumer;
 //#endif
 
-//#if MC <= 1.16.5
-//$$ import net.minecraft.client.gui.components.AbstractWidget;
-//#endif
-
-//#if MC <= 1.16.1
-//$$ import net.minecraft.network.chat.FormattedText;
-//#else
 import net.minecraft.util.FormattedCharSequence;
-//#endif
 
 public abstract class WorldHostScreen extends Screen {
     protected WorldHostScreen(Component component) {
         super(component);
     }
 
-    //#if MC > 1.16.1
-    static
-    //#endif
-    public void drawRightString(
+    public static void drawRightString(
         //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
@@ -57,12 +46,7 @@ public abstract class WorldHostScreen extends Screen {
         drawString(context, font, text, x - font.width(text), y, color);
     }
 
-    //#if MC > 1.16.1
-    static
-    //#else
-    //$$ @Override
-    //#endif
-    public void drawCenteredString(
+    public static void drawCenteredString(
         @NotNull
         //#if MC < 1.20.0
         //$$ PoseStack context,
@@ -70,20 +54,13 @@ public abstract class WorldHostScreen extends Screen {
         GuiGraphics context,
         //#endif
         Font font,
-        @NotNull
-        //#if MC > 11601
-        Component text,
-        //#else
-        //$$ FormattedText text,
-        //#endif
+        @NotNull Component text,
         int x, int y, int color
     ) {
         //#if MC >= 1.20.0
         context.
-        //#elseif MC > 1.16.1
-        //$$ GuiComponent.
         //#else
-        //$$ super.
+        //$$ GuiComponent
         //#endif
             drawCenteredString(
                 //#if MC < 1.20.0
@@ -93,12 +70,7 @@ public abstract class WorldHostScreen extends Screen {
             );
     }
 
-    //#if MC > 1.16.1
-    static
-    //#else
-    //$$ @Override
-    //#endif
-    public void drawCenteredString(
+    public static void drawCenteredString(
         @NotNull
         //#if MC < 1.20.0
         //$$ PoseStack context,
@@ -109,10 +81,8 @@ public abstract class WorldHostScreen extends Screen {
     ) {
         //#if MC >= 1.20.0
         context.
-        //#elseif MC > 1.16.1
-        //$$ GuiComponent.
         //#else
-        //$$ super.
+        //$$ GuiComponent.
         //#endif
             drawCenteredString(
                 //#if MC < 1.20.0
@@ -122,7 +92,7 @@ public abstract class WorldHostScreen extends Screen {
             );
     }
 
-    //#if MC < 1.20.0 && MC > 1.16.1
+    //#if MC < 1.20.0
     //$$ @Override
     //#endif
     public void renderComponentTooltip(
@@ -136,10 +106,8 @@ public abstract class WorldHostScreen extends Screen {
     ) {
         //#if MC >= 1.20.0
         context.renderComponentTooltip
-        //#elseif MC > 1.16.1
-        //$$ super.renderComponentTooltip
         //#else
-        //$$ renderTooltip
+        //$$ super.renderComponentTooltip
         //#endif
             (
                 //#if MC < 1.20.0
@@ -151,12 +119,7 @@ public abstract class WorldHostScreen extends Screen {
             );
     }
 
-    //#if MC > 1.16.1
-    static
-    //#else
-    //$$ @Override
-    //#endif
-    public void drawString(
+    public static void drawString(
         @NotNull
         //#if MC < 1.20.0
         //$$ PoseStack context,
@@ -164,20 +127,13 @@ public abstract class WorldHostScreen extends Screen {
         GuiGraphics context,
         //#endif
         Font font,
-        @NotNull
-        //#if MC > 11601
-        Component text,
-        //#else
-        //$$ FormattedText text,
-        //#endif
+        @NotNull Component text,
         int x, int y, int color
     ) {
         //#if MC >= 1.20.0
         context.
-        //#elseif MC > 1.16.1
-        //$$ GuiComponent.
         //#else
-        //$$ super.
+        //$$ GuiComponent.
         //#endif
             drawString(
                 //#if MC < 1.20.0
@@ -199,7 +155,7 @@ public abstract class WorldHostScreen extends Screen {
         //#if MC >= 1.20.0
         context.
         //#else
-        //$$ WorldHost.texture(texture);
+        //$$ RenderSystem.setShaderTexture(0, texture);
         //$$ GuiComponent.
         //#endif
         blit(
@@ -224,7 +180,7 @@ public abstract class WorldHostScreen extends Screen {
         //#if MC >= 1.20.0
         context.
         //#else
-        //$$ WorldHost.texture(texture);
+        //$$ RenderSystem.setShaderTexture(0, texture);
         //$$ GuiComponent.
         //#endif
         blit(
@@ -246,11 +202,7 @@ public abstract class WorldHostScreen extends Screen {
         //#endif
         Font font,
         @NotNull
-        //#if MC > 1.16.1
         FormattedCharSequence text,
-        //#else
-        //$$ FormattedText text,
-        //#endif
         int x, int y, int color, boolean dropShadow
     ) {
         //#if MC < 1.20.0
@@ -348,19 +300,11 @@ public abstract class WorldHostScreen extends Screen {
     //$$             Minecraft.getInstance().screen.renderTooltip(arg2, lines, i, j);
     //$$         }
     //$$
-            //#if MC > 1.16.5
-            //$$ @Override
-            //$$ public void narrateTooltip(@NotNull Consumer<Component> contents) {
-            //$$     contents.accept(tooltip);
-            //$$ }
-            //#endif
+    //$$         @Override
+    //$$         public void narrateTooltip(@NotNull Consumer<Component> contents) {
+    //$$             contents.accept(tooltip);
+    //$$         }
     //$$     };
-    //$$ }
-    //#endif
-
-    //#if MC <= 1.16.5
-    //$$ protected <T extends AbstractWidget> T addRenderableWidget(T widget) {
-    //$$     return addButton(widget);
     //$$ }
     //#endif
 

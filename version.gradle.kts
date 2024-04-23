@@ -63,7 +63,6 @@ unimined.minecraft {
             mcVersion >= 1_19_00 -> "1.19.2:2022.11.27"
             mcVersion >= 1_18_00 -> "1.18.2:2022.11.06"
             mcVersion >= 1_17_00 -> "1.17.1:2021.12.12"
-            mcVersion >= 1_16_00 -> "1.16.5:2022.03.06"
             else -> null
         }?.let {
             parchment(it.substringBefore(":"), it.substringAfter(":"))
@@ -72,9 +71,6 @@ unimined.minecraft {
         stub.withMappings("searge", listOf("mojmap")) {
             if (mcVersion <= 1_19_00) {
                 c("net/minecraft/client/gui/chat/NarratorChatListener", "net/minecraft/client/GameNarrator")
-            }
-            if (mcVersion < 1_17_00) {
-                c("net/minecraft/client/multiplayer/ServerAddress", "net/minecraft/client/multiplayer/resolver/ServerAddress")
             }
         }
     }
@@ -90,7 +86,6 @@ unimined.minecraft {
                 1_19_02 -> "43.2.0"
                 1_18_02 -> "40.2.0"
                 1_17_01 -> "37.1.1"
-                1_16_05 -> "36.2.34"
                 else -> throw IllegalStateException("Unknown Forge version for $mcVersionString")
             })
             mixinConfig("world-host.mixins.json")
@@ -229,13 +224,9 @@ dependencies {
             1_19_02 -> "4.2.0-beta.2"
             1_18_02 -> "3.2.5"
             1_17_01 -> "2.0.17"
-            1_16_05 -> "1.16.23"
             else -> null
         }?.let {
             "modImplementation"("com.terraformersmc:modmenu:$it")
-        }
-        if (mcVersion == 1_16_01) {
-            "modImplementation"("io.github.prospector:modmenu:1.14.5+build.30")
         }
     }
 
@@ -255,8 +246,6 @@ dependencies {
             1_19_02 -> "0.77.0+1.19.2"
             1_18_02 -> "0.77.0+1.18.2"
             1_17_01 -> "0.46.1+1.17"
-            1_16_05 -> "0.42.0+1.16"
-            1_16_01 -> "0.18.0+build.387-1.16.1"
             else -> null
         }?.let { fabricApi.fabricModule("fabric-resource-loader-v0", it) }
             ?.let {
@@ -344,6 +333,8 @@ modrinth {
 tasks.processResources {
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
+            mcVersion >= 1_20_05 -> 32
+            mcVersion >= 1_20_03 -> 22
             mcVersion >= 1_20_02 -> 18
             mcVersion >= 1_20_00 -> 15
             mcVersion >= 1_19_04 -> 13

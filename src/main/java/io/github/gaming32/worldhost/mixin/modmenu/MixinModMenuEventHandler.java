@@ -1,4 +1,4 @@
-//#if FABRIC && MC > 1.16.1
+//#if FABRIC
 package io.github.gaming32.worldhost.mixin.modmenu;
 
 import com.terraformersmc.modmenu.event.ModMenuEventHandler;

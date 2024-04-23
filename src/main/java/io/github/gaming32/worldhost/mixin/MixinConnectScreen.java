@@ -5,6 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
+import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,16 +13,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC > 1.16.5
-import net.minecraft.client.multiplayer.resolver.ServerAddress;
-//#endif
-
 @Mixin(ConnectScreen.class)
 public class MixinConnectScreen {
     @Shadow @Final Screen parent;
 
     @Inject(method = "connect", at = @At("HEAD"), cancellable = true)
-    //#if MC > 1.16.5
     private void overrideConnect(
         Minecraft minecraft, ServerAddress serverAddress,
         //#if MC > 1.19.2
@@ -31,9 +27,6 @@ public class MixinConnectScreen {
     ) {
         final String host = serverAddress.getHost();
         final int port = serverAddress.getPort();
-    //#else
-    //$$ private void overrideConnect(String host, int port, CallbackInfo ci) {
-    //#endif
         if (WorldHost.protoClient == null || WorldHost.protoClient.getAttemptingToJoin() != null) return;
 
         final String targetBaseAddr;

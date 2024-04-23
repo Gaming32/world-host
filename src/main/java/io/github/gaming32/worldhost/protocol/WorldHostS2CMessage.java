@@ -273,11 +273,7 @@ public sealed interface WorldHostS2CMessage {
                 }
                 minecraft.setScreen(new DisconnectedScreen(
                     parentScreen,
-                    //#if MC > 1.16.1
                     Components.translatable("world-host.connection_not_found"),
-                    //#else
-                    //$$ "world-host.connection_not_found",
-                    //#endif
                     Components.translatable("world-host.connection_not_found.desc", WorldHost.connectionIdToString(connectionId))
                 ));
             });

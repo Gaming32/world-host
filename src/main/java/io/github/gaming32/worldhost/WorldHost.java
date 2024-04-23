@@ -123,19 +123,15 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
 //#elseif MC >= 1.18.2
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
-//#elseif MC >= 1.17.1
-//$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
 //#else
-//$$ import net.minecraftforge.fml.ExtensionPoint;
+//$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
 //#endif
 //#if NEOFORGE
 //$$ import net.neoforged.neoforge.resource.ResourcePackLoader;
 //#elseif MC > 1.17.1
 //$$ import net.minecraftforge.resource.ResourcePackLoader;
-//#elseif MC > 1.16.5
-//$$ import net.minecraftforge.fmllegacy.packs.ResourcePackLoader;
 //#else
-//$$ import net.minecraftforge.fml.packs.ResourcePackLoader;
+//$$ import net.minecraftforge.fmllegacy.packs.ResourcePackLoader;
 //#endif
 //#endif
 
@@ -247,11 +243,7 @@ public class WorldHost
                 })
             //#else
             //$$ ResourcePackLoader
-                //#if MC > 1.16.5
-                //$$ .getPackFor(MOD_ID)
-                //#else
-                //$$ .getResourcePackFor(MOD_ID)
-                //#endif
+            //$$     .getPackFor(MOD_ID)
                 //#if MC >= 1.20.4
                 //$$ .map(c -> c.openPrimary("worldhost"))
                 //#endif
@@ -304,19 +296,11 @@ public class WorldHost
         ).profileCache();
         //#else
         //$$ profileCache = new GameProfileCache(
-        //$$     new YggdrasilAuthenticationService(
-        //$$         Minecraft.getInstance().getProxy()
-                //#if MC <= 1.16.1
-                //$$ , UUID.randomUUID().toString()
-                //#endif
-        //$$     )
-        //$$         .createProfileRepository(),
+        //$$     new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy()).createProfileRepository(),
         //$$     new File(CACHE_DIR, "usercache.json")
         //$$ );
         //#endif
-        //#if MC > 1.16.5
         profileCache.setExecutor(Util.backgroundExecutor());
-        //#endif
 
         reconnect(false, true);
 
@@ -536,10 +520,8 @@ public class WorldHost
     public static void getMaybeAsync(GameProfileCache cache, String name, Consumer<Optional<GameProfile>> action) {
         //#if MC >= 1.20.2
         cache.getAsync(name).thenAccept(action);
-        //#elseif MC > 1.16.5
-        //$$ cache.getAsync(name, action);
         //#else
-        //$$ action.accept(Optional.ofNullable(cache.get(name)));
+        //$$ cache.getAsync(name, action);
         //#endif
     }
 
@@ -561,25 +543,6 @@ public class WorldHost
 
     public static GameProfile fetchProfile(MinecraftSessionService sessionService, GameProfile profile) {
         return fetchProfile(sessionService, profile.getId(), profile);
-    }
-
-    public static void texture(ResourceLocation texture) {
-        //#if MC > 1.16.5
-        RenderSystem.setShaderTexture(0, texture);
-        //#else
-        //$$ Minecraft.getInstance().getTextureManager().bind(texture);
-        //#endif
-    }
-
-    //#if MC <= 1.16.5
-    //$$ @SuppressWarnings("deprecation")
-    //#endif
-    public static void color(float r, float g, float b, float a) {
-        //#if MC > 1.16.5
-        RenderSystem.setShaderColor(r, g, b, a);
-        //#else
-        //$$ RenderSystem.color4f(r, g, b, a);
-        //#endif
     }
 
     public static boolean isFriend(UUID user) {
@@ -611,18 +574,12 @@ public class WorldHost
 
     @SuppressWarnings("RedundantThrows")
     public static ServerStatus parseServerStatus(FriendlyByteBuf buf) throws IOException {
-        //#if MC > 1.16.5
         return new ClientboundStatusResponsePacket(buf)
             //#if MC >= 1.19.4
             .status();
             //#else
             //$$ .getStatus();
             //#endif
-        //#else
-        //$$ final ClientboundStatusResponsePacket packet = new ClientboundStatusResponsePacket();
-        //$$ packet.read(buf);
-        //$$ return packet.getStatus();
-        //#endif
     }
 
     public static ServerStatus createEmptyServerStatus() {
@@ -724,7 +681,6 @@ public class WorldHost
 
     public static void connect(Screen parentScreen, long cid, String host, int port) {
         final Minecraft minecraft = Minecraft.getInstance();
-        //#if MC > 1.16.5
         final ServerAddress serverAddress = new ServerAddress(host, port);
         ConnectScreen.startConnecting(
             parentScreen, minecraft, serverAddress,
@@ -741,10 +697,6 @@ public class WorldHost
             ), false
             //#endif
         );
-        //#else
-        //$$ minecraft.setCurrentServer(null);
-        //$$ minecraft.setScreen(new ConnectScreen(parentScreen, minecraft, host, port));
-        //#endif
     }
 
     private static int ipCommand(CommandContext<CommandSourceStack> ctx) {
@@ -923,11 +875,9 @@ public class WorldHost
                 //#if MC >= 1.19.2
                 //$$ ConfigScreenHandler.ConfigScreenFactory.class,
                 //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
-                //#elseif MC >= 1.17.1
+                //#else
                 //$$ ConfigGuiHandler.ConfigGuiFactory.class,
                 //$$ () -> new ConfigGuiHandler.ConfigGuiFactory(screenFunction)
-                //#else
-                //$$ ExtensionPoint.CONFIGGUIFACTORY, () -> screenFunction
                 //#endif
     //$$         );
     //$$     }

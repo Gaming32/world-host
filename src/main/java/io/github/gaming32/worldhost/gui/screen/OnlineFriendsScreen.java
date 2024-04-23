@@ -226,7 +226,6 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
     public class OnlineFriendsList extends ObjectSelectionList<OnlineFriendsListEntry> {
         public OnlineFriendsList() {
-            //noinspection DataFlowIssue
             super(
                 OnlineFriendsScreen.this.minecraft,
                 //#if MC >= 1.20.3
@@ -311,13 +310,11 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             iconTextureId = new ResourceLocation("world-host", "servers/" + friendUuid + "/icon");
         }
 
-        //#if MC >= 1.17.0
         @NotNull
         @Override
         public Component getNarration() {
             return Components.translatable("narrator.select", getName());
         }
-        //#endif
 
         @Override
         public void render(
@@ -345,7 +342,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             final int labelWidth = font.width(sideLabel);
             WorldHostScreen.drawString(context, font, sideLabel, x + entryWidth - labelWidth - 17, y + 1, 0x808080, false);
 
-            WorldHost.color(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             if (incompatibleVersion) {
                 RenderSystem.enableBlend();
                 blit(context, GUI_ICONS_LOCATION, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
@@ -364,7 +361,6 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 } else {
                     //#if MC >= 1.19.4
                     // Mojang did "@Nullable byte[]" instead of "byte @Nullable []"
-                    //noinspection DataFlowIssue
                     serverInfo.setIconBytes(null);
                     //#else
                     //$$ serverInfo.setIconB64(null);
@@ -372,7 +368,6 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 }
             }
 
-            // Since when does a value marked as @Nullable never satisfy == null?
             //noinspection ConstantValue
             if (icon == null) {
                 final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(profile);
@@ -381,7 +376,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                 blit(context, skinTexture, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
                 RenderSystem.disableBlend();
             } else {
-                WorldHost.texture(iconTextureId);
+                RenderSystem.setShaderTexture(0, iconTextureId);
                 RenderSystem.enableBlend();
                 blit(context, iconTextureId, x, y, 0, 0, 32, 32, 32, 32);
                 RenderSystem.disableBlend();
@@ -405,7 +400,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                     || hovered
             ) {
                 fill(context, x, y, x + 32, y + 32, 0xa0909090);
-                WorldHost.color(1.0F, 1.0F, 1.0F, 1.0F);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 //#if MC >= 1.20.2
                 if (relX < 32 && relX > 16) {
                     context.blitSprite(JOIN_HIGHLIGHTED_SPRITE, x, y, 32, 32);
@@ -565,13 +560,11 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             select(this);
 
-            //#if MC > 1.16.1
             final double relX = mouseX - list.getRowLeft();
             if (relX < 32.0 && relX > 16.0) {
                 connect();
                 return true;
             }
-            //#endif
 
             if (Util.getMillis() - clickTime < 250L) {
                 connect();
