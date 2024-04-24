@@ -56,13 +56,16 @@ unimined.minecraft {
         searge()
         mojmap()
         when {
-            mcVersion >= 1_20_02 -> "1.20.2:2023.10.22"
+            mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
+            mcVersion >= 1_20_03 -> "1.20.3:2023.12.31"
+            mcVersion >= 1_20_02 -> "1.20.2:2023.12.10"
             mcVersion >= 1_20_01 -> "1.20.1:2023.09.03"
             mcVersion >= 1_19_04 -> "1.19.4:2023.06.26"
             mcVersion >= 1_19_03 -> "1.19.3:2023.06.25"
             mcVersion >= 1_19_00 -> "1.19.2:2022.11.27"
             mcVersion >= 1_18_00 -> "1.18.2:2022.11.06"
             mcVersion >= 1_17_00 -> "1.17.1:2021.12.12"
+            mcVersion >= 1_16_00 -> "1.16.5:2022.03.06"
             else -> null
         }?.let {
             parchment(it.substringBefore(":"), it.substringAfter(":"))
@@ -92,7 +95,6 @@ unimined.minecraft {
         }
         isNeoForge -> neoForged {
             loader(when (mcVersion) {
-                1_20_02 -> "86"
                 1_20_04 -> "69-beta"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
             })
@@ -218,7 +220,6 @@ dependencies {
     if (isFabric) {
         when (mcVersion) {
             1_20_04 -> "9.0.0"
-            1_20_02 -> "8.0.1"
             1_20_01 -> "7.2.2"
             1_19_04 -> "6.3.1"
             1_19_02 -> "4.2.0-beta.2"
@@ -240,7 +241,6 @@ dependencies {
     if (isFabric) {
         when (mcVersion) {
             1_20_04 -> "0.91.1+1.20.3"
-            1_20_02 -> "0.91.1+1.20.2"
             1_20_01 -> "0.91.0+1.20.1"
             1_19_04 -> "0.87.2+1.19.4"
             1_19_02 -> "0.77.0+1.19.2"

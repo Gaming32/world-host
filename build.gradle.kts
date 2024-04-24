@@ -10,8 +10,6 @@ repositories {
 preprocess {
     val fabric12004 = createNode("1.20.4-fabric", 1_20_04, "yarn")
     val neoforge12004 = createNode("1.20.4-neoforge", 1_20_04, "yarn")
-    val fabric12002 = createNode("1.20.2-fabric", 1_20_02, "yarn")
-    val neoforge12002 = createNode("1.20.2-neoforge", 1_20_02, "yarn")
     val fabric12001 = createNode("1.20.1-fabric", 1_20_01, "yarn")
     val forge12001 = createNode("1.20.1-forge", 1_20_01, "srg")
     val fabric11904 = createNode("1.19.4-fabric", 1_19_04, "yarn")
@@ -24,9 +22,7 @@ preprocess {
     val forge11701 = createNode("1.17.1-forge", 1_17_01, "srg")
 
     fabric12004.link(neoforge12004)
-    neoforge12004.link(neoforge12002)
-    neoforge12002.link(fabric12002)
-    fabric12002.link(fabric12001)
+    fabric12004.link(fabric12001)
     fabric12001.link(forge12001)
     forge12001.link(forge11904)
     forge11904.link(fabric11904)
