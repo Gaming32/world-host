@@ -47,7 +47,7 @@ repositories {
 
 unimined.minecraft {
     version(mcVersionString)
-    if (mcVersion != 1_20_01 || !isForge) {
+    if ((mcVersion != 1_20_01 || !isForge) && mcVersion < 1_20_05) {
         side("client")
     }
 
@@ -56,6 +56,7 @@ unimined.minecraft {
         searge()
         mojmap()
         when {
+            mcVersion >= 1_20_05 -> "1.20.6:2024.05.01"
             mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
             mcVersion >= 1_20_03 -> "1.20.3:2023.12.31"
             mcVersion >= 1_20_02 -> "1.20.2:2023.12.10"
@@ -76,11 +77,13 @@ unimined.minecraft {
                 c("net/minecraft/client/gui/chat/NarratorChatListener", "net/minecraft/client/GameNarrator")
             }
         }
+
+        devFallbackNamespace("official")
     }
 
     when {
         isFabric -> fabric {
-            loader("0.14.22")
+            loader("0.15.1")
         }
         isForge -> minecraftForge {
             loader(when(mcVersion) {
@@ -95,6 +98,7 @@ unimined.minecraft {
         }
         isNeoForge -> neoForged {
             loader(when (mcVersion) {
+                1_20_06 -> "21-beta"
                 1_20_04 -> "69-beta"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
             })
@@ -219,6 +223,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_20_06 -> "10.0.0-beta.1"
             1_20_04 -> "9.0.0"
             1_20_01 -> "7.2.2"
             1_19_04 -> "6.3.1"
@@ -240,6 +245,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_20_06 -> "0.97.5+1.20.5"
             1_20_04 -> "0.91.1+1.20.3"
             1_20_01 -> "0.91.0+1.20.1"
             1_19_04 -> "0.87.2+1.19.4"
@@ -309,12 +315,10 @@ modrinth {
         1_19_04 -> "23w13a_or_b"
         1_20_01 -> "1.20"
         1_20_04 -> "1.20.3"
+        1_20_06 -> "1.20.5"
         else -> null
     }?.let(gameVersions::add)
     loaders.add(loaderName)
-    if (isFabric) {
-        loaders.add("quilt")
-    }
     dependencies {
         if (isFabric) {
             optional.project("modmenu")
@@ -363,6 +367,7 @@ tasks.processResources {
         "fabric.mod.json",
         "quilt.mod.json",
         "META-INF/mods.toml",
+        "META-INF/neoforge.mods.toml",
         "mixins.*.json",
         "*.mixins.json"
     )) {
@@ -374,9 +379,14 @@ tasks.processResources {
     }
 
     if (isFabric) {
-        exclude("pack.mcmeta", "META-INF/mods.toml")
+        exclude("pack.mcmeta", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")
     } else {
         exclude("fabric.mod.json")
+        if (isNeoForge && mcVersion >= 1_20_05) {
+            exclude("META-INF/mods.toml")
+        } else {
+            exclude("META-INF/neoforge.mods.toml")
+        }
     }
 
     doLast {

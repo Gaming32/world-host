@@ -1,0 +1,35 @@
+modLoader = "javafml"
+loaderVersion = "[3,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/Gaming32/bingo/issues"
+
+[[mods]]
+modId = "world_host"
+namespace = "world-host"
+version = "$version"
+displayName = "World Host"
+displayURL = "https://modrinth.com/mod/world-host"
+logoFile = "icon.png"
+authors = "Gaming32"
+description = "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser."
+
+[[mixins]]
+config = "world-host.mixins.json"
+
+[[dependencies.world_host]]
+modId = "neoforge"
+versionRange = "[20,)"
+type = "required"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.world_host]]
+modId = "minecraft"
+##if MC == 1.20.6
+#?? versionRange = "[1.20.5,1.20.7)"
+##else
+#?? versionRange = "$mc_version"
+##endif
+type = "required"
+ordering = "NONE"
+side = "BOTH"
