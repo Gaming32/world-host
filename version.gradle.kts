@@ -12,7 +12,7 @@ import java.nio.file.Path
 plugins {
     java
     `maven-publish`
-    id("dev.deftu.gradle.preprocess")
+    id("io.github.gaming32.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.modrinth.minotaur") version "2.+"
 }
@@ -285,6 +285,8 @@ tasks.compileJava {
 
 preprocess {
     fun Boolean.toInt() = if (this) 1 else 0
+
+    disableRemapping = true
 
     vars.putAll(mapOf(
         "FABRIC" to isFabric.toInt(),

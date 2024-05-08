@@ -9,12 +9,9 @@ pluginManagement {
         maven("https://maven.jab125.dev/")
         maven("https://maven.wagyourtail.xyz/snapshots")
         maven("https://maven.wagyourtail.xyz/releases")
+        maven("https://maven.jemnetworks.com/releases")
         gradlePluginPortal()
         mavenCentral()
-    }
-
-    plugins {
-        id("dev.deftu.gradle.multiversion-root") version("1.18.0")
     }
 }
 
