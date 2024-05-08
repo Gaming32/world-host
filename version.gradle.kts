@@ -43,6 +43,9 @@ version = "${modVersion}+${mcVersionString}-${loaderName}"
 
 repositories {
     mavenCentral()
+    maven("https://maven.fabricmc.net")
+    maven("https://maven.minecraftforge.net")
+    maven("https://maven.neoforged.net/releases")
 }
 
 unimined.minecraft {
@@ -281,6 +284,7 @@ java {
 
 tasks.compileJava {
     options.release = 17
+    options.compilerArgs.add("-Xlint:all")
 }
 
 preprocess {

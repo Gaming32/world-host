@@ -99,8 +99,6 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //#endif
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
-//$$ import net.minecraft.server.packs.PackType;
-//$$ import net.minecraft.server.packs.PackResources;
 //#if FORGE
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -117,8 +115,10 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 //#endif
 //$$ import java.util.function.BiFunction;
-//#if MC < 1.20.5
-//#if NEOFORGE
+//#if MC >= 1.20.5
+//$$ import net.neoforged.fml.common.EventBusSubscriber;
+//$$ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+//#elseif NEOFORGE
 //$$ import net.neoforged.neoforge.client.ConfigScreenHandler;
 //#elseif MC >= 1.19.2
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
@@ -126,14 +126,6 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
 //#else
 //$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
-//#endif
-//#endif
-//#if NEOFORGE
-//$$ import net.neoforged.neoforge.resource.ResourcePackLoader;
-//#elseif MC > 1.17.1
-//$$ import net.minecraftforge.resource.ResourcePackLoader;
-//#else
-//$$ import net.minecraftforge.fmllegacy.packs.ResourcePackLoader;
 //#endif
 //#endif
 
@@ -848,8 +840,12 @@ public class WorldHost
         });
     }
 
-    //#if FORGELIKE && MC < 1.20.5
+    //#if FORGELIKE
+    //#if MC >= 1.20.5
+    //$$ @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    //#else
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    //#endif
     //$$ public static class ClientModEvents {
     //$$     @SubscribeEvent
     //$$     public static void onClientSetup(FMLClientSetupEvent event) {
@@ -857,7 +853,9 @@ public class WorldHost
     //$$         final BiFunction<Minecraft, Screen, Screen> screenFunction =
     //$$             (mc, screen) -> new WorldHostConfigScreen(screen);
     //$$         ModLoadingContext.get().registerExtensionPoint(
-                //#if MC >= 1.19.2
+                //#if MC >= 1.20.5
+                //$$ IConfigScreenFactory.class, () -> screenFunction::apply
+                //#elseif MC >= 1.19.2
                 //$$ ConfigScreenHandler.ConfigScreenFactory.class,
                 //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
                 //#else
