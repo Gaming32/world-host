@@ -117,6 +117,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 //#endif
 //$$ import java.util.function.BiFunction;
+//#if MC < 1.20.5
 //#if NEOFORGE
 //$$ import net.neoforged.neoforge.client.ConfigScreenHandler;
 //#elseif MC >= 1.19.2
@@ -125,6 +126,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
 //#else
 //$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
+//#endif
 //#endif
 //#if NEOFORGE
 //$$ import net.neoforged.neoforge.resource.ResourcePackLoader;
@@ -229,52 +231,16 @@ public class WorldHost
     //#endif
 
     private static void init() {
-        wordsForCid =
-            //#if FABRIC
-            FabricLoader.getInstance()
-                .getModContainer(MOD_ID)
-                .flatMap(c -> c.findPath("assets/world-host/16k.txt"))
-                .map(path -> {
-                    try {
-                        return Files.lines(path, StandardCharsets.US_ASCII);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                })
-            //#else
-            //$$ ResourcePackLoader
-            //$$     .getPackFor(MOD_ID)
-                //#if MC >= 1.20.4
-                //$$ .map(c -> c.openPrimary("worldhost"))
-                //#endif
-            //$$     .map(c -> {
-                    //#if MC <= 1.19.2
-                    //$$ try {
-                    //#endif
-            //$$             return ((PackResources)c).getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k.txt"));
-                    //#if MC <= 1.19.2
-                    //$$ } catch (IOException e) {
-                    //$$     throw new UncheckedIOException(e);
-                    //$$ }
-                    //#endif
-            //$$     })
-                //#if MC > 1.19.2
-                //$$ .map(i -> {
-                //$$     try {
-                //$$         return i.get();
-                //$$     } catch (IOException e) {
-                //$$         throw new UncheckedIOException(e);
-                //$$     }
-                //$$ })
-                //#endif
-            //$$     .map(is -> new InputStreamReader(is, StandardCharsets.US_ASCII))
-            //$$     .map(BufferedReader::new)
-            //$$     .map(BufferedReader::lines)
-            //#endif
-                .orElseThrow(() -> new IllegalStateException("Unable to find 16k.txt"))
-                .filter(s -> !s.startsWith("//"))
-                .toList();
-
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(
+                WorldHost.class.getResourceAsStream("/assets/world-host/16k.txt"),
+                StandardCharsets.US_ASCII
+            )
+        )) {
+            wordsForCid = reader.lines().filter(s -> !s.startsWith("//")).toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         if (wordsForCid.size() != (1 << 14)) {
             throw new RuntimeException("Expected WORDS_FOR_CID to have " + (1 << 14) + " elements, but it has " + wordsForCid.size() + " elements.");
         }
@@ -574,20 +540,36 @@ public class WorldHost
 
     @SuppressWarnings("RedundantThrows")
     public static ServerStatus parseServerStatus(FriendlyByteBuf buf) throws IOException {
-        return new ClientboundStatusResponsePacket(buf)
-            //#if MC >= 1.19.4
-            .status();
-            //#else
-            //$$ .getStatus();
-            //#endif
+        //#if MC >= 1.20.5
+        return ClientboundStatusResponsePacket.STREAM_CODEC.decode(buf).status();
+        //#elseif MC >= 1.19.4
+        //$$ return new ClientboundStatusResponsePacket(buf).status();
+        //#else
+        //$$ return new ClientboundStatusResponsePacket(buf).getStatus();
+        //#endif
+    }
+
+    public static FriendlyByteBuf writeServerStatus(ServerStatus metadata) {
+        if (metadata == null) {
+            metadata = WorldHost.createEmptyServerStatus();
+        }
+        final FriendlyByteBuf buf = WorldHost.createByteBuf();
+        //#if MC < 1.20.5
+        //$$ new ClientboundStatusResponsePacket(metadata).write(buf);
+        //#else
+        ClientboundStatusResponsePacket.STREAM_CODEC.encode(buf, new ClientboundStatusResponsePacket(metadata));
+        //#endif
+        return buf;
     }
 
     public static ServerStatus createEmptyServerStatus() {
         //#if MC >= 1.19.4
         return new ServerStatus(
             Components.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
-            //#if FORGELIKE
+            //#if FORGELIKE && MC < 1.20.5
             //$$ , Optional.empty()
+            //#elseif NEOFORGE
+            //$$ , false
             //#endif
         );
         //#else
@@ -695,6 +677,9 @@ public class WorldHost
                 ServerData.Type.OTHER
                 //#endif
             ), false
+            //#endif
+            //#if MC >= 1.20.5
+            , null
             //#endif
         );
     }
@@ -863,7 +848,7 @@ public class WorldHost
         });
     }
 
-    //#if FORGELIKE
+    //#if FORGELIKE && MC < 1.20.5
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     //$$ public static class ClientModEvents {
     //$$     @SubscribeEvent

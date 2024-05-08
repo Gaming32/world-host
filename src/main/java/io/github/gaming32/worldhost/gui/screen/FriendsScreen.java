@@ -61,9 +61,11 @@ public class FriendsScreen extends WorldHostScreen {
 
         if (list == null) {
             list = new FriendsList();
-            if (minecraft != null && minecraft.level != null) {
-                list.setRenderBackground(false);
-            }
+            //#if MC < 1.20.5
+            //$$ if (minecraft != null && minecraft.level != null) {
+            //$$     list.setRenderBackground(false);
+            //$$ }
+            //#endif
         }
         setListSize(list, 32, WorldHost.BEDROCK_SUPPORT ? 80 : 64);
         addWidget(list);
@@ -199,8 +201,10 @@ public class FriendsScreen extends WorldHostScreen {
             //$$ final int y0 = this.y0;
             //$$ final int y1 = this.y1;
             //#endif
-            graphics.blit(BACKGROUND_LOCATION, x0, 0, 0f, 0f, width, y0, 32, 32);
-            graphics.blit(BACKGROUND_LOCATION, x0, y1, 0f, y1, width, height - y1, 32, 32);
+            //#if MC < 1.20.5
+            //$$ graphics.blit(BACKGROUND_LOCATION, x0, 0, 0f, 0f, width, y0, 32, 32);
+            //$$ graphics.blit(BACKGROUND_LOCATION, x0, y1, 0f, y1, width, height - y1, 32, 32);
+            //#endif
             graphics.setColor(1f, 1f, 1f, 1f);
             graphics.fillGradient(RenderType.guiOverlay(), x0, y0, x1, y0 + 4, 0xff000000, 0, 0);
             graphics.fillGradient(RenderType.guiOverlay(), x0, y1 - 4, x1, y1, 0, 0xff000000, 0);
