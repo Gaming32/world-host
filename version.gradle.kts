@@ -1,11 +1,10 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
-import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
 import xyz.wagyourtail.unimined.api.mapping.task.ExportMappingsTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
 import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
-import xyz.wagyourtail.unimined.internal.minecraft.MinecraftProvider
+import xyz.wagyourtail.unimined.internal.minecraft.resolver.MinecraftDownloader
 import xyz.wagyourtail.unimined.util.sourceSets
 import java.nio.file.Path
 
@@ -15,6 +14,7 @@ plugins {
     id("io.github.gaming32.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.modrinth.minotaur") version "2.+"
+    id("xyz.wagyourtail.jvmdowngrader") version "0.0.1-SNAPSHOT"
 }
 
 fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
@@ -46,6 +46,17 @@ repositories {
     maven("https://maven.fabricmc.net")
     maven("https://maven.minecraftforge.net")
     maven("https://maven.neoforged.net/releases")
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.compileJava {
+    options.release = 17
+    options.compilerArgs.add("-Xlint:all")
 }
 
 unimined.minecraft {
@@ -111,6 +122,23 @@ unimined.minecraft {
         }
         else -> throw IllegalStateException()
     }
+
+    val mcJavaVersion = (minecraftData as MinecraftDownloader).metadata.javaVersion
+
+    if (mcJavaVersion < java.sourceCompatibility) {
+        println("Classes need downgrading to Java $mcJavaVersion")
+
+        tasks.downgradeJar {
+            downgradeTo = mcJavaVersion
+        }
+        tasks.shadeDowngradedApi {
+            downgradeTo = mcJavaVersion
+        }
+
+        defaultRemapJar = false
+        remap(tasks.shadeDowngradedApi.get(), "remapJar")
+        tasks.assemble.get().dependsOn("remapJar")
+    }
 }
 val minecraft = unimined.minecrafts[sourceSets.main.get()]
 
@@ -154,27 +182,13 @@ if (isForge) {
     mappingsConfig.setGroovyProperty("tinyMappingsWithSrg", tinyMappingsWithSrg.toPath())
 }
 
-buildscript {
-    repositories {
-        maven("https://maven.lenni0451.net/everything")
-    }
-
-    dependencies {
-        classpath("net.raphimc.javadowngrader:gradle-plugin:1.1.1-SNAPSHOT")
-    }
-}
-
 repositories {
     maven("https://maven.quiltmc.org/repository/release/")
-
     maven("https://maven.terraformersmc.com/releases")
-
     maven("https://maven.isxander.dev/releases")
-
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
-
     maven("https://repo.viaversion.com")
-
+    maven("https://maven.wagyourtail.xyz/snapshots")
     maven("https://jitpack.io")
 }
 
@@ -284,17 +298,6 @@ dependencies {
     compileOnly("com.demonwav.mcdev:annotations:2.0.0")
 }
 
-java {
-    withSourcesJar()
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-tasks.compileJava {
-    options.release = 17
-    options.compilerArgs.add("-Xlint:all")
-}
-
 preprocess {
     fun Boolean.toInt() = if (this) 1 else 0
 
@@ -393,8 +396,7 @@ tasks.processResources {
     )) {
         expand(mapOf(
             "version" to modVersion,
-            "mc_version" to mcVersionString,
-            "java_version" to "JAVA_${mcJavaVersion.majorVersion}"
+            "mc_version" to mcVersionString
         ))
     }
 
@@ -433,18 +435,4 @@ tasks.withType<RemapJarTask> {
         }
     }
     from("$rootDir/LICENSE")
-}
-
-val mcJavaVersion = (minecraft as MinecraftProvider).minecraftData.metadata.javaVersion
-
-if (mcJavaVersion < java.sourceCompatibility) {
-    val targetClassVersion = mcJavaVersion.ordinal + 45
-    println("Classes need downgrading to Java $mcJavaVersion ($targetClassVersion)")
-
-    val downgradeClasses by tasks.registering(DowngradeSourceSetTask::class) {
-        dependsOn(tasks.classes)
-        sourceSet.set(sourceSets["main"])
-        targetVersion.set(targetClassVersion)
-    }
-    tasks.classes.get().finalizedBy(downgradeClasses)
 }
