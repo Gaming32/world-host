@@ -21,14 +21,18 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -419,7 +423,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
         private void updateServerInfo() {
             serverInfo.name = getName();
-            final ServerStatus metadata = WorldHost.ONLINE_FRIEND_PINGS.get(profile.getId());
+            final var metadata = WorldHost.ONLINE_FRIEND_PINGS.get(profile.getId());
             if (metadata == null) {
                 serverInfo.status = Components.EMPTY;
                 serverInfo.motd = Components.EMPTY;

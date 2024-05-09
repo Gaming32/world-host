@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface FriendsListUpdate {
+    // TODO: fastutil
     void friendsListUpdate(Map<UUID, Long> friends);
 
     default void friendsListUpdate() {

@@ -3,7 +3,6 @@ package io.github.gaming32.worldhost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -38,7 +37,7 @@ public class ProxyClient extends Thread {
     public void run() {
         WorldHost.LOGGER.info("Starting proxy client from {}", remoteAddress);
         try {
-            final InputStream is = socket.getInputStream();
+            final var is = socket.getInputStream();
             final byte[] b = new byte[0xffff];
             int n;
             while ((n = is.read(b)) != -1) {

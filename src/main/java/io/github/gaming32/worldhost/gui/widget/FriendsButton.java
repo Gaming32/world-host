@@ -7,7 +7,6 @@ import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -35,7 +34,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     @Override
     public void friendsListUpdate(Map<UUID, Long> friends) {
         final int online = friends.size();
-        final Component baseText = WorldHostComponents.FRIENDS.copy().append("  " + online + " ");
+        final var baseText = WorldHostComponents.FRIENDS.copy().append("  " + online + " ");
         setMessage(baseText);
         final Font textRenderer = Minecraft.getInstance().font;
         bgX = width / 2 - textRenderer.width(baseText) / 2 + textRenderer.width(WorldHostComponents.FRIENDS.copy().append(" "));

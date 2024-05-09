@@ -1,6 +1,5 @@
 package io.github.gaming32.worldhost.toast;
 
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.versions.Components;
@@ -113,7 +112,7 @@ public class WHToast {
         poseStack.pushPose();
         poseStack.translate(0f, 0f, 100f);
 
-        final Window window = Minecraft.getInstance().getWindow();
+        final var window = Minecraft.getInstance().getWindow();
         final int screenWidth = window.getGuiScaledWidth();
         final int screenHeight = window.getGuiScaledHeight();
 
@@ -134,7 +133,7 @@ public class WHToast {
             return false;
         }
 
-        final Window window = Minecraft.getInstance().getWindow();
+        final var window = Minecraft.getInstance().getWindow();
         final int screenWidth = window.getGuiScaledWidth();
         final int screenHeight = window.getGuiScaledHeight();
 

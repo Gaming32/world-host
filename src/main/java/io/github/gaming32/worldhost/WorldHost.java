@@ -14,7 +14,6 @@ import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
-import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -27,8 +26,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.resources.SkinManager;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
@@ -37,9 +34,6 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -49,7 +43,11 @@ import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 import org.semver4j.Semver;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,7 +56,16 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -84,7 +91,6 @@ import net.minecraft.server.Services;
 //#endif
 
 //#if MC >= 1.20.2
-import com.mojang.authlib.yggdrasil.ProfileResult;
 import net.minecraft.client.resources.PlayerSkin;
 //#endif
 
@@ -93,8 +99,6 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 //#if MC >= 1.18.2
 import dev.isxander.mainmenucredits.MainMenuCredits;
-import dev.isxander.mainmenucredits.config.MMCConfig;
-import dev.isxander.mainmenucredits.config.MMCConfigEntry;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //#endif
 //#else
@@ -185,7 +189,7 @@ public class WorldHost
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
     private static List<String> wordsForCid;
-    private static Map<String, Integer> wordsForCidInverse;
+    private static Map<String, Integer> wordsForCidInverse; // TODO: fastutil
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
 
@@ -349,7 +353,7 @@ public class WorldHost
             LOGGER.info("Finished authenticating with WH server. Requesting friends list.");
             ONLINE_FRIENDS.clear();
             protoClient.listOnline(CONFIG.getFriends());
-            final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+            final var server = Minecraft.getInstance().getSingleplayerServer();
             if (server != null && server.isPublished()) {
                 protoClient.publishedWorld(CONFIG.getFriends());
             }
@@ -373,7 +377,7 @@ public class WorldHost
                 .executes(ctx -> {
                     try {
                         final int port = ctx.getSource().getServer().getPort();
-                        final UPnPErrors.AddPortMappingErrors error = upnpGateway.openPort(port, 60, false);
+                        final var error = upnpGateway.openPort(port, 60, false);
                         if (error == null) {
                             ctx.getSource().sendSuccess(
                                 //#if MC >= 1.20.0
@@ -457,7 +461,7 @@ public class WorldHost
     }
 
     public static CompletableFuture<ResourceLocation> getInsecureSkinLocation(GameProfile gameProfile) {
-        final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
+        final var skinManager = Minecraft.getInstance().getSkinManager();
         //#if MC >= 1.20.2
         return skinManager.getOrLoad(gameProfile).thenApply(PlayerSkin::texture);
         //#elseif MC >= 1.19.2
@@ -497,7 +501,7 @@ public class WorldHost
         //#if MC < 1.20.2
         //$$ return sessionService.fillProfileProperties(fallback != null ? fallback : new GameProfile(uuid, null), false);
         //#else
-        final ProfileResult result = sessionService.fetchProfile(uuid, false);
+        final var result = sessionService.fetchProfile(uuid, false);
         if (result == null) {
             return fallback != null ? fallback : new GameProfile(uuid, "");
         }
@@ -710,7 +714,7 @@ public class WorldHost
     }
 
     public static void proxyConnect(long connectionId, InetAddress remoteAddr, Supplier<ProxyPassthrough> proxy) {
-        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+        final var server = Minecraft.getInstance().getSingleplayerServer();
         if (server == null || !server.isPublished()) {
             if (protoClient != null) {
                 protoClient.proxyDisconnect(connectionId);
@@ -770,8 +774,8 @@ public class WorldHost
     //#if FABRIC && MC >= 1.18.2
     public static int getMMCLines(boolean isPause) {
         if (FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
-            final MMCConfig baseConfig = MainMenuCredits.getInstance().getConfig();
-            final MMCConfigEntry config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
+            final var baseConfig = MainMenuCredits.getInstance().getConfig();
+            final var config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
             return (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
         }
         return 0;
@@ -792,12 +796,12 @@ public class WorldHost
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
-        try (CloseableHttpResponse response = client.execute(new HttpGet(uri))) {
-            final StatusLine status = response.getStatusLine();
+        try (var response = client.execute(new HttpGet(uri))) {
+            final var status = response.getStatusLine();
             if (status.getStatusCode() != 200) {
                 throw new IOException("Failed to GET " + uri + ": " + status.getStatusCode() + " " + status.getReasonPhrase());
             }
-            final HttpEntity entity = response.getEntity();
+            final var entity = response.getEntity();
             if (entity == null) {
                 throw new IOException("GET " + uri + " returned no body.");
             }

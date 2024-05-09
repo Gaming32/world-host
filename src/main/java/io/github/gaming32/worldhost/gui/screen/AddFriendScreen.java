@@ -11,7 +11,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
@@ -177,7 +176,7 @@ public class AddFriendScreen extends WorldHostScreen {
 
         if (friendProfile != null) {
             assert minecraft != null;
-            final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(friendProfile);
+            final var skinTexture = WorldHost.getSkinLocationNow(friendProfile);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.enableBlend();
             //#if MC >= 1.19.4

@@ -12,12 +12,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -124,7 +121,7 @@ public class FriendsScreen extends WorldHostScreen {
     public static void addFriend(GameProfile profile) {
         WorldHost.CONFIG.getFriends().add(profile.getId());
         WorldHost.saveConfig();
-        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+        final var server = Minecraft.getInstance().getSingleplayerServer();
         if (server != null && server.isPublished() && WorldHost.protoClient != null) {
             WorldHost.protoClient.publishedWorld(Collections.singleton(profile.getId()));
         }
@@ -157,7 +154,7 @@ public class FriendsScreen extends WorldHostScreen {
             if (mouseX >= textX && mouseX <= textX + textWidth) {
                 final int textY = height - 66 - font.lineHeight / 2;
                 if (mouseY >= textY && mouseY <= textY + font.lineHeight) {
-                    final Style component = font.getSplitter().componentStyleAtWidth(BEDROCK_FRIENDS_TEXT, (int)Math.round(mouseX) - textX);
+                    final var component = font.getSplitter().componentStyleAtWidth(BEDROCK_FRIENDS_TEXT, (int)Math.round(mouseX) - textX);
                     if (component != null) {
                         handleComponentClicked(component);
                         return true;
@@ -226,7 +223,7 @@ public class FriendsScreen extends WorldHostScreen {
             //#endif
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {
-            final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(profile);
+            final var skinTexture = WorldHost.getSkinLocationNow(profile);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.enableBlend();
             blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
@@ -247,7 +244,7 @@ public class FriendsScreen extends WorldHostScreen {
                         WorldHost.CONFIG.getFriends().remove(profile.getId());
                         WorldHost.saveConfig();
                         FriendsScreen.this.list.updateEntries();
-                        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                        final var server = Minecraft.getInstance().getSingleplayerServer();
                         if (server != null && server.isPublished() && WorldHost.protoClient != null) {
                             WorldHost.protoClient.closedWorld(Collections.singleton(profile.getId()));
                         }
