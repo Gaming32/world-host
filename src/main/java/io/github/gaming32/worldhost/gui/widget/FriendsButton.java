@@ -18,7 +18,7 @@ import net.minecraft.client.gui.GuiGraphics;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
-public class FriendsButton extends Button implements FriendsListUpdate {
+public final class FriendsButton extends Button implements FriendsListUpdate {
     private int bgX, bgWidth;
 
     public FriendsButton(int x, int y, int width, int height, OnPress onPress) {

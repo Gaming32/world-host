@@ -24,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
+public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public static final int PROTOCOL_VERSION = 5;
 
     private final String originalHost;
