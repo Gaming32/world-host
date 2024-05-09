@@ -258,7 +258,7 @@ public class FriendsScreen extends WorldHostScreen {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            list.setSelected(this);
+            FriendsScreen.this.list.setSelected(this);
             return false;
         }
     }

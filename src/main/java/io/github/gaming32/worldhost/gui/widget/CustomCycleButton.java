@@ -110,6 +110,13 @@ public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> ex
         return result;
     }
 
+    //#if MC >= 1.19.4
+    @Override
+    public final void setTooltip(@Nullable Tooltip tooltip) {
+        super.setTooltip(tooltip);
+    }
+    //#endif
+
     @NotNull
     public abstract Component getValueMessage();
 }

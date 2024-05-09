@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +49,9 @@ import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 //#endif
 //#endif
 
-//#if MC < 1.19.4
+//#if MC >= 1.19.4
+import java.util.Arrays;
+//#else
 //$$ import java.util.Objects;
 //#endif
 
@@ -568,7 +569,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             select(this);
 
-            final double relX = mouseX - list.getRowLeft();
+            final double relX = mouseX - OnlineFriendsScreen.this.list.getRowLeft();
             if (relX < 32.0 && relX > 16.0) {
                 connect();
                 return true;
