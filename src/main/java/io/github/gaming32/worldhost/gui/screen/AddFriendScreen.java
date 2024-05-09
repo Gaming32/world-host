@@ -78,7 +78,11 @@ public class AddFriendScreen extends WorldHostScreen {
 
         usernameField = addWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(36);
+        //#if MC >= 1.19.4
         usernameField.setFocused(true);
+        //#else
+        //$$ usernameField.setFocus(true);
+        //#endif
         if (friendProfile != null) {
             usernameField.setValue(friendProfile.getName());
         }
@@ -176,7 +180,12 @@ public class AddFriendScreen extends WorldHostScreen {
             final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(friendProfile);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.enableBlend();
-            final int size = addFriendButton.getY() - 110;
+            //#if MC >= 1.19.4
+            final int addFriendY = addFriendButton.getY();
+            //#else
+            //$$ final int addFriendY = addFriendButton.y;
+            //#endif
+            final int size = addFriendY - 110;
             final int x = width / 2 - size / 2;
             blit(context, skinTexture, x, 98, size, size, 8, 8, 8, 8, 64, 64);
             blit(context, skinTexture, x, 98, size, size, 40, 8, 8, 8, 64, 64);

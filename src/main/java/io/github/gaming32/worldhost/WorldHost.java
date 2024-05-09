@@ -423,7 +423,12 @@ public class WorldHost
             proxyProtocolClient.close();
             proxyProtocolClient = null;
         }
-        final UUID uuid = Minecraft.getInstance().getUser().getProfileId();
+        final var user = Minecraft.getInstance().getUser();
+        //#if MC >= 1.19.2
+        final UUID uuid = user.getProfileId();
+        //#else
+        //$$ final UUID uuid = user.getGameProfile().getId();
+        //#endif
         //noinspection ConstantValue
         if (uuid == null) {
             LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
