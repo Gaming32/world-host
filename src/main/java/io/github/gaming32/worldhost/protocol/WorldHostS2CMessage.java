@@ -115,7 +115,7 @@ public sealed interface WorldHostS2CMessage {
     record ClosedWorld(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            WorldHost.ONLINE_FRIENDS.remove(user);
+            WorldHost.ONLINE_FRIENDS.removeLong(user);
             WorldHost.ONLINE_FRIEND_PINGS.remove(user);
             WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
         }

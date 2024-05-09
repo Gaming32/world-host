@@ -50,6 +50,10 @@ import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 //#endif
 //#endif
 
+//#if MC < 1.19.4
+//$$ import java.util.Objects;
+//#endif
+
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
     private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
     //#if MC >= 1.20.2
