@@ -76,14 +76,13 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
                     while (!closed) {
                         final ProxyMessage message = ProxyMessage.read(dis);
-                        if (message instanceof ProxyMessage.Open open) {
-                            WorldHost.proxyConnect(open.getConnectionId(), open.getAddress(), () -> WorldHost.proxyProtocolClient);
-                        } else if (message instanceof ProxyMessage.Packet packet) {
-                            WorldHost.proxyPacket(packet.getConnectionId(), packet.getBuffer());
-                        } else if (message instanceof ProxyMessage.Close close) {
-                            WorldHost.proxyDisconnect(close.getConnectionId());
-                        } else {
-                            throw new AssertionError("If..elseif for ProxyMessage should be exhaustive");
+                        switch (message) {
+                            case ProxyMessage.Open open ->
+                                WorldHost.proxyConnect(open.getConnectionId(), open.getAddress(), () -> WorldHost.proxyProtocolClient);
+                            case ProxyMessage.Packet packet ->
+                                WorldHost.proxyPacket(packet.getConnectionId(), packet.getBuffer());
+                            case ProxyMessage.Close close ->
+                                WorldHost.proxyDisconnect(close.getConnectionId());
                         }
                     }
                 } catch (Exception e) {

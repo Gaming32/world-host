@@ -59,9 +59,9 @@ public class WHToast {
             toast.calculateText();
             playSound(toast.important ? IMPORTANT : REGULAR);
             if (!TOASTS.isEmpty()) {
-                if (Y_OFFSET + 2 * toast.height + GAP <= TOASTS.get(0).y) {
+                if (Y_OFFSET + 2 * toast.height + GAP <= TOASTS.getFirst().y) {
                     toast.y = Y_OFFSET;
-                    TOASTS.add(0, toast);
+                    TOASTS.addFirst(toast);
                     return;
                 }
                 for (int i = 0; i < TOASTS.size() - 1; i++) {
@@ -73,7 +73,7 @@ public class WHToast {
                         return;
                     }
                 }
-                final ToastInstance lastToast = TOASTS.get(TOASTS.size() - 1);
+                final ToastInstance lastToast = TOASTS.getLast();
                 toast.y = lastToast.y + lastToast.height + GAP;
             } else {
                 toast.y = Y_OFFSET;
