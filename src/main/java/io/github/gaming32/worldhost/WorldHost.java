@@ -18,6 +18,10 @@ import io.github.gaming32.worldhost.versions.Components;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntAVLTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -58,12 +62,10 @@ import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
@@ -189,11 +191,11 @@ public class WorldHost
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
     private static List<String> wordsForCid;
-    private static Map<String, Integer> wordsForCidInverse; // TODO: fastutil
+    private static Object2IntMap<String> wordsForCidInverse;
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
 
-    public static final Map<UUID, Long> ONLINE_FRIENDS = new LinkedHashMap<>();
+    public static final Object2LongMap<UUID> ONLINE_FRIENDS = new Object2LongLinkedOpenHashMap<>();
     public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -242,7 +244,8 @@ public class WorldHost
         if (wordsForCid.size() != (1 << 14)) {
             throw new RuntimeException("Expected WORDS_FOR_CID to have " + (1 << 14) + " elements, but it has " + wordsForCid.size() + " elements.");
         }
-        wordsForCidInverse = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        wordsForCidInverse = new Object2IntAVLTreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        wordsForCidInverse.defaultReturnValue(-1);
         for (int i = 0; i < wordsForCid.size(); i++) {
             wordsForCidInverse.put(wordsForCid.get(i), i);
         }
@@ -643,8 +646,8 @@ public class WorldHost
         long result = 0L;
         int shift = 0;
         for (final String word : words) {
-            final Integer part = wordsForCidInverse.get(word);
-            if (part == null) {
+            final int part = wordsForCidInverse.getInt(word);
+            if (part == -1) {
                 return null;
             }
             result |= (long)part << shift;

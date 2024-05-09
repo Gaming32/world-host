@@ -4,12 +4,12 @@ import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.versions.Components;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 import java.util.UUID;
 
 //#if MC >= 1.20.0
@@ -32,7 +32,7 @@ public class FriendsButton extends Button implements FriendsListUpdate {
     }
 
     @Override
-    public void friendsListUpdate(Map<UUID, Long> friends) {
+    public void friendsListUpdate(Object2LongMap<UUID> friends) {
         final int online = friends.size();
         final var baseText = WorldHostComponents.FRIENDS.copy().append("  " + online + " ");
         setMessage(baseText);

@@ -9,6 +9,7 @@ import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.widget.FriendsButton;
 import io.github.gaming32.worldhost.mixin.ServerStatusPingerAccessor;
 import io.github.gaming32.worldhost.versions.Components;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -31,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 //#if MC >= 1.20.0
@@ -212,7 +212,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     }
 
     @Override
-    public void friendsListUpdate(Map<UUID, Long> friends) {
+    public void friendsListUpdate(Object2LongMap<UUID> friends) {
         final var newFriends = new LinkedHashMap<>(friends);
         for (int i = list.children().size() - 1; i >= 0; i--) {
             final UUID uuid = list.children().get(i).profile.getId();
