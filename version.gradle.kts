@@ -86,7 +86,7 @@ unimined.minecraft {
 
     when {
         isFabric -> fabric {
-            loader("0.15.1")
+            loader("0.15.6")
         }
         isForge -> minecraftForge {
             loader(when(mcVersion) {
@@ -256,11 +256,19 @@ dependencies {
             1_18_02 -> "0.77.0+1.18.2"
             1_17_01 -> "0.46.1+1.17"
             else -> null
-        }?.let { fabricApi.fabricModule("fabric-resource-loader-v0", it) }
-            ?.let {
-                "modImplementation"(it)
-                bundle(it)
+        }?.let { fapiVersion ->
+            val resourceLoader = fabricApi.fabricModule("fabric-resource-loader-v0", fapiVersion)
+            "modImplementation"(resourceLoader)
+            bundle(resourceLoader)
+
+            for (module in listOf(
+                "fabric-screen-api-v1",
+                "fabric-key-binding-api-v1",
+                "fabric-lifecycle-events-v1"
+            )) {
+                "modRuntimeOnly"(fabricApi.fabricModule(module,fapiVersion))
             }
+        }
     }
 
     if (isFabric && mcVersion >= 1_18_02) {

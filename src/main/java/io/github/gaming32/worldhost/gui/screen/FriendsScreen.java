@@ -29,10 +29,6 @@ import net.minecraft.client.gui.GuiGraphics;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
-//#if MC >= 1.20.2
-import net.minecraft.client.renderer.RenderType;
-//#endif
-
 public class FriendsScreen extends WorldHostScreen {
     public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
     private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
@@ -184,33 +180,6 @@ public class FriendsScreen extends WorldHostScreen {
                 36
             );
         }
-
-        //#if MC >= 1.20.2
-        @Override
-        protected void renderDecorations(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
-            super.renderDecorations(graphics, mouseX, mouseY);
-            graphics.setColor(0.25f, 0.25f, 0.25f, 1f);
-            //#if MC >= 1.20.3
-            final int x0 = getX();
-            final int x1 = getRight();
-            final int y0 = getY();
-            final int y1 = getBottom();
-            //#else
-            //$$ final int x0 = this.x0;
-            //$$ final int x1 = this.x1;
-            //$$ final int y0 = this.y0;
-            //$$ final int y1 = this.y1;
-            //#endif
-            //#if MC < 1.20.5
-            //$$ graphics.blit(BACKGROUND_LOCATION, x0, 0, 0f, 0f, width, y0, 32, 32);
-            //$$ graphics.blit(BACKGROUND_LOCATION, x0, y1, 0f, y1, width, height - y1, 32, 32);
-            //#endif
-            graphics.setColor(1f, 1f, 1f, 1f);
-            graphics.fillGradient(RenderType.guiOverlay(), x0, y0, x1, y0 + 4, 0xff000000, 0, 0);
-            graphics.fillGradient(RenderType.guiOverlay(), x0, y1 - 4, x1, y1, 0, 0xff000000, 0);
-        }
-
-        //#endif
 
         @Override
         public void setSelected(@Nullable FriendsEntry entry) {

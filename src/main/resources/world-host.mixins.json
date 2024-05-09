@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.7",
   "package": "io.github.gaming32.worldhost.mixin",
-  "compatibilityLevel": "$java_version",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
     "MixinCommands",
     "MixinLevelSummary",
