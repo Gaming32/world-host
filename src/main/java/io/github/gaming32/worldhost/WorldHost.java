@@ -106,6 +106,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+//$$ import net.minecraftforge.fml.loading.FMLPaths;
 //#else
 //$$ import net.neoforged.api.distmarker.Dist;
 //$$ import net.neoforged.bus.api.SubscribeEvent;
@@ -113,6 +114,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.neoforged.fml.ModLoadingContext;
 //$$ import net.neoforged.fml.common.Mod;
 //$$ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+//$$ import net.neoforged.fml.loading.FMLPaths;
 //#endif
 //$$ import java.util.function.BiFunction;
 //#if MC >= 1.20.5
@@ -173,13 +175,13 @@ public class WorldHost
         300 * 20
     };
 
-    public static final File GAME_DIR = Minecraft.getInstance().gameDirectory;
-    public static final File CACHE_DIR = new File(GAME_DIR, ".world-host-cache");
+    public static final Path GAME_DIR = getGameDir();
+    public static final Path CACHE_DIR = GAME_DIR.resolve(".world-host-cache");
 
-    public static final File CONFIG_DIR = new File(GAME_DIR, "config");
-    public static final Path CONFIG_FILE = new File(CONFIG_DIR, "world-host.json5").toPath();
-    public static final Path FRIENDS_FILE = new File(CONFIG_DIR, "world-host-friends.json").toPath();
-    public static final Path OLD_CONFIG_FILE = new File(CONFIG_DIR, "world-host.json").toPath();
+    public static final Path CONFIG_DIR = GAME_DIR.resolve("config");
+    public static final Path CONFIG_FILE = CONFIG_DIR.resolve("world-host.json5");
+    public static final Path FRIENDS_FILE = CONFIG_DIR.resolve("world-host-friends.json");
+    public static final Path OLD_CONFIG_FILE = CONFIG_DIR.resolve("world-host.json");
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
     private static List<String> wordsForCid;
@@ -245,17 +247,20 @@ public class WorldHost
 
         loadConfig();
 
-        //noinspection ResultOfMethodCallIgnored
-        CACHE_DIR.mkdirs();
+        try {
+            Files.createDirectories(CACHE_DIR);
+        } catch (IOException e) {
+            LOGGER.error("Failed to create cache directory", e);
+        }
         //#if MC >= 1.19.2
         profileCache = Services.create(
             ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService(),
-            CACHE_DIR
+            CACHE_DIR.toFile()
         ).profileCache();
         //#else
         //$$ profileCache = new GameProfileCache(
         //$$     new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy()).createProfileRepository(),
-        //$$     new File(CACHE_DIR, "usercache.json")
+        //$$     CACHE_DIR.resolve("usercache.json").toFile()
         //$$ );
         //#endif
         profileCache.setExecutor(Util.backgroundExecutor());
@@ -838,6 +843,14 @@ public class WorldHost
             LOGGER.error("Failed to check for updates", t);
             return Optional.empty();
         });
+    }
+
+    private static Path getGameDir() {
+        //#if FABRIC
+        return FabricLoader.getInstance().getGameDir();
+        //#else
+        //$$ return FMLPaths.GAMEDIR.get();
+        //#endif
     }
 
     //#if FORGELIKE

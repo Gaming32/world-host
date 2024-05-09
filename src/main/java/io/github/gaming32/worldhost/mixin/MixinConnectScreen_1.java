@@ -15,6 +15,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //$$ import java.util.concurrent.CompletableFuture;
 //#endif
 
+//#if MC >= 1.20.5
+import net.minecraft.client.multiplayer.TransferState;
+//#endif
+
 @Mixin(targets = "net.minecraft.client.gui.screens.ConnectScreen$1")
 public class MixinConnectScreen_1 {
     @Unique
@@ -31,6 +35,9 @@ public class MixinConnectScreen_1 {
         ServerData serverData,
         //#elseif MC > 1.18.2
         //$$ CompletableFuture<?> completableFuture,
+        //#endif
+        //#if MC >= 1.20.5
+        TransferState transferState,
         //#endif
         CallbackInfo ci
     ) {
