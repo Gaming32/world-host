@@ -83,7 +83,7 @@ public class AddFriendScreen extends WorldHostScreen {
         //$$ usernameField.setFocus(true);
         //#endif
         if (friendProfile != null) {
-            usernameField.setValue(friendProfile.getName());
+            usernameField.setValue(WorldHost.getIfBlank(friendProfile.getName(), () -> friendProfile.getId().toString()));
         }
         if (usernameResponder == null) {
             // Only set the responder here on first init
