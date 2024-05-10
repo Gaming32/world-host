@@ -455,6 +455,7 @@ public class WorldHost
     }
 
     // From Apache Commons Lang StringUtils 3.10+
+    // TODO: Remove when 1.18.2 is minimum
     public static <T extends CharSequence> T getIfBlank(final T str, final Supplier<T> defaultSupplier) {
         return StringUtils.isBlank(str) ? defaultSupplier == null ? null : defaultSupplier.get() : str;
     }

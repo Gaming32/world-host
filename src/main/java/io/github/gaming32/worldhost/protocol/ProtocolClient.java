@@ -47,7 +47,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public ProtocolClient(String host, boolean successToast, boolean failureToast) {
         this.originalHost = host;
         final HostAndPort target = HostAndPort.fromString(host).withDefaultPort(9646);
-        final Thread connectionThread = new Thread(() -> {
+        Thread.ofVirtual().name("WH-ConnectionThread").start(() -> {
             Socket socket = null;
             try {
                 socket = new Socket(target.getHost(), target.getPort());
@@ -91,7 +91,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             }
             final Socket fSocket = socket;
 
-            final Thread sendThread = new Thread(() -> {
+            final Thread sendThread = Thread.ofVirtual().name("WH-SendThread").start(() -> {
                 try {
                     final DataOutputStream dos = new DataOutputStream(fSocket.getOutputStream());
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -111,9 +111,9 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                     WorldHost.LOGGER.error("Critical error in WH send thread", e);
                 }
                 close();
-            }, "WH-SendThread");
+            });
 
-            final Thread recvThread = new Thread(() -> {
+            Thread.ofVirtual().name("WH-RecvThread").start(() -> {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
                     while (!closed) {
@@ -151,10 +151,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                     }
                 }
                 close();
-            }, "WH-RecvThread");
-
-            sendThread.start();
-            recvThread.start();
+            });
 
             try {
                 sendThread.join();
@@ -174,9 +171,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         .show();
                 }
             }
-        }, "WH-ConnectionThread");
-        connectionThread.setDaemon(true);
-        connectionThread.start();
+        });
     }
 
     public String getOriginalHost() {

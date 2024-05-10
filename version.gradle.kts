@@ -435,4 +435,7 @@ tasks.withType<RemapJarTask> {
         }
     }
     from("$rootDir/LICENSE")
+    mixinRemap {
+        disableRefmap()
+    }
 }
