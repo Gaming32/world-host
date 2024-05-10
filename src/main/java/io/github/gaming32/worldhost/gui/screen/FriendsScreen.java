@@ -210,7 +210,7 @@ public class FriendsScreen extends WorldHostScreen {
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.immutable(getName());
+            return Components.literal(getName());
         }
 
         @Override

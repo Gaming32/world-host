@@ -31,7 +31,7 @@ public sealed interface WorldHostS2CMessage {
         public void handle(ProtocolClient client) {
             if (critical) {
                 WHToast.builder("world-host.protocol_error_occurred")
-                    .description(Components.immutable(message))
+                    .description(Components.literal(message))
                     .show();
                 throw new RuntimeException(message);
             } else {

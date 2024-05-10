@@ -64,7 +64,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
                 if (failureToast) {
                     WHToast.builder("world-host.wh_connect.connect_failed")
-                        .description(Components.immutable(e.getLocalizedMessage()))
+                        .description(Components.nullToEmpty(e.getLocalizedMessage()))
                         .show();
                 }
                 if (socket != null) {
@@ -74,7 +74,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         WorldHost.LOGGER.error("Failed to close WH socket", e1);
                         if (failureToast) {
                             WHToast.builder("world-host.wh_connect.close_failed")
-                                .description(Components.immutable(e1.getLocalizedMessage()))
+                                .description(Components.nullToEmpty(e1.getLocalizedMessage()))
                                 .show();
                         }
                     }
@@ -170,7 +170,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 WorldHost.LOGGER.error("Failed to close WH socket.", e);
                 if (WorldHost.CONFIG.isEnableReconnectionToasts()) {
                     WHToast.builder("world-host.wh_connect.close_failed")
-                        .description(Components.immutable(e.getLocalizedMessage()))
+                        .description(Components.nullToEmpty(e.getLocalizedMessage()))
                         .show();
                 }
             }
