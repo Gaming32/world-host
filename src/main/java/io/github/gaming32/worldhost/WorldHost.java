@@ -873,8 +873,13 @@ public class WorldHost
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
     //#endif
     //$$ public static class ClientModEvents {
+    //$$     // Forge 47.1.3 can call FMLClientSetupEvent twice.
+    //$$     private static boolean initialized = false;
+    //$$
     //$$     @SubscribeEvent
-    //$$     public static void onClientSetup(FMLClientSetupEvent event) {
+    //$$     public static synchronized void onClientSetup(FMLClientSetupEvent event) {
+    //$$         if (initialized) return;
+    //$$         initialized = true;
     //$$         init();
     //$$         final BiFunction<Minecraft, Screen, Screen> screenFunction =
     //$$             (mc, screen) -> new WorldHostConfigScreen(screen);

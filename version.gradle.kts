@@ -139,6 +139,12 @@ unimined.minecraft {
         remap(tasks.shadeDowngradedApi.get(), "remapJar")
         tasks.assemble.get().dependsOn("remapJar")
     }
+
+    runs {
+        config("client") {
+            javaVersion = JavaVersion.VERSION_21
+        }
+    }
 }
 val minecraft = unimined.minecrafts[sourceSets.main.get()]
 
