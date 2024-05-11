@@ -56,5 +56,16 @@
   "world-host.joining_world_host": "Verbinde zu World Host world...",
   "world-host.connection_not_found": "Welt konnte nicht gefunden werden",
   "world-host.connection_not_found.desc": "World Host Welt %s konnte nicht gefunden werden.",
-  "chat.square_brackets": "[%s]"
+  "chat.square_brackets": "[%s]",
+  "world-host.config.enableReconnectionToasts": "Reconnection Toasts aktivieren",
+  "world-host.config.shareButton": "Teilen-Button",
+  "world-host.config.shareButton.tooltip": "Zeigt einen \"Welt teilen\" Button neben dem \"Welt spielen\" Button im Einzelspieler-Menü an.\nDies aktiviert auch Shift+Doppelklick, um eine Welt zu teilen.",
+  "world-host.config.allowFriendRequests": "Freundschaftsanfragen erlauben",
+  "world-host.config.allowFriendRequests.tooltip": "Du kannst trotzdem mit einem anderen Spieler befreundet sein, indem ihr euch gegenseitig zu den Freundeslisten hinzufügt.\nDies ist hilfreich, wenn du ein Content Creator bist und mit Freundschaftsanfragen überhäuft wirst.",
+  "world-host.config.announceFriendsOnline": "Popup-Freunde online",
+  "world-host.config.announceFriendsOnline.tooltip": "Wenn ein Freund online geht, bekommst du ein Popup. Mit dieser Option kannst du das deaktivieren.",
+  "world-host.play_world": "Welt spielen",
+  "world-host.share_world": "Welt teilen",
+  "world-host.share_world.failed": "Welt konnte nicht geteilt werden",
+  "world-host.create_world": "Welt erstellen"
 }
