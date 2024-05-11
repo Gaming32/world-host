@@ -14,7 +14,7 @@ plugins {
     id("io.github.gaming32.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.modrinth.minotaur") version "2.+"
-    id("xyz.wagyourtail.jvmdowngrader") version "0.0.1-SNAPSHOT"
+    id("xyz.wagyourtail.jvmdowngrader") version "0.2.0-SNAPSHOT"
 }
 
 fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
