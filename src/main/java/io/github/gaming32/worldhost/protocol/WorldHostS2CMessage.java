@@ -7,15 +7,10 @@ import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
-import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataInputStream;
@@ -36,7 +31,7 @@ public sealed interface WorldHostS2CMessage {
         public void handle(ProtocolClient client) {
             if (critical) {
                 WHToast.builder("world-host.protocol_error_occurred")
-                    .description(Components.immutable(message))
+                    .description(Components.literal(message))
                     .show();
                 throw new RuntimeException(message);
             } else {
@@ -49,7 +44,7 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(user)) {
-                final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                final var server = Minecraft.getInstance().getSingleplayerServer();
                 if (server != null && server.isPublished()) {
                     client.publishedWorld(List.of(user));
                 }
@@ -65,7 +60,7 @@ public sealed interface WorldHostS2CMessage {
                 if (attemptingToJoin == null || ownerCid != attemptingToJoin) return;
                 final Minecraft minecraft = Minecraft.getInstance();
                 assert minecraft.screen != null;
-                Screen parentScreen = minecraft.screen;
+                var parentScreen = minecraft.screen;
                 if (parentScreen instanceof JoiningWorldHostScreen joinScreen) {
                     parentScreen = joinScreen.parent;
                 }
@@ -120,7 +115,7 @@ public sealed interface WorldHostS2CMessage {
     record ClosedWorld(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            WorldHost.ONLINE_FRIENDS.remove(user);
+            WorldHost.ONLINE_FRIENDS.removeLong(user);
             WorldHost.ONLINE_FRIEND_PINGS.remove(user);
             WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
         }
@@ -130,11 +125,11 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(user)) {
-                final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                final var server = Minecraft.getInstance().getSingleplayerServer();
                 if (server == null || !server.isPublished()) return;
                 if (WorldHost.upnpGateway != null && !WorldHost.CONFIG.isNoUPnP()) {
                     try {
-                        final UPnPErrors.AddPortMappingErrors error = WorldHost.upnpGateway.openPort(
+                        final var error = WorldHost.upnpGateway.openPort(
                             server.getPort(), 60, false
                         );
                         if (error == null) {
@@ -170,7 +165,7 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(friend)) {
-                final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                final var server = Minecraft.getInstance().getSingleplayerServer();
                 if (server != null) {
                     client.enqueue(new WorldHostC2SMessage.NewQueryResponse(connectionId, server.getStatus()));
                 }
@@ -244,7 +239,7 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             final String currentVersion = WorldHost.getModVersion(WorldHost.MOD_ID);
-            final Component message = Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion);
+            final var message = Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion);
             WorldHost.LOGGER.info(message.getString());
             if (!WorldHost.CONFIG.isShowOutdatedWorldHost()) return;
             WorldHost.checkForUpdates().thenAcceptAsync(version -> {
@@ -267,7 +262,7 @@ public sealed interface WorldHostS2CMessage {
                 if (client.getAttemptingToJoin() == null || client.getAttemptingToJoin() != connectionId) return;
                 client.setAttemptingToJoin(null);
                 final Minecraft minecraft = Minecraft.getInstance();
-                Screen parentScreen = minecraft.screen;
+                var parentScreen = minecraft.screen;
                 if (parentScreen instanceof JoiningWorldHostScreen joinScreen) {
                     parentScreen = joinScreen.parent;
                 }
@@ -312,7 +307,7 @@ public sealed interface WorldHostS2CMessage {
             case 7 -> new QueryRequest(readUuid(dis), dis.readLong());
             case 8 -> {
                 final UUID friend = readUuid(dis);
-                final FriendlyByteBuf buf = WorldHost.createByteBuf();
+                final var buf = WorldHost.createByteBuf();
                 buf.writeBytes(dis, dis.readInt());
                 ServerStatus serverStatus;
                 try {
@@ -336,7 +331,7 @@ public sealed interface WorldHostS2CMessage {
             case 15 -> new ConnectionNotFound(dis.readLong());
             case 16 -> {
                 final UUID friend = readUuid(dis);
-                final FriendlyByteBuf buf = WorldHost.createByteBuf();
+                final var buf = WorldHost.createByteBuf();
                 buf.writeBytes(dis.readAllBytes());
                 ServerStatus serverStatus;
                 try {

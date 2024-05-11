@@ -1,8 +1,6 @@
 package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.WorldHost;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataOutputStream;
@@ -88,9 +86,7 @@ public sealed interface WorldHostC2SMessage {
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(7);
             dos.writeLong(connectionId);
-            final FriendlyByteBuf buf = WorldHost.createByteBuf();
-            new ClientboundStatusResponsePacket(metadata != null ? metadata : WorldHost.createEmptyServerStatus())
-                .write(buf);
+            final var buf = WorldHost.writeServerStatus(metadata);
             dos.writeInt(buf.readableBytes());
             buf.readBytes(dos, buf.readableBytes());
         }
@@ -126,9 +122,7 @@ public sealed interface WorldHostC2SMessage {
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeByte(11);
             dos.writeLong(connectionId);
-            final FriendlyByteBuf buf = WorldHost.createByteBuf();
-            new ClientboundStatusResponsePacket(metadata != null ? metadata : WorldHost.createEmptyServerStatus())
-                .write(buf);
+            final var buf = WorldHost.writeServerStatus(metadata);
             buf.readBytes(dos, buf.readableBytes());
         }
     }

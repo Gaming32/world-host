@@ -23,7 +23,7 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
     public ProxyProtocolClient(String host, int port, long connectionId, String baseAddr, int mcPort) {
         this.baseAddr = baseAddr;
         this.mcPort = mcPort;
-        final Thread connectionThread = new Thread(() -> {
+        Thread.ofVirtual().name("WHEP-ConnectThread").start(() -> {
             Socket socket = null;
             try {
                 socket = new Socket(host, port);
@@ -52,7 +52,7 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
             }
             final Socket fSocket = socket;
 
-            final Thread sendThread = new Thread(() -> {
+            final Thread sendThread = Thread.ofVirtual().name("WHEP-SendThread").start(() -> {
                 try {
                     final DataOutputStream dos = new DataOutputStream(fSocket.getOutputStream());
                     while (!closed) {
@@ -69,21 +69,20 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
                     WorldHost.LOGGER.error("Critical error in WHEP send thread", e);
                 }
                 closed = true;
-            }, "WHEP-SendThread");
+            });
 
-            final Thread recvThread = new Thread(() -> {
+            Thread.ofVirtual().name("WHEP-RecvThread").start(() -> {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
                     while (!closed) {
                         final ProxyMessage message = ProxyMessage.read(dis);
-                        if (message instanceof ProxyMessage.Open open) {
-                            WorldHost.proxyConnect(open.getConnectionId(), open.getAddress(), () -> WorldHost.proxyProtocolClient);
-                        } else if (message instanceof ProxyMessage.Packet packet) {
-                            WorldHost.proxyPacket(packet.getConnectionId(), packet.getBuffer());
-                        } else if (message instanceof ProxyMessage.Close close) {
-                            WorldHost.proxyDisconnect(close.getConnectionId());
-                        } else {
-                            throw new AssertionError("If..elseif for ProxyMessage should be exhaustive");
+                        switch (message) {
+                            case ProxyMessage.Open open ->
+                                WorldHost.proxyConnect(open.getConnectionId(), open.getAddress(), () -> WorldHost.proxyProtocolClient);
+                            case ProxyMessage.Packet packet ->
+                                WorldHost.proxyPacket(packet.getConnectionId(), packet.getBuffer());
+                            case ProxyMessage.Close close ->
+                                WorldHost.proxyDisconnect(close.getConnectionId());
                         }
                     }
                 } catch (Exception e) {
@@ -92,10 +91,7 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
                     }
                 }
                 closed = true;
-            }, "WHEP-RecvThread");
-
-            sendThread.start();
-            recvThread.start();
+            });
 
             try {
                 sendThread.join();
@@ -108,9 +104,7 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
             } catch (IOException e) {
                 WorldHost.LOGGER.error("Failed to close WHEP socket.", e);
             }
-        }, "WHEP-ConnectThread");
-        connectionThread.setDaemon(true);
-        connectionThread.start();
+        });
     }
 
     private void enqueue(ProxyMessage message) {

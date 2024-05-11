@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.versions;
 import com.demonwav.mcdev.annotations.Translatable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -13,7 +14,11 @@ import net.minecraft.network.chat.MutableComponent;
 //#endif
 
 public class Components {
-    public static final Component EMPTY = immutable("");
+    //#if MC >= 1.19.2
+    public static final Component EMPTY = CommonComponents.EMPTY;
+    //#else
+    //$$ public static final Component EMPTY = TextComponent.EMPTY;
+    //#endif
 
     public static MutableComponent literal(String text) {
         //#if MC >= 1.19.1
@@ -41,7 +46,7 @@ public class Components {
         //#endif
     }
 
-    public static Component immutable(String text) {
+    public static Component nullToEmpty(String text) {
         return Component.nullToEmpty(text);
     }
 

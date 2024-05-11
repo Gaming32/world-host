@@ -1,6 +1,6 @@
 plugins {
-    id("dev.deftu.gradle.preprocess-root") version "0.4.2"
-    id("xyz.wagyourtail.unimined") version "1.2.0" apply false
+    id("io.github.gaming32.gradle.preprocess-root") version "0.4.4"
+    id("xyz.wagyourtail.unimined") version "1.2.4" apply false
 }
 
 repositories {
@@ -8,6 +8,8 @@ repositories {
 }
 
 preprocess {
+    val fabric12006 = createNode("1.20.6-fabric", 1_20_06, "yarn")
+    val neoforge12006 = createNode("1.20.6-neoforge", 1_20_06, "yarn")
     val fabric12004 = createNode("1.20.4-fabric", 1_20_04, "yarn")
     val neoforge12004 = createNode("1.20.4-neoforge", 1_20_04, "yarn")
     val fabric12001 = createNode("1.20.1-fabric", 1_20_01, "yarn")
@@ -21,7 +23,9 @@ preprocess {
     val fabric11701 = createNode("1.17.1-fabric", 1_17_01, "yarn")
     val forge11701 = createNode("1.17.1-forge", 1_17_01, "srg")
 
-    fabric12004.link(neoforge12004)
+    fabric12006.link(neoforge12006)
+    neoforge12006.link(neoforge12004)
+    neoforge12004.link(fabric12004)
     fabric12004.link(fabric12001)
     fabric12001.link(forge12001)
     forge12001.link(forge11904)

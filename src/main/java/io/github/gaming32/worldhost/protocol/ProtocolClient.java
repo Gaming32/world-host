@@ -9,7 +9,11 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CountingInputStream;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.Collection;
@@ -20,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
+public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public static final int PROTOCOL_VERSION = 5;
 
     private final String originalHost;
@@ -43,7 +47,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public ProtocolClient(String host, boolean successToast, boolean failureToast) {
         this.originalHost = host;
         final HostAndPort target = HostAndPort.fromString(host).withDefaultPort(9646);
-        final Thread connectionThread = new Thread(() -> {
+        Thread.ofVirtual().name("WH-ConnectionThread").start(() -> {
             Socket socket = null;
             try {
                 socket = new Socket(target.getHost(), target.getPort());
@@ -60,7 +64,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
                 if (failureToast) {
                     WHToast.builder("world-host.wh_connect.connect_failed")
-                        .description(Components.immutable(e.getLocalizedMessage()))
+                        .description(Components.nullToEmpty(e.getLocalizedMessage()))
                         .show();
                 }
                 if (socket != null) {
@@ -70,7 +74,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         WorldHost.LOGGER.error("Failed to close WH socket", e1);
                         if (failureToast) {
                             WHToast.builder("world-host.wh_connect.close_failed")
-                                .description(Components.immutable(e1.getLocalizedMessage()))
+                                .description(Components.nullToEmpty(e1.getLocalizedMessage()))
                                 .show();
                         }
                     }
@@ -87,7 +91,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             }
             final Socket fSocket = socket;
 
-            final Thread sendThread = new Thread(() -> {
+            final Thread sendThread = Thread.ofVirtual().name("WH-SendThread").start(() -> {
                 try {
                     final DataOutputStream dos = new DataOutputStream(fSocket.getOutputStream());
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -107,9 +111,9 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                     WorldHost.LOGGER.error("Critical error in WH send thread", e);
                 }
                 close();
-            }, "WH-SendThread");
+            });
 
-            final Thread recvThread = new Thread(() -> {
+            Thread.ofVirtual().name("WH-RecvThread").start(() -> {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
                     while (!closed) {
@@ -147,10 +151,7 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                     }
                 }
                 close();
-            }, "WH-RecvThread");
-
-            sendThread.start();
-            recvThread.start();
+            });
 
             try {
                 sendThread.join();
@@ -166,13 +167,11 @@ public class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 WorldHost.LOGGER.error("Failed to close WH socket.", e);
                 if (WorldHost.CONFIG.isEnableReconnectionToasts()) {
                     WHToast.builder("world-host.wh_connect.close_failed")
-                        .description(Components.immutable(e.getLocalizedMessage()))
+                        .description(Components.nullToEmpty(e.getLocalizedMessage()))
                         .show();
                 }
             }
-        }, "WH-ConnectionThread");
-        connectionThread.setDaemon(true);
-        connectionThread.start();
+        });
     }
 
     public String getOriginalHost() {

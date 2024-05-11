@@ -1,20 +1,20 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
-import net.raphimc.javadowngrader.gradle.task.DowngradeSourceSetTask
 import xyz.wagyourtail.unimined.api.mapping.task.ExportMappingsTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
 import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
-import xyz.wagyourtail.unimined.internal.minecraft.MinecraftProvider
+import xyz.wagyourtail.unimined.internal.minecraft.resolver.MinecraftDownloader
 import xyz.wagyourtail.unimined.util.sourceSets
 import java.nio.file.Path
 
 plugins {
     java
     `maven-publish`
-    id("dev.deftu.gradle.preprocess")
+    id("io.github.gaming32.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.modrinth.minotaur") version "2.+"
+    id("xyz.wagyourtail.jvmdowngrader") version "0.2.0-SNAPSHOT"
 }
 
 fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
@@ -43,11 +43,25 @@ version = "${modVersion}+${mcVersionString}-${loaderName}"
 
 repositories {
     mavenCentral()
+    maven("https://maven.fabricmc.net")
+    maven("https://maven.minecraftforge.net")
+    maven("https://maven.neoforged.net/releases")
+}
+
+java {
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.compileJava {
+    options.release = 21
+    options.compilerArgs.add("-Xlint:all")
 }
 
 unimined.minecraft {
     version(mcVersionString)
-    if (mcVersion != 1_20_01 || !isForge) {
+    if ((mcVersion != 1_20_01 || !isForge) && mcVersion < 1_20_05) {
         side("client")
     }
 
@@ -56,6 +70,7 @@ unimined.minecraft {
         searge()
         mojmap()
         when {
+            mcVersion >= 1_20_05 -> "1.20.6:2024.05.01"
             mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
             mcVersion >= 1_20_03 -> "1.20.3:2023.12.31"
             mcVersion >= 1_20_02 -> "1.20.2:2023.12.10"
@@ -76,11 +91,13 @@ unimined.minecraft {
                 c("net/minecraft/client/gui/chat/NarratorChatListener", "net/minecraft/client/GameNarrator")
             }
         }
+
+        devFallbackNamespace("official")
     }
 
     when {
         isFabric -> fabric {
-            loader("0.14.22")
+            loader("0.15.6")
         }
         isForge -> minecraftForge {
             loader(when(mcVersion) {
@@ -95,6 +112,7 @@ unimined.minecraft {
         }
         isNeoForge -> neoForged {
             loader(when (mcVersion) {
+                1_20_06 -> "21-beta"
                 1_20_04 -> "69-beta"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
             })
@@ -103,6 +121,29 @@ unimined.minecraft {
             }
         }
         else -> throw IllegalStateException()
+    }
+
+    val mcJavaVersion = (minecraftData as MinecraftDownloader).metadata.javaVersion
+
+    if (mcJavaVersion < java.sourceCompatibility) {
+        println("Classes need downgrading to Java $mcJavaVersion")
+
+        tasks.downgradeJar {
+            downgradeTo = mcJavaVersion
+        }
+        tasks.shadeDowngradedApi {
+            downgradeTo = mcJavaVersion
+        }
+
+        defaultRemapJar = false
+        remap(tasks.shadeDowngradedApi.get(), "remapJar")
+        tasks.assemble.get().dependsOn("remapJar")
+    }
+
+    runs {
+        config("client") {
+            javaVersion = JavaVersion.VERSION_21
+        }
     }
 }
 val minecraft = unimined.minecrafts[sourceSets.main.get()]
@@ -147,27 +188,13 @@ if (isForge) {
     mappingsConfig.setGroovyProperty("tinyMappingsWithSrg", tinyMappingsWithSrg.toPath())
 }
 
-buildscript {
-    repositories {
-        maven("https://maven.lenni0451.net/everything")
-    }
-
-    dependencies {
-        classpath("net.raphimc.javadowngrader:gradle-plugin:1.1.1-SNAPSHOT")
-    }
-}
-
 repositories {
     maven("https://maven.quiltmc.org/repository/release/")
-
     maven("https://maven.terraformersmc.com/releases")
-
     maven("https://maven.isxander.dev/releases")
-
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
-
     maven("https://repo.viaversion.com")
-
+    maven("https://maven.wagyourtail.xyz/snapshots")
     maven("https://jitpack.io")
 }
 
@@ -219,6 +246,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_20_06 -> "10.0.0-beta.1"
             1_20_04 -> "9.0.0"
             1_20_01 -> "7.2.2"
             1_19_04 -> "6.3.1"
@@ -240,6 +268,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_20_06 -> "0.97.5+1.20.5"
             1_20_04 -> "0.91.1+1.20.3"
             1_20_01 -> "0.91.0+1.20.1"
             1_19_04 -> "0.87.2+1.19.4"
@@ -247,11 +276,19 @@ dependencies {
             1_18_02 -> "0.77.0+1.18.2"
             1_17_01 -> "0.46.1+1.17"
             else -> null
-        }?.let { fabricApi.fabricModule("fabric-resource-loader-v0", it) }
-            ?.let {
-                "modImplementation"(it)
-                bundle(it)
+        }?.let { fapiVersion ->
+            val resourceLoader = fabricApi.fabricModule("fabric-resource-loader-v0", fapiVersion)
+            "modImplementation"(resourceLoader)
+            bundle(resourceLoader)
+
+            for (module in listOf(
+                "fabric-screen-api-v1",
+                "fabric-key-binding-api-v1",
+                "fabric-lifecycle-events-v1"
+            )) {
+                "modRuntimeOnly"(fabricApi.fabricModule(module,fapiVersion))
             }
+        }
     }
 
     if (isFabric && mcVersion >= 1_18_02) {
@@ -267,12 +304,10 @@ dependencies {
     compileOnly("com.demonwav.mcdev:annotations:2.0.0")
 }
 
-java {
-    withSourcesJar()
-}
-
 preprocess {
     fun Boolean.toInt() = if (this) 1 else 0
+
+    disableRemapping = true
 
     vars.putAll(mapOf(
         "FABRIC" to isFabric.toInt(),
@@ -309,12 +344,10 @@ modrinth {
         1_19_04 -> "23w13a_or_b"
         1_20_01 -> "1.20"
         1_20_04 -> "1.20.3"
+        1_20_06 -> "1.20.5"
         else -> null
     }?.let(gameVersions::add)
     loaders.add(loaderName)
-    if (isFabric) {
-        loaders.add("quilt")
-    }
     dependencies {
         if (isFabric) {
             optional.project("modmenu")
@@ -363,20 +396,25 @@ tasks.processResources {
         "fabric.mod.json",
         "quilt.mod.json",
         "META-INF/mods.toml",
+        "META-INF/neoforge.mods.toml",
         "mixins.*.json",
         "*.mixins.json"
     )) {
         expand(mapOf(
             "version" to modVersion,
-            "mc_version" to mcVersionString,
-            "java_version" to "JAVA_${mcJavaVersion.majorVersion}"
+            "mc_version" to mcVersionString
         ))
     }
 
     if (isFabric) {
-        exclude("pack.mcmeta", "META-INF/mods.toml")
+        exclude("pack.mcmeta", "META-INF/mods.toml", "META-INF/neoforge.mods.toml")
     } else {
         exclude("fabric.mod.json")
+        if (isNeoForge && mcVersion >= 1_20_05) {
+            exclude("META-INF/mods.toml")
+        } else {
+            exclude("META-INF/neoforge.mods.toml")
+        }
     }
 
     doLast {
@@ -403,18 +441,7 @@ tasks.withType<RemapJarTask> {
         }
     }
     from("$rootDir/LICENSE")
-}
-
-val mcJavaVersion = (minecraft as MinecraftProvider).minecraftData.metadata.javaVersion
-
-if (mcJavaVersion < java.sourceCompatibility) {
-    val targetClassVersion = mcJavaVersion.ordinal + 45
-    println("Classes need downgrading to Java $mcJavaVersion ($targetClassVersion)")
-
-    val downgradeClasses by tasks.registering(DowngradeSourceSetTask::class) {
-        dependsOn(tasks.classes)
-        sourceSet.set(sourceSets["main"])
-        targetVersion.set(targetClassVersion)
+    mixinRemap {
+        disableRefmap()
     }
-    tasks.classes.get().finalizedBy(downgradeClasses)
 }

@@ -3,14 +3,14 @@ package io.github.gaming32.worldhost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-public class ProxyClient extends Thread {
+public final class ProxyClient {
+    private final Thread thread;
     private final Socket socket;
     private final InetAddress remoteAddress;
     private final long connectionId;
@@ -24,7 +24,7 @@ public class ProxyClient extends Thread {
         long connectionId,
         Supplier<ProxyPassthrough> proxy
     ) throws IOException {
-        super("ProxyClient for " + connectionId);
+        thread = Thread.ofVirtual().name("ProxyClient for " + connectionId).unstarted(this::run);
         socket = new Socket(InetAddress.getLoopbackAddress(), port);
         this.remoteAddress = remoteAddress;
         this.connectionId = connectionId;
@@ -34,11 +34,10 @@ public class ProxyClient extends Thread {
         }
     }
 
-    @Override
-    public void run() {
+    private void run() {
         WorldHost.LOGGER.info("Starting proxy client from {}", remoteAddress);
         try {
-            final InputStream is = socket.getInputStream();
+            final var is = socket.getInputStream();
             final byte[] b = new byte[0xffff];
             int n;
             while ((n = is.read(b)) != -1) {
@@ -57,6 +56,10 @@ public class ProxyClient extends Thread {
             proxy.proxyDisconnect(connectionId);
         }
         WorldHost.LOGGER.info("Proxy client connection for {} closed", remoteAddress);
+    }
+
+    public void start() {
+        thread.start();
     }
 
     public void close() {

@@ -12,12 +12,9 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,10 +24,6 @@ import java.util.Collections;
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
-//#endif
-
-//#if MC >= 1.20.2
-import net.minecraft.client.renderer.RenderType;
 //#endif
 
 public class FriendsScreen extends WorldHostScreen {
@@ -61,9 +54,11 @@ public class FriendsScreen extends WorldHostScreen {
 
         if (list == null) {
             list = new FriendsList();
-            if (minecraft != null && minecraft.level != null) {
-                list.setRenderBackground(false);
-            }
+            //#if MC < 1.20.5
+            //$$ if (minecraft != null && minecraft.level != null) {
+            //$$     list.setRenderBackground(false);
+            //$$ }
+            //#endif
         }
         setListSize(list, 32, WorldHost.BEDROCK_SUPPORT ? 80 : 64);
         addWidget(list);
@@ -126,7 +121,7 @@ public class FriendsScreen extends WorldHostScreen {
     public static void addFriend(GameProfile profile) {
         WorldHost.CONFIG.getFriends().add(profile.getId());
         WorldHost.saveConfig();
-        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+        final var server = Minecraft.getInstance().getSingleplayerServer();
         if (server != null && server.isPublished() && WorldHost.protoClient != null) {
             WorldHost.protoClient.publishedWorld(Collections.singleton(profile.getId()));
         }
@@ -159,7 +154,7 @@ public class FriendsScreen extends WorldHostScreen {
             if (mouseX >= textX && mouseX <= textX + textWidth) {
                 final int textY = height - 66 - font.lineHeight / 2;
                 if (mouseY >= textY && mouseY <= textY + font.lineHeight) {
-                    final Style component = font.getSplitter().componentStyleAtWidth(BEDROCK_FRIENDS_TEXT, (int)Math.round(mouseX) - textX);
+                    final var component = font.getSplitter().componentStyleAtWidth(BEDROCK_FRIENDS_TEXT, (int)Math.round(mouseX) - textX);
                     if (component != null) {
                         handleComponentClicked(component);
                         return true;
@@ -182,31 +177,6 @@ public class FriendsScreen extends WorldHostScreen {
                 36
             );
         }
-
-        //#if MC >= 1.20.2
-        @Override
-        protected void renderDecorations(@NotNull GuiGraphics graphics, int mouseX, int mouseY) {
-            super.renderDecorations(graphics, mouseX, mouseY);
-            graphics.setColor(0.25f, 0.25f, 0.25f, 1f);
-            //#if MC >= 1.20.3
-            final int x0 = getX();
-            final int x1 = getRight();
-            final int y0 = getY();
-            final int y1 = getBottom();
-            //#else
-            //$$ final int x0 = this.x0;
-            //$$ final int x1 = this.x1;
-            //$$ final int y0 = this.y0;
-            //$$ final int y1 = this.y1;
-            //#endif
-            graphics.blit(BACKGROUND_LOCATION, x0, 0, 0f, 0f, width, y0, 32, 32);
-            graphics.blit(BACKGROUND_LOCATION, x0, y1, 0f, y1, width, height - y1, 32, 32);
-            graphics.setColor(1f, 1f, 1f, 1f);
-            graphics.fillGradient(RenderType.guiOverlay(), x0, y0, x1, y0 + 4, 0xff000000, 0, 0);
-            graphics.fillGradient(RenderType.guiOverlay(), x0, y1 - 4, x1, y1, 0, 0xff000000, 0);
-        }
-
-        //#endif
 
         @Override
         public void setSelected(@Nullable FriendsEntry entry) {
@@ -240,7 +210,7 @@ public class FriendsScreen extends WorldHostScreen {
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.immutable(getName());
+            return Components.literal(getName());
         }
 
         @Override
@@ -253,7 +223,7 @@ public class FriendsScreen extends WorldHostScreen {
             //#endif
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {
-            final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(profile);
+            final var skinTexture = WorldHost.getSkinLocationNow(profile);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             RenderSystem.enableBlend();
             blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
@@ -274,7 +244,7 @@ public class FriendsScreen extends WorldHostScreen {
                         WorldHost.CONFIG.getFriends().remove(profile.getId());
                         WorldHost.saveConfig();
                         FriendsScreen.this.list.updateEntries();
-                        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+                        final var server = Minecraft.getInstance().getSingleplayerServer();
                         if (server != null && server.isPublished() && WorldHost.protoClient != null) {
                             WorldHost.protoClient.closedWorld(Collections.singleton(profile.getId()));
                         }
@@ -288,7 +258,7 @@ public class FriendsScreen extends WorldHostScreen {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            list.setSelected(this);
+            FriendsScreen.this.list.setSelected(this);
             return false;
         }
     }

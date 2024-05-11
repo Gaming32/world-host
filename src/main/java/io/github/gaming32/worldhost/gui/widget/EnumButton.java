@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public class EnumButton<E extends Enum<E> & StringRepresentable> extends CustomCycleButton<E, EnumButton<E>> {
+public final class EnumButton<E extends Enum<E> & StringRepresentable> extends CustomCycleButton<E, EnumButton<E>> {
     private final Component[] translations;
 
     public EnumButton(

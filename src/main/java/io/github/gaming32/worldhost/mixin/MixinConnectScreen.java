@@ -13,15 +13,23 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+//#if MC >= 1.20.5
+import net.minecraft.client.multiplayer.TransferState;
+//#endif
+
 @Mixin(ConnectScreen.class)
 public class MixinConnectScreen {
     @Shadow @Final Screen parent;
 
     @Inject(method = "connect", at = @At("HEAD"), cancellable = true)
     private void overrideConnect(
-        Minecraft minecraft, ServerAddress serverAddress,
+        Minecraft minecraft,
+        ServerAddress serverAddress,
         //#if MC > 1.19.2
         ServerData serverData,
+        //#endif
+        //#if MC >= 1.20.5
+        TransferState transferState,
         //#endif
         CallbackInfo ci
     ) {

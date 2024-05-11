@@ -14,11 +14,14 @@ import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
-import io.github.gaming32.worldhost.upnp.UPnPErrors;
 import io.github.gaming32.worldhost.versions.Components;
 import io.netty.buffer.Unpooled;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntAVLTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -27,8 +30,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.client.resources.SkinManager;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
@@ -37,9 +38,6 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -49,7 +47,11 @@ import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 import org.semver4j.Semver;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,7 +60,14 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -84,7 +93,6 @@ import net.minecraft.server.Services;
 //#endif
 
 //#if MC >= 1.20.2
-import com.mojang.authlib.yggdrasil.ProfileResult;
 import net.minecraft.client.resources.PlayerSkin;
 //#endif
 
@@ -93,14 +101,10 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 //#if MC >= 1.18.2
 import dev.isxander.mainmenucredits.MainMenuCredits;
-import dev.isxander.mainmenucredits.config.MMCConfig;
-import dev.isxander.mainmenucredits.config.MMCConfigEntry;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //#endif
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
-//$$ import net.minecraft.server.packs.PackType;
-//$$ import net.minecraft.server.packs.PackResources;
 //#if FORGE
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -108,6 +112,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+//$$ import net.minecraftforge.fml.loading.FMLPaths;
 //#else
 //$$ import net.neoforged.api.distmarker.Dist;
 //$$ import net.neoforged.bus.api.SubscribeEvent;
@@ -115,9 +120,13 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.neoforged.fml.ModLoadingContext;
 //$$ import net.neoforged.fml.common.Mod;
 //$$ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+//$$ import net.neoforged.fml.loading.FMLPaths;
 //#endif
 //$$ import java.util.function.BiFunction;
-//#if NEOFORGE
+//#if MC >= 1.20.5
+//$$ import net.neoforged.fml.common.EventBusSubscriber;
+//$$ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+//#elseif NEOFORGE
 //$$ import net.neoforged.neoforge.client.ConfigScreenHandler;
 //#elseif MC >= 1.19.2
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
@@ -125,13 +134,6 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.minecraftforge.client.ConfigGuiHandler;
 //#else
 //$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
-//#endif
-//#if NEOFORGE
-//$$ import net.neoforged.neoforge.resource.ResourcePackLoader;
-//#elseif MC > 1.17.1
-//$$ import net.minecraftforge.resource.ResourcePackLoader;
-//#else
-//$$ import net.minecraftforge.fmllegacy.packs.ResourcePackLoader;
 //#endif
 //#endif
 
@@ -179,21 +181,21 @@ public class WorldHost
         300 * 20
     };
 
-    public static final File GAME_DIR = Minecraft.getInstance().gameDirectory;
-    public static final File CACHE_DIR = new File(GAME_DIR, ".world-host-cache");
+    public static final Path GAME_DIR = getGameDir();
+    public static final Path CACHE_DIR = GAME_DIR.resolve(".world-host-cache");
 
-    public static final File CONFIG_DIR = new File(GAME_DIR, "config");
-    public static final Path CONFIG_FILE = new File(CONFIG_DIR, "world-host.json5").toPath();
-    public static final Path FRIENDS_FILE = new File(CONFIG_DIR, "world-host-friends.json").toPath();
-    public static final Path OLD_CONFIG_FILE = new File(CONFIG_DIR, "world-host.json").toPath();
+    public static final Path CONFIG_DIR = GAME_DIR.resolve("config");
+    public static final Path CONFIG_FILE = CONFIG_DIR.resolve("world-host.json5");
+    public static final Path FRIENDS_FILE = CONFIG_DIR.resolve("world-host-friends.json");
+    public static final Path OLD_CONFIG_FILE = CONFIG_DIR.resolve("world-host.json");
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
     private static List<String> wordsForCid;
-    private static Map<String, Integer> wordsForCidInverse;
+    private static Object2IntMap<String> wordsForCidInverse;
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
 
-    public static final Map<UUID, Long> ONLINE_FRIENDS = new LinkedHashMap<>();
+    public static final Object2LongMap<UUID> ONLINE_FRIENDS = new Object2LongLinkedOpenHashMap<>();
     public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 
@@ -229,56 +231,21 @@ public class WorldHost
     //#endif
 
     private static void init() {
-        wordsForCid =
-            //#if FABRIC
-            FabricLoader.getInstance()
-                .getModContainer(MOD_ID)
-                .flatMap(c -> c.findPath("assets/world-host/16k.txt"))
-                .map(path -> {
-                    try {
-                        return Files.lines(path, StandardCharsets.US_ASCII);
-                    } catch (IOException e) {
-                        throw new UncheckedIOException(e);
-                    }
-                })
-            //#else
-            //$$ ResourcePackLoader
-            //$$     .getPackFor(MOD_ID)
-                //#if MC >= 1.20.4
-                //$$ .map(c -> c.openPrimary("worldhost"))
-                //#endif
-            //$$     .map(c -> {
-                    //#if MC <= 1.19.2
-                    //$$ try {
-                    //#endif
-            //$$             return ((PackResources)c).getResource(PackType.CLIENT_RESOURCES, new ResourceLocation("world-host", "16k.txt"));
-                    //#if MC <= 1.19.2
-                    //$$ } catch (IOException e) {
-                    //$$     throw new UncheckedIOException(e);
-                    //$$ }
-                    //#endif
-            //$$     })
-                //#if MC > 1.19.2
-                //$$ .map(i -> {
-                //$$     try {
-                //$$         return i.get();
-                //$$     } catch (IOException e) {
-                //$$         throw new UncheckedIOException(e);
-                //$$     }
-                //$$ })
-                //#endif
-            //$$     .map(is -> new InputStreamReader(is, StandardCharsets.US_ASCII))
-            //$$     .map(BufferedReader::new)
-            //$$     .map(BufferedReader::lines)
-            //#endif
-                .orElseThrow(() -> new IllegalStateException("Unable to find 16k.txt"))
-                .filter(s -> !s.startsWith("//"))
-                .toList();
-
+        try (BufferedReader reader = new BufferedReader(
+            new InputStreamReader(
+                WorldHost.class.getResourceAsStream("/assets/world-host/16k.txt"),
+                StandardCharsets.US_ASCII
+            )
+        )) {
+            wordsForCid = reader.lines().filter(s -> !s.startsWith("//")).toList();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
         if (wordsForCid.size() != (1 << 14)) {
             throw new RuntimeException("Expected WORDS_FOR_CID to have " + (1 << 14) + " elements, but it has " + wordsForCid.size() + " elements.");
         }
-        wordsForCidInverse = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        wordsForCidInverse = new Object2IntAVLTreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        wordsForCidInverse.defaultReturnValue(-1);
         for (int i = 0; i < wordsForCid.size(); i++) {
             wordsForCidInverse.put(wordsForCid.get(i), i);
         }
@@ -287,17 +254,20 @@ public class WorldHost
 
         loadConfig();
 
-        //noinspection ResultOfMethodCallIgnored
-        CACHE_DIR.mkdirs();
+        try {
+            Files.createDirectories(CACHE_DIR);
+        } catch (IOException e) {
+            LOGGER.error("Failed to create cache directory", e);
+        }
         //#if MC >= 1.19.2
         profileCache = Services.create(
             ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService(),
-            CACHE_DIR
+            CACHE_DIR.toFile()
         ).profileCache();
         //#else
         //$$ profileCache = new GameProfileCache(
         //$$     new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy()).createProfileRepository(),
-        //$$     new File(CACHE_DIR, "usercache.json")
+        //$$     CACHE_DIR.resolve("usercache.json").toFile()
         //$$ );
         //#endif
         profileCache.setExecutor(Util.backgroundExecutor());
@@ -386,7 +356,7 @@ public class WorldHost
             LOGGER.info("Finished authenticating with WH server. Requesting friends list.");
             ONLINE_FRIENDS.clear();
             protoClient.listOnline(CONFIG.getFriends());
-            final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+            final var server = Minecraft.getInstance().getSingleplayerServer();
             if (server != null && server.isPublished()) {
                 protoClient.publishedWorld(CONFIG.getFriends());
             }
@@ -410,7 +380,7 @@ public class WorldHost
                 .executes(ctx -> {
                     try {
                         final int port = ctx.getSource().getServer().getPort();
-                        final UPnPErrors.AddPortMappingErrors error = upnpGateway.openPort(port, 60, false);
+                        final var error = upnpGateway.openPort(port, 60, false);
                         if (error == null) {
                             ctx.getSource().sendSuccess(
                                 //#if MC >= 1.20.0
@@ -460,7 +430,12 @@ public class WorldHost
             proxyProtocolClient.close();
             proxyProtocolClient = null;
         }
-        final UUID uuid = Minecraft.getInstance().getUser().getProfileId();
+        final var user = Minecraft.getInstance().getUser();
+        //#if MC >= 1.19.2
+        final UUID uuid = user.getProfileId();
+        //#else
+        //$$ final UUID uuid = user.getGameProfile().getId();
+        //#endif
         //noinspection ConstantValue
         if (uuid == null) {
             LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
@@ -480,6 +455,7 @@ public class WorldHost
     }
 
     // From Apache Commons Lang StringUtils 3.10+
+    // TODO: Remove when 1.18.2 is minimum
     public static <T extends CharSequence> T getIfBlank(final T str, final Supplier<T> defaultSupplier) {
         return StringUtils.isBlank(str) ? defaultSupplier == null ? null : defaultSupplier.get() : str;
     }
@@ -489,7 +465,7 @@ public class WorldHost
     }
 
     public static CompletableFuture<ResourceLocation> getInsecureSkinLocation(GameProfile gameProfile) {
-        final SkinManager skinManager = Minecraft.getInstance().getSkinManager();
+        final var skinManager = Minecraft.getInstance().getSkinManager();
         //#if MC >= 1.20.2
         return skinManager.getOrLoad(gameProfile).thenApply(PlayerSkin::texture);
         //#elseif MC >= 1.19.2
@@ -529,7 +505,7 @@ public class WorldHost
         //#if MC < 1.20.2
         //$$ return sessionService.fillProfileProperties(fallback != null ? fallback : new GameProfile(uuid, null), false);
         //#else
-        final ProfileResult result = sessionService.fetchProfile(uuid, false);
+        final var result = sessionService.fetchProfile(uuid, false);
         if (result == null) {
             return fallback != null ? fallback : new GameProfile(uuid, "");
         }
@@ -574,20 +550,36 @@ public class WorldHost
 
     @SuppressWarnings("RedundantThrows")
     public static ServerStatus parseServerStatus(FriendlyByteBuf buf) throws IOException {
-        return new ClientboundStatusResponsePacket(buf)
-            //#if MC >= 1.19.4
-            .status();
-            //#else
-            //$$ .getStatus();
-            //#endif
+        //#if MC >= 1.20.5
+        return ClientboundStatusResponsePacket.STREAM_CODEC.decode(buf).status();
+        //#elseif MC >= 1.19.4
+        //$$ return new ClientboundStatusResponsePacket(buf).status();
+        //#else
+        //$$ return new ClientboundStatusResponsePacket(buf).getStatus();
+        //#endif
+    }
+
+    public static FriendlyByteBuf writeServerStatus(ServerStatus metadata) {
+        if (metadata == null) {
+            metadata = WorldHost.createEmptyServerStatus();
+        }
+        final FriendlyByteBuf buf = WorldHost.createByteBuf();
+        //#if MC < 1.20.5
+        //$$ new ClientboundStatusResponsePacket(metadata).write(buf);
+        //#else
+        ClientboundStatusResponsePacket.STREAM_CODEC.encode(buf, new ClientboundStatusResponsePacket(metadata));
+        //#endif
+        return buf;
     }
 
     public static ServerStatus createEmptyServerStatus() {
         //#if MC >= 1.19.4
         return new ServerStatus(
             Components.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
-            //#if FORGELIKE
+            //#if FORGELIKE && MC < 1.20.5
             //$$ , Optional.empty()
+            //#elseif NEOFORGE
+            //$$ , false
             //#endif
         );
         //#else
@@ -655,8 +647,8 @@ public class WorldHost
         long result = 0L;
         int shift = 0;
         for (final String word : words) {
-            final Integer part = wordsForCidInverse.get(word);
-            if (part == null) {
+            final int part = wordsForCidInverse.getInt(word);
+            if (part == -1) {
                 return null;
             }
             result |= (long)part << shift;
@@ -696,6 +688,9 @@ public class WorldHost
                 //#endif
             ), false
             //#endif
+            //#if MC >= 1.20.5
+            , null
+            //#endif
         );
     }
 
@@ -723,7 +718,7 @@ public class WorldHost
     }
 
     public static void proxyConnect(long connectionId, InetAddress remoteAddr, Supplier<ProxyPassthrough> proxy) {
-        final IntegratedServer server = Minecraft.getInstance().getSingleplayerServer();
+        final var server = Minecraft.getInstance().getSingleplayerServer();
         if (server == null || !server.isPublished()) {
             if (protoClient != null) {
                 protoClient.proxyDisconnect(connectionId);
@@ -780,16 +775,16 @@ public class WorldHost
         //#endif
     }
 
-    //#if FABRIC && MC >= 1.18.2
     public static int getMMCLines(boolean isPause) {
+        //#if FABRIC && MC >= 1.18.2
         if (FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
-            final MMCConfig baseConfig = MainMenuCredits.getInstance().getConfig();
-            final MMCConfigEntry config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
+            final var baseConfig = MainMenuCredits.getInstance().getConfig();
+            final var config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
             return (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
         }
+        //#endif
         return 0;
     }
-    //#endif
 
     public static <T> T httpGet(
         CloseableHttpClient client,
@@ -805,12 +800,12 @@ public class WorldHost
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
-        try (CloseableHttpResponse response = client.execute(new HttpGet(uri))) {
-            final StatusLine status = response.getStatusLine();
+        try (var response = client.execute(new HttpGet(uri))) {
+            final var status = response.getStatusLine();
             if (status.getStatusCode() != 200) {
                 throw new IOException("Failed to GET " + uri + ": " + status.getStatusCode() + " " + status.getReasonPhrase());
             }
-            final HttpEntity entity = response.getEntity();
+            final var entity = response.getEntity();
             if (entity == null) {
                 throw new IOException("GET " + uri + " returned no body.");
             }
@@ -826,7 +821,7 @@ public class WorldHost
                 final String latestVersion = httpGet(
                     client, "https://api.modrinth.com/v2/project/world-host/version",
                     builder -> builder
-                        .addParameter("game_versions", "[\"" + WorldHost.getModVersion("minecraft") + "\"]")
+                        .addParameter("game_versions", "[\"" + getModVersion("minecraft") + "\"]")
                         .addParameter("loaders", "[\"" + MOD_LOADER + "\"]"),
                     input -> {
                         try (JsonReader reader = JsonReader.json(new InputStreamReader(input, StandardCharsets.UTF_8))) {
@@ -863,16 +858,35 @@ public class WorldHost
         });
     }
 
+    private static Path getGameDir() {
+        //#if FABRIC
+        return FabricLoader.getInstance().getGameDir();
+        //#else
+        //$$ return FMLPaths.GAMEDIR.get();
+        //#endif
+    }
+
     //#if FORGELIKE
+    //#if MC >= 1.20.5
+    //$$ @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    //#else
     //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    //#endif
     //$$ public static class ClientModEvents {
+    //$$     // Forge 47.1.3 can call FMLClientSetupEvent twice.
+    //$$     private static boolean initialized = false;
+    //$$
     //$$     @SubscribeEvent
-    //$$     public static void onClientSetup(FMLClientSetupEvent event) {
+    //$$     public static synchronized void onClientSetup(FMLClientSetupEvent event) {
+    //$$         if (initialized) return;
+    //$$         initialized = true;
     //$$         init();
     //$$         final BiFunction<Minecraft, Screen, Screen> screenFunction =
     //$$             (mc, screen) -> new WorldHostConfigScreen(screen);
     //$$         ModLoadingContext.get().registerExtensionPoint(
-                //#if MC >= 1.19.2
+                //#if MC >= 1.20.5
+                //$$ IConfigScreenFactory.class, () -> screenFunction::apply
+                //#elseif MC >= 1.19.2
                 //$$ ConfigScreenHandler.ConfigScreenFactory.class,
                 //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
                 //#else

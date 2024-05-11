@@ -1,11 +1,7 @@
 modLoader = "javafml"
-##if FORGE
-#?? loaderVersion = "[32,)"
-##else
-loaderVersion = "[1,)"
-##endif
-issueTrackerURL = "https://github.com/Gaming32/world-host/issues"
+loaderVersion = "[3,)"
 license = "MIT"
+issueTrackerURL = "https://github.com/Gaming32/bingo/issues"
 
 [[mods]]
 modId = "world_host"
@@ -17,40 +13,23 @@ logoFile = "icon.png"
 authors = "Gaming32"
 description = "Host your singleplayer worlds without having to run a server or setup port forwarding! In the future, we also plan to support Bedrock Edition clients through the use of Geyser."
 
-##if NEOFORGE
-#?? [[mixins]]
-#?? config = "world-host.mixins.json"
-##endif
+[[mixins]]
+config = "world-host.mixins.json"
 
 [[dependencies.world_host]]
-##if FORGE
-#?? modId = "forge"
-#?? versionRange = "[32,)"
-##else
 modId = "neoforge"
 versionRange = "[20,)"
-##endif
-##if MC < 1.20.4
-#?? mandatory = true
-##else
 type = "required"
-##endif
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.world_host]]
 modId = "minecraft"
-##if MC == 1.20.1
-#?? versionRange = "[1.20,1.20.2)"
-##elseif MC == 1.20.4
-#?? versionRange = "[1.20.3,1.20.5)"
+##if MC == 1.20.6
+versionRange = "[1.20.5,1.20.7)"
 ##else
-versionRange = "$mc_version"
+#?? versionRange = "$mc_version"
 ##endif
-##if MC < 1.20.4
-#?? mandatory = true
-##else
 type = "required"
-##endif
 ordering = "NONE"
 side = "BOTH"

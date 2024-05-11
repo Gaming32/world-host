@@ -115,8 +115,13 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
     private void shareWorldOnLoad(UUID uuid, CallbackInfo ci) {
         if (!WorldHost.shareWorldOnLoad) return;
         WorldHost.shareWorldOnLoad = false;
+        //#if MC < 1.20.5
+        //$$ final boolean allowCommands = worldData.getAllowCommands();
+        //#else
+        final boolean allowCommands = worldData.isAllowCommands();
+        //#endif
         final Component message;
-        if (publishServer(worldData.getGameType(), worldData.getAllowCommands(), HttpUtil.getAvailablePort())) {
+        if (publishServer(worldData.getGameType(), allowCommands, HttpUtil.getAvailablePort())) {
             message = wh$getOpenedMessage();
         } else {
             message = Components.translatable("world-host.share_world.failed").withStyle(ChatFormatting.RED);

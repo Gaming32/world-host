@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.7",
   "package": "io.github.gaming32.worldhost.mixin",
-  "compatibilityLevel": "$java_version",
+  "compatibilityLevel": "JAVA_16",
   "mixins": [
     "MixinCommands",
     "MixinLevelSummary",
@@ -24,10 +24,11 @@
     "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor",
+    //#if FABRIC
     "modmenu.MixinModMenuEventHandler"
+    //#endif
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "refmap": "world-host.mixins.refmap.json"
+  }
 }

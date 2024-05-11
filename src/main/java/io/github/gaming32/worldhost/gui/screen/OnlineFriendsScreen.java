@@ -9,6 +9,7 @@ import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.widget.FriendsButton;
 import io.github.gaming32.worldhost.mixin.ServerStatusPingerAccessor;
 import io.github.gaming32.worldhost.versions.Components;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -21,14 +22,16 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.UUID;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -44,6 +47,12 @@ import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 //#else
 //$$ import de.florianmichael.viafabricplus.screen.impl.base.ProtocolSelectionScreen;
 //#endif
+//#endif
+
+//#if MC >= 1.19.4
+import java.util.Arrays;
+//#else
+//$$ import java.util.Objects;
 //#endif
 
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
@@ -208,7 +217,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     }
 
     @Override
-    public void friendsListUpdate(Map<UUID, Long> friends) {
+    public void friendsListUpdate(Object2LongMap<UUID> friends) {
         final var newFriends = new LinkedHashMap<>(friends);
         for (int i = list.children().size() - 1; i >= 0; i--) {
             final UUID uuid = list.children().get(i).profile.getId();
@@ -419,7 +428,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
         private void updateServerInfo() {
             serverInfo.name = getName();
-            final ServerStatus metadata = WorldHost.ONLINE_FRIEND_PINGS.get(profile.getId());
+            final var metadata = WorldHost.ONLINE_FRIEND_PINGS.get(profile.getId());
             if (metadata == null) {
                 serverInfo.status = Components.EMPTY;
                 serverInfo.motd = Components.EMPTY;
@@ -560,7 +569,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             select(this);
 
-            final double relX = mouseX - list.getRowLeft();
+            final double relX = mouseX - OnlineFriendsScreen.this.list.getRowLeft();
             if (relX < 32.0 && relX > 16.0) {
                 connect();
                 return true;

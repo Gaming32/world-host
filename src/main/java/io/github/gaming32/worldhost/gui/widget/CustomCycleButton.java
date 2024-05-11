@@ -27,7 +27,7 @@ public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> ex
     private final T[] values;
     private int valueIndex;
 
-    public CustomCycleButton(
+    protected CustomCycleButton(
         int x, int y,
         int width, int height,
         @Nullable Component title,
@@ -36,7 +36,8 @@ public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> ex
         this(x, y, width, height, title, null, onUpdate, values);
     }
 
-    public CustomCycleButton(
+    @SuppressWarnings("this-escape")
+    protected CustomCycleButton(
         int x, int y,
         int width, int height,
         @Nullable Component title, @Nullable Component tooltip,

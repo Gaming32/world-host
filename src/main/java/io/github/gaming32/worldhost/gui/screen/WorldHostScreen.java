@@ -21,10 +21,7 @@ import net.minecraft.client.gui.GuiGraphics;
 
 //#if MC < 1.19.4
 //$$ import net.minecraft.client.Minecraft;
-//$$ import net.minecraft.client.gui.components.Button;
-//$$ import org.jetbrains.annotations.NotNull;
 //$$
-//$$ import java.util.List;
 //$$ import java.util.function.Consumer;
 //#endif
 

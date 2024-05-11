@@ -13,6 +13,7 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 //#if MC >= 1.20.0
@@ -27,19 +28,18 @@ import net.minecraft.client.gui.components.PlainTextButton;
 //$$ import io.github.gaming32.worldhost.gui.PlainTextButton;
 //#endif
 
-public class OnlineStatusButton extends PlainTextButton {
+public final class OnlineStatusButton extends PlainTextButton {
     private static final ChatFormatting[] COLORS = {
         ChatFormatting.RED,
         ChatFormatting.GOLD,
         ChatFormatting.DARK_GREEN
     };
 
-    @SuppressWarnings("unchecked")
-    private static final Supplier<Component>[] TEXTS = new Supplier[] {
+    private static final List<Supplier<Component>> TEXTS = List.of(
         () -> Components.translatable("world-host.online_status.offline", WorldHost.reconnectDelay / 20 + 1),
         () -> Components.translatable("world-host.online_status.connecting"),
         () -> Components.translatable("world-host.online_status.online")
-    };
+    );
 
     private final int alignedX;
     private final boolean rightAlign;
@@ -87,7 +87,7 @@ public class OnlineStatusButton extends PlainTextButton {
         return Components.translatable(
             "world-host.online_status",
             Components.literal("\u25cf").withStyle(COLORS[status]),
-            TEXTS[status].get()
+            TEXTS.get(status).get()
         );
     }
 
@@ -110,7 +110,7 @@ public class OnlineStatusButton extends PlainTextButton {
         final int status = getStatus();
         if (status != currentStatus || (status == 0 && (WorldHost.reconnectDelay + 1) % 20 == 0)) {
             currentStatus = status;
-            final var accessor = (PlainTextButtonAccessor)this;
+            final var accessor = (PlainTextButtonAccessor)(Object)this;
             final Component message = generateStatusComponent();
             setMessage(message);
             accessor.setPTBMessage(message);

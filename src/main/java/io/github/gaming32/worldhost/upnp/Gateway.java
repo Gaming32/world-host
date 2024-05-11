@@ -28,7 +28,7 @@ import org.w3c.dom.traversal.NodeIterator;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.URL;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -113,7 +113,7 @@ public class Gateway {
         }
         soap.append("</m:").append(action).append("></SOAP-ENV:Body></SOAP-ENV:Envelope>");
         byte[] req = soap.toString().getBytes();
-        HttpURLConnection conn = (HttpURLConnection) new URL(controlURL).openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URI(controlURL).toURL().openConnection();
         conn.setRequestMethod("POST");
         conn.setDoOutput(true);
         conn.setRequestProperty("Content-Type", "text/xml");
