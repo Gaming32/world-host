@@ -775,16 +775,16 @@ public class WorldHost
         //#endif
     }
 
-    //#if FABRIC && MC >= 1.18.2
     public static int getMMCLines(boolean isPause) {
+        //#if FABRIC && MC >= 1.18.2
         if (FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
             final var baseConfig = MainMenuCredits.getInstance().getConfig();
             final var config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
             return (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
         }
+        //#endif
         return 0;
     }
-    //#endif
 
     public static <T> T httpGet(
         CloseableHttpClient client,
@@ -821,7 +821,7 @@ public class WorldHost
                 final String latestVersion = httpGet(
                     client, "https://api.modrinth.com/v2/project/world-host/version",
                     builder -> builder
-                        .addParameter("game_versions", "[\"" + WorldHost.getModVersion("minecraft") + "\"]")
+                        .addParameter("game_versions", "[\"" + getModVersion("minecraft") + "\"]")
                         .addParameter("loaders", "[\"" + MOD_LOADER + "\"]"),
                     input -> {
                         try (JsonReader reader = JsonReader.json(new InputStreamReader(input, StandardCharsets.UTF_8))) {

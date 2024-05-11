@@ -33,14 +33,11 @@ public class MixinTitleScreen extends Screen {
         final OnlineStatusLocation location = WorldHost.CONFIG.getOnlineStatusLocation();
         if (location == OnlineStatusLocation.OFF) return;
         int y = 20;
-        //#if FABRIC
-        //#if MC >= 1.18.2
         final int mmcLines = WorldHost.getMMCLines(false);
         if (mmcLines > 0) {
             y += mmcLines * 12;
         }
-        //#endif
-        //#else
+        //#if FORGELIKE
         //$$ int[] forgeLineCount = {-1};
         //$$ final BiConsumer<Integer, String> lineConsumer = (i, s) -> forgeLineCount[0]++;
         //$$ if (location == OnlineStatusLocation.LEFT) {

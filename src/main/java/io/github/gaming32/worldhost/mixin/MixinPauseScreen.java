@@ -38,13 +38,11 @@ public class MixinPauseScreen extends Screen {
         if (location == OnlineStatusLocation.OFF) return;
         int x = 7;
         int y = 15;
-        //#if FABRIC && MC >= 1.18.2
         final int mmcLines = WorldHost.getMMCLines(true);
         if (mmcLines > 0) {
             x = 2;
             y = 10 + mmcLines * 12;
         }
-        //#endif
         addRenderableWidget(new OnlineStatusButton(
             location == OnlineStatusLocation.RIGHT ? width - x : x,
             height - y,
