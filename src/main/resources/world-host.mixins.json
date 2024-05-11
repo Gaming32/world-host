@@ -30,6 +30,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "refmap": "world-host.mixins.refmap.json"
+  }
 }
