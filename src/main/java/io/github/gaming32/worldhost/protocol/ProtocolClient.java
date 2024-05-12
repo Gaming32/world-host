@@ -31,7 +31,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<Optional<WorldHostC2SMessage>> sendQueue = new LinkedBlockingQueue<>();
 
-    private BlockingQueue<UUID> authUuid = new LinkedBlockingQueue<>(1);
+    private CompletableFuture<UUID> authUuid = new CompletableFuture<>();
 
     private boolean authenticated, closed;
 
@@ -52,7 +52,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             try {
                 socket = new Socket(target.getHost(), target.getPort());
 
-                final UUID userUuid = authUuid.take();
+                final UUID userUuid = authUuid.join();
                 authUuid = null;
                 final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
                 dos.writeInt(PROTOCOL_VERSION);
@@ -181,11 +181,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public void authenticate(UUID userUuid) {
         authenticated = true;
         if (authUuid != null) {
-            try {
-                authUuid.put(userUuid);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            authUuid.complete(userUuid);
         }
     }
 
