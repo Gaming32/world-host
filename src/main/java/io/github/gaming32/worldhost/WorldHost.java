@@ -17,6 +17,8 @@ import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
 import io.github.gaming32.worldhost.versions.Components;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntAVLTreeMap;
@@ -37,8 +39,10 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.network.ServerConnectionListener;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.UncheckedReflectiveOperationException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -53,6 +57,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.URI;
@@ -226,6 +231,7 @@ public class WorldHost
     public static boolean shareWorldOnLoad;
 
     public static SocketAddress proxySocketAddress;
+    public static Constructor<? extends ChannelInitializer<Channel>> channelInitializerConstructor;
 
     //#if FABRIC
     @Override
@@ -863,6 +869,14 @@ public class WorldHost
         //#else
         //$$ return FMLPaths.GAMEDIR.get();
         //#endif
+    }
+
+    public static ChannelInitializer<Channel> createChannelInitializer(ServerConnectionListener listener) {
+        try {
+            return channelInitializerConstructor.newInstance(listener);
+        } catch (ReflectiveOperationException e) {
+            throw new UncheckedReflectiveOperationException(e);
+        }
     }
 
     //#if FORGELIKE
