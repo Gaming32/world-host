@@ -1,6 +1,4 @@
-// NOTE: Even though this file is under assets, it is *not* resourcepack-able. This is because, the file cannot be
-// included in the root resources directory, as DGT will try to expand all resource files, and this file is way too big
-// for that.
+// NOTE: Even though this file is under assets, it is *not* resourcepack-able.
 //
 // This file is generated from https://github.com/first20hours/google-10000-english/blob/master/20k.txt and
 // https://github.com/MauriceButler/badwords/blob/master/array.js.
