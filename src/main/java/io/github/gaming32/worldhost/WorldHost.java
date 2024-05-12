@@ -42,7 +42,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.network.ServerConnectionListener;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.UncheckedReflectiveOperationException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -875,7 +874,8 @@ public class WorldHost
         try {
             return channelInitializerConstructor.newInstance(listener);
         } catch (ReflectiveOperationException e) {
-            throw new UncheckedReflectiveOperationException(e);
+            // TODO: UncheckedReflectiveOperationException when 1.20.4+ becomes the minimum
+            throw new RuntimeException(e);
         }
     }
 
