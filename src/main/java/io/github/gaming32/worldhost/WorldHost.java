@@ -11,11 +11,14 @@ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
+import io.github.gaming32.worldhost.proxy.ProxyClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
 import io.github.gaming32.worldhost.versions.Components;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntAVLTreeMap;
@@ -36,6 +39,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.network.ServerConnectionListener;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
@@ -52,7 +56,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Constructor;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -222,6 +228,9 @@ public class WorldHost
     private static Future<Void> connectingFuture;
 
     public static boolean shareWorldOnLoad;
+
+    public static SocketAddress proxySocketAddress;
+    public static Constructor<? extends ChannelInitializer<Channel>> channelInitializerConstructor;
 
     //#if FABRIC
     @Override
@@ -726,7 +735,7 @@ public class WorldHost
             return;
         }
         try {
-            final ProxyClient proxyClient = new ProxyClient(server.getPort(), remoteAddr, connectionId, proxy);
+            final ProxyClient proxyClient = new ProxyClient(remoteAddr, connectionId, proxy);
             WorldHost.CONNECTED_PROXY_CLIENTS.put(connectionId, proxyClient);
             proxyClient.start();
         } catch (IOException e) {
@@ -734,15 +743,10 @@ public class WorldHost
         }
     }
 
-    // TODO: Implement using a proper Netty channel to introduce packets directly to the Netty pipeline somehow.
     public static void proxyPacket(long connectionId, byte[] data) {
         final ProxyClient proxyClient = WorldHost.CONNECTED_PROXY_CLIENTS.get(connectionId);
         if (proxyClient != null) {
-            try {
-                proxyClient.getOutputStream().write(data);
-            } catch (IOException e) {
-                WorldHost.LOGGER.error("Failed to write to ProxyClient", e);
-            }
+            proxyClient.send(data);
         } else {
             WorldHost.LOGGER.warn("Received packet for unknown connection {}", connectionId);
         }
@@ -864,6 +868,15 @@ public class WorldHost
         //#else
         //$$ return FMLPaths.GAMEDIR.get();
         //#endif
+    }
+
+    public static ChannelInitializer<Channel> createChannelInitializer(ServerConnectionListener listener) {
+        try {
+            return channelInitializerConstructor.newInstance(listener);
+        } catch (ReflectiveOperationException e) {
+            // TODO: UncheckedReflectiveOperationException when 1.20.4+ becomes the minimum
+            throw new RuntimeException(e);
+        }
     }
 
     //#if FORGELIKE

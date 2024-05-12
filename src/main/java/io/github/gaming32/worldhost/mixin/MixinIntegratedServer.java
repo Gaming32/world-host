@@ -1,7 +1,8 @@
 package io.github.gaming32.worldhost.mixin;
 
 import com.mojang.datafixers.DataFixer;
-import io.github.gaming32.worldhost.ProxyClient;
+import io.github.gaming32.worldhost.proxy.ProxyChannels;
+import io.github.gaming32.worldhost.proxy.ProxyClient;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
@@ -147,5 +148,17 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
             "world-host.lan_opened.no_friends",
             Components.copyOnClickText(externalIp), port
         );
+    }
+
+    @Inject(
+        method = "publishServer",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/network/ServerConnectionListener;startTcpServerListener(Ljava/net/InetAddress;I)V",
+            shift = At.Shift.AFTER
+        )
+    )
+    private void startProxyChannel(GameType gameMode, boolean cheats, int port, CallbackInfoReturnable<Boolean> cir) {
+        WorldHost.proxySocketAddress = ProxyChannels.startProxyChannel(getConnection());
     }
 }
