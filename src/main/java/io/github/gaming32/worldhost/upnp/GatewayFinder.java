@@ -41,13 +41,12 @@ public class GatewayFinder {
         SEARCH_MESSAGES = m.toArray(new String[]{});
     }
 
-    private class GatewayListener extends Thread {
+    private class GatewayListener implements Runnable {
 
         private final InetAddress ip;
         private final String req;
 
         public GatewayListener(InetAddress ip, String req) {
-            setName("UPnP Gateway Finder " + ip);
             this.ip = ip;
             this.req = req;
         }
@@ -86,7 +85,7 @@ public class GatewayFinder {
         }
     }
 
-    private final LinkedList<GatewayListener> listeners = new LinkedList<>();
+    private final LinkedList<Thread> listeners = new LinkedList<>();
     private final Consumer<Gateway> onFound;
 
     public GatewayFinder(Consumer<Gateway> onFound) {
@@ -94,14 +93,16 @@ public class GatewayFinder {
         for (InetAddress ip : getLocalIPs()) {
             for (String req : SEARCH_MESSAGES) {
                 GatewayListener l = new GatewayListener(ip, req);
-                l.start();
-                listeners.add(l);
+                final Thread thread = Thread.ofVirtual()
+                    .name("UPnP Gateway Finder " + ip)
+                    .start(l);
+                listeners.add(thread);
             }
         }
     }
 
     public boolean isSearching() {
-        for (GatewayListener l : listeners) {
+        for (Thread l : listeners) {
             if (l.isAlive()) {
                 return true;
             }
