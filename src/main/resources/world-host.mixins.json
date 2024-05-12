@@ -6,7 +6,8 @@
   "mixins": [
     "MixinCommands",
     "MixinLevelSummary",
-    "MixinPublishCommand"
+    "MixinPublishCommand",
+    "ServerConnectionListenerAccessor"
   ],
   "client": [
     "MinecraftAccessor",
