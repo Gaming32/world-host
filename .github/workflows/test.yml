@@ -42,12 +42,9 @@ jobs:
           java-version: 21
       - name: Compile World Host
         run: ./gradlew :${{ matrix.subproject }}:classes
-      - name: Launch Xvfb
-        run: screen -d -m Xvfb :1 -screen 0 1920x1080x24
       - name: Run tests
         run: |
+          xvfb-run -a -s "-screen 0 1920x1080x24" "
           ./gradlew :${{ matrix.subproject }}:runTestHost --stacktrace &
           ./gradlew :${{ matrix.subproject }}:runTestJoiner --stacktrace &&
-          fg
-      - name: Stop Xvfb
-        run: screen -X quit
+          fg"
