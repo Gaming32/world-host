@@ -4,6 +4,7 @@ on: [push, pull_request, workflow_dispatch]
 jobs:
   test:
     strategy:
+      fail-fast: false
       matrix:
         subproject:
           - 1.17.1-forge
