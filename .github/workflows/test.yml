@@ -41,7 +41,7 @@ jobs:
         with:
           java-version: 21
       - name: Install Xvfb
-        run: apt install xvfb
+        run: sudo apt install xvfb
       - name: Launch Xvfb
         run: screen -d -m Xvfb :1 -screen 0 1920x1080x24
       - name: Run tests
