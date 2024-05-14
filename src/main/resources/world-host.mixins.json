@@ -5,12 +5,14 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "MixinCommands",
+    "MixinInputConstants",
     "MixinLevelSummary",
     "MixinPublishCommand",
     "MixinServerConnectionListener_1",
     "ServerConnectionListenerAccessor"
   ],
   "client": [
+    "DisconnectedScreenAccessor",
     "MinecraftAccessor",
     "MixinConnectScreen",
     "MixinConnectScreen_1",
@@ -19,6 +21,7 @@
     "MixinJoinMultiplayerScreen",
     "MixinMinecraft",
     "MixinMouseHandler",
+    "MixinOptions",
     "MixinPauseScreen",
     "MixinSelectWorldScreen",
     "MixinShareToLanScreen",
@@ -26,9 +29,7 @@
     "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor",
-    //#if FABRIC
     "modmenu.MixinModMenuEventHandler"
-    //#endif
   ],
   "injectors": {
     "defaultRequire": 1

@@ -5,6 +5,7 @@ import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -32,7 +33,7 @@ public class WorldHostConfig {
 
     private boolean announceFriendsOnline = true;
 
-    private final Set<UUID> friends = new LinkedHashSet<>();
+    private final Set<UUID> friends = Collections.synchronizedSet(new LinkedHashSet<>());
 
     public void read(JsonReader reader) throws IOException {
         reader.beginObject();

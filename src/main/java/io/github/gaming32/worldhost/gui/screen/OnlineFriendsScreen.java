@@ -280,8 +280,12 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         }
 
         @Override
-        protected int getRowTop(int index) {
+        public int getRowTop(int index) {
             return super.getRowTop(index);
+        }
+
+        public int getItemHeight() {
+            return itemHeight;
         }
     }
 
