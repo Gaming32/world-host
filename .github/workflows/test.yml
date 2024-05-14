@@ -44,7 +44,7 @@ jobs:
         run: ./gradlew :${{ matrix.subproject }}:classes
       - name: Run tests
         run: |
-          xvfb-run -a -s "-screen 0 1920x1080x24" "
+          xvfb-run -a -s "-screen 0 1920x1080x24" "bash -c '
           ./gradlew :${{ matrix.subproject }}:runTestHost --stacktrace &
           ./gradlew :${{ matrix.subproject }}:runTestJoiner --stacktrace &&
-          fg"
+          fg'"
