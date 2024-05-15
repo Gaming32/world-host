@@ -73,12 +73,14 @@ public abstract class MixinMinecraft {
         WorldHost.tickHandler();
     }
 
+    //#if MC >= 1.20.2
     @Inject(method = "addInitialScreens", at = @At("HEAD"), cancellable = true)
     private void noOnboardingWhileTesting(List<Function<Runnable, Screen>> output, CallbackInfo ci) {
         if (WorldHostTesting.ENABLED) {
             ci.cancel();
         }
     }
+    //#endif
 
     //#if MC < 1.19.4
     //$$ @Inject(
