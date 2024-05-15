@@ -157,6 +157,7 @@ unimined.minecraft {
             baseConfig.jvmArgs.add("-Dworld-host-testing.enabled=true")
             baseConfig.jvmArgs.add("-Dworld-host-testing.user=$user")
             baseConfig.jvmArgs.add("-Ddevauth.enabled=false")
+            baseConfig.javaVersion = JavaVersion.VERSION_21
             runs.addTarget(baseConfig)
             runs.configFirst(runName, (provider.mcPatcher as AbstractMinecraftTransformer)::applyClientRunTransform)
         }
