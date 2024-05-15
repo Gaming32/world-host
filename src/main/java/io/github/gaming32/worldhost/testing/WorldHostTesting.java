@@ -48,7 +48,7 @@ public class WorldHostTesting {
             .skip(LevelLoadingScreen.class, ReceivingLevelScreen.class)
             .then(null, () -> press(InputConstants.KEY_ESCAPE))
             .then(PauseScreen.class, () -> click(findWidgetByTranslation("world-host.online_status")))
-            .then(addFriend("o:JOINER"))
+            .then(addFriend(TestingUser.JOINER))
             .then(PauseScreen.class, () -> click(findWidgetByTranslation("world-host.open_world")))
             .then(ShareToLanScreen.class, () -> click(findWidgetByTranslation("world-host.open_world")))
             .then(null, () -> waitForJoinerToJoin(0))
@@ -75,7 +75,7 @@ public class WorldHostTesting {
     private static ScreenChain createJoiner() {
         return ScreenChain.start()
             .then(TitleScreen.class, () -> click(findWidgetByTranslation("world-host.online_status")))
-            .then(addFriend("o:HOST"))
+            .then(addFriend(TestingUser.HOST))
             .then(TitleScreen.class, () -> click(findWidgetByTranslation("menu.multiplayer")))
             .maybe(SafetyScreen.class, () -> click(findWidgetByTranslation("gui.proceed")))
             .then(JoinMultiplayerScreen.class, () -> click(findWidgetByTranslation("world-host.friends")))
@@ -117,16 +117,24 @@ public class WorldHostTesting {
         }
     }
 
-    private static ScreenChain addFriend(String user) {
+    private static ScreenChain addFriend(TestingUser user) {
         return ScreenChain.start()
             .then(WorldHostConfigScreen.class, () -> click(findWidgetByTranslation("world-host.friends")))
             .then(FriendsScreen.class, () -> click(findWidgetByTranslation("world-host.add_friend")))
             .then(AddFriendScreen.class, () -> {
-                enterText(findWidgetByTranslation("world-host.add_friend.enter_username"), user);
+                enterText(findWidgetByTranslation("world-host.add_friend.enter_username"), "o:" + user + getUsernameSuffix());
                 click(findWidgetByTranslation("world-host.add_friend"));
             })
             .then(FriendsScreen.class, () -> click(findWidgetByTranslation("gui.done")))
             .then(WorldHostConfigScreen.class, () -> click(findWidgetByTranslation("gui.done")));
+    }
+
+    private static String getUsernameSuffix() {
+        final String username = Minecraft.getInstance().getUser().getName();
+        if (!username.startsWith(USER.name())) {
+            throw new IllegalStateException("Username " + username + " doesn't start with " + USER);
+        }
+        return username.substring(USER.name().length());
     }
 
     public enum TestingUser {
