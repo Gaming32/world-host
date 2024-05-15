@@ -149,14 +149,18 @@ unimined.minecraft {
             javaVersion = JavaVersion.VERSION_21
         }
 
+        val usernameSuffix = NetworkInterface.getNetworkInterfaces()
+            .nextElement()
+            .hardwareAddress
+            .toHexString()
+            .substring(0, 10)
         for (name in listOf("host", "joiner")) {
             val runName = "test${name.capitalized()}"
             val user = name.uppercase()
-            val uniqueSystemId = NetworkInterface.getNetworkInterfaces().iterator().next().hardwareAddress.toHexString()
             val provider = (minecraftData as MinecraftDownloader).provider
             val baseConfig = provider.provideVanillaRunClientTask(runName, file("run/$runName"))
             baseConfig.description = "Test $user"
-            baseConfig.args.replaceAll { if (it == "Dev") "$user$uniqueSystemId" else it }
+            baseConfig.args.replaceAll { if (it == "Dev") "$user$usernameSuffix" else it }
             baseConfig.jvmArgs.add("-Dworld-host-testing.enabled=true")
             baseConfig.jvmArgs.add("-Dworld-host-testing.user=$user")
             baseConfig.jvmArgs.add("-Ddevauth.enabled=false")
