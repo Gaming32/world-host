@@ -96,11 +96,13 @@ public final class ProxyClient extends SimpleChannelInboundHandler<ByteBuf> {
             .syncUninterruptibly();
     }
 
-    public void close() {
+    public synchronized void close() {
         if (closed) return;
         closed = true;
         try {
-            channel.close();
+            if (channel != null) {
+                channel.close();
+            }
             final ProxyPassthrough proxy = this.proxy.get();
             if (proxy != null) {
                 proxy.proxyDisconnect(connectionId);

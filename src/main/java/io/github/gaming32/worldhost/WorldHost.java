@@ -20,6 +20,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -205,7 +206,7 @@ public class WorldHost
     public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 
-    public static final Long2ObjectMap<ProxyClient> CONNECTED_PROXY_CLIENTS = new Long2ObjectOpenHashMap<>();
+    public static final Long2ObjectMap<ProxyClient> CONNECTED_PROXY_CLIENTS = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 
     public static final long CONNECTION_ID = new SecureRandom().nextLong(MAX_CONNECTION_IDS);
 
