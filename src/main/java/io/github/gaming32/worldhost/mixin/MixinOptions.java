@@ -12,10 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinOptions {
     @Shadow public boolean pauseOnLostFocus;
 
+    @Shadow public boolean onboardAccessibility;
+
     @Inject(method = "load", at = @At("RETURN"))
     private void dontPauseWhileTesting(CallbackInfo ci) {
         if (WorldHostTesting.ENABLED) {
             pauseOnLostFocus = false;
+            onboardAccessibility = false;
         }
     }
 }

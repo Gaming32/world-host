@@ -43,6 +43,7 @@ public class WorldHostTesting {
     private static ScreenChain createHost() {
         return ScreenChain.start()
             .then(TitleScreen.class, () -> click(findWidgetByTranslation("menu.singleplayer")))
+            .maybe(SafetyScreen.class, () -> click(findWidgetByTranslation("gui.proceed")))
             .maybe(SelectWorldScreen.class, () -> click(findWidgetByTranslation("world-host.create_world")))
             .then(CreateWorldScreen.class, () -> click(findWidgetByTranslation("selectWorld.create")))
             .skip(LevelLoadingScreen.class, ReceivingLevelScreen.class)
