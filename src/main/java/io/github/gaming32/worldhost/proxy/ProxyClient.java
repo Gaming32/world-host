@@ -13,6 +13,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalChannel;
 import net.minecraft.server.network.ServerConnectionListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.function.Supplier;
@@ -24,6 +25,7 @@ public final class ProxyClient extends SimpleChannelInboundHandler<ByteBuf> {
     private final long connectionId;
     private final Supplier<ProxyPassthrough> proxy;
 
+    private ByteArrayOutputStream preActiveBuffer = new ByteArrayOutputStream();
     private Channel channel;
     private boolean closed;
 
@@ -41,9 +43,11 @@ public final class ProxyClient extends SimpleChannelInboundHandler<ByteBuf> {
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+    public synchronized void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         channel = ctx.channel();
+        send(preActiveBuffer.toByteArray());
+        preActiveBuffer = null;
         WorldHost.LOGGER.info("Started proxy client from {}", remoteAddress);
     }
 
@@ -107,7 +111,11 @@ public final class ProxyClient extends SimpleChannelInboundHandler<ByteBuf> {
         }
     }
 
-    public void send(byte[] message) {
+    public synchronized void send(byte[] message) {
+        if (channel == null) {
+            preActiveBuffer.writeBytes(message);
+            return;
+        }
         if (channel.eventLoop().inEventLoop()) {
             doSend(message);
         } else {
