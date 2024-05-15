@@ -205,7 +205,6 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     }
 
     public void publishedWorld(Collection<UUID> friends) {
-        WorldHost.LOGGER.info("Published world to friends: {}", friends);
         enqueue(new WorldHostC2SMessage.PublishedWorld(friends));
     }
 

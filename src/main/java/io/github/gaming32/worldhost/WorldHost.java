@@ -363,14 +363,19 @@ public class WorldHost
         if (connectingFuture != null && connectingFuture.isDone()) {
             connectingFuture = null;
             delayIndex = 0;
-            LOGGER.info("Finished authenticating with WH server. Requesting friends list.");
-            ONLINE_FRIENDS.clear();
-            protoClient.listOnline(CONFIG.getFriends());
+            refreshFriendsList();
             final var server = Minecraft.getInstance().getSingleplayerServer();
             if (server != null && server.isPublished()) {
                 protoClient.publishedWorld(CONFIG.getFriends());
             }
         }
+    }
+
+    public static void refreshFriendsList() {
+        LOGGER.info("Refreshing friends list...");
+        ONLINE_FRIENDS.clear();
+        WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
+        protoClient.listOnline(CONFIG.getFriends());
     }
 
     public static void commandRegistrationHandler(CommandDispatcher<CommandSourceStack> dispatcher) {

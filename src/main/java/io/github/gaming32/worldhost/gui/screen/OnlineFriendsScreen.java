@@ -95,10 +95,8 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         );
 
         addRenderableWidget(
-            button(
-                Components.translatable("selectServer.refresh"),
-                button -> minecraft.setScreen(new OnlineFriendsScreen(parent))
-            ).pos(width / 2 + 2, height - 52)
+            button(Components.translatable("selectServer.refresh"), button -> WorldHost.refreshFriendsList())
+                .pos(width / 2 + 2, height - 52)
                 .build()
         );
 
@@ -164,8 +162,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             return true;
         }
         if (keyCode == GLFW.GLFW_KEY_F5) {
-            assert minecraft != null;
-            minecraft.setScreen(new OnlineFriendsScreen(parent));
+            WorldHost.refreshFriendsList();
             return true;
         }
         if (list.getSelected() != null) {
