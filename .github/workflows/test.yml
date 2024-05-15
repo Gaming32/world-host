@@ -43,4 +43,4 @@ jobs:
       - name: Compile World Host
         run: ./gradlew :${{ matrix.subproject }}:classes
       - name: Run tests
-        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./runTests.sh
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./runTests.sh ${{ matrix.subproject }}

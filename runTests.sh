@@ -4,7 +4,7 @@ $host_pid = $!
 $joiner_pid = $!
 wait $host_pid
 $code = $?
-if [ $host_pid -ne 0 ]; then
+if [ "$code" -ne 0 ]; then
   exit $code
 fi
 exit $(wait $joiner_pid)
