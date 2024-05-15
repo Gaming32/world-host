@@ -1,11 +1,15 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
+import org.jetbrains.kotlin.daemon.common.toHexString
 import xyz.wagyourtail.unimined.api.mapping.task.ExportMappingsTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
 import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
+import xyz.wagyourtail.unimined.internal.minecraft.patch.AbstractMinecraftTransformer
 import xyz.wagyourtail.unimined.internal.minecraft.resolver.MinecraftDownloader
+import xyz.wagyourtail.unimined.util.capitalized
 import xyz.wagyourtail.unimined.util.sourceSets
+import java.net.NetworkInterface
 import java.nio.file.Path
 
 plugins {
@@ -143,6 +147,26 @@ unimined.minecraft {
     runs {
         config("client") {
             javaVersion = JavaVersion.VERSION_21
+        }
+
+        val usernameSuffix = NetworkInterface.getNetworkInterfaces()
+            .nextElement()
+            .hardwareAddress
+            .toHexString()
+            .substring(0, 10)
+        for (name in listOf("host", "joiner")) {
+            val runName = "test${name.capitalized()}"
+            val user = name.uppercase()
+            val provider = (minecraftData as MinecraftDownloader).provider
+            val baseConfig = provider.provideVanillaRunClientTask(runName, file("run/$runName"))
+            baseConfig.description = "Test $user"
+            baseConfig.args.replaceAll { if (it == "Dev") "$user$usernameSuffix" else it }
+            baseConfig.jvmArgs.add("-Dworld-host-testing.enabled=true")
+            baseConfig.jvmArgs.add("-Dworld-host-testing.user=$user")
+            baseConfig.jvmArgs.add("-Ddevauth.enabled=false")
+            baseConfig.javaVersion = JavaVersion.VERSION_21
+            runs.addTarget(baseConfig)
+            runs.configFirst(runName, (provider.mcPatcher as AbstractMinecraftTransformer)::applyClientRunTransform)
         }
     }
 }

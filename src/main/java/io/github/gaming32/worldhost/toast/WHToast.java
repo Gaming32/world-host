@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.toast;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
+import io.github.gaming32.worldhost.testing.WorldHostTesting;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -129,7 +130,7 @@ public class WHToast {
     }
 
     public static boolean click(double mouseX, double mouseY, int button) {
-        if (!ready) {
+        if (!ready || WorldHostTesting.ENABLED) {
             return false;
         }
 

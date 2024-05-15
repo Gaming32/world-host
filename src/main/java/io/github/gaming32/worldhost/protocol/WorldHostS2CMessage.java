@@ -17,6 +17,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,6 +79,14 @@ public sealed interface WorldHostS2CMessage {
         public void handle(ProtocolClient client) {
             if (!WorldHost.CONFIG.isEnableFriends()) return;
             final boolean isFriend = WorldHost.isFriend(fromUser);
+            if (isFriend) {
+                Minecraft.getInstance().execute(() -> {
+                    final var server = Minecraft.getInstance().getSingleplayerServer();
+                    if (server != null && server.isPublished()) {
+                        client.publishedWorld(Collections.singleton(fromUser));
+                    }
+                });
+            }
             if (!isFriend && !WorldHost.CONFIG.isAllowFriendRequests()) return;
             WorldHost.showFriendOrOnlineToast(
                 fromUser,
@@ -100,10 +109,11 @@ public sealed interface WorldHostS2CMessage {
     record PublishedWorld(UUID user, long connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            if (!WorldHost.CONFIG.isAnnounceFriendsOnline() || !WorldHost.isFriend(user)) return;
+            if (!WorldHost.isFriend(user)) return;
             Minecraft.getInstance().execute(() -> {
                 WorldHost.ONLINE_FRIENDS.put(user, connectionId);
                 WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
+                if (!WorldHost.CONFIG.isAnnounceFriendsOnline()) return;
                 WorldHost.showFriendOrOnlineToast(
                     user, "world-host.went_online", "world-host.went_online.desc", 200,
                     () -> WorldHost.join(connectionId, null)

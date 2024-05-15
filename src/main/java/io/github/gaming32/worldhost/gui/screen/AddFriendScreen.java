@@ -87,11 +87,22 @@ public class AddFriendScreen extends WorldHostScreen {
         }
         if (usernameResponder == null) {
             // Only set the responder here on first init
-            usernameField.setResponder(usernameResponder = text -> {
+            usernameField.setResponder(usernameResponder = username -> {
                 lastTyping = Util.getMillis();
-                usernameUpdate = true;
-                friendProfile = null;
-                addFriendButton.active = false;
+                if (VALID_USERNAME.matcher(username).matches()) {
+                    usernameUpdate = true;
+                    friendProfile = null;
+                    addFriendButton.active = false;
+                } else if (VALID_UUID.matcher(username).matches()) {
+                    usernameUpdate = false;
+                    friendProfile = new GameProfile(UUID.fromString(username), "");
+                    addFriendButton.active = true;
+                } else if (username.startsWith("o:")) {
+                    usernameUpdate = false;
+                    final String actualName = username.substring(2);
+                    friendProfile = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName);
+                    addFriendButton.active = true;
+                }
             });
         }
     }
@@ -137,24 +148,15 @@ public class AddFriendScreen extends WorldHostScreen {
         if (Util.getMillis() - 300 > lastTyping && usernameUpdate) {
             usernameUpdate = false;
             final String username = usernameField.getValue();
-            if (VALID_USERNAME.matcher(username).matches()) {
-                WorldHost.getMaybeAsync(WorldHost.getProfileCache(), username, p -> {
-                    if (p.isPresent()) {
-                        assert minecraft != null;
-                        friendProfile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), p.get());
-                        addFriendButton.active = true;
-                    } else {
-                        friendProfile = null;
-                    }
-                });
-            } else if (VALID_UUID.matcher(username).matches()) {
-                friendProfile = new GameProfile(UUID.fromString(username), "");
-                addFriendButton.active = true;
-            } else if (username.startsWith("o:")) {
-                final String actualName = username.substring(2);
-                friendProfile = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName);
-                addFriendButton.active = true;
-            }
+            WorldHost.getMaybeAsync(WorldHost.getProfileCache(), username, p -> {
+                if (p.isPresent()) {
+                    assert minecraft != null;
+                    friendProfile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), p.get());
+                    addFriendButton.active = true;
+                } else {
+                    friendProfile = null;
+                }
+            });
         }
     }
 

@@ -1,0 +1,46 @@
+name: Run tests
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        subproject:
+          - 1.17.1-forge
+          - 1.17.1-fabric
+          - 1.18.2-forge
+          - 1.18.2-fabric
+          - 1.19.2-forge
+          - 1.19.2-fabric
+          - 1.19.4-forge
+          - 1.19.4-fabric
+          - 1.20.1-forge
+          - 1.20.1-fabric
+          - 1.20.4-neoforge
+          - 1.20.4-fabric
+          - 1.20.6-neoforge
+          - 1.20.6-fabric
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get cache key
+        id: cache_key
+        run: echo "gradle_key=gradle-`cat versions/mainProject`" >> $GITHUB_OUTPUT
+      - name: Cache Gradle stuff
+        uses: actions/cache@v3
+        with:
+          key: ${{ steps.cache_key.outputs.gradle_key }}-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**') }}
+          restore-keys: ${{ steps.cache_key.outputs.gradle_key }}-
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            .gradle/loom-cache
+      - name: Set up JDK 21
+        uses: actions/setup-java@v1
+        with:
+          java-version: 21
+      - name: Compile World Host
+        run: ./gradlew :${{ matrix.subproject }}:classes
+      - name: Run tests
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" bash runTests.sh ${{ matrix.subproject }}
