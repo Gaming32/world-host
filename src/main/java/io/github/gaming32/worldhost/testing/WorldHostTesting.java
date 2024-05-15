@@ -69,7 +69,7 @@ public class WorldHostTesting {
             }
             sleep(2000, () -> waitForJoinerToJoin(timeSpent + 2000));
         } else {
-            sleep(5000, () -> press(InputConstants.KEY_ESCAPE));
+            sleep(15_000, () -> press(InputConstants.KEY_ESCAPE));
         }
     }
 
