@@ -1,9 +1,9 @@
 ./gradlew :$1:runTestHost --stacktrace &
-host_pid = $!
+host_pid="$!"
 ./gradlew :$1:runTestJoiner --stacktrace &
-joiner_pid = $!
+joiner_pid="$!"
 wait $host_pid
-code = $?
+code="$?"
 if [ "$code" -ne 0 ]; then
   exit $code
 fi
