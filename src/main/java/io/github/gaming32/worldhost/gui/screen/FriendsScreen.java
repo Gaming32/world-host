@@ -72,7 +72,8 @@ public class FriendsScreen extends WorldHostScreen {
                         WorldHost.protoClient.friendRequest(profile.getId());
                     }
                 }));
-            }).pos(width / 2 - 152, height - 52)
+            }).width(152)
+                .pos(width / 2 - 154, height - 54)
                 .tooltip(Components.translatable("world-host.add_friend.tooltip"))
                 .build()
         );
@@ -81,7 +82,8 @@ public class FriendsScreen extends WorldHostScreen {
             button(ADD_SILENTLY_TEXT, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, null, this::addFriendAndUpdate));
-            }).pos(width / 2 - 152, height - 28)
+            }).width(152)
+                .pos(width / 2 - 154, height - 30)
                 .tooltip(Components.translatable("world-host.friends.add_silently.tooltip"))
                 .build()
         );
@@ -91,7 +93,8 @@ public class FriendsScreen extends WorldHostScreen {
                 if (list.getSelected() != null) {
                     list.getSelected().maybeRemove();
                 }
-            }).pos(width / 2 + 2, height - 52)
+            }).width(152)
+                .pos(width / 2 + 2, height - 54)
                 .build()
         );
         removeButton.active = false;
@@ -100,7 +103,8 @@ public class FriendsScreen extends WorldHostScreen {
             button(CommonComponents.GUI_DONE, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(parent);
-            }).pos(width / 2 + 2, height - 28)
+            }).width(152)
+                .pos(width / 2 + 2, height - 30)
                 .build()
         );
 

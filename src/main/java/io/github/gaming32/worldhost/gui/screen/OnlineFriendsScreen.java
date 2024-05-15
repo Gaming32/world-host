@@ -90,25 +90,29 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
         joinButton = addRenderableWidget(
             button(Components.translatable("selectServer.select"), button -> connect())
-                .pos(width / 2 - 152, height - 52)
+                .width(152)
+                .pos(width / 2 - 154, height - 54)
                 .build()
         );
 
         addRenderableWidget(
             button(Components.translatable("selectServer.refresh"), button -> WorldHost.refreshFriendsList())
-                .pos(width / 2 + 2, height - 52)
+                .width(152)
+                .pos(width / 2 + 2, height - 54)
                 .build()
         );
 
         addRenderableWidget(
             button(WorldHostComponents.FRIENDS, button -> minecraft.setScreen(new FriendsScreen(this)))
-                .pos(width / 2 - 152, height - 28)
+                .width(152)
+                .pos(width / 2 - 154, height - 30)
                 .build()
         );
 
         addRenderableWidget(
             button(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
-                .pos(width / 2 + 2, height - 28)
+                .width(152)
+                .pos(width / 2 + 2, height - 30)
                 .build()
         );
 
