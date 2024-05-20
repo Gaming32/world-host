@@ -11,8 +11,4 @@ public enum Loader {
     public String toString() {
         return lowercase;
     }
-
-    public boolean isForgeLike() {
-        return this == FORGE || this == NEOFORGE;
-    }
 }
