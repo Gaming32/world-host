@@ -20,6 +20,8 @@ import net.minecraft.network.chat.contents.TranslatableContents;
 //#endif
 
 public class MinecraftApi {
+    private static final Thread.Builder SLEEP_BUILDER = Thread.ofVirtual().name("WH-TestingSleeper-", 1);
+
     public static void click(AbstractWidget widget) {
         click(
             //#if MC > 1.19.2
@@ -124,7 +126,7 @@ public class MinecraftApi {
     }
 
     public static void sleep(long millis, Runnable wakeupAction) {
-        Thread.ofVirtual().name("WH-TestingSleeper").start(() -> {
+        SLEEP_BUILDER.start(() -> {
             try {
                 Thread.sleep(millis);
             } catch (InterruptedException e) {

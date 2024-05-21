@@ -25,6 +25,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
+    private static final Thread.Builder CONNECTION_THREAD_BUILDER = Thread.ofVirtual().name("WH-ConnectionThread-", 1);
+    private static final Thread.Builder SEND_THREAD_BUILDER = Thread.ofVirtual().name("WH-SendThread-", 1);
+    private static final Thread.Builder RECV_THREAD_BUILDER = Thread.ofVirtual().name("WH-RecvThread-", 1);
+
     public static final int PROTOCOL_VERSION = 5;
 
     private final String originalHost;
@@ -47,7 +51,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public ProtocolClient(String host, boolean successToast, boolean failureToast) {
         this.originalHost = host;
         final HostAndPort target = HostAndPort.fromString(host).withDefaultPort(9646);
-        Thread.ofVirtual().name("WH-ConnectionThread").start(() -> {
+        CONNECTION_THREAD_BUILDER.start(() -> {
             Socket socket = null;
             try {
                 socket = new Socket(target.getHost(), target.getPort());
@@ -91,7 +95,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             }
             final Socket fSocket = socket;
 
-            final Thread sendThread = Thread.ofVirtual().name("WH-SendThread").start(() -> {
+            final Thread sendThread = SEND_THREAD_BUILDER.start(() -> {
                 try {
                     final DataOutputStream dos = new DataOutputStream(fSocket.getOutputStream());
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -113,7 +117,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 close();
             });
 
-            Thread.ofVirtual().name("WH-RecvThread").start(() -> {
+            RECV_THREAD_BUILDER.start(() -> {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
                     while (!closed) {

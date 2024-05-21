@@ -13,6 +13,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
+    private static final Thread.Builder CONNECTION_THREAD_BUILDER = Thread.ofVirtual().name("WHEP-ConnectionThread-", 1);
+    private static final Thread.Builder SEND_THREAD_BUILDER = Thread.ofVirtual().name("WHEP-SendThread-", 1);
+    private static final Thread.Builder RECV_THREAD_BUILDER = Thread.ofVirtual().name("WHEP-RecvThread-", 1);
+
     private final BlockingQueue<Optional<ProxyMessage>> sendQueue = new LinkedBlockingQueue<>();
 
     private final String baseAddr;
@@ -23,7 +27,7 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
     public ProxyProtocolClient(String host, int port, long connectionId, String baseAddr, int mcPort) {
         this.baseAddr = baseAddr;
         this.mcPort = mcPort;
-        Thread.ofVirtual().name("WHEP-ConnectThread").start(() -> {
+        CONNECTION_THREAD_BUILDER.start(() -> {
             Socket socket = null;
             try {
                 socket = new Socket(host, port);
@@ -52,7 +56,7 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
             }
             final Socket fSocket = socket;
 
-            final Thread sendThread = Thread.ofVirtual().name("WHEP-SendThread").start(() -> {
+            final Thread sendThread = SEND_THREAD_BUILDER.start(() -> {
                 try {
                     final DataOutputStream dos = new DataOutputStream(fSocket.getOutputStream());
                     while (!closed) {
@@ -71,7 +75,7 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
                 closed = true;
             });
 
-            Thread.ofVirtual().name("WHEP-RecvThread").start(() -> {
+            RECV_THREAD_BUILDER.start(() -> {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
                     while (!closed) {
