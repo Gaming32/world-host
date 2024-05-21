@@ -4,7 +4,7 @@ import com.google.common.net.HostAndPort;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.toast.WHToast;
-import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.network.chat.Component;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CountingInputStream;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +64,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
                 if (failureToast) {
                     WHToast.builder("world-host.wh_connect.connect_failed")
-                        .description(Components.nullToEmpty(e.getLocalizedMessage()))
+                        .description(Component.nullToEmpty(e.getLocalizedMessage()))
                         .show();
                 }
                 if (socket != null) {
@@ -74,7 +74,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         WorldHost.LOGGER.error("Failed to close WH socket", e1);
                         if (failureToast) {
                             WHToast.builder("world-host.wh_connect.close_failed")
-                                .description(Components.nullToEmpty(e1.getLocalizedMessage()))
+                                .description(Component.nullToEmpty(e1.getLocalizedMessage()))
                                 .show();
                         }
                     }
@@ -167,7 +167,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 WorldHost.LOGGER.error("Failed to close WH socket.", e);
                 if (WorldHost.CONFIG.isEnableReconnectionToasts()) {
                     WHToast.builder("world-host.wh_connect.close_failed")
-                        .description(Components.nullToEmpty(e.getLocalizedMessage()))
+                        .description(Component.nullToEmpty(e.getLocalizedMessage()))
                         .show();
                 }
             }

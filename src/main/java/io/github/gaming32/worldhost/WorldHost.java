@@ -37,6 +37,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
@@ -415,7 +416,7 @@ public class WorldHost
                     }
                     ctx.getSource().sendFailure(Components.translatable(
                         "world-host.worldhost.tempip.failure",
-                        Components.wrapInSquareBrackets(Components.literal("/worldhost ip")).withStyle(style -> style
+                        ComponentUtils.wrapInSquareBrackets(Components.literal("/worldhost ip")).withStyle(style -> style
                             .withColor(ChatFormatting.GREEN)
                             .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/worldhost ip"))
                         )

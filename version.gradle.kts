@@ -325,7 +325,7 @@ dependencies {
         }
     }
 
-    compileOnly("com.demonwav.mcdev:annotations:2.0.0")
+    compileOnly("com.demonwav.mcdev:annotations:2.1.0")
 }
 
 preprocess {

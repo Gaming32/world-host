@@ -65,6 +65,5 @@
   "world-host.play_world": "Гуляць у свет",
   "world-host.share_world": "Падзяліцца светам",
   "world-host.share_world.failed": "Не атрымалася падзяліцца светам",
-  "world-host.create_world": "Стварыць свет",
-  "chat.square_brackets": "[%s]"
+  "world-host.create_world": "Стварыць свет"
 }
