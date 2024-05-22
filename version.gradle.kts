@@ -326,6 +326,9 @@ dependencies {
     }
 
     compileOnly("com.demonwav.mcdev:annotations:2.1.0")
+
+    // Resolves javac warnings about Guava
+    compileOnly("com.google.errorprone:error_prone_annotations:2.11.0")
 }
 
 preprocess {
