@@ -19,22 +19,15 @@ public class WorldHostConfig {
     private String serverIp = DEFAULT_SERVER_IP;
 
     private OnlineStatusLocation onlineStatusLocation = OnlineStatusLocation.RIGHT;
-
     private boolean enableFriends = true;
-
     private boolean enableReconnectionToasts = false;
-
     private boolean noUPnP = false;
-
     private boolean useShortIp = false;
-
     private boolean showOutdatedWorldHost = true;
-
     private boolean shareButton = true;
-
     private boolean allowFriendRequests = true;
-
     private boolean announceFriendsOnline = true;
+    private boolean whitelistJoins = false;
 
     private final Set<UUID> friends = Collections.synchronizedSet(new LinkedHashSet<>());
 
@@ -201,6 +194,15 @@ public class WorldHostConfig {
 
     public void setAnnounceFriendsOnline(boolean announceFriendsOnline) {
         this.announceFriendsOnline = announceFriendsOnline;
+    }
+
+    @ConfigProperty(order = 10)
+    public boolean isWhitelistJoins() {
+        return whitelistJoins;
+    }
+
+    public void setWhitelistJoins(boolean whitelistJoins) {
+        this.whitelistJoins = whitelistJoins;
     }
 
     public Set<UUID> getFriends() {
