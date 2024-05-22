@@ -688,6 +688,14 @@ public class WorldHost
         protoClient.requestDirectJoin(connectionId);
     }
 
+    public static void connect(Screen parentScreen, long cid) {
+        connect(
+            parentScreen, cid,
+            connectionIdToString(cid) + '.' + protoClient.getBaseIp(),
+            protoClient.getBasePort()
+        );
+    }
+
     public static void connect(Screen parentScreen, long cid, String host, int port) {
         final Minecraft minecraft = Minecraft.getInstance();
         final ServerAddress serverAddress = new ServerAddress(host, port);
