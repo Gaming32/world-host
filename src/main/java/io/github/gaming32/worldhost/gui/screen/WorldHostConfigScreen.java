@@ -89,11 +89,9 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     protected void init() {
         super.init();
 
-        final int yOffset = height / 6;
+        int yOffset = height / 6;
 
-        serverIpBox = addRenderableWidget(new EditBox(
-            font, width / 2 + 5, yOffset, 150, 20, SERVER_IP
-        ));
+        serverIpBox = addRenderableWidget(new EditBox(font, width / 2 + 5, yOffset, 150, 20, SERVER_IP));
         serverIpBox.setValue(WorldHost.CONFIG.getServerIp());
 
         final int serverAddressResetX = 145 - font.width(SERVER_IP);
@@ -105,18 +103,18 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         );
 
         for (int i = 0; i < OPTIONS.length; i++) {
-            addRenderableWidget(OPTIONS[i].createButton(
-                width / 2 - 155 + 160 * (i % 2),
-                yOffset + 24 + 24 * (i / 2),
-                150, 20
-            ));
+            if ((i & 1) == 0) {
+                yOffset += 24;
+            }
+            addRenderableWidget(OPTIONS[i].createButton(width / 2 - 155 + 160 * (i % 2), yOffset, 150, 20));
         }
+        yOffset += 48;
 
         addRenderableWidget(
             button(WorldHostComponents.FRIENDS, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(new FriendsScreen(this));
-            }).pos(width / 2 - 155, yOffset + 168)
+            }).pos(width / 2 - 155, yOffset)
                 .build()
         );
 
@@ -124,7 +122,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
             button(CommonComponents.GUI_DONE, button -> {
                 assert minecraft != null;
                 minecraft.setScreen(parent);
-            }).pos(width / 2 + 5, yOffset + 168)
+            }).pos(width / 2 + 5, yOffset)
                 .build()
         );
     }
