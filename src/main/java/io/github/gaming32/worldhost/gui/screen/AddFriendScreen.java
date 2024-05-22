@@ -78,7 +78,7 @@ public class AddFriendScreen extends WorldHostScreen {
         usernameField = addWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, FRIEND_USERNAME_TEXT));
         usernameField.setMaxLength(36);
         //#if MC >= 1.19.4
-        usernameField.setFocused(true);
+        setInitialFocus(usernameField);
         //#else
         //$$ usernameField.setFocus(true);
         //#endif
