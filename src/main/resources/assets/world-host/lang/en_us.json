@@ -19,6 +19,8 @@
   "world-host.config.allowFriendRequests.tooltip": "You can still become friends with another player by adding each other to your friends lists.\nThis is helpful if you're a content creator who is getting spammed with friend requests.",
   "world-host.config.announceFriendsOnline": "Popup Friends Online",
   "world-host.config.announceFriendsOnline.tooltip": "When a friend goes online, you will get a popup. You can use this option to disable that.",
+  "world-host.config.whitelistJoins": "Whitelist Joins",
+  "world-host.config.whitelistJoins.tooltip": "Only allow friends to join your worlds. This will also affect LAN.",
   "world-host.friends": "Friends",
   "world-host.friends.add_silently": "Add Friend Silently",
   "world-host.friends.add_silently.tooltip": "This will add the person as a friend, without notifying them.\nNote that you must both friend each other in order to join each other's games.",

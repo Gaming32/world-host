@@ -1,5 +1,8 @@
-package io.github.gaming32.worldhost;
+package io.github.gaming32.worldhost.config;
 
+import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.config.option.ConfigOption;
+import io.github.gaming32.worldhost.config.option.ConfigOptions;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
@@ -41,6 +44,16 @@ public class WorldHostConfig {
             final String key;
             switch (key = reader.nextName()) {
                 case "serverIp" -> serverIp = reader.nextString();
+                default -> {
+                    final ConfigOption<?> option = ConfigOptions.OPTIONS.get(key);
+                    if (option != null) {
+                        option.readValue(reader, this);
+                    } else {
+                        WorldHost.LOGGER.warn("Unknown WH config key {}. Skipping.", key);
+                        reader.skipValue();
+                    }
+                }
+                // Legacy updaters
                 case "serverUri" -> {
                     WorldHost.LOGGER.info("Found old-style serverUri. Converting to new-style serverIp.");
                     final String serverUri = reader.nextString();
@@ -55,30 +68,10 @@ public class WorldHostConfig {
                         serverIp = serverIp.substring(0, serverIp.length() - 5);
                     }
                 }
-                case "onlineStatusLocation" -> {
-                    final String value;
-                    onlineStatusLocation = switch (value = reader.nextString()) {
-                        case "left" -> OnlineStatusLocation.LEFT;
-                        case "right" -> OnlineStatusLocation.RIGHT;
-                        case "off" -> OnlineStatusLocation.OFF;
-                        default -> {
-                            WorldHost.LOGGER.warn("Unknown value for showOnlineStatus {}. Defaulting to right.", value);
-                            yield OnlineStatusLocation.RIGHT;
-                        }
-                    };
-                }
                 case "showOnlineStatus" -> {
                     WorldHost.LOGGER.info("Converting old showOnlineStatus to new onlineStatusLocation.");
                     onlineStatusLocation = reader.nextBoolean() ? OnlineStatusLocation.RIGHT : OnlineStatusLocation.OFF;
                 }
-                case "enableFriends" -> enableFriends = reader.nextBoolean();
-                case "enableReconnectionToasts" -> enableReconnectionToasts = reader.nextBoolean();
-                case "noUPnP" -> noUPnP = reader.nextBoolean();
-                case "useShortIp" -> useShortIp = reader.nextBoolean();
-                case "showOutdatedWorldHost" -> showOutdatedWorldHost = reader.nextBoolean();
-                case "shareButton" -> shareButton = reader.nextBoolean();
-                case "allowFriendRequests" -> allowFriendRequests = reader.nextBoolean();
-                case "announceFriendsOnline" -> announceFriendsOnline = reader.nextBoolean();
                 case "friends" -> {
                     WorldHost.LOGGER.info("Found old friends list.");
                     reader.beginArray();
@@ -87,10 +80,6 @@ public class WorldHostConfig {
                         friends.add(UUID.fromString(reader.nextString()));
                     }
                     reader.endArray();
-                }
-                default -> {
-                    WorldHost.LOGGER.warn("Unknown WH config key {}. Skipping.", key);
-                    reader.skipValue();
                 }
             }
         }
@@ -109,15 +98,10 @@ public class WorldHostConfig {
     public void write(JsonWriter writer) throws IOException {
         writer.beginObject();
         writer.name("serverIp").value(serverIp);
-        writer.name("onlineStatusLocation").value(onlineStatusLocation.getSerializedName());
-        writer.name("enableFriends").value(enableFriends);
-        writer.name("enableReconnectionToasts").value(enableReconnectionToasts);
-        writer.name("noUPnP").value(noUPnP);
-        writer.name("useShortIp").value(useShortIp);
-        writer.name("showOutdatedWorldHost").value(showOutdatedWorldHost);
-        writer.name("shareButton").value(shareButton);
-        writer.name("allowFriendRequests").value(allowFriendRequests);
-        writer.name("announceFriendsOnline").value(announceFriendsOnline);
+        for (final var option : ConfigOptions.OPTIONS.values()) {
+            writer.name(option.getName());
+            option.writeValue(this, writer);
+        }
         writer.endObject();
     }
 
@@ -137,6 +121,8 @@ public class WorldHostConfig {
         this.serverIp = serverIp;
     }
 
+    @ConfigProperty
+    @ConfigProperty.EnumFallback("right")
     public OnlineStatusLocation getOnlineStatusLocation() {
         return onlineStatusLocation;
     }
@@ -145,6 +131,7 @@ public class WorldHostConfig {
         this.onlineStatusLocation = onlineStatusLocation;
     }
 
+    @ConfigProperty
     public boolean isEnableFriends() {
         return enableFriends;
     }
@@ -153,6 +140,7 @@ public class WorldHostConfig {
         this.enableFriends = enableFriends;
     }
 
+    @ConfigProperty
     public boolean isEnableReconnectionToasts() {
         return enableReconnectionToasts;
     }
@@ -161,6 +149,7 @@ public class WorldHostConfig {
         this.enableReconnectionToasts = enableReconnectionToasts;
     }
 
+    @ConfigProperty
     public boolean isNoUPnP() {
         return noUPnP;
     }
@@ -169,6 +158,7 @@ public class WorldHostConfig {
         this.noUPnP = noUPnP;
     }
 
+    @ConfigProperty
     public boolean isUseShortIp() {
         return useShortIp;
     }
@@ -177,6 +167,7 @@ public class WorldHostConfig {
         this.useShortIp = useShortIp;
     }
 
+    @ConfigProperty
     public boolean isShowOutdatedWorldHost() {
         return showOutdatedWorldHost;
     }
@@ -185,6 +176,7 @@ public class WorldHostConfig {
         this.showOutdatedWorldHost = showOutdatedWorldHost;
     }
 
+    @ConfigProperty
     public boolean isShareButton() {
         return shareButton;
     }
@@ -193,6 +185,7 @@ public class WorldHostConfig {
         this.shareButton = shareButton;
     }
 
+    @ConfigProperty
     public boolean isAllowFriendRequests() {
         return allowFriendRequests;
     }
@@ -201,6 +194,7 @@ public class WorldHostConfig {
         this.allowFriendRequests = allowFriendRequests;
     }
 
+    @ConfigProperty
     public boolean isAnnounceFriendsOnline() {
         return announceFriendsOnline;
     }

@@ -17,7 +17,8 @@ public final class EnumButton<E extends Enum<E> & StringRepresentable> extends C
         String translationBase,
         @Nullable Component title,
         @Nullable Component tooltip,
-        Class<E> clazz, Consumer<EnumButton<E>> onToggle
+        Class<E> clazz,
+        Consumer<EnumButton<E>> onToggle
     ) {
         super(x, y, width, height, title, tooltip, onToggle, clazz.getEnumConstants());
         translations = getTranslations(translationBase);
