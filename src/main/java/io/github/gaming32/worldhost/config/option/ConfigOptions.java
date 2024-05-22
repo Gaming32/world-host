@@ -10,6 +10,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -29,6 +30,7 @@ public final class ConfigOptions {
             return Arrays.stream(Introspector.getBeanInfo(WorldHostConfig.class).getPropertyDescriptors())
                 .map(ConfigOptions::createConfigOption)
                 .filter(Objects::nonNull)
+                .sorted(Comparator.comparingInt(ConfigOption::getOrder))
                 .collect(ImmutableMap.toImmutableMap(ConfigOption::getName, Function.identity()));
         } catch (IntrospectionException e) {
             throw new IllegalStateException(e);

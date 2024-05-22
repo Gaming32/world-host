@@ -8,6 +8,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface ConfigProperty {
+    int order();
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     @interface EnumFallback {

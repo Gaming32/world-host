@@ -1,6 +1,7 @@
 package io.github.gaming32.worldhost.config.option;
 
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.config.ConfigProperty;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
 import net.minecraft.client.gui.components.Button;
 import org.quiltmc.parsers.json.JsonReader;
@@ -11,14 +12,22 @@ import java.io.IOException;
 
 public abstract sealed class ConfigOption<T> permits EnumOption, YesNoOption {
     protected final PropertyDescriptor property;
+    private final int order;
     private Runnable onSet = null;
 
     protected ConfigOption(PropertyDescriptor property) {
         this.property = property;
+
+        final ConfigProperty info = property.getReadMethod().getAnnotation(ConfigProperty.class);
+        order = info.order();
     }
 
     public String getName() {
         return property.getName();
+    }
+
+    public int getOrder() {
+        return order;
     }
 
     public void onSet(Runnable onSet) {

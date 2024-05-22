@@ -121,7 +121,7 @@ public class WorldHostConfig {
         this.serverIp = serverIp;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 1)
     @ConfigProperty.EnumFallback("right")
     public OnlineStatusLocation getOnlineStatusLocation() {
         return onlineStatusLocation;
@@ -131,7 +131,7 @@ public class WorldHostConfig {
         this.onlineStatusLocation = onlineStatusLocation;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 2)
     public boolean isEnableFriends() {
         return enableFriends;
     }
@@ -140,7 +140,7 @@ public class WorldHostConfig {
         this.enableFriends = enableFriends;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 3)
     public boolean isEnableReconnectionToasts() {
         return enableReconnectionToasts;
     }
@@ -149,7 +149,7 @@ public class WorldHostConfig {
         this.enableReconnectionToasts = enableReconnectionToasts;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 4)
     public boolean isNoUPnP() {
         return noUPnP;
     }
@@ -158,7 +158,7 @@ public class WorldHostConfig {
         this.noUPnP = noUPnP;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 5)
     public boolean isUseShortIp() {
         return useShortIp;
     }
@@ -167,7 +167,7 @@ public class WorldHostConfig {
         this.useShortIp = useShortIp;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 6)
     public boolean isShowOutdatedWorldHost() {
         return showOutdatedWorldHost;
     }
@@ -176,7 +176,7 @@ public class WorldHostConfig {
         this.showOutdatedWorldHost = showOutdatedWorldHost;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 7)
     public boolean isShareButton() {
         return shareButton;
     }
@@ -185,7 +185,7 @@ public class WorldHostConfig {
         this.shareButton = shareButton;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 8)
     public boolean isAllowFriendRequests() {
         return allowFriendRequests;
     }
@@ -194,7 +194,7 @@ public class WorldHostConfig {
         this.allowFriendRequests = allowFriendRequests;
     }
 
-    @ConfigProperty
+    @ConfigProperty(order = 9)
     public boolean isAnnounceFriendsOnline() {
         return announceFriendsOnline;
     }
