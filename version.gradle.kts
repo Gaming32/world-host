@@ -428,7 +428,7 @@ tasks.processResources {
         "*.mixins.json"
     )) {
         expand(mapOf(
-            "version" to modVersion,
+            "version" to version,
             "mc_version" to mcVersionString
         ))
     }
