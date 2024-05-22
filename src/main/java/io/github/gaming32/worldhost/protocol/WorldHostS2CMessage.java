@@ -134,40 +134,24 @@ public sealed interface WorldHostS2CMessage {
     record RequestJoin(UUID user, long connectionId) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            if (WorldHost.isFriend(user)) {
-                final var server = Minecraft.getInstance().getSingleplayerServer();
-                if (server == null || !server.isPublished()) return;
-                if (WorldHost.upnpGateway != null && !WorldHost.CONFIG.isNoUPnP()) {
-                    try {
-                        final var error = WorldHost.upnpGateway.openPort(
-                            server.getPort(), 60, false
-                        );
-                        if (error == null) {
-                            client.enqueue(new WorldHostC2SMessage.JoinGranted(
-                                connectionId, new JoinType.UPnP(server.getPort())
-                            ));
-                            return;
-                        }
+            final var server = Minecraft.getInstance().getSingleplayerServer();
+            if (server == null || !server.isPublished()) return;
+            JoinType joinType = JoinType.Proxy.INSTANCE;
+            if (WorldHost.isFriend(user) && WorldHost.upnpGateway != null && !WorldHost.CONFIG.isNoUPnP()) {
+                try {
+                    final var error = WorldHost.upnpGateway.openPort(
+                        server.getPort(), 60, false
+                    );
+                    if (error == null) {
+                        joinType = new JoinType.UPnP(server.getPort());
+                    } else {
                         WorldHost.LOGGER.info("Failed to use UPnP mode due to {}. Falling back to Proxy mode.", error);
-                    } catch (Exception e) {
-                        WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                     }
+                } catch (Exception e) {
+                    WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                 }
-                final JoinType joinType;
-//                if (client.getPunchPort() != 0) {
-//                    new PunchClient(
-//                        client.getOriginalHost(),
-//                        client.getPunchPort(),
-//                        true,
-//                        client.getConnectionId(),
-//                        connectionId
-//                    ).start();
-//                    joinType = JoinType.Punch.INSTANCE;
-//                } else {
-                    joinType = JoinType.Proxy.INSTANCE;
-//                }
-                client.enqueue(new WorldHostC2SMessage.JoinGranted(connectionId, joinType));
             }
+            client.enqueue(new WorldHostC2SMessage.JoinGranted(connectionId, joinType));
         }
     }
 

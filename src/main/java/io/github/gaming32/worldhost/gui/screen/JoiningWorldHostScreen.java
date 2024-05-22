@@ -17,7 +17,6 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
     private static final Component MESSAGE = Components.translatable("world-host.joining_world_host");
 
     public final Screen parent;
-    private int timeout = 20;
 
     public JoiningWorldHostScreen(Screen parent) {
         super(MESSAGE);
@@ -55,20 +54,6 @@ public class JoiningWorldHostScreen extends WorldHostScreen {
         minecraft.setScreen(parent);
         if (WorldHost.protoClient != null) {
             WorldHost.protoClient.setAttemptingToJoin(null);
-        }
-    }
-
-    @Override
-    public void tick() {
-        if (timeout-- == 0) {
-            final Long attemptingToJoin = WorldHost.protoClient.getAttemptingToJoin();
-            if (attemptingToJoin == null) {
-                WorldHost.LOGGER.warn("attemptingToJoin was null after timeout in JoiningWorldHostScreen");
-                assert minecraft != null;
-                minecraft.setScreen(parent);
-                return;
-            }
-            WorldHost.connect(parent, attemptingToJoin);
         }
     }
 }
