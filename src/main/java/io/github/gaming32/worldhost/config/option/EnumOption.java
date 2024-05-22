@@ -12,7 +12,9 @@ import org.quiltmc.parsers.json.JsonWriter;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class EnumOption<E extends Enum<E> & StringRepresentable> extends ConfigOption<E> {
     private final Class<E> enumType;
@@ -30,7 +32,8 @@ public final class EnumOption<E extends Enum<E> & StringRepresentable> extends C
         }
 
         enumType = (Class<E>)property.getPropertyType();
-        lookup = StringRepresentable.fromEnum(enumType::getEnumConstants)::byName;
+        lookup = Arrays.stream(enumType.getEnumConstants())
+            .collect(Collectors.toMap(StringRepresentable::getSerializedName, Function.identity()))::get;
 
         final var enumFallback = property.getReadMethod().getAnnotation(ConfigProperty.EnumFallback.class);
         if (enumFallback == null) {
