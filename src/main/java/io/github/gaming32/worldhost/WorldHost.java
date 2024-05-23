@@ -94,7 +94,6 @@ import org.slf4j.Logger;
 
 //#if MC >= 1.19.2
 import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
-import net.minecraft.server.Services;
 //#else
 //$$ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 //$$ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
@@ -271,18 +270,15 @@ public class WorldHost
         } catch (IOException e) {
             LOGGER.error("Failed to create cache directory", e);
         }
-        //#if MC >= 1.19.2
-        profileCache = Services.create(
-            ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService(),
-            CACHE_DIR.toFile()
-        ).profileCache();
-        //#else
-        //$$ profileCache = new GameProfileCache(
-        //$$     new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy()).createProfileRepository(),
-        //$$     CACHE_DIR.resolve("usercache.json").toFile()
-        //$$ );
-        //#endif
-        profileCache.setExecutor(Util.backgroundExecutor());
+        profileCache = new GameProfileCache(
+            //#if MC >= 1.19.2
+            ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService().createProfileRepository(),
+            //#else
+            //$$ new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy()).createProfileRepository(),
+            //#endif
+            CACHE_DIR.resolve("usercache.json").toFile()
+        );
+        profileCache.setExecutor(Minecraft.getInstance());
 
         reconnect(false, true);
 
