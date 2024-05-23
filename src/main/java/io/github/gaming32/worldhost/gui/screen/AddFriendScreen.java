@@ -100,6 +100,7 @@ public class AddFriendScreen extends WorldHostScreen {
                 } else if (username.startsWith("o:")) {
                     usernameUpdate = false;
                     final String actualName = username.substring(2);
+                    // TODO: Use createOfflinePlayerUUID when 1.19.2+ becomes the minimum, and createOfflineProfile in 1.20.4+
                     friendProfile = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName);
                     addFriendButton.active = true;
                 }
