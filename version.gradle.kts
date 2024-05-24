@@ -391,6 +391,7 @@ modrinth {
 }
 
 tasks.processResources {
+    // TODO: Remove pack.mcmeta in 1.20.4
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
             mcVersion >= 1_20_05 -> 32
