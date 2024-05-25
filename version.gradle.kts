@@ -256,17 +256,11 @@ dependencies {
         bundle(dependency)
     }
 
-    bundleImplementation("org.quiltmc.parsers:json:0.2.1")
-    bundleImplementation("org.semver4j:semver4j:5.2.2")
+    bundleImplementation("org.quiltmc.parsers:json:0.3.0")
+    bundleImplementation("org.semver4j:semver4j:5.3.0")
     if (isForgeLike) {
-        "minecraftLibraries"("org.quiltmc.parsers:json:0.2.1")
+        "minecraftLibraries"("org.quiltmc.parsers:json:0.3.0")
     }
-
-    //TODO: bump to unimined 1.1.0+ to use these, also enable the processor in unimined's mixin config settings
-//    includeImplementation("com.github.LlamaLad7.MixinExtras:mixinextras-${mcData.loader.name}:0.2.0-beta.6")h
-//    if (mcData.isForge) {
-//        implementation("com.github.LlamaLad7.MixinExtras:mixinextras-common:0.2.0-beta.6")
-//    }
 
     if (isFabric) {
         when (mcVersion) {
