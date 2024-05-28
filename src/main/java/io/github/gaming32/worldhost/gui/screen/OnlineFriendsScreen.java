@@ -493,7 +493,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             //$$
             //$$ serverInfo.playerList = List.of();
             //$$ if (metadata.getPlayers() != null) {
-            //$$     serverInfo.status = ServerStatusPingerAccessor.formatPlayerCount(
+            //$$     serverInfo.status = ServerStatusPingerAccessor.callFormatPlayerCount(
             //$$         metadata.getPlayers().getNumPlayers(), metadata.getPlayers().getMaxPlayers()
             //$$     );
             //$$     final List<Component> lines = new ArrayList<>();
