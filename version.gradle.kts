@@ -304,7 +304,7 @@ dependencies {
                 "fabric-key-binding-api-v1",
                 "fabric-lifecycle-events-v1"
             )) {
-                "modRuntimeOnly"(fabricApi.fabricModule(module,fapiVersion))
+                "modRuntimeOnly"(fabricApi.fabricModule(module, fapiVersion))
             }
         }
     }

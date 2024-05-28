@@ -7,8 +7,8 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(ServerStatusPinger.class)
 public interface ServerStatusPingerAccessor {
-    @Invoker("formatPlayerCount")
-    static Component formatPlayerCount(int current, int max) {
+    @Invoker
+    static Component callFormatPlayerCount(int current, int max) {
         throw new AssertionError();
     }
 }

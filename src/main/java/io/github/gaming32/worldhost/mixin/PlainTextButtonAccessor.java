@@ -18,6 +18,6 @@ public interface PlainTextButtonAccessor {
     void setPTBMessage(Component message);
 
     @Mutable
-    @Accessor("underlinedMessage")
+    @Accessor
     void setUnderlinedMessage(Component underlinedMessage);
 }
