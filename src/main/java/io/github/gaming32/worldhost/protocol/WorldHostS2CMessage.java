@@ -5,12 +5,14 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
+import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataInputStream;
@@ -61,14 +63,10 @@ public sealed interface WorldHostS2CMessage {
                 if (attemptingToJoin == null || ownerCid != attemptingToJoin) return;
                 final Minecraft minecraft = Minecraft.getInstance();
                 assert minecraft.screen != null;
-                var parentScreen = minecraft.screen;
-                if (parentScreen instanceof JoiningWorldHostScreen joinScreen) {
-                    parentScreen = joinScreen.parent;
-                }
                 if (isPunchProtocol) {
                     WorldHost.LOGGER.error("Punch is not supported!");
                 } else {
-                    WorldHost.connect(parentScreen, ownerCid, host, port);
+                    WorldHost.connect(new OnlineFriendsScreen(new TitleScreen()), ownerCid, host, port);
                 }
             });
         }
