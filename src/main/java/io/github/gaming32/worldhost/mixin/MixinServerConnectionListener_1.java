@@ -15,6 +15,7 @@ public abstract class MixinServerConnectionListener_1 extends ChannelInitializer
     private void storeClass(ServerConnectionListener this$0, CallbackInfo ci) throws NoSuchMethodException {
         if (WorldHost.channelInitializerConstructor == null) {
             WorldHost.channelInitializerConstructor = getClass().getDeclaredConstructor(ServerConnectionListener.class);
+            WorldHost.channelInitializerConstructor.setAccessible(true);
         }
     }
 }
