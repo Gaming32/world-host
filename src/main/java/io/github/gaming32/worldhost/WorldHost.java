@@ -694,6 +694,9 @@ public class WorldHost
 
     public static void connect(Screen parentScreen, long cid, String host, int port) {
         final Minecraft minecraft = Minecraft.getInstance();
+        if (minecraft.getSingleplayerServer() != null) {
+            minecraft.getSingleplayerServer().halt(false);
+        }
         final ServerAddress serverAddress = new ServerAddress(host, port);
         ConnectScreen.startConnecting(
             parentScreen, minecraft, serverAddress,
