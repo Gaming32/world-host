@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.FriendsListUpdate;
+import io.github.gaming32.worldhost.ResourceLocations;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.widget.FriendsButton;
@@ -56,12 +57,12 @@ import java.util.Arrays;
 //#endif
 
 public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
-    private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
+    private static final ResourceLocation GUI_ICONS_LOCATION = ResourceLocations.minecraft("textures/gui/icons.png");
     //#if MC >= 1.20.2
-    private static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = new ResourceLocation("server_list/join_highlighted");
-    private static final ResourceLocation JOIN_SPRITE = new ResourceLocation("server_list/join");
+    private static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = ResourceLocations.minecraft("server_list/join_highlighted");
+    private static final ResourceLocation JOIN_SPRITE = ResourceLocations.minecraft("server_list/join");
     //#else
-    //$$ private static final ResourceLocation GUI_SERVER_SELECTION_LOCATION = new ResourceLocation("textures/gui/server_selection.png");
+    //$$ private static final ResourceLocation GUI_SERVER_SELECTION_LOCATION = ResourceLocations.minecraft("textures/gui/server_selection.png");
     //#endif
 
     private final Screen parent;
@@ -321,7 +322,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             Util.backgroundExecutor().execute(
                 () -> profile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), profile)
             );
-            iconTextureId = new ResourceLocation("world-host", "servers/" + friendUuid + "/icon");
+            iconTextureId = ResourceLocations.worldHost("servers/" + friendUuid + "/icon");
         }
 
         @NotNull

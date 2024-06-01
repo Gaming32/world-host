@@ -1,13 +1,13 @@
 package io.github.gaming32.worldhost.toast;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.gaming32.worldhost.ResourceLocations;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.testing.WorldHostTesting;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -159,7 +159,7 @@ public class WHToast {
         //#else
         //$$ return new SoundEvent(
         //#endif
-            new ResourceLocation("world-host:toast/" + location)
+            ResourceLocations.worldHost("toast/" + location)
         );
     }
 
