@@ -11,22 +11,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC > 1.18.2
-import net.minecraft.commands.CommandBuildContext;
-//#endif
-
 @Mixin(Commands.class)
 public class MixinCommands {
     @Shadow @Final private CommandDispatcher<CommandSourceStack> dispatcher;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void commandRegistrationEvent(
-        Commands.CommandSelection commandSelection,
-        //#if MC > 1.18.2
-        CommandBuildContext commandBuildContext,
-        //#endif
-        CallbackInfo ci
-    ) {
+    private void commandRegistrationEvent(CallbackInfo ci) {
         WorldHost.commandRegistrationHandler(dispatcher);
     }
 }

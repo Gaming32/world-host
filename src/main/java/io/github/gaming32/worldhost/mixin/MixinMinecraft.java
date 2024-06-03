@@ -79,7 +79,7 @@ public abstract class MixinMinecraft {
     //$$         shift = At.Shift.AFTER
     //$$     )
     //$$ )
-    //$$ private void toastRender(boolean renderLevel, CallbackInfo ci) {
+    //$$ private void toastRender(CallbackInfo ci) {
     //$$     int i = (int)(
     //$$         this.mouseHandler.xpos() * (double)this.getWindow().getGuiScaledWidth() / (double)this.getWindow().getScreenWidth()
     //$$     );

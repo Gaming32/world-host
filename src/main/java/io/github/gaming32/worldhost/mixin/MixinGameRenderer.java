@@ -40,7 +40,7 @@ public class MixinGameRenderer {
             shift = At.Shift.AFTER
         )
     )
-    private void toastRender(float partialTicks, long nanoTime, boolean renderLevel, CallbackInfo ci) {
+    private void toastRender(CallbackInfo ci) {
         int mouseX = (int)(
             this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
         );

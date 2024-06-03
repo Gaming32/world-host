@@ -13,7 +13,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.util.HttpUtil;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.Proxy;
-import java.util.UUID;
 
 //#if MC > 1.18.2
 import net.minecraft.server.Services;
@@ -97,14 +95,14 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
     @Shadow private int publishedPort;
 
     @Inject(method = "publishServer", at = @At(value = "RETURN", ordinal = 0))
-    private void serverIsOpen(GameType gameMode, boolean cheats, int port, CallbackInfoReturnable<Boolean> cir) {
+    private void serverIsOpen(CallbackInfoReturnable<Boolean> cir) {
         if (WorldHost.protoClient != null && WorldHost.CONFIG.isEnableFriends()) {
             WorldHost.protoClient.publishedWorld(WorldHost.CONFIG.getFriends());
         }
     }
 
     @Inject(method = "halt", at = @At("TAIL"))
-    private void serverIsClosed(boolean waitForServer, CallbackInfo ci) {
+    private void serverIsClosed(CallbackInfo ci) {
         WorldHost.CONNECTED_PROXY_CLIENTS.values().forEach(ProxyClient::close);
         WorldHost.CONNECTED_PROXY_CLIENTS.clear();
         if (isPublished() && WorldHost.protoClient != null) {
@@ -113,7 +111,7 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
     }
 
     @Inject(method = "setUUID", at = @At("TAIL"))
-    private void shareWorldOnLoad(UUID uuid, CallbackInfo ci) {
+    private void shareWorldOnLoad(CallbackInfo ci) {
         if (!WorldHost.shareWorldOnLoad) return;
         WorldHost.shareWorldOnLoad = false;
         //#if MC < 1.20.5
@@ -158,7 +156,7 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
             shift = At.Shift.AFTER
         )
     )
-    private void startProxyChannel(GameType gameMode, boolean cheats, int port, CallbackInfoReturnable<Boolean> cir) {
+    private void startProxyChannel(CallbackInfoReturnable<Boolean> cir) {
         WorldHost.proxySocketAddress = ProxyChannels.startProxyChannel(getConnection());
     }
 }
