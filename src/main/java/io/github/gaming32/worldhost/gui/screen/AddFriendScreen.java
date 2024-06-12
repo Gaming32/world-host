@@ -12,6 +12,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.GameProfileCache;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -83,7 +84,7 @@ public class AddFriendScreen extends WorldHostScreen {
         //$$ usernameField.setFocus(true);
         //#endif
         if (friendProfile != null) {
-            usernameField.setValue(WorldHost.getIfBlank(friendProfile.getName(), () -> friendProfile.getId().toString()));
+            usernameField.setValue(StringUtils.getIfBlank(friendProfile.getName(), () -> friendProfile.getId().toString()));
         }
         if (usernameResponder == null) {
             // Only set the responder here on first init
