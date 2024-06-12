@@ -26,10 +26,10 @@ description = "Host your singleplayer worlds without having to run a server or s
 [[dependencies.world_host]]
 ##if FORGE
 #?? modId = "forge"
-#?? versionRange = "[32,)"
+#?? versionRange = "[32,48)"
 ##else
 modId = "neoforge"
-versionRange = "[20,)"
+versionRange = "[20,20.5)"
 ##endif
 ##if MC < 1.20.4
 #?? mandatory = true
@@ -46,7 +46,7 @@ modId = "minecraft"
 ##elseif MC == 1.20.4
 #?? versionRange = "[1.20.3,1.20.5)"
 ##else
-versionRange = "$mc_version"
+versionRange = "[$mc_version]"
 ##endif
 ##if MC < 1.20.4
 #?? mandatory = true

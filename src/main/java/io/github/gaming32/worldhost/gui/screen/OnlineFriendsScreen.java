@@ -375,7 +375,6 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
                     iconData = icon;
                 } else {
                     //#if MC >= 1.19.4
-                    // Mojang did "@Nullable byte[]" instead of "byte @Nullable []"
                     serverInfo.setIconBytes(null);
                     //#else
                     //$$ serverInfo.setIconB64(null);

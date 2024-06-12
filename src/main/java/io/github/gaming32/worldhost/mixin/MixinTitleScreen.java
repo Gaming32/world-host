@@ -14,10 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //#if FORGELIKE
 //#if NEOFORGE
 //$$ import net.neoforged.neoforge.internal.BrandingControl;
-//#elseif MC > 1.17.1
-//$$ import net.minecraftforge.internal.BrandingControl;
 //#else
-//$$ import net.minecraftforge.fmllegacy.BrandingControl;
+//$$ import net.minecraftforge.internal.BrandingControl;
 //#endif
 //$$ import java.util.function.BiConsumer;
 //#endif

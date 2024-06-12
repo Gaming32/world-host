@@ -19,7 +19,7 @@ config = "world-host.mixins.json"
 
 [[dependencies.world_host]]
 modId = "neoforge"
-versionRange = "[20,)"
+versionRange = "[20.5,)"
 type = "required"
 ordering = "NONE"
 side = "BOTH"
@@ -29,7 +29,7 @@ modId = "minecraft"
 ##if MC == 1.20.6
 versionRange = "[1.20.5,1.20.7)"
 ##else
-#?? versionRange = "$mc_version"
+#?? versionRange = "[$mc_version]"
 ##endif
 type = "required"
 ordering = "NONE"

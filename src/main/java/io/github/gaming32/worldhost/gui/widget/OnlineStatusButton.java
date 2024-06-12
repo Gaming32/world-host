@@ -7,6 +7,7 @@ import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.PlainTextButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
@@ -20,12 +21,6 @@ import java.util.function.Supplier;
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
-//#endif
-
-//#if MC > 1.17.1
-import net.minecraft.client.gui.components.PlainTextButton;
-//#else
-//$$ import io.github.gaming32.worldhost.gui.PlainTextButton;
 //#endif
 
 public final class OnlineStatusButton extends PlainTextButton {
@@ -127,15 +122,8 @@ public final class OnlineStatusButton extends PlainTextButton {
                 (context, i, j, f);
     }
 
-    //#if MC >= 1.18.0
     @Override
     public boolean isHoveredOrFocused() {
         return currentStatus != 1 && super.isHoveredOrFocused();
     }
-    //#else
-    //$$ @Override
-    //$$ public boolean isHovered() {
-    //$$     return currentStatus != 1 && super.isHovered();
-    //$$ }
-    //#endif
 }

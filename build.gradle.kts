@@ -20,8 +20,6 @@ preprocess {
     val forge11902 = createNode("1.19.2-forge", 1_19_02, "srg")
     val fabric11802 = createNode("1.18.2-fabric", 1_18_02, "yarn")
     val forge11802 = createNode("1.18.2-forge", 1_18_02, "srg")
-    val fabric11701 = createNode("1.17.1-fabric", 1_17_01, "yarn")
-    val forge11701 = createNode("1.17.1-forge", 1_17_01, "srg")
 
     fabric12006.link(neoforge12006)
     neoforge12006.link(neoforge12004)
@@ -34,23 +32,4 @@ preprocess {
     fabric11902.link(forge11902)
     forge11902.link(forge11802)
     forge11802.link(fabric11802)
-    fabric11802.link(fabric11701)
-    fabric11701.link(forge11701)
-
-//    subprojects {
-//        apply(plugin = "java")
-//        if (name == "1.20.1-fabric") {
-//            sourceSets.main {
-//                java {
-//                    srcDir("$rootDir/src/main/java")
-//                }
-//            }
-//        }
-//    }
 }
-
-//gradle.projectsEvaluated {
-//    subprojects.asSequence().zipWithNext().forEach { (left, right) ->
-//        right.tasks.named("modrinth").get().mustRunAfter(left.tasks.named("modrinth"))
-//    }
-//}

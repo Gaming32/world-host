@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.mixin;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Window;
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
@@ -10,8 +11,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 
 @Mixin(MouseHandler.class)
 public class MixinMouseHandler {
@@ -31,7 +30,7 @@ public class MixinMouseHandler {
         cancellable = true
     )
     private void toastClick(long windowPointer, int button, int action, int modifiers, CallbackInfo ci) {
-        if (action != GLFW_PRESS) return;
+        if (action != InputConstants.PRESS) return;
         final Window window = minecraft.getWindow();
         if (WHToast.click(
             xpos * window.getGuiScaledWidth() / window.getScreenWidth(),

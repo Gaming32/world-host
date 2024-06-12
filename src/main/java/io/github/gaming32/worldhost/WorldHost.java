@@ -6,6 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
@@ -44,6 +45,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.network.ServerConnectionListener;
 import net.minecraft.server.players.GameProfileCache;
+import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -53,6 +55,7 @@ import org.jetbrains.annotations.Nullable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 import org.semver4j.Semver;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -84,14 +87,6 @@ import java.util.function.Supplier;
 
 import static net.minecraft.commands.Commands.literal;
 
-//#if MC >= 1.18.0
-import com.mojang.logging.LogUtils;
-import org.slf4j.Logger;
-//#else
-//$$ import org.apache.logging.log4j.LogManager;
-//$$ import org.apache.logging.log4j.Logger;
-//#endif
-
 //#if MC >= 1.19.2
 import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
 //#else
@@ -105,12 +100,10 @@ import net.minecraft.client.resources.PlayerSkin;
 //#endif
 
 //#if FABRIC
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
-//#if MC >= 1.18.2
 import dev.isxander.mainmenucredits.MainMenuCredits;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
-//#endif
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 //#if FORGE
@@ -138,10 +131,8 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 //$$ import net.neoforged.neoforge.client.ConfigScreenHandler;
 //#elseif MC >= 1.19.2
 //$$ import net.minecraftforge.client.ConfigScreenHandler;
-//#elseif MC >= 1.18.2
-//$$ import net.minecraftforge.client.ConfigGuiHandler;
 //#else
-//$$ import net.minecraftforge.fmlclient.ConfigGuiHandler;
+//$$ import net.minecraftforge.client.ConfigGuiHandler;
 //#endif
 //#endif
 
@@ -160,12 +151,7 @@ public class WorldHost
         "world-host";
         //#endif
 
-    public static final Logger LOGGER =
-        //#if MC >= 1.18.0
-        LogUtils.getLogger();
-        //#else
-        //$$ LogManager.getLogger();
-        //#endif
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Loader MOD_LOADER =
         //#if NEOFORGE
@@ -464,13 +450,7 @@ public class WorldHost
     }
 
     public static String getName(GameProfile profile) {
-        return getIfBlank(profile.getName(), () -> profile.getId().toString());
-    }
-
-    // From Apache Commons Lang StringUtils 3.10+
-    // TODO: Remove when 1.18.2 is minimum
-    public static <T extends CharSequence> T getIfBlank(final T str, final Supplier<T> defaultSupplier) {
-        return StringUtils.isBlank(str) ? defaultSupplier == null ? null : defaultSupplier.get() : str;
+        return StringUtils.getIfBlank(profile.getName(), () -> profile.getId().toString());
     }
 
     public static GameProfileCache getProfileCache() {
@@ -795,7 +775,7 @@ public class WorldHost
     }
 
     public static int getMMCLines(boolean isPause) {
-        //#if FABRIC && MC >= 1.18.2
+        //#if FABRIC
         if (FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
             final var baseConfig = MainMenuCredits.getInstance().getConfig();
             final var config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;

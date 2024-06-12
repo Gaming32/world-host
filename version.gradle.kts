@@ -109,7 +109,6 @@ unimined.minecraft {
                 1_19_04 -> "45.1.0"
                 1_19_02 -> "43.2.0"
                 1_18_02 -> "40.2.0"
-                1_17_01 -> "37.1.1"
                 else -> throw IllegalStateException("Unknown Forge version for $mcVersionString")
             })
             mixinConfig("world-host.mixins.json")
@@ -244,11 +243,7 @@ minecraft.apply {
 
 dependencies {
     fun bundle(dependency: Any) {
-        if (isFabric || mcVersion >= 1_18_00) {
-            "include"(dependency)
-        } else {
-            forgeJarJar(dependency)
-        }
+        "include"(dependency)
     }
 
     fun bundleImplementation(dependency: Any) {
@@ -270,7 +265,6 @@ dependencies {
             1_19_04 -> "6.3.1"
             1_19_02 -> "4.2.0-beta.2"
             1_18_02 -> "3.2.5"
-            1_17_01 -> "2.0.17"
             else -> null
         }?.let {
             "modImplementation"("com.terraformersmc:modmenu:$it")
@@ -292,7 +286,6 @@ dependencies {
             1_19_04 -> "0.87.2+1.19.4"
             1_19_02 -> "0.77.0+1.19.2"
             1_18_02 -> "0.77.0+1.18.2"
-            1_17_01 -> "0.46.1+1.17"
             else -> null
         }?.let { fapiVersion ->
             val resourceLoader = fabricApi.fabricModule("fabric-resource-loader-v0", fapiVersion)
@@ -309,7 +302,7 @@ dependencies {
         }
     }
 
-    if (isFabric && mcVersion >= 1_18_02) {
+    if (isFabric) {
         modCompileOnly("dev.isxander:main-menu-credits:1.1.2")
     }
 

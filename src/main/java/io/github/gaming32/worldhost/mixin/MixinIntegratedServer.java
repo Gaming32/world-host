@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.util.HttpUtil;
@@ -35,14 +36,6 @@ import net.minecraft.server.Services;
 //$$ import net.minecraft.server.players.GameProfileCache;
 //#endif
 
-//#if MC < 1.18.2
-//$$ import net.minecraft.core.RegistryAccess;
-//$$ import net.minecraft.server.ServerResources;
-//$$ import net.minecraft.world.level.storage.WorldData;
-//#else
-import net.minecraft.server.WorldStem;
-//#endif
-
 @Mixin(IntegratedServer.class)
 public abstract class MixinIntegratedServer extends MinecraftServer {
     public MixinIntegratedServer(
@@ -55,7 +48,7 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
         DataFixer dataFixer,
         Services services,
         ChunkProgressListenerFactory chunkProgressListenerFactory
-        //#elseif MC > 1.17.1
+        //#else
         //$$ Thread thread,
         //$$ LevelStorageSource.LevelStorageAccess levelStorageAccess,
         //$$ PackRepository packRepository,
@@ -66,27 +59,12 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
         //$$ GameProfileRepository gameProfileRepository,
         //$$ GameProfileCache gameProfileCache,
         //$$ ChunkProgressListenerFactory chunkProgressListenerFactory
-        //#else
-        //$$ Thread thread,
-        //$$ RegistryAccess.RegistryHolder registryHolder,
-        //$$ LevelStorageSource.LevelStorageAccess levelStorageAccess,
-        //$$ WorldData worldData,
-        //$$ PackRepository packRepository,
-        //$$ Proxy proxy,
-        //$$ DataFixer dataFixer,
-        //$$ ServerResources serverResources,
-        //$$ MinecraftSessionService minecraftSessionService,
-        //$$ GameProfileRepository gameProfileRepository,
-        //$$ GameProfileCache gameProfileCache,
-        //$$ ChunkProgressListenerFactory chunkProgressListenerFactory
         //#endif
     ) {
         //#if MC > 1.18.2
         super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, services, chunkProgressListenerFactory);
-        //#elseif MC > 1.17.1
-        //$$ super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         //#else
-        //$$ super(thread, registryHolder, levelStorageAccess, worldData, packRepository, proxy, dataFixer, serverResources, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
+        //$$ super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
         //#endif
     }
 
