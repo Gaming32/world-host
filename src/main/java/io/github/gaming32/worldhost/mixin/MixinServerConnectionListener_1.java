@@ -1,6 +1,6 @@
 package io.github.gaming32.worldhost.mixin;
 
-import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.proxy.ProxyChannels;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import net.minecraft.server.network.ServerConnectionListener;
@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinServerConnectionListener_1 extends ChannelInitializer<Channel> {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void storeClass(ServerConnectionListener this$0, CallbackInfo ci) throws NoSuchMethodException {
-        if (WorldHost.channelInitializerConstructor == null) {
-            WorldHost.channelInitializerConstructor = getClass().getDeclaredConstructor(ServerConnectionListener.class);
-            WorldHost.channelInitializerConstructor.setAccessible(true);
+        if (ProxyChannels.channelInitializerConstructor == null) {
+            ProxyChannels.channelInitializerConstructor = getClass().getDeclaredConstructor(ServerConnectionListener.class);
+            ProxyChannels.channelInitializerConstructor.setAccessible(true);
         }
     }
 }
