@@ -13,9 +13,9 @@ public final class ResourceLocations {
 
     public static ResourceLocation minecraft(String path) {
         //#if MC >= 1.21
-        //$$ return ResourceLocation.withDefaultNamespace(path);
+        return ResourceLocation.withDefaultNamespace(path);
         //#else
-        return new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, path);
+        //$$ return new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, path);
         //#endif
     }
 
@@ -29,9 +29,9 @@ public final class ResourceLocations {
 
     public static ResourceLocation namespaced(String namespace, String path) {
         //#if MC >= 1.21
-        //$$ return ResourceLocation.fromNamespaceAndPath(namespace, path);
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
         //#else
-        return new ResourceLocation(namespace, path);
+        //$$ return new ResourceLocation(namespace, path);
         //#endif
     }
 }
