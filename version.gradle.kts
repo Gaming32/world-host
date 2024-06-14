@@ -113,9 +113,9 @@ unimined.minecraft {
             })
             mixinConfig("world-host.mixins.json")
         }
-        isNeoForge -> neoForged {
+        isNeoForge -> neoForge {
             loader(when (mcVersion) {
-                1_21_00 -> "0.4-beta"
+                1_21_00 -> "4-beta"
                 1_20_06 -> "21-beta"
                 1_20_04 -> "69-beta"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
