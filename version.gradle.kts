@@ -115,6 +115,7 @@ unimined.minecraft {
         }
         isNeoForge -> neoForged {
             loader(when (mcVersion) {
+                1_21_00 -> "0.4-beta"
                 1_20_06 -> "21-beta"
                 1_20_04 -> "69-beta"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
@@ -259,6 +260,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_00 -> "11.0.0-beta.1"
             1_20_06 -> "10.0.0-beta.1"
             1_20_04 -> "9.0.0"
             1_20_01 -> "7.2.2"
@@ -280,6 +282,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_00 -> "0.100.1+1.21"
             1_20_06 -> "0.100.0+1.20.6"
             1_20_04 -> "0.97.1+1.20.4"
             1_20_01 -> "0.92.2+1.20.1"
@@ -381,6 +384,7 @@ tasks.processResources {
     // TODO: Remove pack.mcmeta in 1.20.4
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
+            mcVersion >= 1_21_00 -> 34
             mcVersion >= 1_20_05 -> 32
             mcVersion >= 1_20_03 -> 22
             mcVersion >= 1_20_02 -> 18
