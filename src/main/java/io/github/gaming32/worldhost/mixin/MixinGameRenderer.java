@@ -53,7 +53,12 @@ public class MixinGameRenderer {
             //#else
             new GuiGraphics(minecraft, renderBuffers.bufferSource()),
             //#endif
-            mouseX, mouseY, minecraft.getFrameTime()
+            mouseX, mouseY,
+            //#if MC >= 1.21
+            minecraft.getTimer().getRealtimeDeltaTicks()
+            //#else
+            //$$ minecraft.getFrameTime()
+            //#endif
         );
     }
     //#endif
