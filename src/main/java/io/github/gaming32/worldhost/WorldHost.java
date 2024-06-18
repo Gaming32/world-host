@@ -47,11 +47,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
-import org.semver4j.Semver;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
@@ -807,49 +805,6 @@ public class WorldHost
                 return handler.apply(is);
             }
         }
-    }
-
-    public static CompletableFuture<Optional<String>> checkForUpdates() {
-        return CompletableFuture.<Optional<String>>supplyAsync(() -> {
-            try (CloseableHttpClient client = HttpClients.createMinimal()) {
-                final String latestVersion = httpGet(
-                    client, "https://api.modrinth.com/v2/project/world-host/version",
-                    builder -> builder
-                        .addParameter("game_versions", "[\"" + getModVersion("minecraft") + "\"]")
-                        .addParameter("loaders", "[\"" + MOD_LOADER + "\"]"),
-                    input -> {
-                        try (JsonReader reader = JsonReader.json(new InputStreamReader(input, StandardCharsets.UTF_8))) {
-                            reader.beginArray();
-                            if (!reader.hasNext()) {
-                                return null;
-                            }
-                            reader.beginObject();
-                            while (reader.hasNext()) {
-                                final String key = reader.nextName();
-                                if (!key.equals("version_number")) {
-                                    reader.skipValue();
-                                    continue;
-                                }
-                                return reader.nextString();
-                            }
-                            return null;
-                        }
-                    }
-                );
-                if (latestVersion == null) {
-                    return Optional.empty();
-                }
-                if (new Semver(getModVersion(MOD_ID)).compareTo(new Semver(latestVersion)) >= 0) {
-                    return Optional.empty();
-                }
-                return Optional.of(latestVersion);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }, Util.ioPool()).exceptionally(t -> {
-            LOGGER.error("Failed to check for updates", t);
-            return Optional.empty();
-        });
     }
 
     private static Path getGameDir() {

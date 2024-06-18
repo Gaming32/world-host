@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.WorldHostUpdateChecker;
 import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
@@ -234,13 +235,12 @@ public sealed interface WorldHostS2CMessage {
             final var message = Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion);
             WorldHost.LOGGER.info(message.getString());
             if (!WorldHost.CONFIG.isShowOutdatedWorldHost()) return;
-            WorldHost.checkForUpdates().thenAcceptAsync(version -> {
+            WorldHostUpdateChecker.checkForUpdates().thenAcceptAsync(version -> {
                 if (version.isEmpty()) return;
+                final String updateLink = WorldHostUpdateChecker.formatUpdateLink(version.get());
                 WHToast.builder("world-host.outdated_world_host")
                     .description(message)
-                    .clickAction(() -> Util.getPlatform().openUri(
-                        "https://modrinth.com/mod/world-host/version/" + version.get()
-                    ))
+                    .clickAction(() -> Util.getPlatform().openUri(updateLink))
                     .ticks(200)
                     .show();
             }, Minecraft.getInstance());
