@@ -21,6 +21,7 @@ import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.gui.screens.multiplayer.SafetyScreen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
+import net.minecraft.network.chat.Component;
 
 import java.util.function.Supplier;
 
@@ -95,7 +96,12 @@ public class WorldHostTesting {
             .maybe(DisconnectedScreen.class, () -> {
                 final var screen = (DisconnectedScreenAccessor)Minecraft.getInstance().screen;
                 assert screen != null;
-                throw new IllegalStateException("Unexpected disconnect trying to join server: " + screen.getReason().getString());
+                //#if MC >= 1.21
+                final Component reason = screen.getDetails().reason();
+                //#else
+                //$$ final Component reason = screen.getReason();
+                //#endif
+                throw new IllegalStateException("Unexpected disconnect trying to join server: " + reason.getString());
             })
             .skip(ReceivingLevelScreen.class);
     }
