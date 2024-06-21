@@ -278,7 +278,7 @@ dependencies {
         isForge -> "forge-latest"
         isNeoForge -> "neoforge"
         else -> null
-    }?.let { modRuntimeOnly("me.djtheredstoner:DevAuth-$it:1.2.0") }
+    }?.let { modRuntimeOnly("me.djtheredstoner:DevAuth-$it:1.2.1") }
 
     if (isFabric) {
         when (mcVersion) {
@@ -306,7 +306,9 @@ dependencies {
     }
 
     if (isFabric) {
-        modCompileOnly("dev.isxander:main-menu-credits:1.1.2")
+        modCompileOnly("dev.isxander:main-menu-credits:1.1.2") {
+            isTransitive = false
+        }
     }
 
     if (isFabric && mcVersion >= 1_20_04) {
