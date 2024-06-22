@@ -101,7 +101,7 @@ unimined.minecraft {
 
     when {
         isFabric -> fabric {
-            loader("0.15.6")
+            loader("0.15.11")
         }
         isForge -> minecraftForge {
             loader(when(mcVersion) {
