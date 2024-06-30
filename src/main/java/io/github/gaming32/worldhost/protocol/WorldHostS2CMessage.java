@@ -276,6 +276,17 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
+    record Warning(String message, boolean important) implements WorldHostS2CMessage {
+        @Override
+        public void handle(ProtocolClient client) {
+            WorldHost.LOGGER.warn("Warning from WH server (important: {}): {}", important, message);
+            WHToast.builder(Components.translatable("world-host.protocol_warning_occurred"))
+                .description(Components.literal(message))
+                .important(important)
+                .show();
+        }
+    }
+
     /**
      * NOTE: This method is called from the RecvThread, so it should be careful to not do anything that could
      * <ol>
@@ -334,6 +345,7 @@ public sealed interface WorldHostS2CMessage {
                 }
                 yield new NewQueryResponse(friend, serverStatus);
             }
+            case 17 -> new Warning(readString(dis), dis.read() != 0);
             default -> new Error("Received packet with unknown typeId from server (outdated client?): " + typeId);
         };
     }
