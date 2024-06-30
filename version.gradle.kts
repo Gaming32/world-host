@@ -158,15 +158,17 @@ unimined.minecraft {
             val runName = "test${name.capitalized()}"
             val user = name.uppercase()
             val provider = (minecraftData as MinecraftDownloader).provider
-            val baseConfig = provider.provideVanillaRunClientTask(runName, file("run/$runName"))
-            baseConfig.description = "Test $user"
-            baseConfig.args.replaceAll { if (it == "Dev") "$user$usernameSuffix" else it }
-            baseConfig.jvmArgs.add("-Dworld-host-testing.enabled=true")
-            baseConfig.jvmArgs.add("-Dworld-host-testing.user=$user")
-            baseConfig.jvmArgs.add("-Ddevauth.enabled=false")
-            baseConfig.javaVersion = JavaVersion.VERSION_21
-            runs.addTarget(baseConfig)
-            runs.configFirst(runName, (provider.mcPatcher as AbstractMinecraftTransformer)::applyClientRunTransform)
+            provider.provideRunClientTask(runName, file("run/$runName"))
+            configFirst(runName) {
+                description = "Test $user"
+                args!!.replaceAll { if (it == "Dev") "$user$usernameSuffix" else it }
+                jvmArgs = jvmArgs!!.toList() + listOf(
+                    "-Dworld-host-testing.enabled=true",
+                    "-Dworld-host-testing.user=$user",
+                    "-Ddevauth.enabled=false"
+                )
+                javaVersion = JavaVersion.VERSION_21
+            }
         }
     }
 }
