@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
@@ -18,6 +19,8 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
     private static final Thread.Builder RECV_THREAD_BUILDER = Thread.ofVirtual().name("WHEP-RecvThread-", 1);
 
     private final BlockingQueue<Optional<ProxyMessage>> sendQueue = new LinkedBlockingQueue<>();
+
+    private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
 
     private final String baseAddr;
     private final int mcPort;
@@ -108,6 +111,8 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
             } catch (IOException e) {
                 WorldHost.LOGGER.error("Failed to close WHEP socket.", e);
             }
+
+            shutdownFuture.complete(null);
         });
     }
 
@@ -139,6 +144,10 @@ public class ProxyProtocolClient implements AutoCloseable, ProxyPassthrough {
     @Override
     public void proxyDisconnect(long connectionId) {
         close(connectionId);
+    }
+
+    public CompletableFuture<Void> getShutdownFuture() {
+        return shutdownFuture;
     }
 
     public String getBaseAddr() {

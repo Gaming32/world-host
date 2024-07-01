@@ -48,6 +48,8 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<Optional<WorldHostC2SMessage>> sendQueue = new LinkedBlockingQueue<>();
 
+    private final CompletableFuture<Void> shutdownFuture = new CompletableFuture<>();
+
     private CompletableFuture<User> authUser = new CompletableFuture<>();
 
     private boolean authenticated, closed;
@@ -184,6 +186,8 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         .show();
                 }
             }
+
+            shutdownFuture.complete(null);
         });
     }
 
@@ -312,6 +316,10 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
     public Future<Void> getConnectingFuture() {
         return connectingFuture;
+    }
+
+    public CompletableFuture<Void> getShutdownFuture() {
+        return shutdownFuture;
     }
 
     public long getConnectionId() {

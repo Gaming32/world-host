@@ -76,7 +76,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -265,6 +268,13 @@ public class WorldHost
         if (!CONFIG.isNoUPnP()) {
             scanUpnp();
         }
+
+        Runtime.getRuntime().addShutdownHook(
+            Thread.ofPlatform()
+                .name("World Host Shutdown Thread")
+                .unstarted(() -> {
+                })
+        );
     }
 
     public static void loadConfig() {
@@ -415,18 +425,36 @@ public class WorldHost
     }
 
     public static void reconnect(boolean successToast, boolean failureToast) {
-        if (protoClient != null) {
-            protoClient.close();
-            protoClient = null;
-        }
-        if (proxyProtocolClient != null) {
-            proxyProtocolClient.close();
-            proxyProtocolClient = null;
-        }
+        shutdownClients();
         LOGGER.info("Attempting to connect to WH server at {}", CONFIG.getServerIp());
         protoClient = new ProtocolClient(CONFIG.getServerIp(), successToast, failureToast);
         connectingFuture = protoClient.getConnectingFuture();
         protoClient.authenticate(Minecraft.getInstance().getUser());
+    }
+
+    public static void shutdownClients() {
+        if (protoClient != null) {
+            protoClient.close();
+        }
+        if (proxyProtocolClient != null) {
+            proxyProtocolClient.close();
+        }
+        if (protoClient != null) {
+            try {
+                protoClient.getShutdownFuture().get(5L, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                LOGGER.error("Failed to wait for protocol client shutdown", e);
+            }
+        }
+        protoClient = null;
+        if (proxyProtocolClient != null) {
+            try {
+                proxyProtocolClient.getShutdownFuture().get(5L, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                LOGGER.error("Failed to wait for proxy protocol client shutdown", e);
+            }
+        }
+        proxyProtocolClient = null;
     }
 
     public static String getName(GameProfile profile) {
