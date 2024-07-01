@@ -32,6 +32,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
+//#if MC < 1.20.4
+//$$ import com.mojang.authlib.GameProfile;
+//#endif
+
 public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     private static final Thread.Builder CONNECTION_THREAD_BUILDER = Thread.ofVirtual().name("WH-ConnectionThread-", 1);
     private static final Thread.Builder SEND_THREAD_BUILDER = Thread.ofVirtual().name("WH-SendThread-", 1);
@@ -215,13 +219,27 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         dos.write(encryptedSecretKey);
         dos.flush();
 
-        if (user.getProfileId().version() == 4) {
+        //#if MC >= 1.20.4
+        final UUID profileId = user.getProfileId();
+        //#else
+        //$$ final GameProfile profile = user.getGameProfile();
+        //$$ final UUID profileId = profile.getId();
+        //#endif
+
+        if (profileId.version() == 4) {
             Minecraft.getInstance()
                 .getMinecraftSessionService()
-                .joinServer(user.getProfileId(), user.getAccessToken(), authKey);
+                .joinServer(
+                    //#if MC >= 1.20.4
+                    profileId,
+                    //#else
+                    //$$ profile,
+                    //#endif
+                    user.getAccessToken(), authKey
+                );
         }
 
-        WorldHostC2SMessage.writeUuid(dos, user.getProfileId());
+        WorldHostC2SMessage.writeUuid(dos, profileId);
         WorldHostC2SMessage.writeString(dos, user.getName());
         dos.writeLong(connectionId);
         dos.flush();
