@@ -123,12 +123,7 @@ public class FriendsScreen extends WorldHostScreen {
     }
 
     public static void addFriend(GameProfile profile) {
-        WorldHost.CONFIG.getFriends().add(profile.getId());
-        WorldHost.saveConfig();
-        final var server = Minecraft.getInstance().getSingleplayerServer();
-        if (server != null && server.isPublished() && WorldHost.protoClient != null) {
-            WorldHost.protoClient.publishedWorld(Collections.singleton(profile.getId()));
-        }
+        WorldHost.addFriends(profile.getId());
     }
 
     @Override

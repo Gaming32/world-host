@@ -5,6 +5,7 @@ import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -132,5 +133,11 @@ public sealed interface WorldHostC2SMessage {
     static void writeUuid(DataOutputStream dos, UUID uuid) throws IOException {
         dos.writeLong(uuid.getMostSignificantBits());
         dos.writeLong(uuid.getLeastSignificantBits());
+    }
+
+    static void writeString(DataOutputStream dos, String string) throws IOException {
+        final byte[] buf = string.getBytes(StandardCharsets.UTF_8);
+        dos.writeShort(buf.length);
+        dos.write(buf);
     }
 }

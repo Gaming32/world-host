@@ -1,21 +1,29 @@
 package io.github.gaming32.worldhost.protocol;
 
 import com.google.common.net.HostAndPort;
+import com.mojang.authlib.exceptions.AuthenticationException;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.toast.WHToast;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.User;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Crypt;
+import net.minecraft.util.CryptException;
 import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CountingInputStream;
 import org.jetbrains.annotations.Nullable;
 
+import javax.crypto.SecretKey;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,13 +37,14 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     private static final Thread.Builder SEND_THREAD_BUILDER = Thread.ofVirtual().name("WH-SendThread-", 1);
     private static final Thread.Builder RECV_THREAD_BUILDER = Thread.ofVirtual().name("WH-RecvThread-", 1);
 
-    public static final int PROTOCOL_VERSION = 5;
+    public static final int PROTOCOL_VERSION = 6;
+    private static final int KEY_PREFIX = 0xFAFA0000;
 
     private final String originalHost;
     final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<Optional<WorldHostC2SMessage>> sendQueue = new LinkedBlockingQueue<>();
 
-    private CompletableFuture<UUID> authUuid = new CompletableFuture<>();
+    private CompletableFuture<User> authUser = new CompletableFuture<>();
 
     private boolean authenticated, closed;
 
@@ -56,14 +65,10 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             try {
                 socket = new Socket(target.getHost(), target.getPort());
 
-                final UUID userUuid = authUuid.join();
-                authUuid = null;
-                final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
-                dos.writeInt(PROTOCOL_VERSION);
-                dos.writeLong(userUuid.getMostSignificantBits());
-                dos.writeLong(userUuid.getLeastSignificantBits());
-                dos.writeLong(connectionId);
-                dos.flush();
+                final User user = authUser.join();
+                authUser = null;
+
+                performHandshake(socket, user, connectionId);
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
                 if (failureToast) {
@@ -178,14 +183,58 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         });
     }
 
+    private static void performHandshake(
+        Socket socket, User user, long connectionId
+    ) throws IOException, CryptException, AuthenticationException {
+
+        final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
+        dos.writeInt(PROTOCOL_VERSION);
+        dos.flush();
+
+        final DataInputStream dis = new DataInputStream(socket.getInputStream());
+        if (dis.readInt() != KEY_PREFIX) {
+            throw new IllegalStateException("Server does not support updated auth protocol.");
+        }
+
+        final byte[] publicKeyBytes = new byte[dis.readUnsignedShort()];
+        dis.readFully(publicKeyBytes);
+        final byte[] challenge = new byte[dis.readUnsignedShort()];
+        dis.readFully(challenge);
+
+        final SecretKey secretKey = Crypt.generateSecretKey();
+        final PublicKey publicKey = Crypt.byteToPublicKey(publicKeyBytes);
+        final String authKey = new BigInteger(Crypt.digestData("", publicKey, secretKey)).toString(16);
+
+        final byte[] encryptedChallenge = Crypt.encryptUsingKey(publicKey, challenge);
+        dos.writeShort(encryptedChallenge.length);
+        dos.write(encryptedChallenge);
+        dos.flush();
+
+        final byte[] encryptedSecretKey = Crypt.encryptUsingKey(publicKey, secretKey.getEncoded());
+        dos.writeShort(encryptedSecretKey.length);
+        dos.write(encryptedSecretKey);
+        dos.flush();
+
+        if (user.getProfileId().version() == 4) {
+            Minecraft.getInstance()
+                .getMinecraftSessionService()
+                .joinServer(user.getProfileId(), user.getAccessToken(), authKey);
+        }
+
+        WorldHostC2SMessage.writeUuid(dos, user.getProfileId());
+        WorldHostC2SMessage.writeString(dos, user.getName());
+        dos.writeLong(connectionId);
+        dos.flush();
+    }
+
     public String getOriginalHost() {
         return originalHost;
     }
 
-    public void authenticate(UUID userUuid) {
+    public void authenticate(User user) {
         authenticated = true;
-        if (authUuid != null) {
-            authUuid.complete(userUuid);
+        if (authUser != null) {
+            authUser.complete(user);
         }
     }
 

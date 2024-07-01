@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.toast;
 
+import com.demonwav.mcdev.annotations.Translatable;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.ResourceLocations;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
@@ -34,7 +35,7 @@ public class WHToast {
         return new ToastBuilder(title);
     }
 
-    public static ToastBuilder builder(@NotNull String titleKey) {
+    public static ToastBuilder builder(@NotNull @Translatable String titleKey) {
         return new ToastBuilder(Components.translatable(titleKey));
     }
 

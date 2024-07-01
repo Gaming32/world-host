@@ -66,6 +66,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -422,24 +423,10 @@ public class WorldHost
             proxyProtocolClient.close();
             proxyProtocolClient = null;
         }
-        final var user = Minecraft.getInstance().getUser();
-        //#if MC >= 1.19.2
-        final UUID uuid = user.getProfileId();
-        //#else
-        //$$ final UUID uuid = user.getGameProfile().getId();
-        //#endif
-        //noinspection ConstantValue
-        if (uuid == null) {
-            LOGGER.warn("Failed to get player UUID. Unable to use World Host.");
-            if (failureToast) {
-                WHToast.builder("world-host.wh_connect.not_available").show();
-            }
-            return;
-        }
         LOGGER.info("Attempting to connect to WH server at {}", CONFIG.getServerIp());
         protoClient = new ProtocolClient(CONFIG.getServerIp(), successToast, failureToast);
         connectingFuture = protoClient.getConnectingFuture();
-        protoClient.authenticate(uuid);
+        protoClient.authenticate(Minecraft.getInstance().getUser());
     }
 
     public static String getName(GameProfile profile) {
@@ -509,6 +496,19 @@ public class WorldHost
 
     public static boolean isFriend(UUID user) {
         return CONFIG.isEnableFriends() && CONFIG.getFriends().contains(user);
+    }
+
+    public static void addFriends(UUID... friends) {
+        addFriends(List.of(friends));
+    }
+
+    public static void addFriends(Collection<UUID> friends) {
+        CONFIG.getFriends().addAll(friends);
+        saveConfig();
+        final var server = Minecraft.getInstance().getSingleplayerServer();
+        if (server != null && server.isPublished() && protoClient != null) {
+            protoClient.publishedWorld(friends);
+        }
     }
 
     public static void showFriendOrOnlineToast(UUID user, String title, String description, int ticks, Runnable clickAction) {
