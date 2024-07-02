@@ -3,14 +3,16 @@ package io.github.gaming32.worldhost.config.option;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.config.ConfigProperty;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.util.Collection;
 
-public abstract sealed class ConfigOption<T> permits EnumOption, YesNoOption {
+public abstract sealed class ConfigOption<T> permits EnumOption, StringOption, YesNoOption {
     protected final PropertyDescriptor property;
     private final int order;
     private Runnable onSet = null;
@@ -81,5 +83,9 @@ public abstract sealed class ConfigOption<T> permits EnumOption, YesNoOption {
 
     public abstract void writeValue(T value, JsonWriter writer) throws IOException;
 
-    public abstract Button createButton(int x, int y, int width, int height);
+    public boolean isWide() {
+        return false;
+    }
+
+    public abstract Collection<? extends AbstractWidget> createWidgets(int x, int y, int width, int height, Font font);
 }

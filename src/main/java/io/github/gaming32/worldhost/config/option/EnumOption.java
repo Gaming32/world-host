@@ -4,7 +4,8 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.config.ConfigProperty;
 import io.github.gaming32.worldhost.gui.widget.EnumButton;
 import io.github.gaming32.worldhost.versions.Components;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.util.StringRepresentable;
 import org.quiltmc.parsers.json.JsonReader;
@@ -13,6 +14,8 @@ import org.quiltmc.parsers.json.JsonWriter;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -65,7 +68,7 @@ public final class EnumOption<E extends Enum<E> & StringRepresentable> extends C
     }
 
     @Override
-    public Button createButton(int x, int y, int width, int height) {
+    public Collection<? extends AbstractWidget> createWidgets(int x, int y, int width, int height, Font font) {
         final String translationBase = "world-host.config." + property.getName();
         final String tooltipKey = translationBase + ".tooltip";
         final EnumButton<E> button = new EnumButton<>(
@@ -77,6 +80,6 @@ public final class EnumOption<E extends Enum<E> & StringRepresentable> extends C
             b -> setValue(WorldHost.CONFIG, b.getValue())
         );
         button.setValue(getValue(WorldHost.CONFIG));
-        return button;
+        return List.of(button);
     }
 }

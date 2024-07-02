@@ -48,6 +48,9 @@ public final class ConfigOptions {
         if (property.getPropertyType() == boolean.class) {
             return new YesNoOption(property);
         }
+        if (property.getPropertyType() == String.class) {
+            return new StringOption(property);
+        }
         if (property.getPropertyType().isEnum()) {
             return new EnumOption<>(property);
         }

@@ -3,13 +3,16 @@ package io.github.gaming32.worldhost.config.option;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.widget.YesNoButton;
 import io.github.gaming32.worldhost.versions.Components;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.resources.language.I18n;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 public final class YesNoOption extends ConfigOption<Boolean> {
     public YesNoOption(PropertyDescriptor property) {
@@ -30,7 +33,7 @@ public final class YesNoOption extends ConfigOption<Boolean> {
     }
 
     @Override
-    public Button createButton(int x, int y, int width, int height) {
+    public Collection<? extends AbstractWidget> createWidgets(int x, int y, int width, int height, Font font) {
         final String translationBase = "world-host.config." + property.getName();
         final String tooltipKey = translationBase + ".tooltip";
         final YesNoButton button = new YesNoButton(
@@ -40,6 +43,6 @@ public final class YesNoOption extends ConfigOption<Boolean> {
             b -> setValue(WorldHost.CONFIG, b.isToggled())
         );
         button.setToggled(getValue(WorldHost.CONFIG));
-        return button;
+        return List.of(button);
     }
 }

@@ -12,6 +12,12 @@ public @interface ConfigProperty {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
+    @interface StringDefault {
+        String value();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
     @interface EnumFallback {
         String value();
     }

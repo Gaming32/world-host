@@ -1,13 +1,9 @@
 package io.github.gaming32.worldhost.gui.screen;
 
-import com.google.common.math.IntMath;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
-import io.github.gaming32.worldhost.config.WorldHostConfig;
 import io.github.gaming32.worldhost.config.option.ConfigOptions;
 import io.github.gaming32.worldhost.versions.Components;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -15,22 +11,22 @@ import org.jetbrains.annotations.NotNull;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
-
-import java.math.RoundingMode;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
+//#if MC < 1.20.2
+//$$ import net.minecraft.client.gui.components.EditBox;
+//#endif
+
 public class WorldHostConfigScreen extends WorldHostScreen {
     private static final Component TITLE = Components.translatable("world-host.config.title");
-    private static final Component SERVER_IP = Components.translatable("world-host.config.serverIp");
     private static final Component UPNP = Components.literal("UPnP");
 
     private final Screen parent;
 
     private final String oldServerIp;
     private final boolean oldEnableFriends;
-    private EditBox serverIpBox;
 
     public WorldHostConfigScreen(Screen parent) {
         super(TITLE);
@@ -43,35 +39,33 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     protected void init() {
         super.init();
 
-        int yOffset = height / 6;
+        int yOffset = height / 6 - 24;
 
-        serverIpBox = addRenderableWidget(new EditBox(font, width / 2 + 5, yOffset, 150, 20, SERVER_IP));
-        serverIpBox.setValue(WorldHost.CONFIG.getServerIp());
-
-        final int serverAddressResetX = 145 - font.width(SERVER_IP);
-        addRenderableWidget(
-            button(Components.translatable("controls.reset"), b -> serverIpBox.setValue(WorldHostConfig.DEFAULT_SERVER_IP))
-                .pos(width / 2 - serverAddressResetX, yOffset)
-                .width(serverAddressResetX - 5)
-                .build()
-        );
-
-        final boolean useThreeColumns = yOffset + 24 * IntMath.divide(ConfigOptions.OPTIONS.size(), 2, RoundingMode.UP) + 68 >= height;
+        final boolean useThreeColumns = yOffset + 24 * getRowCount(2) + 68 >= height;
         final int columns = useThreeColumns ? 3 : 2;
-        final int buttonLeft = useThreeColumns ? 153 : 155;
-        final int buttonSpacing = useThreeColumns ? 104 : 160;
-        final int buttonWidth = useThreeColumns ? 100 : 150;
+        final int columnLeft = useThreeColumns ? 153 : 155;
+        final int columnSpacing = useThreeColumns ? 4 : 10;
+        final int columnWidth = useThreeColumns ? 100 : 150;
 
-        int optionIndex = 0;
+        int columnIndex = 0;
         for (final var option : ConfigOptions.OPTIONS.values()) {
-            if ((optionIndex % columns) == 0) {
+            final boolean wide = option.isWide();
+            if (columnIndex == columns - 1 || wide) {
                 yOffset += 24;
+                columnIndex = 0;
+            } else {
+                columnIndex++;
             }
-            addRenderableWidget(option.createButton(
-                width / 2 - buttonLeft + buttonSpacing * (optionIndex % columns),
-                yOffset, buttonWidth, 20
-            ));
-            optionIndex++;
+            option.createWidgets(
+                width / 2 - columnLeft + (columnWidth + columnSpacing) * columnIndex,
+                yOffset,
+                !wide ? columnWidth : columnWidth * columns + columnSpacing * (columns - 1),
+                20,
+                font
+            ).forEach(this::addRenderableWidget);
+            if (wide) {
+                columnIndex = columns - 1;
+            }
         }
         yOffset += 48;
 
@@ -92,11 +86,22 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         );
     }
 
-    @Override
-    public void resize(@NotNull Minecraft minecraft, int width, int height) {
-        final String oldServerIp = serverIpBox.getValue();
-        super.resize(minecraft, width, height);
-        serverIpBox.setValue(oldServerIp);
+    private static int getRowCount(int columns) {
+        int columnIndex = 0;
+        int rowCount = 0;
+        for (final var option : ConfigOptions.OPTIONS.values()) {
+            final boolean wide = option.isWide();
+            if (columnIndex == columns - 1 || wide) {
+                rowCount++;
+                columnIndex = 0;
+            } else {
+                columnIndex++;
+            }
+            if (wide) {
+                columnIndex = columns - 1;
+            }
+        }
+        return rowCount;
     }
 
     @Override
@@ -113,17 +118,12 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         super.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
 
-        final int yOffset = height / 6 + 10 - font.lineHeight / 2;
-        drawString(context, font, SERVER_IP, width / 2 - 150, yOffset, 0xffffff);
-
         drawRightString(context, font, UPNP, width - 7, height - 15, WorldHost.upnpGateway != null ? 0x55ff55 : 0xff5555);
     }
 
     @Override
     public void removed() {
-        if (!serverIpBox.getValue().equals(oldServerIp)) {
-            WorldHost.CONFIG.setServerIp(serverIpBox.getValue());
-            WorldHost.saveConfig();
+        if (!WorldHost.CONFIG.getServerIp().equals(oldServerIp)) {
             WorldHost.reconnect(true, true);
         }
         if (oldEnableFriends && !WorldHost.CONFIG.isEnableFriends() && WorldHost.protoClient != null) {
@@ -134,7 +134,11 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     //#if MC < 1.20.2
     //$$ @Override
     //$$ public void tick() {
-    //$$     serverIpBox.tick();
+    //$$     for (final var widget : children) {
+    //$$         if (widget instanceof EditBox editBox) {
+    //$$             editBox.tick();
+    //$$         }
+    //$$     }
     //$$ }
     //#endif
 }

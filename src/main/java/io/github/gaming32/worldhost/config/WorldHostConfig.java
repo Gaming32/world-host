@@ -110,6 +110,8 @@ public class WorldHostConfig {
         writer.endArray();
     }
 
+    @ConfigProperty(order = 0)
+    @ConfigProperty.StringDefault(DEFAULT_SERVER_IP)
     public String getServerIp() {
         return serverIp;
     }
