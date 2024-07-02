@@ -351,7 +351,7 @@ modrinth {
     projectId.set(if (isStaging) "world-host-staging" else "world-host")
     versionNumber.set(version.toString())
     val loadersText = when {
-        isFabric -> "Fabric/Quilt"
+        isFabric -> "Fabric"
         isForge -> "Forge"
         isNeoForge -> "NeoForge"
         else -> throw IllegalStateException()
@@ -414,12 +414,9 @@ tasks.processResources {
     }
 
     filesMatching(listOf(
-        "mcmod.info",
         "fabric.mod.json",
-        "quilt.mod.json",
         "META-INF/mods.toml",
         "META-INF/neoforge.mods.toml",
-        "mixins.*.json",
         "*.mixins.json"
     )) {
         expand(mapOf(
