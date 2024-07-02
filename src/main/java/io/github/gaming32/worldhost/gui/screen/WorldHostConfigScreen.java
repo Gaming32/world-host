@@ -134,7 +134,7 @@ public class WorldHostConfigScreen extends WorldHostScreen {
     //#if MC < 1.20.2
     //$$ @Override
     //$$ public void tick() {
-    //$$     for (final var widget : children) {
+    //$$     for (final var widget : children()) {
     //$$         if (widget instanceof EditBox editBox) {
     //$$             editBox.tick();
     //$$         }

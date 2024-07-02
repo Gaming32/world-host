@@ -2,17 +2,19 @@ package io.github.gaming32.worldhost.gui.widget;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.network.chat.Component;
 
-//#if MC < 1.19.4
+//#if MC >= 1.19.4
+import net.minecraft.client.gui.components.Tooltip;
+//#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
+//$$ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 //$$ import net.minecraft.client.gui.components.Button;
 //#endif
 
-public class TooltipEditBox extends EditBox {
+public final class TooltipEditBox extends EditBox {
     //#if MC < 1.19.4
-    //$$ private final Button.OnTooltip onTooltip;
+    //$$ private final WorldHostScreen.TooltipRenderer tooltip;
     //#endif
 
     public TooltipEditBox(Font font, int x, int y, int width, int height, Component message, Component tooltip) {
@@ -22,22 +24,24 @@ public class TooltipEditBox extends EditBox {
             setTooltip(Tooltip.create(tooltip));
         }
         //#else
-        //$$ onTooltip = tooltip != null ? WorldHostScreen.onTooltip(tooltip) : Button.NO_TOOLTIP;
+        //$$ this.tooltip = tooltip != null
+        //$$     ? WorldHostScreen.TooltipRenderer.create(tooltip)
+        //$$     : WorldHostScreen.TooltipRenderer.NONE;
         //#endif
     }
 
     //#if MC < 1.19.4
     //$$ @Override
-    //$$ protected void renderButton(PoseStack pose, int mouseX, int mouseY, float partialTick) {
+    //$$ public void renderButton(PoseStack pose, int mouseX, int mouseY, float partialTick) {
     //$$     super.renderButton(pose, mouseX, mouseY, partialTick);
     //$$     if (isHoveredOrFocused()) {
-    //$$         renderTooltip(pose, mouseX, mouseY);
+    //$$         renderToolTip(pose, mouseX, mouseY);
     //$$     }
     //$$ }
     //$$
     //$$ @Override
-    //$$ public void renderTooltip(PoseStack pose, int mouseX, int mouseY) {
-    //$$     onTooltip.onTooltip(this, pose, mouseX, mouseY);
+    //$$ public void renderToolTip(PoseStack pose, int mouseX, int mouseY) {
+    //$$     tooltip.render(pose, mouseX, mouseY);
     //$$ }
     //#endif
 }

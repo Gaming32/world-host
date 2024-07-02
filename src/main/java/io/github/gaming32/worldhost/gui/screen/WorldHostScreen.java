@@ -287,14 +287,25 @@ public abstract class WorldHostScreen extends Screen {
     }
 
     //#if MC < 1.19.4
+    //$$ @FunctionalInterface
+    //$$ public interface TooltipRenderer {
+    //$$     TooltipRenderer NONE = (pose, mouseX, mouseY) -> {};
+    //$$
+    //$$     void render(PoseStack pose, int mouseX, int mouseY);
+    //$$
+    //$$     static TooltipRenderer create(Component tooltip) {
+    //$$         // 170 matches 1.19.4+
+    //$$         final var lines = Minecraft.getInstance().font.split(tooltip, 170);
+    //$$         return (pose, mouseX, mouseY) -> Minecraft.getInstance().screen.renderTooltip(pose, lines, mouseX, mouseY);
+    //$$     }
+    //$$ }
+    //$$
     //$$ public static Button.OnTooltip onTooltip(Component tooltip) {
-    //$$     // 170 matches 1.19.4+
-    //$$     final var lines = Minecraft.getInstance().font.split(tooltip, 170);
+    //$$     final TooltipRenderer renderer = TooltipRenderer.create(tooltip);
     //$$     return new Button.OnTooltip() {
     //$$         @Override
-    //$$         public void onTooltip(@NotNull Button arg, @NotNull PoseStack arg2, int i, int j) {
-    //$$             assert Minecraft.getInstance().screen != null;
-    //$$             Minecraft.getInstance().screen.renderTooltip(arg2, lines, i, j);
+    //$$         public void onTooltip(@NotNull Button button, @NotNull PoseStack pose, int mouseX, int mouseY) {
+    //$$             renderer.render(pose, mouseX, mouseY);
     //$$         }
     //$$
     //$$         @Override
