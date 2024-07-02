@@ -1,5 +1,5 @@
 {
-  "world-host.config.title": "World Host Config",
+  "world-host.config.title": "World Host Options",
   "world-host.config.serverIp": "Server Address",
   "world-host.config.onlineStatusLocation": "Online Status Location",
   "world-host.config.onlineStatusLocation.left": "Left",
@@ -8,8 +8,8 @@
   "world-host.config.enableFriends": "Enable Friends",
   "world-host.config.enableFriends.tooltip": "Enable all friends-related GUIs and the entire friends system.\nIf you disable this and re-enable it, all your friends will still be there.",
   "world-host.config.enableReconnectionToasts": "Reconnection Toasts",
-  "world-host.config.noUPnP": "Don't Try UPnP",
-  "world-host.config.noUPnP.tooltip": "UPnP is a mechanism that can be used for direct connection. However, it sometimes has weird issues.\nEnable this setting if people are having trouble connecting to you through the friends list or tempip.",
+  "world-host.config.UPnP": "Use UPnP",
+  "world-host.config.UPnP.tooltip": "UPnP is a mechanism that can be used for direct connection. However, it sometimes has weird issues.\nDisable this option if people are having trouble connecting to you through the friends list or tempip.",
   "world-host.config.useShortIp": "Use Short IP",
   "world-host.config.useShortIp.tooltip": "These IPs are made up of nine letters and numbers instead of three words. This makes them shorter, but harder to remember.",
   "world-host.config.showOutdatedWorldHost": "Version Check Popup",

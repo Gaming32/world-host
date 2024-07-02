@@ -263,7 +263,7 @@ public class WorldHost
 
         reconnect(false, true);
 
-        if (!CONFIG.isNoUPnP()) {
+        if (CONFIG.isUPnP()) {
             scanUpnp();
         }
 
@@ -372,11 +372,11 @@ public class WorldHost
             )
             .then(literal("tempip")
                 .requires(s ->
-                    !CONFIG.isNoUPnP() &&
-                        s.getServer().isPublished() &&
+                    CONFIG.isUPnP() &&
+                    s.getServer().isPublished() &&
                         upnpGateway != null &&
                         protoClient != null &&
-                        !protoClient.getUserIp().isEmpty()
+                    !protoClient.getUserIp().isEmpty()
                 )
                 .executes(ctx -> {
                     try {

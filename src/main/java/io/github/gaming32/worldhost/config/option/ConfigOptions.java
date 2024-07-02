@@ -19,7 +19,7 @@ public final class ConfigOptions {
     public static final Map<String, ? extends ConfigOption<?>> OPTIONS = initConfigOptions();
 
     static {
-        OPTIONS.get("noUPnP").onSet(WorldHost::scanUpnp);
+        OPTIONS.get("UPnP").onSet(WorldHost::scanUpnp);
     }
 
     private ConfigOptions() {

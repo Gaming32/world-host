@@ -160,7 +160,7 @@ public sealed interface WorldHostS2CMessage {
             final var server = Minecraft.getInstance().getSingleplayerServer();
             if (server == null || !server.isPublished()) return;
             JoinType joinType = JoinType.Proxy.INSTANCE;
-            if (WorldHost.isFriend(user) && WorldHost.upnpGateway != null && !WorldHost.CONFIG.isNoUPnP()) {
+            if (WorldHost.isFriend(user) && WorldHost.upnpGateway != null && WorldHost.CONFIG.isUPnP()) {
                 try {
                     final var error = WorldHost.upnpGateway.openPort(
                         server.getPort(), 60, false

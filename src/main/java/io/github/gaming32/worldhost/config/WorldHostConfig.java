@@ -22,7 +22,7 @@ public class WorldHostConfig {
     private OnlineStatusLocation onlineStatusLocation = OnlineStatusLocation.RIGHT;
     private boolean enableFriends = true;
     private boolean enableReconnectionToasts = false;
-    private boolean noUPnP = false;
+    private boolean UPnP = false;
     private boolean useShortIp = false;
     private boolean showOutdatedWorldHost = true;
     private boolean shareButton = true;
@@ -66,6 +66,10 @@ public class WorldHostConfig {
                 case "showOnlineStatus" -> {
                     WorldHost.LOGGER.info("Converting old showOnlineStatus to new onlineStatusLocation.");
                     onlineStatusLocation = reader.nextBoolean() ? OnlineStatusLocation.RIGHT : OnlineStatusLocation.OFF;
+                }
+                case "noUPnP" -> {
+                    WorldHost.LOGGER.info("Converting old noUPnP to new UPnP");
+                    UPnP = !reader.nextBoolean();
                 }
                 case "friends" -> {
                     WorldHost.LOGGER.info("Found old friends list.");
@@ -146,12 +150,12 @@ public class WorldHostConfig {
     }
 
     @ConfigProperty(order = 4)
-    public boolean isNoUPnP() {
-        return noUPnP;
+    public boolean isUPnP() {
+        return UPnP;
     }
 
-    public void setNoUPnP(boolean noUPnP) {
-        this.noUPnP = noUPnP;
+    public void setUPnP(boolean UPnP) {
+        this.UPnP = UPnP;
     }
 
     @ConfigProperty(order = 5)
