@@ -1,9 +1,11 @@
 package io.github.gaming32.worldhost.config;
 
+import io.github.gaming32.worldhost.SecurityLevel;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.config.option.ConfigOption;
 import io.github.gaming32.worldhost.config.option.ConfigOptions;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
+import io.github.gaming32.worldhost.testing.WorldHostTesting;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 
@@ -28,6 +30,7 @@ public class WorldHostConfig {
     private boolean allowFriendRequests = true;
     private boolean announceFriendsOnline = true;
     private boolean whitelistJoins = false;
+    private SecurityLevel requiredSecurityLevel = WorldHostTesting.ENABLED ? SecurityLevel.OFFLINE : SecurityLevel.SECURE;
 
     private final Set<UUID> friends = Collections.synchronizedSet(new LinkedHashSet<>());
 
@@ -37,6 +40,7 @@ public class WorldHostConfig {
             final String key;
             switch (key = reader.nextName()) {
                 case "serverIp" -> serverIp = reader.nextString();
+                //noinspection DefaultNotLastCaseInSwitch
                 default -> {
                     final ConfigOption<?> option = ConfigOptions.OPTIONS.get(key);
                     if (option != null) {
@@ -203,6 +207,16 @@ public class WorldHostConfig {
 
     public void setWhitelistJoins(boolean whitelistJoins) {
         this.whitelistJoins = whitelistJoins;
+    }
+
+    @ConfigProperty(order = 11)
+    @ConfigProperty.EnumFallback("secure")
+    public SecurityLevel getRequiredSecurityLevel() {
+        return requiredSecurityLevel;
+    }
+
+    public void setRequiredSecurityLevel(SecurityLevel requiredSecurityLevel) {
+        this.requiredSecurityLevel = requiredSecurityLevel;
     }
 
     public Set<UUID> getFriends() {

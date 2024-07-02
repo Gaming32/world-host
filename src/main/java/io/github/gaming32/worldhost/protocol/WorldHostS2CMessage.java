@@ -1,6 +1,7 @@
 package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.FriendsListUpdate;
+import io.github.gaming32.worldhost.SecurityLevel;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostUpdateChecker;
 import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
@@ -26,6 +27,24 @@ import java.util.UUID;
 
 // Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostS2CMessage.kt
 public sealed interface WorldHostS2CMessage {
+    interface SecurityCheckable {
+        SecurityLevel security();
+
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+        default boolean checkAndLogSecurity() {
+            final SecurityLevel receivedLevel = security();
+            final SecurityLevel requiredLevel = WorldHost.CONFIG.getRequiredSecurityLevel();
+            if (receivedLevel.compareTo(requiredLevel) >= 0) {
+                return true;
+            }
+            WorldHost.LOGGER.warn(
+                "Received {} from insecure client. Security is {}, but {} is required.",
+                this, receivedLevel, requiredLevel
+            );
+            return false;
+        }
+    }
+
     record Error(String message, boolean critical) implements WorldHostS2CMessage {
         public Error(String message) {
             this(message, false);
@@ -73,10 +92,10 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record FriendRequest(UUID fromUser) implements WorldHostS2CMessage {
+    record FriendRequest(UUID fromUser, SecurityLevel security) implements WorldHostS2CMessage, SecurityCheckable {
         @Override
         public void handle(ProtocolClient client) {
-            if (!WorldHost.CONFIG.isEnableFriends()) return;
+            if (!WorldHost.CONFIG.isEnableFriends() || !checkAndLogSecurity()) return;
             final boolean isFriend = WorldHost.isFriend(fromUser);
             if (isFriend) {
                 Minecraft.getInstance().execute(() -> {
@@ -105,10 +124,12 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record PublishedWorld(UUID user, long connectionId) implements WorldHostS2CMessage {
+    record PublishedWorld(
+        UUID user, long connectionId, SecurityLevel security
+    ) implements WorldHostS2CMessage, SecurityCheckable {
         @Override
         public void handle(ProtocolClient client) {
-            if (!WorldHost.isFriend(user)) return;
+            if (!checkAndLogSecurity() || !WorldHost.isFriend(user)) return;
             Minecraft.getInstance().execute(() -> {
                 WorldHost.ONLINE_FRIENDS.put(user, connectionId);
                 WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
@@ -130,9 +151,12 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record RequestJoin(UUID user, long connectionId) implements WorldHostS2CMessage {
+    record RequestJoin(
+        UUID user, long connectionId, SecurityLevel security
+    ) implements WorldHostS2CMessage, SecurityCheckable {
         @Override
         public void handle(ProtocolClient client) {
+            if (!checkAndLogSecurity()) return;
             final var server = Minecraft.getInstance().getSingleplayerServer();
             if (server == null || !server.isPublished()) return;
             JoinType joinType = JoinType.Proxy.INSTANCE;
@@ -154,14 +178,15 @@ public sealed interface WorldHostS2CMessage {
         }
     }
 
-    record QueryRequest(UUID friend, long connectionId) implements WorldHostS2CMessage {
+    record QueryRequest(
+        UUID friend, long connectionId, SecurityLevel security
+    ) implements WorldHostS2CMessage, SecurityCheckable {
         @Override
         public void handle(ProtocolClient client) {
-            if (WorldHost.isFriend(friend)) {
-                final var server = Minecraft.getInstance().getSingleplayerServer();
-                if (server != null) {
-                    client.enqueue(new WorldHostC2SMessage.NewQueryResponse(connectionId, server.getStatus()));
-                }
+            if (!checkAndLogSecurity() || !WorldHost.isFriend(friend)) return;
+            final var server = Minecraft.getInstance().getSingleplayerServer();
+            if (server != null) {
+                client.enqueue(new WorldHostC2SMessage.NewQueryResponse(connectionId, server.getStatus()));
             }
         }
     }
@@ -303,11 +328,11 @@ public sealed interface WorldHostS2CMessage {
             case 0 -> new Error(readString(dis), dis.read() > 0); // -1 means that there was no critical flag sent
             case 1 -> new IsOnlineTo(readUuid(dis));
             case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), dis.readLong(), dis.readBoolean());
-            case 3 -> new FriendRequest(readUuid(dis));
-            case 4 -> new PublishedWorld(readUuid(dis), dis.readLong());
+            case 3 -> new FriendRequest(readUuid(dis), SecurityLevel.byId(dis.readUnsignedByte()));
+            case 4 -> new PublishedWorld(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
             case 5 -> new ClosedWorld(readUuid(dis));
-            case 6 -> new RequestJoin(readUuid(dis), dis.readLong());
-            case 7 -> new QueryRequest(readUuid(dis), dis.readLong());
+            case 6 -> new RequestJoin(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
+            case 7 -> new QueryRequest(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
             case 8 -> {
                 final UUID friend = readUuid(dis);
                 final var buf = WorldHost.createByteBuf();
@@ -345,7 +370,7 @@ public sealed interface WorldHostS2CMessage {
                 }
                 yield new NewQueryResponse(friend, serverStatus);
             }
-            case 17 -> new Warning(readString(dis), dis.read() != 0);
+            case 17 -> new Warning(readString(dis), dis.readBoolean());
             default -> new Error("Received packet with unknown typeId from server (outdated client?): " + typeId);
         };
     }

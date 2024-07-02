@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.gui.screen;
 
+import com.google.common.math.IntMath;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
@@ -14,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
+
+import java.math.RoundingMode;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
@@ -53,12 +56,21 @@ public class WorldHostConfigScreen extends WorldHostScreen {
                 .build()
         );
 
+        final boolean useThreeColumns = yOffset + 24 * IntMath.divide(ConfigOptions.OPTIONS.size(), 2, RoundingMode.UP) + 68 >= height;
+        final int columns = useThreeColumns ? 3 : 2;
+        final int buttonLeft = useThreeColumns ? 153 : 155;
+        final int buttonSpacing = useThreeColumns ? 104 : 160;
+        final int buttonWidth = useThreeColumns ? 100 : 150;
+
         int optionIndex = 0;
         for (final var option : ConfigOptions.OPTIONS.values()) {
-            if ((optionIndex & 1) == 0) {
+            if ((optionIndex % columns) == 0) {
                 yOffset += 24;
             }
-            addRenderableWidget(option.createButton(width / 2 - 155 + 160 * (optionIndex % 2), yOffset, 150, 20));
+            addRenderableWidget(option.createButton(
+                width / 2 - buttonLeft + buttonSpacing * (optionIndex % columns),
+                yOffset, buttonWidth, 20
+            ));
             optionIndex++;
         }
         yOffset += 48;
