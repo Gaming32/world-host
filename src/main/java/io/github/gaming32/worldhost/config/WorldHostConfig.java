@@ -19,7 +19,6 @@ public class WorldHostConfig {
     public static final String DEFAULT_SERVER_IP = "world-host.jemnetworks.com";
 
     private String serverIp = DEFAULT_SERVER_IP;
-
     private OnlineStatusLocation onlineStatusLocation = OnlineStatusLocation.RIGHT;
     private boolean enableFriends = true;
     private boolean enableReconnectionToasts = false;
@@ -39,7 +38,6 @@ public class WorldHostConfig {
         while (reader.hasNext()) {
             final String key;
             switch (key = reader.nextName()) {
-                case "serverIp" -> serverIp = reader.nextString();
                 //noinspection DefaultNotLastCaseInSwitch
                 default -> {
                     final ConfigOption<?> option = ConfigOptions.OPTIONS.get(key);
@@ -94,7 +92,6 @@ public class WorldHostConfig {
 
     public void write(JsonWriter writer) throws IOException {
         writer.beginObject();
-        writer.name("serverIp").value(serverIp);
         for (final var option : ConfigOptions.OPTIONS.values()) {
             writer.name(option.getName());
             option.writeValue(this, writer);
