@@ -44,9 +44,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
 import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
@@ -61,6 +60,9 @@ import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -199,6 +201,11 @@ public class WorldHost
         //#else
         //$$ false;
         //#endif
+
+    public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.ALWAYS)
+        .executor(Util.ioPool())
+        .build();
 
     private static boolean hasScannedForUpnp;
     public static Gateway upnpGateway;
@@ -804,12 +811,11 @@ public class WorldHost
         return 0;
     }
 
-    public static <T> T httpGet(
-        CloseableHttpClient client,
+    public static <T> CompletableFuture<T> httpGet(
         String baseUri,
         Consumer<URIBuilder> buildAction,
         IOFunction<InputStream, T> handler
-    ) throws IOException {
+    ) {
         final URI uri;
         try {
             final URIBuilder uriBuilder = new URIBuilder(baseUri);
@@ -818,19 +824,25 @@ public class WorldHost
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }
-        try (var response = client.execute(new HttpGet(uri))) {
-            final var status = response.getStatusLine();
-            if (status.getStatusCode() != 200) {
-                throw new IOException("Failed to GET " + uri + ": " + status.getStatusCode() + " " + status.getReasonPhrase());
-            }
-            final var entity = response.getEntity();
-            if (entity == null) {
-                throw new IOException("GET " + uri + " returned no body.");
-            }
-            try (InputStream is = response.getEntity().getContent()) {
-                return handler.apply(is);
-            }
-        }
+        final HttpRequest request = HttpRequest.newBuilder()
+            .uri(uri)
+            .header("User-Agent", "World Host/" + getModVersion(MOD_ID))
+            .GET()
+            .build();
+        return HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofInputStream())
+            .thenComposeAsync(response -> {
+                if (response.statusCode() != 200) {
+                    final String reason = EnglishReasonPhraseCatalog.INSTANCE.getReason(response.statusCode(), null);
+                    return CompletableFuture.failedFuture(new IOException(
+                        "Failed to GET " + response.request().uri() + ": " + response.statusCode() + " " + reason
+                    ));
+                }
+                try {
+                    return CompletableFuture.completedFuture(handler.apply(response.body()));
+                } catch (Throwable t) {
+                    return CompletableFuture.failedFuture(t);
+                }
+            }, Util.ioPool());
     }
 
     private static Path getGameDir() {
