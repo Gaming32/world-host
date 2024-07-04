@@ -53,7 +53,6 @@ import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
@@ -107,6 +106,7 @@ import net.fabricmc.loader.api.FabricLoader;
 //#if FORGE
 //$$ import net.minecraftforge.api.distmarker.Dist;
 //$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
+//$$ import net.minecraftforge.fml.ModContainer;
 //$$ import net.minecraftforge.fml.ModList;
 //$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
@@ -115,6 +115,7 @@ import net.fabricmc.loader.api.FabricLoader;
 //#else
 //$$ import net.neoforged.api.distmarker.Dist;
 //$$ import net.neoforged.bus.api.SubscribeEvent;
+//$$ import net.neoforged.fml.ModContainer;
 //$$ import net.neoforged.fml.ModList;
 //$$ import net.neoforged.fml.ModLoadingContext;
 //$$ import net.neoforged.fml.common.Mod;
@@ -225,16 +226,40 @@ public class WorldHost
     //#if FABRIC
     @Override
     public void onInitializeClient() {
-        init();
+        final var container = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
+        init(path -> container.findPath(path).orElseThrow(() -> new NoSuchFileException(path)));
     }
+    //#else
+    //$$ public WorldHost(
+        //#if NEOFORGE
+        //$$ ModContainer container
+        //#endif
+    //$$ ) {
+        //#if FORGE
+        //$$ final ModContainer container = ModLoadingContext.get().getActiveContainer();
+        //#endif
+    //$$     final var modFile = container.getModInfo().getOwningFile().getFile();
+    //$$     init(path -> modFile.findResource(path.split("/")));
+    //$$     final BiFunction<Minecraft, Screen, Screen> screenFunction =
+    //$$         (mc, screen) -> new WorldHostConfigScreen(screen);
+    //$$     container.registerExtensionPoint(
+            //#if MC >= 1.20.5
+            //$$ IConfigScreenFactory.class, screenFunction::apply
+            //#elseif MC >= 1.19.2
+            //$$ ConfigScreenHandler.ConfigScreenFactory.class,
+            //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
+            //#else
+            //$$ ConfigGuiHandler.ConfigGuiFactory.class,
+            //$$ () -> new ConfigGuiHandler.ConfigGuiFactory(screenFunction)
+            //#endif
+    //$$     );
+    //$$ }
     //#endif
 
-    private static void init() {
-        try (BufferedReader reader = new BufferedReader(
-            new InputStreamReader(
-                WorldHost.class.getResourceAsStream("/assets/world-host/16k.txt"),
-                StandardCharsets.US_ASCII
-            )
+    private static void init(IOFunction<String, Path> assetGetter) {
+        try (BufferedReader reader = Files.newBufferedReader(
+            assetGetter.apply("assets/world-host/16k.txt"),
+            StandardCharsets.US_ASCII
         )) {
             wordsForCid = reader.lines().filter(s -> !s.startsWith("//")).toList();
         } catch (IOException e) {
@@ -852,36 +877,4 @@ public class WorldHost
         //$$ return FMLPaths.GAMEDIR.get();
         //#endif
     }
-
-    //#if FORGELIKE
-    //#if MC >= 1.20.5
-    //$$ @EventBusSubscriber(modid = MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    //#else
-    //$$ @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
-    //#endif
-    //$$ public static class ClientModEvents {
-    //$$     // Forge 47.1.3 can call FMLClientSetupEvent twice.
-    //$$     private static boolean initialized = false;
-    //$$
-    //$$     @SubscribeEvent
-    //$$     public static synchronized void onClientSetup(FMLClientSetupEvent event) {
-    //$$         if (initialized) return;
-    //$$         initialized = true;
-    //$$         init();
-    //$$         final BiFunction<Minecraft, Screen, Screen> screenFunction =
-    //$$             (mc, screen) -> new WorldHostConfigScreen(screen);
-    //$$         ModLoadingContext.get().registerExtensionPoint(
-                //#if MC >= 1.20.5
-                //$$ IConfigScreenFactory.class, () -> screenFunction::apply
-                //#elseif MC >= 1.19.2
-                //$$ ConfigScreenHandler.ConfigScreenFactory.class,
-                //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
-                //#else
-                //$$ ConfigGuiHandler.ConfigGuiFactory.class,
-                //$$ () -> new ConfigGuiHandler.ConfigGuiFactory(screenFunction)
-                //#endif
-    //$$         );
-    //$$     }
-    //$$ }
-    //#endif
 }
