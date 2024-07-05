@@ -302,8 +302,7 @@ public class WorldHost
         Runtime.getRuntime().addShutdownHook(
             Thread.ofPlatform()
                 .name("World Host Shutdown Thread")
-                .unstarted(() -> {
-                })
+                .unstarted(WorldHost::shutdownClients)
         );
     }
 
