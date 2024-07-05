@@ -65,10 +65,11 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
     public ProtocolClient(String host, boolean successToast, boolean failureToast) {
         this.originalHost = host;
-        final HostAndPort target = HostAndPort.fromString(host).withDefaultPort(9646);
         CONNECTION_THREAD_BUILDER.start(() -> {
+            HostAndPort target = null;
             Socket socket = null;
             try {
+                target = HostAndPort.fromString(host).withDefaultPort(9646);
                 socket = new Socket(target.getHost(), target.getPort());
 
                 final User user = authUser.join();
@@ -76,7 +77,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
                 performHandshake(socket, user, connectionId);
             } catch (Exception e) {
-                WorldHost.LOGGER.error("Failed to connect to {}.", target, e);
+                WorldHost.LOGGER.error("Failed to connect to {} ({}).", originalHost, target, e);
                 if (failureToast) {
                     WHToast.builder("world-host.wh_connect.connect_failed")
                         .description(Component.nullToEmpty(e.getLocalizedMessage()))
