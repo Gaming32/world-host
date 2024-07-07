@@ -64,9 +64,6 @@ tasks.compileJava {
 
 unimined.minecraft {
     version(mcVersionString)
-    if ((mcVersion != 1_20_01 || !isForge) && mcVersion < 1_20_05) {
-        side("client")
-    }
 
     mappings {
         intermediary()
