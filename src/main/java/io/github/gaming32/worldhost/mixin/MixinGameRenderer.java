@@ -55,7 +55,7 @@ public class MixinGameRenderer {
             //#endif
             mouseX, mouseY,
             //#if MC >= 1.21
-            minecraft.getTimer().getRealtimeDeltaTicks()
+            minecraft.getTimer().getGameTimeDeltaPartialTick(false)
             //#else
             //$$ minecraft.getFrameTime()
             //#endif
