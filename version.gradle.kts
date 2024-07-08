@@ -5,7 +5,6 @@ import xyz.wagyourtail.unimined.api.mapping.task.ExportMappingsTask
 import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
 import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
 import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
-import xyz.wagyourtail.unimined.internal.minecraft.patch.AbstractMinecraftTransformer
 import xyz.wagyourtail.unimined.internal.minecraft.resolver.MinecraftDownloader
 import xyz.wagyourtail.unimined.util.capitalized
 import xyz.wagyourtail.unimined.util.sourceSets
@@ -65,6 +64,9 @@ tasks.compileJava {
 
 unimined.minecraft {
     version(mcVersionString)
+    if ((mcVersion != 1_20_01 || !isForge) && mcVersion < 1_20_05) {
+        side("client")
+    }
 
     mappings {
         intermediary()
@@ -155,15 +157,17 @@ unimined.minecraft {
             val runName = "test${name.capitalized()}"
             val user = name.uppercase()
             val provider = (minecraftData as MinecraftDownloader).provider
-            val baseConfig = provider.provideVanillaRunClientTask(runName, file("run/$runName"))
-            baseConfig.description = "Test $user"
-            baseConfig.args.replaceAll { if (it == "Dev") "$user$usernameSuffix" else it }
-            baseConfig.jvmArgs.add("-Dworld-host-testing.enabled=true")
-            baseConfig.jvmArgs.add("-Dworld-host-testing.user=$user")
-            baseConfig.jvmArgs.add("-Ddevauth.enabled=false")
-            baseConfig.javaVersion = JavaVersion.VERSION_21
-            runs.addTarget(baseConfig)
-            runs.configFirst(runName, (provider.mcPatcher as AbstractMinecraftTransformer)::applyClientRunTransform)
+            provider.provideRunClientTask(runName, file("run/$runName"))
+            configFirst(runName) {
+                description = "Test $user"
+                args = args!!.map { if (it == "Dev") "$user$usernameSuffix" else it }
+                jvmArgs(
+                    "-Dworld-host-testing.enabled=true",
+                    "-Dworld-host-testing.user=$user",
+                    "-Ddevauth.enabled=false"
+                )
+                javaVersion = JavaVersion.VERSION_21
+            }
         }
     }
 }
