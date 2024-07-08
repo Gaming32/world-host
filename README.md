@@ -12,7 +12,7 @@ through the use of Geyser.
 
 ## What if my friend doesn't have the mod installed?
 
-If your friend doesn't have the mod installed, you cannot use the friends system with them. However, you can run the command `/worldhost ip` to get an IP that can be used with tunneling. Do note, however, that not using the friends system could increase ping. If you don't want the ping increase, you can run `/worldhost tempip` to get a *temporary* server IP that lasts for at least 60 seconds. Clients who connect within the 60 seconds will remain connected. If you plan to never use the friends system, you can disable it in the mod settings (requires [Mod Menu](https://modrinth.com/mod/modmenu)).
+If your friend doesn't have the mod installed, you cannot use the friends system with them. However, you can run the command `/worldhost ip` to get an IP that can be used with tunneling. Do note, however, that not using the friends system could increase ping. If you don't want the ping increase, you can run `/worldhost tempip` to get a *temporary* server IP that lasts for at least 60 seconds. Clients who connect within the 60 seconds will remain connected. If you plan to never use the friends system, you can disable it in the mod settings.
 
 ## How does this mod work?
 
