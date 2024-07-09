@@ -136,6 +136,7 @@ unimined.minecraft {
         }
         tasks.shadeDowngradedApi {
             downgradeTo = mcJavaVersion
+            shadePath = { "io/github/gaming32/worldhost" }
         }
 
         defaultRemapJar = false
