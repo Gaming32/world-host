@@ -31,12 +31,11 @@ public class FriendsScreen extends WorldHostScreen {
     private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
     private static final Component BEDROCK_FRIENDS_TEXT = Components.translatable(
         "world-host.friends.bedrock_notice",
-        Components.translatable("world-host.friends.bedrock_notice.link")
-            .withStyle(s -> s
-                .applyFormat(ChatFormatting.UNDERLINE)
-                .withColor(ChatFormatting.BLUE)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://account.xbox.com/Profile"))
-            )
+        Components.translatable("world-host.friends.bedrock_notice.link").withStyle(s -> s
+            .applyFormat(ChatFormatting.UNDERLINE)
+            .withColor(ChatFormatting.BLUE)
+            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://account.xbox.com/Profile"))
+        )
     );
 
     private final Screen parent;

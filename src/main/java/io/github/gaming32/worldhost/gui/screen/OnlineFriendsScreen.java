@@ -82,7 +82,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         sendRepeatEvents(true);
         if (list == null) {
             list = new OnlineFriendsList();
-            WorldHost.ONLINE_FRIENDS.forEach((u, c) -> list.addEntry(new OnlineFriendsListEntry(u, c)));
+            WorldHost.ONLINE_FRIENDS.forEach((uuid, cid) -> list.addEntry(new OnlineFriendsListEntry(uuid, cid)));
             WorldHost.pingFriends();
             WorldHost.ONLINE_FRIEND_UPDATES.add(this);
         }

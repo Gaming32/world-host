@@ -199,9 +199,9 @@ public class WorldHost
 
     public static final boolean BEDROCK_SUPPORT =
         //#if FABRIC
-        FabricLoader.getInstance().isModLoaded("world-host-bedrock");
+        FabricLoader.getInstance().isModLoaded("world_host_bedrock");
         //#else
-        //$$ false;
+        //$$ ModList.get().isLoaded("world_host_bedrock");
         //#endif
 
     public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
