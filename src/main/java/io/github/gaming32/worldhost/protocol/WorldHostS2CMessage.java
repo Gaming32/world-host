@@ -134,6 +134,7 @@ public sealed interface WorldHostS2CMessage {
                 WorldHost.ONLINE_FRIENDS.put(user, connectionId);
                 WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
                 if (!WorldHost.CONFIG.isAnnounceFriendsOnline()) return;
+                if (Minecraft.getInstance().screen instanceof OnlineFriendsScreen) return;
                 WorldHost.showFriendOrOnlineToast(
                     user, "world-host.went_online", "world-host.went_online.desc", 200,
                     () -> WorldHost.join(connectionId, null)

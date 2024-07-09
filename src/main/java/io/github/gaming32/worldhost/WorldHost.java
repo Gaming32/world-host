@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost;
 
+import com.demonwav.mcdev.annotations.Translatable;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -570,7 +571,13 @@ public class WorldHost
         }
     }
 
-    public static void showFriendOrOnlineToast(UUID user, String title, String description, int ticks, Runnable clickAction) {
+    public static void showFriendOrOnlineToast(
+        UUID user,
+        @Translatable String title,
+        @Translatable String description,
+        int ticks,
+        Runnable clickAction
+    ) {
         Util.backgroundExecutor().execute(() -> {
             final GameProfile profile = fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), user);
             getInsecureSkinLocation(profile).thenAcceptAsync(skinTexture -> {
