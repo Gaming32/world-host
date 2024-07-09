@@ -392,7 +392,9 @@ public class WorldHost
         LOGGER.info("Refreshing friends list...");
         ONLINE_FRIENDS.clear();
         WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
-        protoClient.listOnline(CONFIG.getFriends());
+        if (protoClient != null) {
+            protoClient.listOnline(CONFIG.getFriends());
+        }
     }
 
     public static void commandRegistrationHandler(CommandDispatcher<CommandSourceStack> dispatcher) {
