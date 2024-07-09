@@ -118,7 +118,12 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         super.render(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
 
-        drawRightString(context, font, UPNP, width - 7, height - 15, WorldHost.upnpGateway != null ? 0x55ff55 : 0xff5555);
+        if (WorldHost.hasScannedForUpnp()) {
+            drawRightString(
+                context, font, UPNP, width - 7, height - 15,
+                WorldHost.upnpGateway != null ? 0x55ff55 : 0xff5555
+            );
+        }
     }
 
     @Override

@@ -456,6 +456,10 @@ public class WorldHost
         });
     }
 
+    public static boolean hasScannedForUpnp() {
+        return hasScannedForUpnp;
+    }
+
     public static void reconnect(boolean successToast, boolean failureToast) {
         shutdownClients();
         LOGGER.info("Attempting to connect to WH server at {}", CONFIG.getServerIp());
