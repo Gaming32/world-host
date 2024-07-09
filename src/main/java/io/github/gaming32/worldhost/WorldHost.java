@@ -105,27 +105,21 @@ import net.fabricmc.loader.api.FabricLoader;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 //#if FORGE
-//$$ import net.minecraftforge.api.distmarker.Dist;
-//$$ import net.minecraftforge.eventbus.api.SubscribeEvent;
 //$$ import net.minecraftforge.fml.ModContainer;
 //$$ import net.minecraftforge.fml.ModList;
 //$$ import net.minecraftforge.fml.ModLoadingContext;
 //$$ import net.minecraftforge.fml.common.Mod;
-//$$ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 //$$ import net.minecraftforge.fml.loading.FMLPaths;
+//$$ import net.minecraftforge.fml.loading.LoadingModList;
 //#else
-//$$ import net.neoforged.api.distmarker.Dist;
-//$$ import net.neoforged.bus.api.SubscribeEvent;
 //$$ import net.neoforged.fml.ModContainer;
 //$$ import net.neoforged.fml.ModList;
-//$$ import net.neoforged.fml.ModLoadingContext;
 //$$ import net.neoforged.fml.common.Mod;
-//$$ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 //$$ import net.neoforged.fml.loading.FMLPaths;
+//$$ import net.neoforged.fml.loading.LoadingModList;
 //#endif
 //$$ import java.util.function.BiFunction;
 //#if MC >= 1.20.5
-//$$ import net.neoforged.fml.common.EventBusSubscriber;
 //$$ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 //#elseif NEOFORGE
 //$$ import net.neoforged.neoforge.client.ConfigScreenHandler;
@@ -201,7 +195,7 @@ public class WorldHost
         //#if FABRIC
         FabricLoader.getInstance().isModLoaded("world_host_bedrock");
         //#else
-        //$$ ModList.get().isLoaded("world_host_bedrock");
+        //$$ LoadingModList.get().getModFileById("world_host_bedrock") != null;
         //#endif
 
     public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
