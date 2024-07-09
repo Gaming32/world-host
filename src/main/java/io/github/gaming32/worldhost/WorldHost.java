@@ -621,7 +621,7 @@ public class WorldHost
         //#if MC >= 1.19.4
         return new ServerStatus(
             Components.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
-            //#if FORGELIKE && MC < 1.20.5
+            //#if FORGELIKE && MC < 1.20.4
             //$$ , Optional.empty()
             //#elseif NEOFORGE
             //$$ , false

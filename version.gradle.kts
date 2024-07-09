@@ -114,9 +114,9 @@ unimined.minecraft {
         }
         isNeoForge -> neoForge {
             loader(when (mcVersion) {
-                1_21_00 -> "4-beta"
-                1_20_06 -> "21-beta"
-                1_20_04 -> "69-beta"
+                1_21_00 -> "78-beta"
+                1_20_06 -> "115"
+                1_20_04 -> "167"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
             })
             minecraftRemapper.config {
