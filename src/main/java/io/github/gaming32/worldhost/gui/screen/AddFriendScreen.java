@@ -172,9 +172,11 @@ public class AddFriendScreen extends WorldHostScreen {
         //#endif
         int mouseX, int mouseY, float delta
     ) {
+        assert minecraft != null;
+        final int labelColor = minecraft.level == null ? 0xa0a0a0 : 0xc0c0c0;
         whRenderBackground(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 20, 0xffffff);
-        drawString(context, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, 0xa0a0a0);
+        drawString(context, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, labelColor);
         usernameField.render(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
 
