@@ -15,6 +15,7 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataInputStream;
@@ -258,14 +259,19 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             final String currentVersion = WorldHost.getModVersion(WorldHost.MOD_ID);
-            final var message = Components.translatable("world-host.outdated_world_host.desc", currentVersion, recommendedVersion);
-            WorldHost.LOGGER.info(message.getString());
+            WorldHost.LOGGER.info(I18n.get(
+                "world-host.outdated_world_host.desc",
+                currentVersion, recommendedVersion + '+'
+            ));
             if (!WorldHost.CONFIG.isShowOutdatedWorldHost()) return;
             WorldHostUpdateChecker.checkForUpdates().thenAcceptAsync(version -> {
                 if (version.isEmpty()) return;
                 final String updateLink = WorldHostUpdateChecker.formatUpdateLink(version.get());
                 WHToast.builder("world-host.outdated_world_host")
-                    .description(message)
+                    .description(Components.translatable(
+                        "world-host.outdated_world_host.desc",
+                        currentVersion, version.get()
+                    ))
                     .clickAction(() -> Util.getPlatform().openUri(updateLink))
                     .ticks(200)
                     .show();
