@@ -19,6 +19,9 @@
     "client": [
       "io.github.gaming32.worldhost.WorldHost"
     ],
+    "worldhost": [
+      "io.github.gaming32.worldhost.plugin.vanilla.VanillaWorldHostPlugin"
+    ],
     "modmenu": [
       "io.github.gaming32.worldhost.compat.WorldHostModMenuCompat"
     ]

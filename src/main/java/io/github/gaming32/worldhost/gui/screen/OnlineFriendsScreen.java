@@ -7,10 +7,12 @@ import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.ResourceLocations;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.gui.widget.FriendsButton;
+import io.github.gaming32.worldhost.plugin.OnlineFriend;
+import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.mixin.ServerStatusPingerAccessor;
 import io.github.gaming32.worldhost.versions.Components;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -32,6 +34,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 //#if MC >= 1.20.0
@@ -56,7 +59,7 @@ import java.util.Arrays;
 //$$ import java.util.Objects;
 //#endif
 
-public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListUpdate {
+public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsListUpdate {
     private static final ResourceLocation GUI_ICONS_LOCATION = ResourceLocations.minecraft("textures/gui/icons.png");
     //#if MC >= 1.20.2
     private static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = ResourceLocations.minecraft("server_list/join_highlighted");
@@ -71,7 +74,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     private List<Component> tooltip;
 
     public OnlineFriendsScreen(Screen parent) {
-        super(Components.translatable("world-host.online_friends.title"));
+        super(Components.translatable("world-host.online_friends.title"), InfoTextsCategory.ONLINE_FRIENDS_SCREEN);
         this.parent = parent;
     }
 
@@ -82,11 +85,11 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         sendRepeatEvents(true);
         if (list == null) {
             list = new OnlineFriendsList();
-            WorldHost.ONLINE_FRIENDS.forEach((uuid, cid) -> list.addEntry(new OnlineFriendsListEntry(uuid, cid)));
             WorldHost.pingFriends();
+            addListEntries(WorldHost.ONLINE_FRIENDS);
             WorldHost.ONLINE_FRIEND_UPDATES.add(this);
         }
-        setListSize(list, 60, 64);
+        setListSize(list, 60, getInfoTextsAdjustedBottomMargin(64));
         addWidget(list);
 
         joinButton = addRenderableWidget(
@@ -203,10 +206,8 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     public void connect() {
         final OnlineFriendsListEntry entry = list.getSelected();
         if (entry == null) return;
-        WorldHost.LOGGER.info("Requesting to join {}", entry.profile.getId());
-        if (WorldHost.protoClient != null) {
-            WorldHost.join(entry.connectionId, this);
-        }
+        WorldHost.LOGGER.info("Requesting to join {}", entry.friend);
+        entry.friend.joinWorld(this);
     }
 
     public void select(OnlineFriendsListEntry entry) {
@@ -219,20 +220,26 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
     }
 
     @Override
-    public void friendsListUpdate(Object2LongMap<UUID> friends) {
-        final var newFriends = new LinkedHashMap<>(friends);
+    public void friendsListUpdate(Map<UUID, OnlineFriend> friends) {
+        final var friendsToAdd = new LinkedHashMap<>(friends);
         for (int i = list.children().size() - 1; i >= 0; i--) {
-            final UUID uuid = list.children().get(i).profile.getId();
+            final UUID uuid = list.children().get(i).friend.uuid();
             if (friends.containsKey(uuid)) {
-                newFriends.remove(uuid);
+                friendsToAdd.remove(uuid);
             } else {
                 list.remove(i);
             }
         }
 
-        for (final var friend : newFriends.entrySet()) {
-            list.addEntry(new OnlineFriendsListEntry(friend.getKey(), friend.getValue()));
-        }
+        WorldHost.pingFriends(friends.values());
+        addListEntries(friendsToAdd);
+    }
+
+    private void addListEntries(Map<?, OnlineFriend> friends) {
+        friends.values()
+            .stream()
+            .map(OnlineFriendsListEntry::new)
+            .forEach(list::addEntry);
     }
 
     public class OnlineFriendsList extends ObjectSelectionList<OnlineFriendsListEntry> {
@@ -301,8 +308,8 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             ServerData.Type.OTHER
             //#endif
         );
-        private final long connectionId;
-        private GameProfile profile;
+        private final OnlineFriend friend;
+        private ProfileInfo profile;
 
         private final ResourceLocation iconTextureId;
         //#if MC >= 1.19.4
@@ -315,20 +322,23 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         private DynamicTexture icon;
         private long clickTime;
 
-        public OnlineFriendsListEntry(UUID friendUuid, long connectionId) {
+        public OnlineFriendsListEntry(OnlineFriend friend) {
             minecraft = Minecraft.getInstance();
-            this.connectionId = connectionId;
-            profile = new GameProfile(friendUuid, "");
-            Util.backgroundExecutor().execute(
-                () -> profile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), profile)
-            );
-            iconTextureId = ResourceLocations.worldHost("servers/" + friendUuid + "/icon");
+            this.friend = friend;
+            profile = friend.fallbackProfileInfo();
+            friend.profileInfo()
+                .thenAccept(ready -> profile = ready)
+                .exceptionally(t -> {
+                    WorldHost.LOGGER.error("Failed to request profile skin for {}", friend, t);
+                    return null;
+                });
+            iconTextureId = ResourceLocations.worldHost("servers/" + friend.uuid() + "/icon");
         }
 
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.translatable("narrator.select", getName());
+            return Components.translatable("narrator.select", profile.name());
         }
 
         @Override
@@ -384,10 +394,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
             //noinspection ConstantValue
             if (icon == null) {
-                final ResourceLocation skinTexture = WorldHost.getSkinLocationNow(profile);
-                RenderSystem.enableBlend();
-                blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
-                blit(context, skinTexture, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
+                profile.iconRenderer().draw(context, x, y, 32, 32);
                 RenderSystem.disableBlend();
             } else {
                 RenderSystem.setShaderTexture(0, iconTextureId);
@@ -432,8 +439,8 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
         }
 
         private void updateServerInfo() {
-            serverInfo.name = getName();
-            final var metadata = WorldHost.ONLINE_FRIEND_PINGS.get(profile.getId());
+            serverInfo.name = profile.name();
+            final var metadata = WorldHost.ONLINE_FRIEND_PINGS.get(friend.uuid());
             if (metadata == null) {
                 serverInfo.status = Components.EMPTY;
                 serverInfo.motd = Components.EMPTY;
@@ -526,10 +533,6 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
             //#endif
         }
 
-        private String getName() {
-            return WorldHost.getName(profile);
-        }
-
         private boolean uploadServerIcon(
             //#if MC >= 1.19.4
             byte[] newIconData
@@ -562,7 +565,7 @@ public class OnlineFriendsScreen extends WorldHostScreen implements FriendsListU
 
                     minecraft.getTextureManager().register(iconTextureId, icon);
                 } catch (Throwable t) {
-                    WorldHost.LOGGER.error("Invalid icon for World Host server {} ({})", serverInfo.name, profile.getId(), t);
+                    WorldHost.LOGGER.error("Invalid icon for World Host server {} ({})", serverInfo.name, friend.uuid(), t);
                     return false;
                 }
             }

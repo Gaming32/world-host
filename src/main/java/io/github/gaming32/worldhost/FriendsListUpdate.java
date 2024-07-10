@@ -1,11 +1,12 @@
 package io.github.gaming32.worldhost;
 
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import io.github.gaming32.worldhost.plugin.OnlineFriend;
 
+import java.util.Map;
 import java.util.UUID;
 
 public interface FriendsListUpdate {
-    void friendsListUpdate(Object2LongMap<UUID> friends);
+    void friendsListUpdate(Map<UUID, OnlineFriend> friends);
 
     default void friendsListUpdate() {
         friendsListUpdate(WorldHost.ONLINE_FRIENDS);

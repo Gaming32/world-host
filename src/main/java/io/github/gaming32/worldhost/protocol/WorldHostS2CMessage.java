@@ -8,6 +8,7 @@ import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
+import io.github.gaming32.worldhost.plugin.vanilla.WorldHostOnlineFriend;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.versions.Components;
@@ -132,7 +133,7 @@ public sealed interface WorldHostS2CMessage {
         public void handle(ProtocolClient client) {
             if (!checkAndLogSecurity() || !WorldHost.isFriend(user)) return;
             Minecraft.getInstance().execute(() -> {
-                WorldHost.ONLINE_FRIENDS.put(user, connectionId);
+                WorldHost.ONLINE_FRIENDS.put(user, new WorldHostOnlineFriend(user, connectionId, security));
                 WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
                 if (!WorldHost.CONFIG.isAnnounceFriendsOnline()) return;
                 if (Minecraft.getInstance().screen instanceof OnlineFriendsScreen) return;
@@ -147,7 +148,7 @@ public sealed interface WorldHostS2CMessage {
     record ClosedWorld(UUID user) implements WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
-            WorldHost.ONLINE_FRIENDS.removeLong(user);
+            WorldHost.ONLINE_FRIENDS.remove(user);
             WorldHost.ONLINE_FRIEND_PINGS.remove(user);
             WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
         }

@@ -1,20 +1,23 @@
 package io.github.gaming32.worldhost;
 
 import com.demonwav.mcdev.annotations.Translatable;
+import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
-import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
+import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
+import io.github.gaming32.worldhost.plugin.OnlineFriend;
+import io.github.gaming32.worldhost.plugin.WorldHostPlugin;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.proxy.ProxyClient;
+import io.github.gaming32.worldhost.toast.IconRenderer;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
@@ -25,8 +28,6 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntAVLTreeMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -38,6 +39,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
@@ -68,9 +70,11 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,6 +86,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static net.minecraft.commands.Commands.literal;
 
@@ -104,6 +109,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
+//$$ import java.lang.annotation.ElementType;
+//$$ import java.util.Objects;
 //#if FORGE
 //$$ import net.minecraftforge.fml.ModContainer;
 //$$ import net.minecraftforge.fml.ModList;
@@ -116,7 +123,6 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.neoforged.fml.ModList;
 //$$ import net.neoforged.fml.common.Mod;
 //$$ import net.neoforged.fml.loading.FMLPaths;
-//$$ import net.neoforged.fml.loading.LoadingModList;
 //#endif
 //$$ import java.util.function.BiFunction;
 //#if MC >= 1.20.5
@@ -183,20 +189,13 @@ public class WorldHost
 
     public static final long MAX_CONNECTION_IDS = 1L << 42;
 
-    public static final Object2LongMap<UUID> ONLINE_FRIENDS = new Object2LongLinkedOpenHashMap<>();
+    public static final Map<UUID, OnlineFriend> ONLINE_FRIENDS = new LinkedHashMap<>();
     public static final Map<UUID, ServerStatus> ONLINE_FRIEND_PINGS = new HashMap<>();
     public static final Set<FriendsListUpdate> ONLINE_FRIEND_UPDATES = Collections.newSetFromMap(new WeakHashMap<>());
 
     public static final Long2ObjectMap<ProxyClient> CONNECTED_PROXY_CLIENTS = Long2ObjectMaps.synchronize(new Long2ObjectOpenHashMap<>());
 
     public static final long CONNECTION_ID = new SecureRandom().nextLong(MAX_CONNECTION_IDS);
-
-    public static final boolean BEDROCK_SUPPORT =
-        //#if FABRIC
-        FabricLoader.getInstance().isModLoaded("world_host_bedrock");
-        //#else
-        //$$ LoadingModList.get().getModFileById("world_host_bedrock") != null;
-        //#endif
 
     public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.ALWAYS)
@@ -217,6 +216,8 @@ public class WorldHost
     public static boolean shareWorldOnLoad;
 
     public static SocketAddress proxySocketAddress;
+
+    private static List<LoadedWorldHostPlugin> plugins;
 
     //#if FABRIC
     @Override
@@ -288,7 +289,14 @@ public class WorldHost
         );
         profileCache.setExecutor(Minecraft.getInstance());
 
-        reconnect(false, true);
+        plugins = ImmutableList.sortedCopyOf(collectPlugins());
+        LOGGER.info(
+            "Found {} World Host plugin(s): {}",
+            plugins.size(),
+            plugins.stream()
+                .map(plugin -> plugin.modId() + " (" + plugin.plugin().toString() + ")")
+                .collect(Collectors.joining(", "))
+        );
 
         if (CONFIG.isUPnP()) {
             scanUpnp();
@@ -299,6 +307,8 @@ public class WorldHost
                 .name("World Host Shutdown Thread")
                 .unstarted(WorldHost::shutdownClients)
         );
+
+        reconnect(false, true);
     }
 
     public static void loadConfig() {
@@ -351,6 +361,51 @@ public class WorldHost
         }
     }
 
+    private static List<LoadedWorldHostPlugin> collectPlugins() {
+        //#if FABRIC
+        return FabricLoader.getInstance()
+            .getEntrypointContainers("worldhost", WorldHostPlugin.class)
+            .stream()
+            .map(container -> new LoadedWorldHostPlugin(
+                container.getProvider().getMetadata().getId(),
+                container.getEntrypoint()
+            ))
+            .toList();
+        //#else
+        //$$ return ModList.get()
+        //$$     .getModFiles()
+        //$$     .stream()
+        //$$     .flatMap(modFile -> modFile
+        //$$         .getFile()
+        //$$         .getScanResult()
+        //$$         .getAnnotatedBy(WorldHostPlugin.Entrypoint.class, ElementType.TYPE)
+        //$$         .map(ad -> {
+        //$$             try {
+        //$$                 return (WorldHostPlugin)Class.forName(ad.clazz().getClassName()).getDeclaredConstructor().newInstance();
+        //$$             } catch (ReflectiveOperationException e) {
+        //$$                 LOGGER.error("Failed to load World Host plugin from class {}", ad.clazz().getClassName(), e);
+        //$$                 return null;
+        //$$             }
+        //$$         })
+        //$$         .filter(Objects::nonNull)
+        //$$         .map(plugin -> new LoadedWorldHostPlugin(modFile.getMods().getFirst().getModId(), plugin))
+        //$$     )
+        //$$     .toList();
+        //#endif
+    }
+
+    public static List<LoadedWorldHostPlugin> getPlugins() {
+        return plugins;
+    }
+
+    public static List<Component> getInfoTexts(InfoTextsCategory category) {
+        final List<Component> result = new ArrayList<>();
+        for (final LoadedWorldHostPlugin plugin : plugins) {
+            result.addAll(plugin.plugin().getInfoTexts(category));
+        }
+        return result;
+    }
+
     public static void tickHandler() {
         if (protoClient == null || protoClient.isClosed()) {
             protoClient = null;
@@ -387,8 +442,8 @@ public class WorldHost
         LOGGER.info("Refreshing friends list...");
         ONLINE_FRIENDS.clear();
         WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
-        if (protoClient != null) {
-            protoClient.listOnline(CONFIG.getFriends());
+        for (final LoadedWorldHostPlugin plugin : plugins) {
+            plugin.plugin().refreshFriendsList();
         }
     }
 
@@ -581,11 +636,7 @@ public class WorldHost
             getInsecureSkinLocation(profile).thenAcceptAsync(skinTexture -> {
                 WHToast.builder(Components.translatable(title, getName(profile)))
                     .description(Components.translatable(description))
-                    .icon((context, x, y, width, height) -> {
-                        RenderSystem.enableBlend();
-                        WorldHostScreen.blit(context, skinTexture, x, y, width, height, 8, 8, 8, 8, 64, 64);
-                        WorldHostScreen.blit(context, skinTexture, x, y, width, height, 40, 8, 8, 8, 64, 64);
-                    })
+                    .icon(IconRenderer.createSkinIconRenderer(skinTexture))
                     .clickAction(clickAction)
                     .ticks(ticks)
                     .important()
@@ -661,8 +712,19 @@ public class WorldHost
 
     public static void pingFriends() {
         ONLINE_FRIEND_PINGS.clear();
-        if (protoClient != null) {
-            protoClient.queryRequest(CONFIG.getFriends());
+        if (ONLINE_FRIENDS.isEmpty()) return;
+        for (final LoadedWorldHostPlugin plugin : plugins) {
+            plugin.plugin().pingFriends(ONLINE_FRIENDS.values());
+        }
+    }
+
+    public static void pingFriends(Collection<OnlineFriend> friends) {
+        if (friends.isEmpty()) return;
+        for (final OnlineFriend friend : friends) {
+            ONLINE_FRIEND_PINGS.remove(friend.uuid());
+        }
+        for (final LoadedWorldHostPlugin plugin : plugins) {
+            plugin.plugin().pingFriends(friends);
         }
     }
 
