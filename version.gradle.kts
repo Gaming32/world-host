@@ -471,8 +471,12 @@ tasks.withType<RemapJarTask> {
 publishing {
     publications {
         create<MavenPublication>("maven") {
-            from(components["java"])
             artifactId = "world-host"
+
+            artifact(tasks.named("remapJar"))
+            artifact(tasks.named("sourcesJar")) {
+                classifier = "sources"
+            }
         }
     }
 }
