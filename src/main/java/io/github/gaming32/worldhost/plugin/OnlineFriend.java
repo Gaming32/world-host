@@ -11,7 +11,9 @@ import java.util.concurrent.CompletableFuture;
 public interface OnlineFriend {
     UUID uuid();
 
-    SecurityLevel security();
+    default SecurityLevel security() {
+        return SecurityLevel.SECURE;
+    }
 
     ProfileInfo fallbackProfileInfo();
 
