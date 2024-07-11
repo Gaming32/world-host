@@ -111,6 +111,8 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 //$$ import java.lang.annotation.ElementType;
 //$$ import java.util.Objects;
+//$$ import java.util.function.BiFunction;
+//$$ import org.objectweb.asm.Type;
 //#if FORGE
 //$$ import net.minecraftforge.fml.ModContainer;
 //$$ import net.minecraftforge.fml.ModList;
@@ -124,7 +126,6 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.neoforged.fml.common.Mod;
 //$$ import net.neoforged.fml.loading.FMLPaths;
 //#endif
-//$$ import java.util.function.BiFunction;
 //#if MC >= 1.20.5
 //$$ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 //#elseif NEOFORGE
@@ -372,13 +373,16 @@ public class WorldHost
             ))
             .toList();
         //#else
+        //$$ final Type entrypointAnnotationType = Type.getType(WorldHostPlugin.Entrypoint.class);
         //$$ return ModList.get()
         //$$     .getModFiles()
         //$$     .stream()
         //$$     .flatMap(modFile -> modFile
         //$$         .getFile()
         //$$         .getScanResult()
-        //$$         .getAnnotatedBy(WorldHostPlugin.Entrypoint.class, ElementType.TYPE)
+        //$$         .getAnnotations()
+        //$$         .stream()
+        //$$         .filter(ad -> ad.targetType() == ElementType.TYPE && ad.annotationType().equals(entrypointAnnotationType))
         //$$         .map(ad -> {
         //$$             try {
         //$$                 return (WorldHostPlugin)Class.forName(ad.clazz().getClassName()).getDeclaredConstructor().newInstance();
