@@ -72,5 +72,6 @@
   "world-host.play_world": "Play World",
   "world-host.share_world": "Share World",
   "world-host.share_world.failed": "Failed to share world",
-  "world-host.create_world": "Create World"
+  "world-host.create_world": "Create World",
+  "world-host.world_with_security": "%s \u2022 %s"
 }

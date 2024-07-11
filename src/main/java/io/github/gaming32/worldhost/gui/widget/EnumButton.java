@@ -28,9 +28,13 @@ public final class EnumButton<E extends Enum<E> & StringRepresentable> extends C
         final E[] constants = getValues();
         final Component[] result = new Component[constants.length];
         for (int i = 0; i < constants.length; i++) {
-            result[i] = Components.translatable(translationBase + '.' + constants[i].getSerializedName());
+            result[i] = getTranslation(translationBase, constants[i]);
         }
         return result;
+    }
+
+    public static Component getTranslation(String base, StringRepresentable element) {
+        return Components.translatable(base + '.' + element.getSerializedName());
     }
 
     public void setValue(E value) {

@@ -5,8 +5,10 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.ResourceLocations;
+import io.github.gaming32.worldhost.SecurityLevel;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.gui.widget.EnumButton;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.gui.widget.FriendsButton;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
@@ -25,6 +27,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
@@ -55,6 +58,7 @@ import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 
 //#if MC >= 1.19.4
 import java.util.Arrays;
+import net.minecraft.client.gui.components.Tooltip;
 //#else
 //$$ import java.util.Objects;
 //#endif
@@ -203,9 +207,17 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         }
     }
 
+    @Override
+    public void tick() {
+        super.tick();
+        for (final OnlineFriendsListEntry entry : list.children()) {
+            entry.updateDisplayInfo();
+        }
+    }
+
     public void connect() {
         final OnlineFriendsListEntry entry = list.getSelected();
-        if (entry == null) return;
+        if (entry == null || entry.friend.unjoinableReason().isPresent()) return;
         WorldHost.LOGGER.info("Requesting to join {}", entry.friend);
         entry.friend.joinWorld(this);
     }
@@ -216,7 +228,21 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
     }
 
     private void updateButtonActivationStates() {
-        joinButton.active = list.getSelected() != null;
+        final var selected = list.getSelected();
+        if (selected != null) {
+            final var unjoinableReason = selected.friend.unjoinableReason();
+            //#if MC >= 1.19.4
+            if (unjoinableReason.isEmpty()) {
+                joinButton.active = true;
+                joinButton.setTooltip(null);
+            } else {
+                joinButton.active = false;
+                joinButton.setTooltip(Tooltip.create(unjoinableReason.get()));
+            }
+            //#endif
+        } else {
+            joinButton.active = false;
+        }
     }
 
     @Override
@@ -311,6 +337,9 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         private final OnlineFriend friend;
         private ProfileInfo profile;
 
+        private Component displayName;
+        private List<Component> unjoinableTooltip;
+
         private final ResourceLocation iconTextureId;
         //#if MC >= 1.19.4
         private byte[] iconData;
@@ -320,6 +349,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         //#endif
         @Nullable
         private DynamicTexture icon;
+
         private long clickTime;
 
         public OnlineFriendsListEntry(OnlineFriend friend) {
@@ -333,12 +363,13 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     return null;
                 });
             iconTextureId = ResourceLocations.worldHost("servers/" + friend.uuid() + "/icon");
+            updateDisplayInfo();
         }
 
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.translatable("narrator.select", profile.name());
+            return Components.translatable("narrator.select", displayName);
         }
 
         @Override
@@ -351,10 +382,8 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             //#endif
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {
-            updateServerInfo();
-
             final boolean incompatibleVersion = serverInfo.protocol != SharedConstants.getCurrentVersion().getProtocolVersion();
-            WorldHostScreen.drawString(context, font, serverInfo.name, x + 35, y + 1, 0xffffff, false);
+            WorldHostScreen.drawString(context, font, displayName, x + 35, y + 1, 0xffffff, false);
 
             final var lines = font.split(serverInfo.motd, entryWidth - 34);
             for (int i = 0; i < Math.min(lines.size(), 2); i++) {
@@ -411,15 +440,16 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                 }
             } else if (relX >= entryWidth - labelWidth - 17 && relX <= entryWidth - 17 && relY >= 0 && relY <= 8) {
                 tooltip = serverInfo.playerList;
+            } else if (unjoinableTooltip != null && hovered) {
+                tooltip = unjoinableTooltip;
             }
 
-            if (
-                minecraft.options.touchscreen
-                    //#if MC >= 1.19.0
-                    ().get()
-                    //#endif
-                    || hovered
-            ) {
+            //#if MC >= 1.19.0
+            final boolean touchscreen = minecraft.options.touchscreen().get();
+            //#else
+            //$$ final boolean touchscreen = minecraft.options.touchscreen;
+            //#endif
+            if (unjoinableTooltip == null && (touchscreen || hovered)) {
                 fill(context, x, y, x + 32, y + 32, 0xa0909090);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 //#if MC >= 1.20.2
@@ -438,8 +468,9 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             }
         }
 
-        private void updateServerInfo() {
+        private void updateDisplayInfo() {
             serverInfo.name = profile.name();
+            updateNameAndTooltip();
             final var metadata = WorldHost.ONLINE_FRIEND_PINGS.get(friend.uuid());
             if (metadata == null) {
                 serverInfo.status = Components.EMPTY;
@@ -531,6 +562,28 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             //$$     serverInfo.setIconB64(null);
             //$$ }
             //#endif
+        }
+
+        private void updateNameAndTooltip() {
+            final var security = friend.security();
+            final var unjoinableReason = friend.unjoinableReason();
+
+            final MutableComponent newDisplayName;
+            if (security == SecurityLevel.SECURE) {
+                newDisplayName = Components.literal(profile.name());
+            } else {
+                newDisplayName = Components.translatable(
+                    "world-host.world_with_security",
+                    profile.name(),
+                    EnumButton.getTranslation("world-host.config.requiredSecurityLevel", security)
+                );
+            }
+            if (unjoinableReason.isPresent()) {
+                newDisplayName.withStyle(ChatFormatting.RED);
+            }
+            displayName = newDisplayName;
+
+            unjoinableTooltip = unjoinableReason.map(List::of).orElse(null);
         }
 
         private boolean uploadServerIcon(
