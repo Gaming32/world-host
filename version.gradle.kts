@@ -23,6 +23,8 @@ plugins {
 fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
 fun Any.getGroovyProperty(name: String): Any = withGroovyBuilder { metaClass }.getProperty(this, name)!!
 
+group = "io.github.gaming32"
+
 val modVersion = project.properties["mod.version"] as String
 val mcVersionString by extra(name.substringBefore("-"))
 val loaderName by extra(name.substringAfter("-"))
@@ -463,5 +465,14 @@ tasks.withType<RemapJarTask> {
     from("$rootDir/LICENSE")
     mixinRemap {
         disableRefmap()
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifactId = "world-host"
+        }
     }
 }
