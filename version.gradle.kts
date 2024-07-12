@@ -458,8 +458,13 @@ tasks.withType<RemapJarTask> {
         forgeJarJar.files.forEach { from(zipTree(it)) }
     }
     manifest {
-        if (isForge) {
-            attributes["MixinConfigs"] = "world-host.mixins.json"
+        when {
+            isForge -> {
+                attributes["MixinConfigs"] = "world-host.mixins.json"
+            }
+            isFabric -> {
+                attributes["Fabric-Loom-Mixin-Remap-Type"] = "static"
+            }
         }
     }
     from("$rootDir/LICENSE")
