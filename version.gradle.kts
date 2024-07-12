@@ -247,19 +247,14 @@ minecraft.apply {
 }
 
 dependencies {
-    fun bundle(dependency: Any) {
-        "include"(dependency)
-    }
+    val include = configurations["include"]
+    val modImplementation = configurations["modImplementation"]
+    val minecraftLibraries = configurations["minecraftLibraries"]
 
-    fun bundleImplementation(dependency: Any) {
-        implementation(dependency)
-        bundle(dependency)
-    }
-
-    bundleImplementation("org.quiltmc.parsers:json:0.3.0")
-    bundleImplementation("org.semver4j:semver4j:5.3.0")
+    include(implementation("org.quiltmc.parsers:json:0.3.0")!!)
+    include(implementation("org.semver4j:semver4j:5.3.0")!!)
     if (isForgeLike) {
-        "minecraftLibraries"("org.quiltmc.parsers:json:0.3.0")
+        minecraftLibraries("org.quiltmc.parsers:json:0.3.0")
     }
 
     if (isFabric) {
@@ -273,7 +268,7 @@ dependencies {
             1_18_02 -> "3.2.5"
             else -> null
         }?.let {
-            "modImplementation"("com.terraformersmc:modmenu:$it")
+            modImplementation("com.terraformersmc:modmenu:$it")
         }
     }
 
@@ -296,15 +291,14 @@ dependencies {
             else -> null
         }?.let { fapiVersion ->
             val resourceLoader = fabricApi.fabricModule("fabric-resource-loader-v0", fapiVersion)
-            "modImplementation"(resourceLoader)
-            bundle(resourceLoader)
+            include(modImplementation(resourceLoader)!!)
 
             for (module in listOf(
                 "fabric-screen-api-v1",
                 "fabric-key-binding-api-v1",
                 "fabric-lifecycle-events-v1"
             )) {
-                "modRuntimeOnly"(fabricApi.fabricModule(module, fapiVersion))
+                modRuntimeOnly(fabricApi.fabricModule(module, fapiVersion))
             }
         }
     }
@@ -453,6 +447,10 @@ tasks.processResources {
     }
 }
 
+tasks.jar {
+    archiveClassifier = "dev"
+}
+
 tasks.withType<RemapJarTask> {
     if (isForgeLike && !forgeJarJar.isEmpty) {
         forgeJarJar.files.forEach { from(zipTree(it)) }
@@ -477,7 +475,6 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             artifactId = "world-host"
-
             artifact(tasks.named("remapJar"))
             artifact(tasks.named("sourcesJar")) {
                 classifier = "sources"
