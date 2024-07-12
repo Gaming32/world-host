@@ -299,6 +299,10 @@ public class WorldHost
                 .collect(Collectors.joining(", "))
         );
 
+        for (final LoadedWorldHostPlugin plugin : plugins) {
+            plugin.plugin().init();
+        }
+
         if (CONFIG.isUPnP()) {
             scanUpnp();
         }

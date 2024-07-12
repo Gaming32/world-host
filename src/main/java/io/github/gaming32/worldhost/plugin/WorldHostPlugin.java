@@ -19,6 +19,9 @@ public interface WorldHostPlugin {
         return 0;
     }
 
+    default void init() {
+    }
+
     default List<Component> getInfoTexts(InfoTextsCategory category) {
         return List.of();
     }
