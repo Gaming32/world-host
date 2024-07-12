@@ -6,4 +6,7 @@ public interface ProfileInfo {
     String name();
 
     IconRenderer iconRenderer();
+
+    record Basic(String name, IconRenderer iconRenderer) implements ProfileInfo {
+    }
 }
