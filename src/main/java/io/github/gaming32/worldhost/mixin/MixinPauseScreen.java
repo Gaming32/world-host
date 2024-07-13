@@ -52,10 +52,10 @@ public class MixinPauseScreen extends Screen {
         if (location == OnlineStatusLocation.OFF) return;
         int x = 7;
         int y = 15;
-        final int mmcLines = WorldHost.getMenuLines(true);
+        final int mmcLines = WorldHost.getMenuLines(true, location);
         if (mmcLines > 0) {
             x = 2;
-            y = 10 + mmcLines * 12;
+            y = 10 + mmcLines * WorldHost.getMenuLineSpacing();
         }
         addRenderableWidget(new OnlineStatusButton(
             location == OnlineStatusLocation.RIGHT ? width - x : x,

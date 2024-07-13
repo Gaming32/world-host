@@ -21,7 +21,7 @@ public class MixinTitleScreen extends Screen {
     private void onlineStatus(CallbackInfo ci) {
         final OnlineStatusLocation location = WorldHost.CONFIG.getOnlineStatusLocation();
         if (location == OnlineStatusLocation.OFF) return;
-        final int y = 20 + WorldHost.getMenuLines(false) * WorldHost.getMainMenuLineSpacing();
+        final int y = 10 + (1 + WorldHost.getMenuLines(false, location)) * WorldHost.getMenuLineSpacing();
         addRenderableWidget(new OnlineStatusButton(
             location == OnlineStatusLocation.RIGHT ? width - 2 : 2,
             height - y,

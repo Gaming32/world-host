@@ -904,21 +904,21 @@ public class WorldHost
         //#endif
     }
 
-    public static int getMenuLines(boolean isPause) {
+    public static int getMenuLines(boolean isPause, OnlineStatusLocation side) {
         //#if FABRIC
         if (!FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
             return 0;
         }
         final var baseConfig = MainMenuCredits.getInstance().getConfig();
         final var config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
-        return (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
+        return (side == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
         //#else
         //$$ if (isPause) {
         //$$     return 0;
         //$$ }
         //$$ int[] forgeLineCount = {-1};
         //$$ final BiConsumer<Integer, String> lineConsumer = (i, s) -> forgeLineCount[0]++;
-        //$$ if (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.LEFT) {
+        //$$ if (side == OnlineStatusLocation.LEFT) {
         //$$     BrandingControl.forEachLine(true, true, lineConsumer);
         //$$ } else {
         //$$     BrandingControl.forEachAboveCopyrightLine(lineConsumer);
@@ -928,7 +928,7 @@ public class WorldHost
         //#endif
     }
 
-    public static int getMainMenuLineSpacing() {
+    public static int getMenuLineSpacing() {
         //#if FABRIC
         return 12;
         //#else
