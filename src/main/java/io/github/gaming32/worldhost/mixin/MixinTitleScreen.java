@@ -11,15 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if FORGELIKE
-//#if NEOFORGE
-//$$ import net.neoforged.neoforge.internal.BrandingControl;
-//#else
-//$$ import net.minecraftforge.internal.BrandingControl;
-//#endif
-//$$ import java.util.function.BiConsumer;
-//#endif
-
 @Mixin(TitleScreen.class)
 public class MixinTitleScreen extends Screen {
     protected MixinTitleScreen(Component component) {
@@ -30,22 +21,7 @@ public class MixinTitleScreen extends Screen {
     private void onlineStatus(CallbackInfo ci) {
         final OnlineStatusLocation location = WorldHost.CONFIG.getOnlineStatusLocation();
         if (location == OnlineStatusLocation.OFF) return;
-        int y = 20;
-        final int mmcLines = WorldHost.getMMCLines(false);
-        if (mmcLines > 0) {
-            y += mmcLines * 12;
-        }
-        //#if FORGELIKE
-        //$$ int[] forgeLineCount = {-1};
-        //$$ final BiConsumer<Integer, String> lineConsumer = (i, s) -> forgeLineCount[0]++;
-        //$$ if (location == OnlineStatusLocation.LEFT) {
-        //$$     BrandingControl.forEachLine(true, true, lineConsumer);
-        //$$ } else {
-        //$$     BrandingControl.forEachAboveCopyrightLine(lineConsumer);
-        //$$     forgeLineCount[0]++;
-        //$$ }
-        //$$ y += forgeLineCount[0] * 10;
-        //#endif
+        final int y = 20 + WorldHost.getMenuLines(false) * WorldHost.getMainMenuLineSpacing();
         addRenderableWidget(new OnlineStatusButton(
             location == OnlineStatusLocation.RIGHT ? width - 2 : 2,
             height - y,

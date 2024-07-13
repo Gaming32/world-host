@@ -9,6 +9,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
+import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
@@ -104,13 +105,13 @@ import net.minecraft.client.resources.PlayerSkin;
 
 //#if FABRIC
 import dev.isxander.mainmenucredits.MainMenuCredits;
-import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 //$$ import java.lang.annotation.ElementType;
 //$$ import java.util.Objects;
+//$$ import java.util.function.BiConsumer;
 //$$ import java.util.function.BiFunction;
 //$$ import org.objectweb.asm.Type;
 //#if FORGE
@@ -120,11 +121,13 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.minecraftforge.fml.common.Mod;
 //$$ import net.minecraftforge.fml.loading.FMLPaths;
 //$$ import net.minecraftforge.fml.loading.LoadingModList;
+//$$ import net.minecraftforge.internal.BrandingControl;
 //#else
 //$$ import net.neoforged.fml.ModContainer;
 //$$ import net.neoforged.fml.ModList;
 //$$ import net.neoforged.fml.common.Mod;
 //$$ import net.neoforged.fml.loading.FMLPaths;
+//$$ import net.neoforged.neoforge.internal.BrandingControl;
 //#endif
 //#if MC >= 1.20.5
 //$$ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -901,15 +904,36 @@ public class WorldHost
         //#endif
     }
 
-    public static int getMMCLines(boolean isPause) {
+    public static int getMenuLines(boolean isPause) {
         //#if FABRIC
-        if (FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
-            final var baseConfig = MainMenuCredits.getInstance().getConfig();
-            final var config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
-            return (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
+        if (!FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
+            return 0;
         }
+        final var baseConfig = MainMenuCredits.getInstance().getConfig();
+        final var config = isPause ? baseConfig.PAUSE_MENU : baseConfig.MAIN_MENU;
+        return (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.RIGHT ? config.getBottomRight() : config.getBottomLeft()).size();
+        //#else
+        //$$ if (isPause) {
+        //$$     return 0;
+        //$$ }
+        //$$ int[] forgeLineCount = {-1};
+        //$$ final BiConsumer<Integer, String> lineConsumer = (i, s) -> forgeLineCount[0]++;
+        //$$ if (CONFIG.getOnlineStatusLocation() == OnlineStatusLocation.LEFT) {
+        //$$     BrandingControl.forEachLine(true, true, lineConsumer);
+        //$$ } else {
+        //$$     BrandingControl.forEachAboveCopyrightLine(lineConsumer);
+        //$$     forgeLineCount[0]++;
+        //$$ }
+        //$$ return forgeLineCount[0];
         //#endif
-        return 0;
+    }
+
+    public static int getMainMenuLineSpacing() {
+        //#if FABRIC
+        return 12;
+        //#else
+        //$$ return 10;
+        //#endif
     }
 
     public static <T> CompletableFuture<T> httpGet(
