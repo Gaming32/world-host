@@ -454,7 +454,7 @@ public class WorldHost
         ONLINE_FRIENDS.clear();
         WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
         for (final LoadedWorldHostPlugin plugin : plugins) {
-            plugin.plugin().refreshFriendsList();
+            plugin.plugin().refreshOnlineFriends();
         }
     }
 

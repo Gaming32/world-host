@@ -6,18 +6,13 @@ import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
-public interface OnlineFriend {
+public interface OnlineFriend extends Profilable {
     UUID uuid();
 
     default SecurityLevel security() {
         return SecurityLevel.SECURE;
     }
-
-    ProfileInfo fallbackProfileInfo();
-
-    CompletableFuture<ProfileInfo> profileInfo();
 
     void joinWorld(Screen parentScreen);
 

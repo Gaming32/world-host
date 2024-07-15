@@ -1,10 +1,12 @@
 package io.github.gaming32.worldhost.plugin.vanilla;
 
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
 import io.github.gaming32.worldhost.plugin.WorldHostPlugin;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 @WorldHostPlugin.Entrypoint
 public final class VanillaWorldHostPlugin implements WorldHostPlugin {
@@ -24,8 +26,16 @@ public final class VanillaWorldHostPlugin implements WorldHostPlugin {
     }
 
     @Override
-    public void refreshFriendsList() {
+    public void refreshOnlineFriends() {
         if (WorldHost.protoClient == null) return;
         WorldHost.protoClient.listOnline(WorldHost.CONFIG.getFriends());
+    }
+
+    @Override
+    public void listFriends(Consumer<FriendListFriend> friendConsumer) {
+        WorldHost.CONFIG.getFriends()
+            .stream()
+            .map(WorldHostFriendListFriend::new)
+            .forEach(friendConsumer);
     }
 }

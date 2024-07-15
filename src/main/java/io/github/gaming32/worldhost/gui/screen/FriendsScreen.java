@@ -4,9 +4,11 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
+import io.github.gaming32.worldhost.plugin.ProfileInfo;
+import io.github.gaming32.worldhost.plugin.vanilla.WorldHostFriendListFriend;
 import io.github.gaming32.worldhost.versions.Components;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -16,8 +18,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collections;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -109,7 +109,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
 
     private void addFriendAndUpdate(GameProfile profile) {
         addFriend(profile);
-        list.addEntry(new FriendsEntry(profile));
+        list.addEntry(new FriendsEntry(new WorldHostFriendListFriend(profile)));
     }
 
     public static void addFriend(GameProfile profile) {
@@ -153,7 +153,11 @@ public class FriendsScreen extends ScreenWithInfoTexts {
 
         private void updateEntries() {
             clearEntries();
-            WorldHost.CONFIG.getFriends().forEach(uuid -> addEntry(new FriendsEntry(new GameProfile(uuid, ""))));
+            for (final var plugin : WorldHost.getPlugins()) {
+                plugin.plugin().listFriends(friend ->
+                    Minecraft.getInstance().execute(() -> addEntry(new FriendsEntry(friend)))
+                );
+            }
         }
 
         @Override
@@ -164,20 +168,25 @@ public class FriendsScreen extends ScreenWithInfoTexts {
 
     public class FriendsEntry extends ObjectSelectionList.Entry<FriendsEntry> {
         private final Minecraft minecraft;
-        private GameProfile profile;
+        private final FriendListFriend friend;
+        private ProfileInfo profile;
 
-        public FriendsEntry(GameProfile profile) {
+        public FriendsEntry(FriendListFriend friend) {
             minecraft = Minecraft.getInstance();
-            this.profile = profile;
-            Util.backgroundExecutor().execute(
-                () -> this.profile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), profile)
-            );
-        }
+            this.friend = friend;
+            profile = friend.fallbackProfileInfo();
+            friend.profileInfo()
+                .thenAccept(ready -> profile = ready)
+                .exceptionally(t -> {
+                    WorldHost.LOGGER.error("Failed to request profile skin for {}", friend, t);
+                    return null;
+                });
+            }
 
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.literal(getName());
+            return Components.translatable("narrator.select", profile.name());
         }
 
         @Override
@@ -190,17 +199,10 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             //#endif
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {
-            final var skinTexture = WorldHost.getSkinLocationNow(profile);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.enableBlend();
-            blit(context, skinTexture, x, y, 32, 32, 8, 8, 8, 8, 64, 64);
-            blit(context, skinTexture, x, y, 32, 32, 40, 8, 8, 8, 64, 64);
+            profile.iconRenderer().draw(context, x, y, 32, 32);
             RenderSystem.disableBlend();
-            drawCenteredString(context, minecraft.font, getName(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
-        }
-
-        public String getName() {
-            return WorldHost.getName(profile);
+            drawCenteredString(context, minecraft.font, profile.name(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
         }
 
         public void maybeRemove() {
@@ -208,13 +210,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             minecraft.setScreen(new ConfirmScreen(
                 yes -> {
                     if (yes) {
-                        WorldHost.CONFIG.getFriends().remove(profile.getId());
-                        WorldHost.saveConfig();
-                        FriendsScreen.this.list.updateEntries();
-                        final var server = Minecraft.getInstance().getSingleplayerServer();
-                        if (server != null && server.isPublished() && WorldHost.protoClient != null) {
-                            WorldHost.protoClient.closedWorld(Collections.singleton(profile.getId()));
-                        }
+                        friend.removeFriend(() -> minecraft.execute(() -> FriendsScreen.this.list.updateEntries()));
                     }
                     minecraft.setScreen(FriendsScreen.this);
                 },

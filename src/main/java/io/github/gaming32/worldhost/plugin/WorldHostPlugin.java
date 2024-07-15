@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * World Host plugin entrypoint class. On Forge and NeoForge, annotate your implementation with {@link Entrypoint}. On
@@ -29,7 +30,10 @@ public interface WorldHostPlugin {
     default void pingFriends(Collection<OnlineFriend> friends) {
     }
 
-    default void refreshFriendsList() {
+    default void refreshOnlineFriends() {
+    }
+
+    default void listFriends(Consumer<FriendListFriend> friendConsumer) {
     }
 
     /**
