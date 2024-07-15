@@ -106,7 +106,7 @@ public class AddFriendScreen extends WorldHostScreen {
         //#if MC >= 1.19.4
         setInitialFocus(nameField);
         //#else
-        //$$ usernameField.setFocus(true);
+        //$$ nameField.setFocus(true);
         //#endif
         nameField.setResponder(name -> {
             lastTyping = Util.getMillis();
@@ -187,7 +187,7 @@ public class AddFriendScreen extends WorldHostScreen {
     @Override
     public void tick() {
         //#if MC < 1.20.2
-        //$$ usernameField.tick();
+        //$$ nameField.tick();
         //#endif
         if (Util.getMillis() - 300 > lastTyping && delayedFriendUpdate) {
             delayedFriendUpdate = false;

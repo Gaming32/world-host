@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
+import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.network.chat.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -18,7 +19,7 @@ public class WorldHostFriendAdder implements FriendAdder {
 
     @Override
     public Component label() {
-        return Component.literal("World Host");
+        return Components.literal("World Host");
     }
 
     @Override
