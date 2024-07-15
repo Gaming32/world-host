@@ -154,7 +154,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         }
 
         private void reloadEntries() {
-            final int currentReloadCount = reloadCount++;
+            final int currentReloadCount = ++reloadCount;
             clearEntries();
             for (final var plugin : WorldHost.getPlugins()) {
                 plugin.plugin().listFriends(friend -> Minecraft.getInstance().execute(() -> {
