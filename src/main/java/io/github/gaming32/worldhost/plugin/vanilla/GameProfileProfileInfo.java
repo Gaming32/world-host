@@ -7,7 +7,6 @@ import io.github.gaming32.worldhost.toast.IconRenderer;
 
 public final class GameProfileProfileInfo implements ProfileInfo {
     private final GameProfile profile;
-    private IconRenderer iconRenderer;
 
     public GameProfileProfileInfo(GameProfile profile) {
         this.profile = profile;
@@ -20,9 +19,6 @@ public final class GameProfileProfileInfo implements ProfileInfo {
 
     @Override
     public IconRenderer iconRenderer() {
-        if (iconRenderer == null) {
-            iconRenderer = IconRenderer.createSkinIconRenderer(WorldHost.getSkinLocationNow(profile));
-        }
-        return iconRenderer;
+        return IconRenderer.createSkinIconRenderer(WorldHost.getSkinLocationNow(profile));
     }
 }

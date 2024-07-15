@@ -19,6 +19,9 @@ public interface GameProfileBasedProfilable extends Profilable {
 
     @Override
     default CompletableFuture<ProfileInfo> profileInfo() {
+        if (defaultProfile().getId().version() != 4) {
+            return CompletableFuture.completedFuture(fallbackProfileInfo());
+        }
         return CompletableFuture.supplyAsync(
             () -> WorldHost.fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), defaultProfile()),
             //#if MC >= 1.20.4

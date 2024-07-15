@@ -359,7 +359,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             friend.profileInfo()
                 .thenAccept(ready -> profile = ready)
                 .exceptionally(t -> {
-                    WorldHost.LOGGER.error("Failed to request profile skin for {}", friend, t);
+                    WorldHost.LOGGER.error("Failed to request profile info for {}", friend, t);
                     return null;
                 });
             iconTextureId = ResourceLocations.worldHost("servers/" + friend.uuid() + "/icon");

@@ -11,6 +11,7 @@ import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
+import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
 import io.github.gaming32.worldhost.plugin.WorldHostPlugin;
@@ -415,6 +416,14 @@ public class WorldHost
             result.addAll(plugin.plugin().getInfoTexts(category));
         }
         return result;
+    }
+
+    public static List<FriendAdder> getFriendAdders() {
+        return plugins.stream()
+            .map(LoadedWorldHostPlugin::plugin)
+            .map(WorldHostPlugin::friendAdder)
+            .flatMap(Optional::stream)
+            .toList();
     }
 
     public static void tickHandler() {

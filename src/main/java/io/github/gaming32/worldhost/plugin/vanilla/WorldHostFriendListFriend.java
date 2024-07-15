@@ -20,6 +20,15 @@ public record WorldHostFriendListFriend(
     }
 
     @Override
+    public void addFriend(boolean notify, Runnable refresher) {
+        WorldHost.addFriends(uuid);
+        refresher.run();
+        if (notify && WorldHost.protoClient != null) {
+            WorldHost.protoClient.friendRequest(uuid);
+        }
+    }
+
+    @Override
     public void removeFriend(Runnable refresher) {
         WorldHost.CONFIG.getFriends().remove(uuid);
         WorldHost.saveConfig();

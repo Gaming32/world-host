@@ -8,6 +8,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -34,6 +35,10 @@ public interface WorldHostPlugin {
     }
 
     default void listFriends(Consumer<FriendListFriend> friendConsumer) {
+    }
+
+    default Optional<FriendAdder> friendAdder() {
+        return Optional.empty();
     }
 
     /**

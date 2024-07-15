@@ -1,13 +1,11 @@
 package io.github.gaming32.worldhost.gui.screen;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
-import io.github.gaming32.worldhost.plugin.vanilla.WorldHostFriendListFriend;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -33,6 +31,11 @@ public class FriendsScreen extends ScreenWithInfoTexts {
     private Button removeButton;
     private FriendsList list;
 
+    private final Runnable refresher = () -> {
+        assert minecraft != null;
+        minecraft.execute(() -> list.reloadEntries());
+    };
+
     public FriendsScreen(Screen parent) {
         super(WorldHostComponents.FRIENDS, InfoTextsCategory.FRIENDS_SCREEN);
         this.parent = parent;
@@ -56,12 +59,10 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         addRenderableWidget(
             button(ADD_FRIEND_TEXT, button -> {
                 assert minecraft != null;
-                minecraft.setScreen(new AddFriendScreen(this, ADD_FRIEND_TEXT, null, profile -> {
-                    addFriendAndUpdate(profile);
-                    if (WorldHost.protoClient != null) {
-                        WorldHost.protoClient.friendRequest(profile.getId());
-                    }
-                }));
+                minecraft.setScreen(new AddFriendScreen(
+                    this, ADD_FRIEND_TEXT, null,
+                    friend -> friend.addFriend(true, refresher)
+                ));
             }).width(152)
                 .pos(width / 2 - 154, height - 54)
                 .tooltip(Components.translatable("world-host.add_friend.tooltip"))
@@ -71,7 +72,10 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         addRenderableWidget(
             button(ADD_SILENTLY_TEXT, button -> {
                 assert minecraft != null;
-                minecraft.setScreen(new AddFriendScreen(this, ADD_SILENTLY_TEXT, null, this::addFriendAndUpdate));
+                minecraft.setScreen(new AddFriendScreen(
+                    this, ADD_SILENTLY_TEXT, null,
+                    friend -> friend.addFriend(false, refresher)
+                ));
             }).width(152)
                 .pos(width / 2 - 154, height - 30)
                 .tooltip(Components.translatable("world-host.friends.add_silently.tooltip"))
@@ -105,15 +109,6 @@ public class FriendsScreen extends ScreenWithInfoTexts {
     public void onClose() {
         assert minecraft != null;
         minecraft.setScreen(parent);
-    }
-
-    private void addFriendAndUpdate(GameProfile profile) {
-        addFriend(profile);
-        list.addEntry(new FriendsEntry(new WorldHostFriendListFriend(profile)));
-    }
-
-    public static void addFriend(GameProfile profile) {
-        WorldHost.addFriends(profile.getId());
     }
 
     @Override
@@ -183,10 +178,10 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             friend.profileInfo()
                 .thenAccept(ready -> profile = ready)
                 .exceptionally(t -> {
-                    WorldHost.LOGGER.error("Failed to request profile skin for {}", friend, t);
+                    WorldHost.LOGGER.error("Failed to request profile info for {}", friend, t);
                     return null;
                 });
-            }
+        }
 
         @NotNull
         @Override
@@ -224,7 +219,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             minecraft.setScreen(new ConfirmScreen(
                 yes -> {
                     if (yes) {
-                        friend.removeFriend(() -> minecraft.execute(() -> FriendsScreen.this.list.reloadEntries()));
+                        friend.removeFriend(refresher);
                     }
                     minecraft.setScreen(FriendsScreen.this);
                 },

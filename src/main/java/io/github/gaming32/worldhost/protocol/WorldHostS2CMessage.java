@@ -8,6 +8,7 @@ import io.github.gaming32.worldhost.gui.screen.AddFriendScreen;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
+import io.github.gaming32.worldhost.plugin.vanilla.WorldHostFriendListFriend;
 import io.github.gaming32.worldhost.plugin.vanilla.WorldHostOnlineFriend;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.toast.WHToast;
@@ -118,8 +119,8 @@ public sealed interface WorldHostS2CMessage {
                     minecraft.setScreen(new AddFriendScreen(
                         minecraft.screen,
                         FriendsScreen.ADD_FRIEND_TEXT,
-                        fromUser,
-                        FriendsScreen::addFriend
+                        new WorldHostFriendListFriend(fromUser),
+                        friend -> friend.addFriend(true, () -> {})
                     ));
                 }
             );

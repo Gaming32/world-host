@@ -36,6 +36,7 @@
   "world-host.add_friend": "Add Friend",
   "world-host.add_friend.tooltip": "This will add the person as a friend, and notify them that you did so, asking them to return the favor.\nNote that you must both friend each other in order to join each other's games.",
   "world-host.add_friend.enter_username": "Friend Username",
+  "world-host.add_friend.friend_adder": "Friend Type",
   "world-host.wh_connect.close_failed": "Failed to close connection to World Host server.",
   "world-host.wh_connect.not_available": "Failed to get player UUID. Unable to use World Host.",
   "world-host.wh_connect.auth_failed": "Failed to authenticate user!",

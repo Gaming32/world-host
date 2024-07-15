@@ -1,8 +1,11 @@
 package io.github.gaming32.worldhost.gui.screen;
 
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.gui.widget.FriendAdderSelectorButton;
+import io.github.gaming32.worldhost.plugin.FriendAdder;
+import io.github.gaming32.worldhost.plugin.FriendListFriend;
+import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -12,14 +15,12 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.GameProfileCache;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import java.nio.charset.StandardCharsets;
-import java.util.UUID;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -28,27 +29,70 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 public class AddFriendScreen extends WorldHostScreen {
-    public static final Pattern VALID_USERNAME = Pattern.compile("^[a-zA-Z0-9_]{1,16}$");
-    public static final Pattern VALID_UUID = Pattern.compile("^[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}$");
     private static final Component FRIEND_USERNAME_TEXT = Components.translatable("world-host.add_friend.enter_username");
 
     private final Screen parent;
-    private final Consumer<GameProfile> addAction;
+    private final Consumer<FriendListFriend> addAction;
 
-    private Consumer<String> usernameResponder;
+    private final List<FriendAdder> friendAdders = WorldHost.getFriendAdders();
+    private FriendAdder friendAdder = friendAdders.getFirst();
+
     private Button addFriendButton;
-    private EditBox usernameField;
+    private EditBox nameField;
     private long lastTyping;
-    private boolean usernameUpdate;
-    private GameProfile friendProfile;
+    private boolean delayedFriendUpdate;
 
-    public AddFriendScreen(Screen parent, Component title, UUID prefilledUser, Consumer<GameProfile> addAction) {
+    private FriendListFriend friend;
+    private int reloadCount;
+    private ProfileInfo friendProfile;
+
+    public AddFriendScreen(
+        Screen parent,
+        Component title,
+        @Nullable FriendListFriend prefilledFriend,
+        Consumer<FriendListFriend> addAction
+    ) {
         super(title);
         this.parent = parent;
         this.addAction = addAction;
-        if (prefilledUser != null) {
-            friendProfile = WorldHost.fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), prefilledUser);
+        if (prefilledFriend != null) {
+            setFriend(prefilledFriend);
         }
+    }
+
+    private void setFriend(FriendListFriend friend) {
+        this.friend = friend;
+        addFriendButton.active = friend != null;
+        final int currentReloadCount = ++reloadCount;
+        if (friend == null) {
+            friendProfile = null;
+            return;
+        }
+        friendProfile = friend.fallbackProfileInfo();
+        friend.profileInfo()
+            .thenAcceptAsync(ready -> {
+                if (reloadCount == currentReloadCount) {
+                    friendProfile = ready;
+                }
+            }, Minecraft.getInstance())
+            .exceptionally(t -> {
+                WorldHost.LOGGER.error("Failed to request profile info for {}", friend, t);
+                return null;
+            });
+    }
+
+    private void resolveFriend(String name) {
+        final int currentReloadCount = ++reloadCount;
+        friendAdder.resolveFriend(name)
+            .thenAcceptAsync(ready -> {
+                if (reloadCount == currentReloadCount) {
+                    setFriend(ready.orElse(null));
+                }
+            }, Minecraft.getInstance())
+            .exceptionally(t -> {
+                WorldHost.LOGGER.error("Failed to request friend with name '{}'", name, t);
+                return null;
+            });
     }
 
     @Override
@@ -57,65 +101,63 @@ public class AddFriendScreen extends WorldHostScreen {
         sendRepeatEvents(true);
         GameProfileCache.setUsesAuthentication(true); // This makes non-existent users return an empty value instead of an offline mode fallback.
 
-        addFriendButton = addRenderableWidget(
-            button(Components.translatable("world-host.add_friend"), button -> {
-                if (friendProfile != null) { // Just in case the user somehow clicks the button with this null
-                    addAction.accept(friendProfile);
-                }
-                minecraft.setScreen(parent);
-            }).pos(width / 2 - 100, height / 4 + 108)
-                .width(200)
-                .build()
-        );
-        addFriendButton.active = friendProfile != null;
-
-        addRenderableWidget(
-            button(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
-                .pos(width / 2 - 100, height / 4 + 132)
-                .width(200)
-                .build()
-        );
-
-        usernameField = addWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, FRIEND_USERNAME_TEXT));
-        usernameField.setMaxLength(36);
+        nameField = addRenderableWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, nameField, FRIEND_USERNAME_TEXT));
+        nameField.setMaxLength(36);
         //#if MC >= 1.19.4
-        setInitialFocus(usernameField);
+        setInitialFocus(nameField);
         //#else
         //$$ usernameField.setFocus(true);
         //#endif
-        if (friendProfile != null) {
-            usernameField.setValue(StringUtils.getIfBlank(friendProfile.getName(), () -> friendProfile.getId().toString()));
-        }
-        if (usernameResponder == null) {
-            // Only set the responder here on first init
-            usernameField.setResponder(usernameResponder = username -> {
-                lastTyping = Util.getMillis();
-                if (VALID_USERNAME.matcher(username).matches()) {
-                    usernameUpdate = true;
-                    friendProfile = null;
+        nameField.setResponder(name -> {
+            lastTyping = Util.getMillis();
+            setFriend(null);
+            addFriendButton.active = false;
+            if (friendAdder.rateLimit(name)) {
+                delayedFriendUpdate = true;
+            } else {
+                delayedFriendUpdate = false;
+                resolveFriend(name);
+            }
+        });
+
+        int extraY = 0;
+        if (showFriendAddersButton()) {
+            addRenderableWidget(new FriendAdderSelectorButton(
+                width / 2 - 100, 90, 200, 20,
+                Components.translatable("world-host.add_friend.friend_adder"),
+                button -> {
+                    friendAdder = button.getValue();
+                    setFriend(null);
                     addFriendButton.active = false;
-                } else if (VALID_UUID.matcher(username).matches()) {
-                    usernameUpdate = false;
-                    friendProfile = new GameProfile(UUID.fromString(username), "");
-                    addFriendButton.active = true;
-                } else if (username.startsWith("o:")) {
-                    usernameUpdate = false;
-                    final String actualName = username.substring(2);
-                    // TODO: Use createOfflinePlayerUUID when 1.19.2+ becomes the minimum, and createOfflineProfile in 1.20.4+
-                    friendProfile = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName);
-                    addFriendButton.active = true;
-                }
-            });
+                    resolveFriend(nameField.getValue());
+                },
+                friendAdders.toArray(FriendAdder[]::new)
+            ));
+            extraY += 24;
         }
+
+        addFriendButton = addRenderableWidget(
+            button(Components.translatable("world-host.add_friend"), button -> {
+                if (friend != null) { // Just in case the user somehow clicks the button with this null
+                    addAction.accept(friend);
+                }
+                minecraft.setScreen(parent);
+            }).pos(width / 2 - 100, height / 4 + 108 + extraY)
+                .width(200)
+                .build()
+        );
+        addFriendButton.active = friend != null;
+
+        addRenderableWidget(
+            button(CommonComponents.GUI_CANCEL, button -> minecraft.setScreen(parent))
+                .pos(width / 2 - 100, height / 4 + 132 + extraY)
+                .width(200)
+                .build()
+        );
     }
 
-    @Override
-    public void resize(@NotNull Minecraft minecraft, int width, int height) {
-        final String oldUsername = usernameField.getValue();
-        super.resize(minecraft, width, height);
-        usernameField.setValue(oldUsername);
-        // Make sure to set the responder *after* the value
-        usernameField.setResponder(usernameResponder);
+    private boolean showFriendAddersButton() {
+        return friendAdders.size() > 1;
     }
 
     @Override
@@ -133,8 +175,8 @@ public class AddFriendScreen extends WorldHostScreen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (
             addFriendButton.active &&
-                getFocused() == usernameField &&
-                (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
+            getFocused() == nameField &&
+            (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER)
         ) {
             addFriendButton.onPress();
             return true;
@@ -147,18 +189,9 @@ public class AddFriendScreen extends WorldHostScreen {
         //#if MC < 1.20.2
         //$$ usernameField.tick();
         //#endif
-        if (Util.getMillis() - 300 > lastTyping && usernameUpdate) {
-            usernameUpdate = false;
-            final String username = usernameField.getValue();
-            WorldHost.getMaybeAsync(WorldHost.getProfileCache(), username, p -> {
-                if (p.isPresent()) {
-                    assert minecraft != null;
-                    friendProfile = WorldHost.fetchProfile(minecraft.getMinecraftSessionService(), p.get());
-                    addFriendButton.active = true;
-                } else {
-                    friendProfile = null;
-                }
-            });
+        if (Util.getMillis() - 300 > lastTyping && delayedFriendUpdate) {
+            delayedFriendUpdate = false;
+            resolveFriend(nameField.getValue());
         }
     }
 
@@ -177,23 +210,20 @@ public class AddFriendScreen extends WorldHostScreen {
         whRenderBackground(context, mouseX, mouseY, delta);
         drawCenteredString(context, font, title, width / 2, 20, 0xffffff);
         drawString(context, font, FRIEND_USERNAME_TEXT, width / 2 - 100, 50, labelColor);
-        usernameField.render(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
 
         if (friendProfile != null) {
             assert minecraft != null;
-            final var skinTexture = WorldHost.getSkinLocationNow(friendProfile);
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-            RenderSystem.enableBlend();
+            final int yShift = showFriendAddersButton() ? 24 : 0;
             //#if MC >= 1.19.4
             final int addFriendY = addFriendButton.getY();
             //#else
             //$$ final int addFriendY = addFriendButton.y;
             //#endif
-            final int size = addFriendY - 110;
+            final int size = addFriendY - 110 - yShift;
             final int x = width / 2 - size / 2;
-            blit(context, skinTexture, x, 98, size, size, 8, 8, 8, 8, 64, 64);
-            blit(context, skinTexture, x, 98, size, size, 40, 8, 8, 8, 64, 64);
+            friendProfile.iconRenderer().draw(context, x, 98 + yShift, size, size);
             RenderSystem.disableBlend();
         }
     }
