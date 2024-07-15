@@ -17,6 +17,7 @@ public class MixinConnection {
 
     @Inject(method = "isMemoryConnection", at = @At("HEAD"), cancellable = true)
     private void proxyConnectionDoesntCountAsMemory(CallbackInfoReturnable<Boolean> cir) {
+        if (channel == null) return; // Fake players
         final SocketAddress checkAddress = WorldHost.proxySocketAddress;
         if (checkAddress == null) return;
         if (checkAddress.equals(channel.localAddress()) || checkAddress.equals(channel.remoteAddress())) {
