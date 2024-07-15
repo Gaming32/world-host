@@ -98,7 +98,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
                 .build()
         );
 
-        list.updateEntries();
+        list.reloadEntries();
     }
 
     @Override
@@ -133,6 +133,8 @@ public class FriendsScreen extends ScreenWithInfoTexts {
     }
 
     public class FriendsList extends ObjectSelectionList<FriendsEntry> {
+        private int reloadCount = 0;
+
         public FriendsList() {
             super(
                 FriendsScreen.this.minecraft,
@@ -151,12 +153,15 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             removeButton.active = entry != null;
         }
 
-        private void updateEntries() {
+        private void reloadEntries() {
+            final int currentReloadCount = reloadCount++;
             clearEntries();
             for (final var plugin : WorldHost.getPlugins()) {
-                plugin.plugin().listFriends(friend ->
-                    Minecraft.getInstance().execute(() -> addEntry(new FriendsEntry(friend)))
-                );
+                plugin.plugin().listFriends(friend -> Minecraft.getInstance().execute(() -> {
+                    if (reloadCount == currentReloadCount) {
+                        addEntry(new FriendsEntry(friend));
+                    }
+                }));
             }
         }
 
@@ -210,7 +215,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             minecraft.setScreen(new ConfirmScreen(
                 yes -> {
                     if (yes) {
-                        friend.removeFriend(() -> minecraft.execute(() -> FriendsScreen.this.list.updateEntries()));
+                        friend.removeFriend(() -> minecraft.execute(() -> FriendsScreen.this.list.reloadEntries()));
                     }
                     minecraft.setScreen(FriendsScreen.this);
                 },
