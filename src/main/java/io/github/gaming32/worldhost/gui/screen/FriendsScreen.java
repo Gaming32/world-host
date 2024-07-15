@@ -191,7 +191,16 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.translatable("narrator.select", profile.name());
+            return Components.translatable("narrator.select", getNameWithTag());
+        }
+
+        public Component getNameWithTag() {
+            return friend.tag()
+                .map(component -> Components.translatable(
+                    "world-host.friends.tagged_friend",
+                    profile.name(), component
+                ))
+                .orElseGet(() -> Components.literal(profile.name()));
         }
 
         @Override
@@ -207,7 +216,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             profile.iconRenderer().draw(context, x, y, 32, 32);
             RenderSystem.disableBlend();
-            drawCenteredString(context, minecraft.font, profile.name(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
+            drawCenteredString(context, minecraft.font, getNameWithTag(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
         }
 
         public void maybeRemove() {
