@@ -64,11 +64,12 @@ import net.minecraft.client.gui.components.Tooltip;
 //#endif
 
 public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsListUpdate {
-    private static final ResourceLocation GUI_ICONS_LOCATION = ResourceLocations.minecraft("textures/gui/icons.png");
     //#if MC >= 1.20.2
+    private static final ResourceLocation INCOMPATIBLE_SPRITE = ResourceLocations.minecraft("server_list/incompatible");
     private static final ResourceLocation JOIN_HIGHLIGHTED_SPRITE = ResourceLocations.minecraft("server_list/join_highlighted");
     private static final ResourceLocation JOIN_SPRITE = ResourceLocations.minecraft("server_list/join");
     //#else
+    //$$ private static final ResourceLocation GUI_ICONS_LOCATION = ResourceLocations.minecraft("textures/gui/icons.png");
     //$$ private static final ResourceLocation GUI_SERVER_SELECTION_LOCATION = ResourceLocations.minecraft("textures/gui/server_selection.png");
     //#endif
 
@@ -399,7 +400,11 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             if (incompatibleVersion) {
                 RenderSystem.enableBlend();
-                blit(context, GUI_ICONS_LOCATION, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
+                //#if MC >= 1.20.2
+                context.blitSprite(INCOMPATIBLE_SPRITE, x + entryWidth - 15, y, 10, 8);
+                //#else
+                //$$ blit(context, GUI_ICONS_LOCATION, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
+                //#endif
                 RenderSystem.disableBlend();
             }
 

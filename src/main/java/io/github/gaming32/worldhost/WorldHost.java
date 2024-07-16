@@ -205,7 +205,7 @@ public class WorldHost
     public static final long CONNECTION_ID = new SecureRandom().nextLong(MAX_CONNECTION_IDS);
 
     public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-        .followRedirects(HttpClient.Redirect.ALWAYS)
+        .followRedirects(HttpClient.Redirect.NORMAL)
         .executor(Util.ioPool())
         .build();
 
