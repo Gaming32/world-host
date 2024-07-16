@@ -40,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-//#if MC >= 1.20.4
+//#if MC >= 1.20.4 && FABRIC
 import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 import de.florianmichael.viafabricplus.settings.impl.GeneralSettings;
 //#endif
@@ -136,14 +136,14 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
 
         updateButtonActivationStates();
 
-        //#if MC >= 1.20.4
+        //#if MC >= 1.20.4 && FABRIC
         if (WorldHost.isModLoaded("viafabricplus")) {
             vfpInit();
         }
         //#endif
     }
 
-    //#if MC >= 1.20.4
+    //#if MC >= 1.20.4 && FABRIC
     // Based on https://github.com/ViaVersion/ViaFabricPlus/blob/main/src/main/java/de/florianmichael/viafabricplus/injection/mixin/base/integration/MixinMultiplayerScreen.java
     private void vfpInit() {
         Button.Builder builder = Button.builder(
