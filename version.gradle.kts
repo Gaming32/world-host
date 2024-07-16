@@ -64,8 +64,6 @@ tasks.compileJava {
     options.compilerArgs.add("-Xlint:all")
 }
 
-val remapFromIntermediary: Configuration by configurations.creating
-
 unimined.minecraft {
     version(mcVersionString)
     if ((mcVersion != 1_20_01 || !isForge) && mcVersion < 1_20_05) {
@@ -128,10 +126,6 @@ unimined.minecraft {
             }
         }
         else -> throw IllegalStateException()
-    }
-
-    mods.remap(remapFromIntermediary) {
-        namespace("intermediary")
     }
 
     val mcJavaVersion = (minecraftData as MinecraftDownloader).metadata.javaVersion
