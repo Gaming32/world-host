@@ -40,20 +40,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+//#if MC >= 1.20.4
+import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
+import de.florianmichael.viafabricplus.settings.impl.GeneralSettings;
+//#endif
+
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
-//#endif
-
-//#if MC >= 1.20.4 && FABRIC
-import de.florianmichael.viafabricplus.settings.impl.GeneralSettings;
-import net.fabricmc.loader.api.FabricLoader;
-//#if MC >= 1.20.1
-import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
-//#else
-//$$ import de.florianmichael.viafabricplus.screen.impl.base.ProtocolSelectionScreen;
-//#endif
 //#endif
 
 //#if MC >= 1.19.4
@@ -141,14 +136,14 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
 
         updateButtonActivationStates();
 
-        //#if MC >= 1.20.4 && FABRIC
-        if (FabricLoader.getInstance().isModLoaded("viafabricplus")) {
+        //#if MC >= 1.20.4
+        if (WorldHost.isModLoaded("viafabricplus")) {
             vfpInit();
         }
         //#endif
     }
 
-    //#if MC >= 1.20.4 && FABRIC
+    //#if MC >= 1.20.4
     // Based on https://github.com/ViaVersion/ViaFabricPlus/blob/main/src/main/java/de/florianmichael/viafabricplus/injection/mixin/base/integration/MixinMultiplayerScreen.java
     private void vfpInit() {
         Button.Builder builder = Button.builder(

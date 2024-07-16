@@ -929,9 +929,17 @@ public class WorldHost
         //#endif
     }
 
+    public static boolean isModLoaded(String modId) {
+        //#if FABRIC
+        return FabricLoader.getInstance().isModLoaded(modId);
+        //#else
+        //$$ return ModList.get().isLoaded(modId);
+        //#endif
+    }
+
     public static int getMenuLines(boolean isPause, OnlineStatusLocation side) {
         //#if FABRIC
-        if (!FabricLoader.getInstance().isModLoaded("isxander-main-menu-credits")) {
+        if (!isModLoaded("isxander-main-menu-credits")) {
             return 0;
         }
         final var baseConfig = MainMenuCredits.getInstance().getConfig();
