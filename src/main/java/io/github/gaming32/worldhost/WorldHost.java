@@ -11,15 +11,17 @@ import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
+import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
+import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.plugin.WorldHostPlugin;
+import io.github.gaming32.worldhost.plugin.vanilla.GameProfileProfileInfo;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.proxy.ProxyClient;
-import io.github.gaming32.worldhost.toast.IconRenderer;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.Gateway;
 import io.github.gaming32.worldhost.upnp.GatewayFinder;
@@ -426,6 +428,17 @@ public class WorldHost
             .toList();
     }
 
+    public static void friendWentOnline(OnlineFriend friend) {
+        ONLINE_FRIENDS.put(friend.uuid(), friend);
+        ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
+        if (!CONFIG.isAnnounceFriendsOnline()) return;
+        if (Minecraft.getInstance().screen instanceof OnlineFriendsScreen) return;
+        showFriendOrOnlineToast(
+            friend.profileInfo(), "world-host.went_online", "world-host.went_online.desc", 200,
+            friend.unjoinableReason().isPresent() ? null : () -> friend.joinWorld(Minecraft.getInstance().screen)
+        );
+    }
+
     public static void tickHandler() {
         if (protoClient == null || protoClient.isClosed()) {
             protoClient = null;
@@ -562,10 +575,6 @@ public class WorldHost
         proxyProtocolClient = null;
     }
 
-    public static String getName(GameProfile profile) {
-        return StringUtils.getIfBlank(profile.getName(), () -> profile.getId().toString());
-    }
-
     public static GameProfileCache getProfileCache() {
         return profileCache;
     }
@@ -627,6 +636,20 @@ public class WorldHost
         return fetchProfile(sessionService, profile.getId(), profile);
     }
 
+    public static CompletableFuture<ProfileInfo> resolveProfileInfo(GameProfile profile) {
+        if (profile.getId().version() != 4) {
+            return CompletableFuture.completedFuture(new GameProfileProfileInfo(profile));
+        }
+        return CompletableFuture.supplyAsync(
+            () -> WorldHost.fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), profile),
+            //#if MC >= 1.20.4
+            Util.nonCriticalIoPool()
+            //#else
+            //$$ Util.ioPool()
+            //#endif
+        ).thenApply(GameProfileProfileInfo::new);
+    }
+
     public static boolean isFriend(UUID user) {
         return CONFIG.isEnableFriends() && CONFIG.getFriends().contains(user);
     }
@@ -645,24 +668,21 @@ public class WorldHost
     }
 
     public static void showFriendOrOnlineToast(
-        UUID user,
+        CompletableFuture<ProfileInfo> profileFuture,
         @Translatable String title,
         @Translatable String description,
         int ticks,
         Runnable clickAction
     ) {
-        Util.backgroundExecutor().execute(() -> {
-            final GameProfile profile = fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), user);
-            getInsecureSkinLocation(profile).thenAcceptAsync(skinTexture -> {
-                WHToast.builder(Components.translatable(title, getName(profile)))
-                    .description(Components.translatable(description))
-                    .icon(IconRenderer.createSkinIconRenderer(skinTexture))
-                    .clickAction(clickAction)
-                    .ticks(ticks)
-                    .important()
-                    .show();
-            }, Minecraft.getInstance());
-        });
+        profileFuture.thenAccept(profile ->
+            WHToast.builder(Components.translatable(title, profile.name()))
+                .description(Components.translatable(description))
+                .icon(profile.iconRenderer())
+                .clickAction(clickAction)
+                .ticks(ticks)
+                .important()
+                .show()
+        );
     }
 
     public static FriendlyByteBuf createByteBuf() {
@@ -789,17 +809,13 @@ public class WorldHost
         return result;
     }
 
-    public static void join(long connectionId, @Nullable Screen parentScreen) {
+    public static void join(long connectionId, Screen parentScreen) {
         if (protoClient == null) {
             LOGGER.error("Tried to join {}, but protoClient == null!", connectionIdToString(connectionId));
             return;
         }
-        final Minecraft minecraft = Minecraft.getInstance();
-        if (parentScreen == null) {
-            parentScreen = minecraft.screen;
-        }
         protoClient.setAttemptingToJoin(connectionId);
-        minecraft.setScreen(new JoiningWorldHostScreen(parentScreen));
+        Minecraft.getInstance().setScreen(new JoiningWorldHostScreen(parentScreen));
         protoClient.requestDirectJoin(connectionId);
     }
 

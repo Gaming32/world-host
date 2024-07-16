@@ -14,7 +14,9 @@ public final class GameProfileProfileInfo implements ProfileInfo {
 
     @Override
     public String name() {
-        return WorldHost.getName(profile);
+        return !profile.getName().isBlank()
+            ? profile.getName()
+            : profile.getId().toString();
     }
 
     @Override

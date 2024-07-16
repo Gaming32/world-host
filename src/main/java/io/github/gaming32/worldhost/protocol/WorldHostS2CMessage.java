@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.protocol;
 
+import com.mojang.authlib.GameProfile;
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.SecurityLevel;
 import io.github.gaming32.worldhost.WorldHost;
@@ -110,7 +111,7 @@ public sealed interface WorldHostS2CMessage {
             }
             if (!isFriend && !WorldHost.CONFIG.isAllowFriendRequests()) return;
             WorldHost.showFriendOrOnlineToast(
-                fromUser,
+                WorldHost.resolveProfileInfo(new GameProfile(fromUser, "")),
                 isFriend ? "world-host.friend_added_you.already" : "world-host.friend_added_you",
                 isFriend ? "world-host.friend_added_you.already.desc" : "world-host.need_add_back",
                 isFriend ? 100 : 200,
@@ -133,16 +134,9 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             if (!checkAndLogSecurity() || !WorldHost.isFriend(user)) return;
-            Minecraft.getInstance().execute(() -> {
-                WorldHost.ONLINE_FRIENDS.put(user, new WorldHostOnlineFriend(user, connectionId, security));
-                WorldHost.ONLINE_FRIEND_UPDATES.forEach(FriendsListUpdate::friendsListUpdate);
-                if (!WorldHost.CONFIG.isAnnounceFriendsOnline()) return;
-                if (Minecraft.getInstance().screen instanceof OnlineFriendsScreen) return;
-                WorldHost.showFriendOrOnlineToast(
-                    user, "world-host.went_online", "world-host.went_online.desc", 200,
-                    () -> WorldHost.join(connectionId, null)
-                );
-            });
+            Minecraft.getInstance().execute(() ->
+                WorldHost.friendWentOnline(new WorldHostOnlineFriend(user, connectionId, security))
+            );
         }
     }
 
