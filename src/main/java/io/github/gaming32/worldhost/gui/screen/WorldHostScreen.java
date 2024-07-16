@@ -92,19 +92,19 @@ public abstract class WorldHostScreen extends Screen {
     //#if MC < 1.20.0
     //$$ @Override
     //#endif
-    public void renderComponentTooltip(
+    public void renderTooltip(
         @NotNull
         //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
         GuiGraphics context,
         //#endif
-        @NotNull List<Component> tooltips, int mouseX, int mouseY
+        @NotNull List<FormattedCharSequence> tooltips, int mouseX, int mouseY
     ) {
         //#if MC >= 1.20.0
-        context.renderComponentTooltip
+        context.renderTooltip
         //#else
-        //$$ super.renderComponentTooltip
+        //$$ super.renderTooltip
         //#endif
             (
                 //#if MC < 1.20.0

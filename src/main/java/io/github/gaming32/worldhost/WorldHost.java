@@ -435,7 +435,7 @@ public class WorldHost
         if (Minecraft.getInstance().screen instanceof OnlineFriendsScreen) return;
         showFriendOrOnlineToast(
             friend.profileInfo(), "world-host.went_online", "world-host.went_online.desc", 200,
-            friend.unjoinableReason().isPresent() ? null : () -> friend.joinWorld(Minecraft.getInstance().screen)
+            !friend.joinability().canJoin() ? null : () -> friend.joinWorld(Minecraft.getInstance().screen)
         );
     }
 

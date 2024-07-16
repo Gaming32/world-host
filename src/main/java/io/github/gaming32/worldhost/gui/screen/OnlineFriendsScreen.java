@@ -11,6 +11,7 @@ import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.widget.EnumButton;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.gui.widget.FriendsButton;
+import io.github.gaming32.worldhost.plugin.Joinability;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.mixin.ServerStatusPingerAccessor;
@@ -29,6 +30,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -71,7 +73,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
     private final Screen parent;
     private OnlineFriendsList list;
     private Button joinButton;
-    private List<Component> tooltip;
+    private List<FormattedCharSequence> tooltip;
 
     public OnlineFriendsScreen(Screen parent) {
         super(Components.translatable("world-host.online_friends.title"), InfoTextsCategory.ONLINE_FRIENDS_SCREEN);
@@ -199,7 +201,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         drawCenteredString(context, font, title, width / 2, 15, 0xffffff);
         super.render(context, mouseX, mouseY, delta);
         if (tooltip != null) {
-            renderComponentTooltip(context, tooltip, mouseX, mouseY);
+            renderTooltip(context, tooltip, mouseX, mouseY);
         }
     }
 
@@ -213,7 +215,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
 
     public void connect() {
         final OnlineFriendsListEntry entry = list.getSelected();
-        if (entry == null || entry.friend.unjoinableReason().isPresent()) return;
+        if (entry == null || entry.friend.joinability() instanceof Joinability.Unjoinable) return;
         WorldHost.LOGGER.info("Requesting to join {}", entry.friend);
         entry.friend.joinWorld(this);
     }
@@ -226,15 +228,10 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
     private void updateButtonActivationStates() {
         final var selected = list.getSelected();
         if (selected != null) {
-            final var unjoinableReason = selected.friend.unjoinableReason();
+            final var joinability = selected.friend.joinability();
+            joinButton.active = joinability.canJoin();
             //#if MC >= 1.19.4
-            if (unjoinableReason.isEmpty()) {
-                joinButton.active = true;
-                joinButton.setTooltip(null);
-            } else {
-                joinButton.active = false;
-                joinButton.setTooltip(Tooltip.create(unjoinableReason.get()));
-            }
+            joinButton.setTooltip(joinability.reason().map(Tooltip::create).orElse(null));
             //#endif
         } else {
             joinButton.active = false;
@@ -334,7 +331,8 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         private ProfileInfo profile;
 
         private Component displayName;
-        private List<Component> unjoinableTooltip;
+        private List<FormattedCharSequence> joinabilityTooltip;
+        private boolean joinable;
 
         private final ResourceLocation iconTextureId;
         //#if MC >= 1.19.4
@@ -436,12 +434,15 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             final int relY = mouseY - y;
             if (relX >= entryWidth - 15 && relX <= entryWidth - 5 && relY >= 0 && relY <= 8) {
                 if (incompatibleVersion) {
-                    tooltip = List.of(Components.translatable("multiplayer.status.incompatible"));
+                    tooltip = List.of(Components.translatable("multiplayer.status.incompatible").getVisualOrderText());
                 }
             } else if (relX >= entryWidth - labelWidth - 17 && relX <= entryWidth - 17 && relY >= 0 && relY <= 8) {
-                tooltip = serverInfo.playerList;
-            } else if (unjoinableTooltip != null && hovered) {
-                tooltip = unjoinableTooltip;
+                tooltip = new ArrayList<>();
+                for (final Component line : serverInfo.playerList) {
+                    tooltip.add(line.getVisualOrderText());
+                }
+            } else if (joinabilityTooltip != null && hovered) {
+                tooltip = joinabilityTooltip;
             }
 
             //#if MC >= 1.19.0
@@ -449,7 +450,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             //#else
             //$$ final boolean touchscreen = minecraft.options.touchscreen;
             //#endif
-            if (unjoinableTooltip == null && (touchscreen || hovered)) {
+            if (joinable && (touchscreen || hovered)) {
                 fill(context, x, y, x + 32, y + 32, 0xa0909090);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 //#if MC >= 1.20.2
@@ -566,7 +567,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
 
         private void updateNameAndTooltip() {
             final var security = friend.security();
-            final var unjoinableReason = friend.unjoinableReason();
+            final var joinability = friend.joinability();
 
             final MutableComponent newDisplayName;
             if (security == SecurityLevel.SECURE) {
@@ -578,12 +579,13 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     EnumButton.getTranslation("world-host.config.requiredSecurityLevel", security)
                 );
             }
-            if (unjoinableReason.isPresent()) {
-                newDisplayName.withStyle(ChatFormatting.RED);
-            }
+            newDisplayName.withStyle(joinability.nameFormatting());
             displayName = newDisplayName;
 
-            unjoinableTooltip = unjoinableReason.map(List::of).orElse(null);
+            joinabilityTooltip = joinability.reason()
+                .map(text -> font.split(text, 170))
+                .orElse(null);
+            joinable = joinability.canJoin();
         }
 
         private boolean uploadServerIcon(
