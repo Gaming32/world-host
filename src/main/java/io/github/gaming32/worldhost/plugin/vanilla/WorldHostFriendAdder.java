@@ -27,9 +27,7 @@ public class WorldHostFriendAdder implements FriendAdder {
     public CompletableFuture<List<? extends FriendListFriend>> searchFriends(String name, int maxResults) {
         if (VALID_USERNAME.matcher(name).matches()) {
             final CompletableFuture<Optional<GameProfile>> result = new CompletableFuture<>();
-            WorldHost.getMaybeAsync(
-                WorldHost.getProfileCache(), name, result::complete
-            );
+            WorldHost.getMaybeAsync(WorldHost.getProfileCache(), name, result::complete);
             return result.thenApply(p -> p.map(WorldHostFriendListFriend::new).map(List::of).orElse(List.of()));
         }
         if (VALID_UUID.matcher(name).matches()) {
