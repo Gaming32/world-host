@@ -83,10 +83,10 @@ public class AddFriendScreen extends WorldHostScreen {
 
     private void resolveFriend(String name) {
         final int currentReloadCount = ++reloadCount;
-        friendAdder.resolveFriend(name)
+        friendAdder.searchFriends(name, 1)
             .thenAcceptAsync(ready -> {
                 if (reloadCount == currentReloadCount) {
-                    setFriend(ready.orElse(null));
+                    setFriend(!ready.isEmpty() ? ready.getFirst() : null);
                 }
             }, Minecraft.getInstance())
             .exceptionally(t -> {
@@ -112,7 +112,7 @@ public class AddFriendScreen extends WorldHostScreen {
             lastTyping = Util.getMillis();
             setFriend(null);
             addFriendButton.active = false;
-            if (friendAdder.rateLimit(name)) {
+            if (friendAdder.delayLookup(name)) {
                 delayedFriendUpdate = true;
             } else {
                 delayedFriendUpdate = false;
