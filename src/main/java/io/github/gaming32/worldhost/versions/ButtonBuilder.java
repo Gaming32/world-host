@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.versions;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 //#if MC >= 1.19.4
 import net.minecraft.client.gui.components.Tooltip;
@@ -70,11 +71,11 @@ public class ButtonBuilder {
         return this;
     }
 
-    public ButtonBuilder tooltip(Component tooltip) {
+    public ButtonBuilder tooltip(@Nullable Component tooltip) {
         //#if MC >= 1.19.4
-        builder.tooltip(Tooltip.create(tooltip));
+        builder.tooltip(tooltip != null ? Tooltip.create(tooltip) : null);
         //#else
-        //$$ onTooltip = WorldHostScreen.onTooltip(tooltip);
+        //$$ onTooltip = tooltip != null ? WorldHostScreen.onTooltip(tooltip) : Button.NO_TOOLTIP;
         //#endif
         return this;
     }

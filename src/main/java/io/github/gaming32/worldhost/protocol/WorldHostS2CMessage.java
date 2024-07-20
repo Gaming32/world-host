@@ -121,7 +121,7 @@ public sealed interface WorldHostS2CMessage {
                         minecraft.screen,
                         FriendsScreen.ADD_FRIEND_TEXT,
                         new WorldHostFriendListFriend(fromUser),
-                        friend -> friend.addFriend(true, () -> {})
+                        (friend, notify) -> friend.addFriend(notify, () -> {})
                     ));
                 }
             );

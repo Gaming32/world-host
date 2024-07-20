@@ -29,6 +29,11 @@ public record WorldHostFriendListFriend(
     }
 
     @Override
+    public boolean supportsNotifyAdd() {
+        return true;
+    }
+
+    @Override
     public void removeFriend(Runnable refresher) {
         WorldHost.CONFIG.getFriends().remove(uuid);
         WorldHost.saveConfig();

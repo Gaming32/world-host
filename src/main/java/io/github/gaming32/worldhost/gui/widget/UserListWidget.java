@@ -5,19 +5,24 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.toast.IconRenderer;
+import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.locale.Language;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.button;
 import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.drawString;
@@ -29,28 +34,31 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 public final class UserListWidget extends AbstractContainerWidget {
-    private final List<FriendListFriend> users = new ArrayList<>();
-    private final List<Button> addButtons = new ArrayList<>();
-    private final List<CachedProfile> userProfiles = new ArrayList<>();
+    private final List<UserInfo> users = new ArrayList<>();
+    private final List<Button> actionButtons = new ArrayList<>();
     private final Font font;
-    private final Consumer<FriendListFriend> doneAction;
+    private final Function<FriendListFriend, List<Action>> getApplicableActions;
 
-    public UserListWidget(Font font, int x, int y, int width, int height, Consumer<FriendListFriend> doneAction) {
-        this(font, x, y, width, height, doneAction, null);
+    public UserListWidget(
+        Font font,
+        int x, int y, int width, int height,
+        Function<FriendListFriend, List<Action>> getApplicableActions
+    ) {
+        this(font, x, y, width, height, getApplicableActions, null);
     }
 
     public UserListWidget(
-        Font font, int x, int y, int width, int height,
-        Consumer<FriendListFriend> doneAction,
+        Font font,
+        int x, int y, int width, int height,
+        Function<FriendListFriend, List<Action>> getApplicableActions,
         @Nullable UserListWidget old
     ) {
         super(x, y, width, height, Component.empty());
         this.font = font;
-        this.doneAction = doneAction;
+        this.getApplicableActions = getApplicableActions;
         if (old != null && !old.users.isEmpty()) {
             users.addAll(old.users);
-            initButtons();
-            userProfiles.addAll(old.userProfiles);
+            addButtons(0);
         }
     }
 
@@ -67,13 +75,14 @@ public final class UserListWidget extends AbstractContainerWidget {
         final int x = getX();
         int y = getY();
         for (int i = 0; i < getVisibleCount(); i++) {
-            final Button addButton = addButtons.get(i);
-            final CachedProfile profile = userProfiles.get(i);
-            profile.getIcon().draw(context, x, y, 20, 20);
+            final var user = users.get(i);
+            user.getIcon().draw(context, x, y, 20, 20);
             RenderSystem.disableBlend();
-            drawString(context, font, profile.getName(), x + 24, y + textYOffset, 0xffffff, true);
-            addButton.render(context, mouseX, mouseY, partialTick);
+            drawString(context, font, user.getName(), x + 24, y + textYOffset, 0xffffff, true);
             y += 24;
+        }
+        for (final Button button : actionButtons) {
+            button.render(context, mouseX, mouseY, partialTick);
         }
     }
 
@@ -81,36 +90,50 @@ public final class UserListWidget extends AbstractContainerWidget {
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
     }
 
-    public List<FriendListFriend> getUsers() {
-        return users;
+    public int getUsersCount() {
+        return users.size();
+    }
+
+    public void clearUsers() {
+        users.clear();
+        actionButtons.clear();
     }
 
     public void setUsers(List<? extends FriendListFriend> users) {
         this.users.clear();
-        this.users.addAll(users);
-        initButtons();
-        initUserProfiles();
+        actionButtons.clear();
+        addUsers(users);
     }
 
-    private void initButtons() {
-        addButtons.clear();
-        int y = getY();
-        for (int i = 0; i < getVisibleCount(); i++) {
-            final FriendListFriend user = users.get(i);
-            addButtons.add(
-                button(Component.literal("+"), b -> doneAction.accept(user))
-                    .pos(getRight() - 20, y)
-                    .size(20, 20)
-                    .build()
-            );
-            y += 24;
-        }
-    }
-
-    private void initUserProfiles() {
-        userProfiles.clear();
+    public void addUsers(List<? extends FriendListFriend> users) {
+        final int oldSize = this.users.size();
         for (final FriendListFriend user : users) {
-            userProfiles.add(new CachedProfile(user));
+            this.users.add(new UserInfo(user));
+        }
+        addButtons(oldSize);
+    }
+
+    public void addUser(FriendListFriend user) {
+        users.add(new UserInfo(user));
+        addButtons(users.size() - 1);
+    }
+
+    private void addButtons(int fromI) {
+        int y = getY() + fromI * 24;
+        for (int i = fromI; i < getVisibleCount(); i++) {
+            final UserInfo user = users.get(i);
+            int x = getRight() - 24 * user.actions.size() + 4;
+            for (final Action action : user.actions) {
+                actionButtons.add(
+                    button(action.text, b -> action.apply.run())
+                        .tooltip(action.tooltip)
+                        .pos(x, y)
+                        .size(20, 20)
+                        .build()
+                );
+                x += 24;
+            }
+            y += 24;
         }
     }
 
@@ -120,7 +143,7 @@ public final class UserListWidget extends AbstractContainerWidget {
 
     @Override
     public @NotNull List<? extends GuiEventListener> children() {
-        return addButtons;
+        return actionButtons;
     }
 
     //#if MC < 1.19.4
@@ -133,10 +156,23 @@ public final class UserListWidget extends AbstractContainerWidget {
     //$$ }
     //#endif
 
-    private final class CachedProfile {
+    public static Component getNameWithTag(FriendListFriend user, ProfileInfo profile) {
+        return user.tag()
+            .map(component -> Components.translatable(
+                "world-host.friends.tagged_friend",
+                profile.name(), component
+            ))
+            .orElseGet(() -> Components.literal(profile.name()));
+    }
+
+    private final class UserInfo {
+        final FriendListFriend user;
+        final List<Action> actions;
         private ProfileInfo profile;
 
-        CachedProfile(FriendListFriend user) {
+        UserInfo(FriendListFriend user) {
+            this.user = user;
+            actions = getApplicableActions.apply(user);
             profile = user.fallbackProfileInfo();
             user.profileInfo()
                 .thenAcceptAsync(ready -> profile = ready, Minecraft.getInstance())
@@ -146,23 +182,24 @@ public final class UserListWidget extends AbstractContainerWidget {
                 });
         }
 
-        String getName() {
-            return fitName(profile.name());
+        FormattedCharSequence getName() {
+            final Component name = getNameWithTag(user, profile);
+            final int maxWidth = width - 24 - 24 * actions.size();
+            if (font.width(name) <= maxWidth) {
+                return name.getVisualOrderText();
+            }
+            final FormattedText clipped = font.substrByWidth(name, maxWidth - font.width(CommonComponents.ELLIPSIS));
+            return Language.getInstance().getVisualOrder(FormattedText.composite(clipped, CommonComponents.ELLIPSIS));
         }
 
         IconRenderer getIcon() {
             return profile.iconRenderer();
         }
+    }
 
-        private String fitName(String name) {
-            final int nameWidth = font.width(name);
-            final int maxWidth = width - 48;
-            if (nameWidth <= maxWidth) {
-                return name;
-            }
-            final String ellipses = "...";
-            final String clipped = font.plainSubstrByWidth(name, maxWidth - font.width(ellipses));
-            return clipped + ellipses;
+    public record Action(Component text, @Nullable Component tooltip, Runnable apply) {
+        public Action(Component text, Runnable apply) {
+            this(text, null, apply);
         }
     }
 }

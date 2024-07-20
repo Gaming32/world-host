@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.gui.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.gui.widget.UserListWidget;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
@@ -25,7 +26,6 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class FriendsScreen extends ScreenWithInfoTexts {
     public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
-    private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
 
     private final Screen parent;
     private Button removeButton;
@@ -61,24 +61,17 @@ public class FriendsScreen extends ScreenWithInfoTexts {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(
                     this, ADD_FRIEND_TEXT, null,
-                    friend -> friend.addFriend(true, refresher)
+                    (friend, notify) -> friend.addFriend(notify, refresher)
                 ));
             }).width(152)
                 .pos(width / 2 - 154, height - 54)
-                .tooltip(Components.translatable("world-host.add_friend.tooltip"))
                 .build()
         );
 
         addRenderableWidget(
-            button(ADD_SILENTLY_TEXT, button -> {
-                assert minecraft != null;
-                minecraft.setScreen(new AddFriendScreen(
-                    this, ADD_SILENTLY_TEXT, null,
-                    friend -> friend.addFriend(false, refresher)
-                ));
+            button(Component.empty(), button -> {
             }).width(152)
                 .pos(width / 2 - 154, height - 30)
-                .tooltip(Components.translatable("world-host.friends.add_silently.tooltip"))
                 .build()
         );
 
@@ -190,12 +183,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         }
 
         public Component getNameWithTag() {
-            return friend.tag()
-                .map(component -> Components.translatable(
-                    "world-host.friends.tagged_friend",
-                    profile.name(), component
-                ))
-                .orElseGet(() -> Components.literal(profile.name()));
+            return UserListWidget.getNameWithTag(friend, profile);
         }
 
         @Override

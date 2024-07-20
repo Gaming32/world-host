@@ -1,13 +1,11 @@
 package io.github.gaming32.worldhost.gui.screen;
 
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.gui.widget.FriendAdderSelectorButton;
 import io.github.gaming32.worldhost.gui.widget.UserListWidget;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -16,8 +14,9 @@ import net.minecraft.server.players.GameProfileCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -27,26 +26,29 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class AddFriendScreen extends WorldHostScreen {
     private static final Component FRIEND_USERNAME_TEXT = Components.translatable("world-host.add_friend.enter_username");
+    private static final Component ADD_FRIEND_TEXT = Component.literal("+");
+    private static final Component ADD_FRIEND_SILENT_TEXT = Component.literal("+\ud83d\udd08");
+    private static final Component ADD_FRIEND_NOTIFY_TEXT = Component.literal("+\ud83d\udd0a");
+    private static final Component ADD_FRIEND_SILENT_TOOLTIP = Components.translatable("world-host.add_friend.tooltip");
+    private static final Component ADD_FRIEND_NOTIFY_TOOLTIP = Components.translatable("world-host.friends.add_silently.tooltip");
 
     private final Screen parent;
-    private final Consumer<FriendListFriend> addAction;
+    private final BiConsumer<FriendListFriend, Boolean> addAction;
     private FriendListFriend prefilledFriend;
 
     private final List<FriendAdder> friendAdders = WorldHost.getFriendAdders();
-    private FriendAdder friendAdder = friendAdders.getFirst();
 
     private int maxFriends;
     private UserListWidget userList;
     private EditBox nameField;
     private long lastTyping;
-    private boolean delayedFriendUpdate;
-    private int reloadCount;
+    private Runnable delayedLookup;
 
     public AddFriendScreen(
         Screen parent,
         Component title,
         @Nullable FriendListFriend prefilledFriend,
-        Consumer<FriendListFriend> addAction
+        BiConsumer<FriendListFriend, Boolean> addAction
     ) {
         super(title);
         this.parent = parent;
@@ -54,18 +56,17 @@ public class AddFriendScreen extends WorldHostScreen {
         this.prefilledFriend = prefilledFriend;
     }
 
-    private void resolveFriends(String name) {
-        final int currentReloadCount = ++reloadCount;
-        friendAdder.searchFriends(name, maxFriends)
-            .thenAcceptAsync(friends -> {
-                if (reloadCount == currentReloadCount && userList != null) {
-                    userList.setUsers(friends);
+    private void resolveFriends(FriendAdder adder, String name) {
+        assert minecraft != null;
+        adder.searchFriends(
+            name,
+            maxFriends - userList.getUsersCount(),
+            friend -> minecraft.execute(() -> {
+                if (nameField.getValue().equals(name)) {
+                    userList.addUser(friend);
                 }
-            }, Minecraft.getInstance())
-            .exceptionally(t -> {
-                WorldHost.LOGGER.error("Failed to request friend with name '{}'", name, t);
-                return null;
-            });
+            })
+        );
     }
 
     @Override
@@ -83,30 +84,28 @@ public class AddFriendScreen extends WorldHostScreen {
         //#endif
         nameField.setResponder(name -> {
             lastTyping = Util.getMillis();
-            if (friendAdder.delayLookup(name)) {
-                delayedFriendUpdate = true;
+            userList.clearUsers();
+            final List<FriendAdder> delayedAdders = new ArrayList<>();
+            for (final FriendAdder adder : friendAdders) {
+                if (adder.delayLookup(name)) {
+                    delayedAdders.add(adder);
+                } else {
+                    resolveFriends(adder, name);
+                }
+            }
+            if (!delayedAdders.isEmpty()) {
+                delayedLookup = () -> {
+                    for (final FriendAdder adder : delayedAdders) {
+                        resolveFriends(adder, name);
+                    }
+                };
             } else {
-                delayedFriendUpdate = false;
-                resolveFriends(name);
+                delayedLookup = null;
             }
         });
 
         final int widgetsX = width / 2 - 100;
         final int widgetsWidth = 200;
-
-        int topWidgetsY = 90;
-        if (showFriendAddersButton()) {
-            addRenderableWidget(new FriendAdderSelectorButton(
-                widgetsX, topWidgetsY, widgetsWidth, 20,
-                Components.translatable("world-host.add_friend.friend_adder"),
-                button -> {
-                    friendAdder = button.getValue();
-                    resolveFriends(nameField.getValue());
-                },
-                friendAdders.toArray(FriendAdder[]::new)
-            ));
-            topWidgetsY += 24;
-        }
 
         int cancelY = 216;
         while (cancelY + 24 < height / 4 + 156) {
@@ -120,17 +119,11 @@ public class AddFriendScreen extends WorldHostScreen {
         );
 
         maxFriends = (cancelY - 90) / 24;
-        if (showFriendAddersButton()) {
-            maxFriends--;
-        }
 
         userList = addRenderableWidget(new UserListWidget(
             font,
-            widgetsX, topWidgetsY, widgetsWidth, cancelY - topWidgetsY,
-            friend -> {
-                addAction.accept(friend);
-                minecraft.setScreen(parent);
-            },
+            widgetsX, 90, widgetsWidth, cancelY - 90,
+            this::getActions,
             userList
         ));
         if (prefilledFriend != null) {
@@ -139,17 +132,31 @@ public class AddFriendScreen extends WorldHostScreen {
         }
     }
 
-    @Override
-    public void resize(Minecraft minecraft, int width, int height) {
-        final int oldMaxFriends = maxFriends;
-        super.resize(minecraft, width, height);
-        if (maxFriends != oldMaxFriends) {
-            resolveFriends(nameField.getValue());
+    private List<UserListWidget.Action> getActions(FriendListFriend user) {
+        if (user.supportsNotifyAdd()) {
+            return List.of(
+                new UserListWidget.Action(
+                    ADD_FRIEND_NOTIFY_TEXT, ADD_FRIEND_NOTIFY_TOOLTIP,
+                    getAddRunnable(user, true)
+                ),
+                new UserListWidget.Action(
+                    ADD_FRIEND_SILENT_TEXT, ADD_FRIEND_SILENT_TOOLTIP,
+                    getAddRunnable(user, false)
+                )
+            );
+        } else {
+            return List.of(
+                new UserListWidget.Action(ADD_FRIEND_TEXT, getAddRunnable(user, false))
+            );
         }
     }
 
-    private boolean showFriendAddersButton() {
-        return friendAdders.size() > 1;
+    private Runnable getAddRunnable(FriendListFriend user, boolean notify) {
+        assert minecraft != null;
+        return () -> {
+            addAction.accept(user, notify);
+            minecraft.setScreen(parent);
+        };
     }
 
     @Override
@@ -168,9 +175,9 @@ public class AddFriendScreen extends WorldHostScreen {
         //#if MC < 1.20.2
         //$$ nameField.tick();
         //#endif
-        if (Util.getMillis() - 300 > lastTyping && delayedFriendUpdate) {
-            delayedFriendUpdate = false;
-            resolveFriends(nameField.getValue());
+        if (Util.getMillis() - 300 > lastTyping && delayedLookup != null) {
+            delayedLookup.run();
+            delayedLookup = null;
         }
     }
 

@@ -8,10 +8,8 @@ import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.network.chat.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class WorldHostFriendAdder implements FriendAdder {
@@ -24,25 +22,21 @@ public class WorldHostFriendAdder implements FriendAdder {
     }
 
     @Override
-    public CompletableFuture<List<? extends FriendListFriend>> searchFriends(String name, int maxResults) {
+    public void searchFriends(String name, int maxResults, Consumer<FriendListFriend> friendConsumer) {
         if (VALID_USERNAME.matcher(name).matches()) {
-            final CompletableFuture<Optional<GameProfile>> result = new CompletableFuture<>();
-            WorldHost.getMaybeAsync(WorldHost.getProfileCache(), name, result::complete);
-            return result.thenApply(p -> p.map(WorldHostFriendListFriend::new).map(List::of).orElse(List.of()));
-        }
-        if (VALID_UUID.matcher(name).matches()) {
-            return CompletableFuture.completedFuture(List.of(
-                new WorldHostFriendListFriend(UUID.fromString(name))
-            ));
-        }
-        if (name.startsWith("o:")) {
+            WorldHost.getMaybeAsync(
+                WorldHost.getProfileCache(), name,
+                profile -> profile.map(WorldHostFriendListFriend::new).ifPresent(friendConsumer)
+            );
+        } else if (VALID_UUID.matcher(name).matches()) {
+            friendConsumer.accept(new WorldHostFriendListFriend(UUID.fromString(name)));
+        } else if (name.startsWith("o:")) {
             final String actualName = name.substring(2);
             // TODO: Use createOfflinePlayerUUID when 1.19.2+ becomes the minimum, and createOfflineProfile in 1.20.4+
-            return CompletableFuture.completedFuture(List.of(new WorldHostFriendListFriend(new GameProfile(
+            friendConsumer.accept(new WorldHostFriendListFriend(new GameProfile(
                 UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName
-            ))));
+            )));
         }
-        return CompletableFuture.completedFuture(List.of());
     }
 
     @Override

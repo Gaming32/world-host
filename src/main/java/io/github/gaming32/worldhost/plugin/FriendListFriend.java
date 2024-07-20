@@ -11,6 +11,10 @@ public interface FriendListFriend extends Profilable {
     default void addFriend(boolean notify, Runnable refresher) {
     }
 
+    default boolean supportsNotifyAdd() {
+        return false;
+    }
+
     void removeFriend(Runnable refresher);
 
     default Optional<Component> tag() {
