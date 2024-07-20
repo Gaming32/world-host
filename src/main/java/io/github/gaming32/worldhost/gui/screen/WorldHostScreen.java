@@ -99,7 +99,7 @@ public abstract class WorldHostScreen extends Screen {
         //#else
         GuiGraphics context,
         //#endif
-        @NotNull List<FormattedCharSequence> tooltips, int mouseX, int mouseY
+        @NotNull List<? extends FormattedCharSequence> tooltips, int mouseX, int mouseY
     ) {
         //#if MC >= 1.20.0
         context.renderTooltip

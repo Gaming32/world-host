@@ -69,7 +69,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         );
 
         addRenderableWidget(
-            button(Component.empty(), button -> {
+            button(Components.empty(), button -> {
             }).width(152)
                 .pos(width / 2 - 154, height - 30)
                 .build()

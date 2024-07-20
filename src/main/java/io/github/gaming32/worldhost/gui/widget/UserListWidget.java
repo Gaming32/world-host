@@ -2,18 +2,18 @@ package io.github.gaming32.worldhost.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.toast.IconRenderer;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.AbstractContainerWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.locale.Language;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
@@ -24,20 +24,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.button;
-import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.drawString;
-
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //#endif
 
-public final class UserListWidget extends AbstractContainerWidget {
+//#if MC >= 1.20.4
+import net.minecraft.client.gui.components.AbstractContainerWidget;
+//#else
+//$$ import net.minecraft.client.gui.components.AbstractWidget;
+//$$ import net.minecraft.client.gui.components.events.ContainerEventHandler;
+//$$ import net.minecraft.client.gui.components.events.GuiEventListener;
+//$$ import net.minecraft.client.gui.narration.NarratableEntry;
+//#endif
+
+public final class UserListWidget
+    //#if MC >= 1.20.4
+    extends AbstractContainerWidget
+    //#else
+    //$$ extends AbstractWidget implements ContainerEventHandler
+    //#endif
+{
     private final List<UserInfo> users = new ArrayList<>();
     private final List<Button> actionButtons = new ArrayList<>();
     private final Font font;
     private final Function<FriendListFriend, List<Action>> getApplicableActions;
+
+    //#if MC < 1.20.4
+    //$$ private GuiEventListener focused;
+    //$$ private boolean isDragging;
+    //#endif
 
     public UserListWidget(
         Font font,
@@ -53,7 +70,7 @@ public final class UserListWidget extends AbstractContainerWidget {
         Function<FriendListFriend, List<Action>> getApplicableActions,
         @Nullable UserListWidget old
     ) {
-        super(x, y, width, height, Component.empty());
+        super(x, y, width, height, Components.empty());
         this.font = font;
         this.getApplicableActions = getApplicableActions;
         if (old != null && !old.users.isEmpty()) {
@@ -63,7 +80,11 @@ public final class UserListWidget extends AbstractContainerWidget {
     }
 
     @Override
-    protected void renderWidget(
+    //#if MC >= 1.19.4
+    public void renderWidget(
+    //#else
+    //$$ public void render(
+    //#endif
         //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
@@ -78,7 +99,7 @@ public final class UserListWidget extends AbstractContainerWidget {
             final var user = users.get(i);
             user.getIcon().draw(context, x, y, 20, 20);
             RenderSystem.disableBlend();
-            drawString(context, font, user.getName(), x + 24, y + textYOffset, 0xffffff, true);
+            WorldHostScreen.drawString(context, font, user.getName(), x + 24, y + textYOffset, 0xffffff, true);
             y += 24;
         }
         for (final Button button : actionButtons) {
@@ -86,9 +107,15 @@ public final class UserListWidget extends AbstractContainerWidget {
         }
     }
 
+    //#if MC >= 1.19.4
     @Override
     protected void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
     }
+    //#else
+    //$$ @Override
+    //$$ public void updateNarration(NarrationElementOutput narrationElementOutput) {
+    //$$ }
+    //#endif
 
     public int getUsersCount() {
         return users.size();
@@ -125,7 +152,7 @@ public final class UserListWidget extends AbstractContainerWidget {
             int x = getRight() - 24 * user.actions.size() + 4;
             for (final Action action : user.actions) {
                 actionButtons.add(
-                    button(action.text, b -> action.apply.run())
+                    WorldHostScreen.button(action.text, b -> action.apply.run())
                         .tooltip(action.tooltip)
                         .pos(x, y)
                         .size(20, 20)
@@ -153,6 +180,48 @@ public final class UserListWidget extends AbstractContainerWidget {
     //$$
     //$$ private int getY() {
     //$$     return y;
+    //$$ }
+    //#endif
+
+    //#if MC < 1.20.4
+    //$$ private int getRight() {
+    //$$     return getX() + width;
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ public final boolean isDragging() {
+    //$$     return this.isDragging;
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ public final void setDragging(boolean bl) {
+    //$$     this.isDragging = bl;
+    //$$ }
+    //$$
+    //$$ @Nullable
+    //$$ @Override
+    //$$ public GuiEventListener getFocused() {
+    //$$     return this.focused;
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ public void setFocused(@Nullable GuiEventListener guiEventListener) {
+    //$$     this.focused = guiEventListener;
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    //$$     return ContainerEventHandler.super.mouseClicked(mouseX, mouseY, button);
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    //$$     return ContainerEventHandler.super.mouseReleased(mouseX, mouseY, button);
+    //$$ }
+    //$$
+    //$$ @Override
+    //$$ public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    //$$     return ContainerEventHandler.super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     //$$ }
     //#endif
 
@@ -188,8 +257,8 @@ public final class UserListWidget extends AbstractContainerWidget {
             if (font.width(name) <= maxWidth) {
                 return name.getVisualOrderText();
             }
-            final FormattedText clipped = font.substrByWidth(name, maxWidth - font.width(CommonComponents.ELLIPSIS));
-            return Language.getInstance().getVisualOrder(FormattedText.composite(clipped, CommonComponents.ELLIPSIS));
+            final FormattedText clipped = font.substrByWidth(name, maxWidth - font.width(WorldHostComponents.ELLIPSIS));
+            return Language.getInstance().getVisualOrder(FormattedText.composite(clipped, WorldHostComponents.ELLIPSIS));
         }
 
         IconRenderer getIcon() {
