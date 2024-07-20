@@ -99,7 +99,26 @@ public final class UserListWidget
             final var user = users.get(i);
             user.getIcon().draw(context, x, y, 20, 20);
             RenderSystem.disableBlend();
-            WorldHostScreen.drawString(context, font, user.getName(), x + 24, y + textYOffset, 0xffffff, true);
+            final Component unclippedName = user.getUnclippedName();
+            if (user.nameNeedsClipping(unclippedName)) {
+                WorldHostScreen.drawString(
+                    context, font, user.clipName(unclippedName), x + 24, y + textYOffset, 0xffffff, true
+                );
+                if (
+                    mouseX >= x + 24 && mouseX <= x + 24 + user.getMaxNameWidth() &&
+                    mouseY >= y && mouseY <= y + 20
+                ) {
+                    //#if MC >= 1.20.1
+                    context.renderTooltip(font, unclippedName, mouseX, mouseY);
+                    //#else
+                    //$$ Minecraft.getInstance().screen.renderTooltip(context, unclippedName, mouseX, mouseY);
+                    //#endif
+                }
+            } else {
+                WorldHostScreen.drawString(
+                    context, font, unclippedName, x + 24, y + textYOffset, 0xffffff, true
+                );
+            }
             y += 24;
         }
         for (final Button button : actionButtons) {
@@ -251,13 +270,20 @@ public final class UserListWidget
                 });
         }
 
-        FormattedCharSequence getName() {
-            final Component name = getNameWithTag(user, profile);
-            final int maxWidth = width - 24 - 24 * actions.size();
-            if (font.width(name) <= maxWidth) {
-                return name.getVisualOrderText();
-            }
-            final FormattedText clipped = font.substrByWidth(name, maxWidth - font.width(WorldHostComponents.ELLIPSIS));
+        Component getUnclippedName() {
+            return getNameWithTag(user, profile);
+        }
+
+        boolean nameNeedsClipping(Component unclippedName) {
+            return font.width(unclippedName) >= getMaxNameWidth();
+        }
+
+        int getMaxNameWidth() {
+            return width - 24 - 24 * actions.size();
+        }
+
+        FormattedCharSequence clipName(Component unclippedName) {
+            final FormattedText clipped = font.substrByWidth(unclippedName, getMaxNameWidth() - font.width(WorldHostComponents.ELLIPSIS));
             return Language.getInstance().getVisualOrder(FormattedText.composite(clipped, WorldHostComponents.ELLIPSIS));
         }
 
