@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.resources.ResourceLocation;
 
-
 //#if MC >= 1.20.2
 import net.minecraft.client.resources.PlayerSkin;
 //#else
@@ -12,7 +11,11 @@ import net.minecraft.client.resources.PlayerSkin;
 //$$ import java.util.UUID;
 //$$ import java.util.concurrent.CompletableFuture;
 //$$ import net.minecraft.client.resources.DefaultPlayerSkin;
+//#if MC >= 1.19.2
 //$$ import net.minecraft.core.UUIDUtil;
+//#else
+//$$ import net.minecraft.world.entity.player.Player;
+//#endif
 //#endif
 
 // TODO: Remove in 1.20.2+
@@ -39,14 +42,18 @@ public record WHPlayerSkin(
         //$$     skinTexture = skinManager.registerTexture(skin, MinecraftProfileTexture.Type.SKIN);
         //$$     skinModel = skin.getMetadata("model");
         //$$ } else {
-        //$$     final UUID uuid = UUIDUtil.getOrCreatePlayerUUID(profile);
+                //#if MC >= 1.19.2
+                //$$ final UUID uuid = UUIDUtil.getOrCreatePlayerUUID(profile);
+                //#else
+                //$$ final UUID uuid = Player.createPlayerUUID(profile);
+                //#endif
         //$$     skinTexture = DefaultPlayerSkin.getDefaultSkin(uuid);
         //$$     skinModel = DefaultPlayerSkin.getSkinModelName(uuid);
         //$$ }
         //$$ final MinecraftProfileTexture cape = map.get(MinecraftProfileTexture.Type.CAPE);
         //$$ return new WHPlayerSkin(
         //$$     skinTexture,
-        //$$     cape != null ? skinTexture.registerTexture(cape, MinecraftProfileTexture.Type.CAPE) : null,
+        //$$     cape != null ? skinManager.registerTexture(cape, MinecraftProfileTexture.Type.CAPE) : null,
         //$$     Model.byName(skinModel)
         //$$ );
         //#endif
