@@ -16,7 +16,6 @@
   "client": [
     "DisconnectedScreenAccessor",
     "MinecraftAccessor",
-    "MixinAbstractClientPlayer",
     "MixinConnectScreen",
     "MixinConnectScreen_1",
     "MixinGameRenderer",
