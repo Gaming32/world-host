@@ -33,10 +33,13 @@ public class PlayerInfoScreen extends WorldHostScreen {
     @Override
     protected void init() {
         assert minecraft != null;
+        final int top = height / 4 - 25;
+        final int bottom = height / 2 + 75;
         addRenderableWidget(new WHPlayerSkinWidget(
-            width / 2 - 100, height / 2 - 150,
-            200, 225,
+            width / 2 - 100, top,
+            200, bottom - top,
             () -> WorldHost.getInsecureSkin(profile),
+            () -> profile.getName().equals("deadmau5"),
             minecraft.getEntityModels()
         ));
         addRenderableWidget(

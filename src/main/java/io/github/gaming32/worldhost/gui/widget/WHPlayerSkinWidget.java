@@ -1,6 +1,7 @@
 package io.github.gaming32.worldhost.gui.widget;
 
 import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import io.github.gaming32.worldhost.WHPlayerSkin;
 import io.github.gaming32.worldhost.versions.Components;
@@ -9,6 +10,7 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayers;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.pose;
@@ -18,7 +20,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.util.Mth;
 //#else
 //$$ import com.mojang.blaze3d.systems.RenderSystem;
@@ -36,6 +40,7 @@ public class WHPlayerSkinWidget extends AbstractWidget {
     private static final float ROTATION_X_LIMIT = 50f;
 
     private final Supplier<WHPlayerSkin> skin;
+    private final BooleanSupplier isDeadmau5;
     private final PlayerModel<?> wideModel;
     private final PlayerModel<?> slimModel;
     private float rotationX = DEFAULT_ROTATION_X;
@@ -43,11 +48,12 @@ public class WHPlayerSkinWidget extends AbstractWidget {
 
     public WHPlayerSkinWidget(
         int x, int y, int width, int height,
-        Supplier<WHPlayerSkin> skin,
+        Supplier<WHPlayerSkin> skin, BooleanSupplier isDeadmau5,
         EntityModelSet models
     ) {
         super(x, y, width, height, Components.empty());
         this.skin = skin;
+        this.isDeadmau5 = isDeadmau5;
 
         wideModel = new PlayerModel<>(models.bakeLayer(ModelLayers.PLAYER), false);
         slimModel = new PlayerModel<>(models.bakeLayer(ModelLayers.PLAYER_SLIM), true);
@@ -59,6 +65,10 @@ public class WHPlayerSkinWidget extends AbstractWidget {
     protected void onDrag(double mouseX, double mouseY, double dragX, double dragY) {
         rotationX = Mth.clamp(rotationX - (float)dragY * ROTATION_SENSITIVITY, -ROTATION_X_LIMIT, ROTATION_X_LIMIT);
         rotationY += (float)dragX * ROTATION_SENSITIVITY;
+    }
+
+    @Override
+    public void playDownSound(SoundManager handler) {
     }
 
     @Override
@@ -103,6 +113,50 @@ public class WHPlayerSkinWidget extends AbstractWidget {
         final PlayerModel<?> model = skin.model() == WHPlayerSkin.Model.SLIM ? slimModel : wideModel;
         final var renderType = model.renderType(skin.texture());
         model.renderToBuffer(pose(context), bufferSource(context).getBuffer(renderType), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+        if (isDeadmau5.getAsBoolean()) {
+            renderEars(context, model, skin);
+        }
+        if (skin.capeTexture() != null) {
+            renderCape(context, model, skin);
+        }
+        pose(context).popPose();
+    }
+
+    private void renderEars(
+        //#if MC < 1.20.0
+        //$$ PoseStack context,
+        //#else
+        GuiGraphics context,
+        //#endif
+        PlayerModel<?> model,
+        WHPlayerSkin skin
+    ) {
+        final var consumer = bufferSource(context).getBuffer(RenderType.entitySolid(skin.texture()));
+        for (int ear = 0; ear < 2; ear++) {
+            pose(context).pushPose();
+            pose(context).translate(0.375f * (ear * 2 - 1), -0.375f, 0f);
+            final float scale = 1 + 1 / 3f;
+            pose(context).scale(scale, scale, scale);
+            model.renderEars(pose(context), consumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+            pose(context).popPose();
+        }
+    }
+
+    private void renderCape(
+        //#if MC < 1.20.0
+        //$$ PoseStack context,
+        //#else
+        GuiGraphics context,
+        //#endif
+        PlayerModel<?> model,
+        WHPlayerSkin skin
+    ) {
+        pose(context).pushPose();
+        pose(context).translate(0f, 0f, 0.125f);
+        pose(context).mulPose(Axis.XP.rotationDegrees(6f));
+        pose(context).mulPose(Axis.YP.rotationDegrees(180f));
+        final VertexConsumer consumer = bufferSource(context).getBuffer(RenderType.entitySolid(skin.capeTexture()));
+        model.renderCloak(pose(context), consumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
         pose(context).popPose();
     }
 
