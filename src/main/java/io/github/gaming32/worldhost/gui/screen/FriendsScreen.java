@@ -8,6 +8,7 @@ import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -170,6 +171,8 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         private final FriendListFriend friend;
         private ProfileInfo profile;
 
+        private long clickTime;
+
         public FriendsEntry(FriendListFriend friend) {
             minecraft = Minecraft.getInstance();
             this.friend = friend;
@@ -225,6 +228,12 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             FriendsScreen.this.list.setSelected(this);
+            if (Util.getMillis() - clickTime < 250L) {
+                friend.showFriendInfo(FriendsScreen.this);
+                clickTime = Util.getMillis();
+                return true;
+            }
+            clickTime = Util.getMillis();
             return false;
         }
     }
