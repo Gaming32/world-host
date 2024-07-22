@@ -195,7 +195,6 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     private static void performHandshake(
         Socket socket, User user, long connectionId
     ) throws IOException, CryptException, AuthenticationException {
-
         final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
         dos.writeInt(PROTOCOL_VERSION);
         dos.flush();
