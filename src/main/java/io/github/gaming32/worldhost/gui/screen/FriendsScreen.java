@@ -28,6 +28,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
     public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
 
     private final Screen parent;
+    private Button infoButton;
     private Button removeButton;
     private FriendsList list;
 
@@ -68,12 +69,16 @@ public class FriendsScreen extends ScreenWithInfoTexts {
                 .build()
         );
 
-        addRenderableWidget(
-            button(Components.empty(), button -> {
+        infoButton = addRenderableWidget(
+            button(Components.translatable("world-host.friends.show_info"), button -> {
+                if (list.getSelected() != null) {
+                    list.getSelected().friend.showFriendInfo(this);
+                }
             }).width(152)
                 .pos(width / 2 - 154, height - 30)
                 .build()
         );
+        infoButton.active = false;
 
         removeButton = addRenderableWidget(
             button(Components.translatable("world-host.friends.remove"), button -> {
@@ -138,6 +143,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         @Override
         public void setSelected(@Nullable FriendsEntry entry) {
             super.setSelected(entry);
+            infoButton.active = entry != null;
             removeButton.active = entry != null;
         }
 

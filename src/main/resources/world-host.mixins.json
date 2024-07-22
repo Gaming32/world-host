@@ -16,6 +16,7 @@
   "client": [
     "DisconnectedScreenAccessor",
     "MinecraftAccessor",
+    "MixinAbstractClientPlayer",
     "MixinConnectScreen",
     "MixinConnectScreen_1",
     "MixinGameRenderer",
@@ -31,9 +32,7 @@
     "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor",
-    //#if FABRIC
     "modmenu.MixinModMenuEventHandler"
-    //#endif
   ],
   "injectors": {
     "defaultRequire": 1

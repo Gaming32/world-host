@@ -636,9 +636,9 @@ public class WorldHost
         return fetchProfile(sessionService, profile.getId(), profile);
     }
 
-    public static CompletableFuture<ProfileInfo> resolveProfileInfo(GameProfile profile) {
+    public static CompletableFuture<GameProfile> resolveGameProfile(GameProfile profile) {
         if (profile.getId().version() != 4) {
-            return CompletableFuture.completedFuture(new GameProfileProfileInfo(profile));
+            return CompletableFuture.completedFuture(profile);
         }
         return CompletableFuture.supplyAsync(
             () -> WorldHost.fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), profile),
@@ -647,7 +647,11 @@ public class WorldHost
             //#else
             //$$ Util.ioPool()
             //#endif
-        ).thenApply(GameProfileProfileInfo::new);
+        );
+    }
+
+    public static CompletableFuture<ProfileInfo> resolveProfileInfo(GameProfile profile) {
+        return resolveGameProfile(profile).thenApply(GameProfileProfileInfo::new);
     }
 
     public static boolean isFriend(UUID user) {

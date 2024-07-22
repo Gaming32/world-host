@@ -32,6 +32,7 @@
   "world-host.friends.remove": "Remove Friend",
   "world-host.friends.remove.title": "Are you sure you want to remove this friend from your friends list?",
   "world-host.friends.remove.message": "You can always add them back later.",
+  "world-host.friends.show_info": "Show Info",
   "world-host.friends.tagged_friend": "%s (%s)",
   "world-host.add_friend": "Add Friend",
   "world-host.add_friend.tooltip": "This will add the person as a friend, and notify them that you did so, asking them to return the favor.\nNote that you must both friend each other in order to join each other's games.",

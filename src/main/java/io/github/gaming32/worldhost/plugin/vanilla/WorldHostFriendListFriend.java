@@ -2,8 +2,10 @@ package io.github.gaming32.worldhost.plugin.vanilla;
 
 import com.mojang.authlib.GameProfile;
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.gui.screen.PlayerInfoScreen;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -42,5 +44,10 @@ public record WorldHostFriendListFriend(
         if (server != null && server.isPublished() && WorldHost.protoClient != null) {
             WorldHost.protoClient.closedWorld(Collections.singleton(uuid));
         }
+    }
+
+    @Override
+    public void showFriendInfo(Screen parentScreen) {
+        Minecraft.getInstance().setScreen(new PlayerInfoScreen(parentScreen, defaultProfile));
     }
 }
