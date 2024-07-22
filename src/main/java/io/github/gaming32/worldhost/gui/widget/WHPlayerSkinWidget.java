@@ -93,11 +93,13 @@ public class WHPlayerSkinWidget extends AbstractWidget {
         pose(context).translate(getX() + getWidth() / 2f, getY() + getHeight(), Z_OFFSET);
         final float scale = getHeight() / MODEL_HEIGHT;
         pose(context).scale(scale, scale, scale);
-        pose(context).translate(0f, -MODEL_OFFSET, 0f);
         //#if MC >= 1.20.0
+        pose(context).translate(0f, -MODEL_OFFSET, 0f);
         pose(context).rotateAround(XP.rotationDegrees(rotationX), 0f, -1f - MODEL_OFFSET, 0f);
         //#else
+        //$$ pose(context).translate(0f, -1f - 2 * MODEL_OFFSET, 0f);
         //$$ pose(context).mulPose(XP.rotationDegrees(rotationX));
+        //$$ pose(context).translate(0f, 1f + MODEL_OFFSET, 0f);
         //#endif
         pose(context).mulPose(YP.rotationDegrees(rotationY));
         flush(context);
