@@ -50,8 +50,14 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record Error(String message, boolean critical) implements WorldHostS2CMessage {
+        public static final int ID = 0;
+
         public Error(String message) {
             this(message, false);
+        }
+
+        public static Error decode(DataInputStream dis) throws IOException {
+            return new Error(readString(dis), dis.read() > 0); // -1 means that there was no critical flag sent
         }
 
         @Override
@@ -68,6 +74,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record IsOnlineTo(UUID user) implements WorldHostS2CMessage {
+        public static final int ID = 1;
+
+        public static IsOnlineTo decode(DataInputStream dis) throws IOException {
+            return new IsOnlineTo(readUuid(dis));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(user)) {
@@ -80,6 +92,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record OnlineGame(String host, int port, long ownerCid, boolean isPunchProtocol) implements WorldHostS2CMessage {
+        public static final int ID = 2;
+
+        public static OnlineGame decode(DataInputStream dis) throws IOException {
+            return new OnlineGame(readString(dis), dis.readUnsignedShort(), dis.readLong(), dis.readBoolean());
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             Minecraft.getInstance().execute(() -> {
@@ -97,6 +115,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record FriendRequest(UUID fromUser, SecurityLevel security) implements WorldHostS2CMessage, SecurityCheckable {
+        public static final int ID = 3;
+
+        public static FriendRequest decode(DataInputStream dis) throws IOException {
+            return new FriendRequest(readUuid(dis), SecurityLevel.byId(dis.readUnsignedByte()));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             if (!WorldHost.CONFIG.isEnableFriends() || !checkAndLogSecurity()) return;
@@ -131,6 +155,12 @@ public sealed interface WorldHostS2CMessage {
     record PublishedWorld(
         UUID user, long connectionId, SecurityLevel security
     ) implements WorldHostS2CMessage, SecurityCheckable {
+        public static final int ID = 4;
+
+        public static PublishedWorld decode(DataInputStream dis) throws IOException {
+            return new PublishedWorld(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             if (!checkAndLogSecurity() || !WorldHost.isFriend(user)) return;
@@ -141,6 +171,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record ClosedWorld(UUID user) implements WorldHostS2CMessage {
+        public static final int ID = 5;
+
+        public static ClosedWorld decode(DataInputStream dis) throws IOException {
+            return new ClosedWorld(readUuid(dis));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.ONLINE_FRIENDS.remove(user);
@@ -152,6 +188,12 @@ public sealed interface WorldHostS2CMessage {
     record RequestJoin(
         UUID user, long connectionId, SecurityLevel security
     ) implements WorldHostS2CMessage, SecurityCheckable {
+        public static final int ID = 6;
+
+        public static RequestJoin decode(DataInputStream dis) throws IOException {
+            return new RequestJoin(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             if (!checkAndLogSecurity()) return;
@@ -179,6 +221,12 @@ public sealed interface WorldHostS2CMessage {
     record QueryRequest(
         UUID friend, long connectionId, SecurityLevel security
     ) implements WorldHostS2CMessage, SecurityCheckable {
+        public static final int ID = 7;
+
+        public static QueryRequest decode(DataInputStream dis) throws IOException {
+            return new QueryRequest(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             if (!checkAndLogSecurity() || !WorldHost.isFriend(friend)) return;
@@ -190,6 +238,22 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record QueryResponse(UUID friend, ServerStatus metadata) implements WorldHostS2CMessage {
+        public static final int ID = 8;
+
+        public static QueryResponse decode(DataInputStream dis) throws IOException {
+            final UUID friend = readUuid(dis);
+            final var buf = WorldHost.createByteBuf();
+            buf.writeBytes(dis, dis.readInt());
+            ServerStatus serverStatus;
+            try {
+                serverStatus = WorldHost.parseServerStatus(buf);
+            } catch (Exception e) {
+                WorldHost.LOGGER.error("Failed to parse server status", e);
+                serverStatus = WorldHost.createEmptyServerStatus();
+            }
+            return new QueryResponse(friend, serverStatus);
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(friend)) {
@@ -199,6 +263,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record ProxyC2SPacket(long connectionId, byte[] data) implements WorldHostS2CMessage {
+        public static final int ID = 9;
+
+        public static ProxyC2SPacket decode(DataInputStream dis) throws IOException {
+            return new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.proxyPacket(connectionId, data);
@@ -206,6 +276,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record ProxyConnect(long connectionId, InetAddress remoteAddr) implements WorldHostS2CMessage {
+        public static final int ID = 10;
+
+        public static ProxyConnect decode(DataInputStream dis) throws IOException {
+            return new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.proxyConnect(connectionId, remoteAddr, () -> WorldHost.protoClient);
@@ -213,6 +289,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record ProxyDisconnect(long connectionId) implements WorldHostS2CMessage {
+        public static final int ID = 11;
+
+        public static ProxyDisconnect decode(DataInputStream dis) throws IOException {
+            return new ProxyDisconnect(dis.readLong());
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.proxyDisconnect(connectionId);
@@ -222,6 +304,14 @@ public sealed interface WorldHostS2CMessage {
     record ConnectionInfo(
         long connectionId, String baseIp, int basePort, String userIp, int protocolVersion, int punchPort
     ) implements WorldHostS2CMessage {
+        public static final int ID = 12;
+
+        public static ConnectionInfo decode(DataInputStream dis) throws IOException {
+            return new ConnectionInfo(
+                dis.readLong(), readString(dis), dis.readUnsignedShort(), readString(dis), dis.readInt(), dis.readUnsignedShort()
+            );
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.LOGGER.info("Received {}", this);
@@ -241,6 +331,14 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record ExternalProxyServer(String host, int port, String baseAddr, int mcPort) implements WorldHostS2CMessage {
+        public static final int ID = 13;
+
+        public static ExternalProxyServer decode(DataInputStream dis) throws IOException {
+            return new ExternalProxyServer(
+                readString(dis), dis.readUnsignedShort(), readString(dis), dis.readUnsignedShort()
+            );
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.LOGGER.info("Attempting to connect to WHEP server at {}, {}", host, port);
@@ -252,6 +350,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record OutdatedWorldHost(String recommendedVersion) implements WorldHostS2CMessage {
+        public static final int ID = 14;
+
+        public static OutdatedWorldHost decode(DataInputStream dis) throws IOException {
+            return new OutdatedWorldHost(readString(dis));
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             final String currentVersion = WorldHost.getModVersion(WorldHost.MOD_ID);
@@ -276,6 +380,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record ConnectionNotFound(long connectionId) implements WorldHostS2CMessage {
+        public static final int ID = 15;
+
+        public static ConnectionNotFound decode(DataInputStream dis) throws IOException {
+            return new ConnectionNotFound(dis.readLong());
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             Minecraft.getInstance().execute(() -> {
@@ -296,6 +406,22 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record NewQueryResponse(UUID friend, ServerStatus metadata) implements WorldHostS2CMessage {
+        public static final int ID = 16;
+
+        public static NewQueryResponse decode(DataInputStream dis) throws IOException {
+            final UUID friend = readUuid(dis);
+            final var buf = WorldHost.createByteBuf();
+            buf.writeBytes(dis.readAllBytes());
+            ServerStatus serverStatus;
+            try {
+                serverStatus = WorldHost.parseServerStatus(buf);
+            } catch (Exception e) {
+                WorldHost.LOGGER.error("Failed to parse server status", e);
+                serverStatus = WorldHost.createEmptyServerStatus();
+            }
+            return new NewQueryResponse(friend, serverStatus);
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             if (WorldHost.isFriend(friend)) {
@@ -305,6 +431,12 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record Warning(String message, boolean important) implements WorldHostS2CMessage {
+        public static final int ID = 17;
+
+        public static Warning decode(DataInputStream dis) throws IOException {
+            return new Warning(readString(dis), dis.readBoolean());
+        }
+
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.LOGGER.warn("Warning from WH server (important: {}): {}", important, message);
@@ -325,55 +457,30 @@ public sealed interface WorldHostS2CMessage {
      */
     void handle(ProtocolClient client);
 
-    static WorldHostS2CMessage decode(DataInputStream dis) throws IOException {
-        final int typeId = dis.readUnsignedByte();
+    static boolean isEncrypted(int typeId) {
+        return false;
+    }
+
+    static WorldHostS2CMessage decode(int typeId, DataInputStream dis) throws IOException {
         return switch (typeId) {
-            case 0 -> new Error(readString(dis), dis.read() > 0); // -1 means that there was no critical flag sent
-            case 1 -> new IsOnlineTo(readUuid(dis));
-            case 2 -> new OnlineGame(readString(dis), dis.readUnsignedShort(), dis.readLong(), dis.readBoolean());
-            case 3 -> new FriendRequest(readUuid(dis), SecurityLevel.byId(dis.readUnsignedByte()));
-            case 4 -> new PublishedWorld(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
-            case 5 -> new ClosedWorld(readUuid(dis));
-            case 6 -> new RequestJoin(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
-            case 7 -> new QueryRequest(readUuid(dis), dis.readLong(), SecurityLevel.byId(dis.readUnsignedByte()));
-            case 8 -> {
-                final UUID friend = readUuid(dis);
-                final var buf = WorldHost.createByteBuf();
-                buf.writeBytes(dis, dis.readInt());
-                ServerStatus serverStatus;
-                try {
-                    serverStatus = WorldHost.parseServerStatus(buf);
-                } catch (Exception e) {
-                    WorldHost.LOGGER.error("Failed to parse server status", e);
-                    serverStatus = WorldHost.createEmptyServerStatus();
-                }
-                yield new QueryResponse(friend, serverStatus);
-            }
-            case 9 -> new ProxyC2SPacket(dis.readLong(), dis.readAllBytes());
-            case 10 -> new ProxyConnect(dis.readLong(), InetAddress.getByAddress(dis.readNBytes(dis.readUnsignedByte())));
-            case 11 -> new ProxyDisconnect(dis.readLong());
-            case 12 -> new ConnectionInfo(
-                dis.readLong(), readString(dis), dis.readUnsignedShort(), readString(dis), dis.readInt(), dis.readUnsignedShort()
-            );
-            case 13 -> new ExternalProxyServer(
-                readString(dis), dis.readUnsignedShort(), readString(dis), dis.readUnsignedShort()
-            );
-            case 14 -> new OutdatedWorldHost(readString(dis));
-            case 15 -> new ConnectionNotFound(dis.readLong());
-            case 16 -> {
-                final UUID friend = readUuid(dis);
-                final var buf = WorldHost.createByteBuf();
-                buf.writeBytes(dis.readAllBytes());
-                ServerStatus serverStatus;
-                try {
-                    serverStatus = WorldHost.parseServerStatus(buf);
-                } catch (Exception e) {
-                    WorldHost.LOGGER.error("Failed to parse server status", e);
-                    serverStatus = WorldHost.createEmptyServerStatus();
-                }
-                yield new NewQueryResponse(friend, serverStatus);
-            }
-            case 17 -> new Warning(readString(dis), dis.readBoolean());
+            case Error.ID -> Error.decode(dis);
+            case IsOnlineTo.ID -> IsOnlineTo.decode(dis);
+            case OnlineGame.ID -> OnlineGame.decode(dis);
+            case FriendRequest.ID -> FriendRequest.decode(dis);
+            case PublishedWorld.ID -> PublishedWorld.decode(dis);
+            case ClosedWorld.ID -> ClosedWorld.decode(dis);
+            case RequestJoin.ID -> RequestJoin.decode(dis);
+            case QueryRequest.ID -> QueryRequest.decode(dis);
+            case QueryResponse.ID -> QueryResponse.decode(dis);
+            case ProxyC2SPacket.ID -> ProxyC2SPacket.decode(dis);
+            case ProxyConnect.ID -> ProxyConnect.decode(dis);
+            case ProxyDisconnect.ID -> ProxyDisconnect.decode(dis);
+            case ConnectionInfo.ID -> ConnectionInfo.decode(dis);
+            case ExternalProxyServer.ID -> ExternalProxyServer.decode(dis);
+            case OutdatedWorldHost.ID -> OutdatedWorldHost.decode(dis);
+            case ConnectionNotFound.ID -> ConnectionNotFound.decode(dis);
+            case NewQueryResponse.ID -> NewQueryResponse.decode(dis);
+            case Warning.ID -> Warning.decode(dis);
             default -> new Error("Received packet with unknown typeId from server (outdated client?): " + typeId);
         };
     }

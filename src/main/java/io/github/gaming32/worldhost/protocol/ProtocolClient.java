@@ -14,7 +14,9 @@ import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.io.input.CountingInputStream;
 import org.jetbrains.annotations.Nullable;
 
+import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -68,6 +70,8 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         CONNECTION_THREAD_BUILDER.start(() -> {
             HostAndPort target = null;
             Socket socket = null;
+            Cipher decryptCipher = null;
+            Cipher encryptCipher = null;
             try {
                 target = HostAndPort.fromString(host).withDefaultPort(9646);
                 socket = new Socket(target.getHost(), target.getPort());
@@ -75,7 +79,9 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 final User user = authUser.join();
                 authUser = null;
 
-                performHandshake(socket, user, connectionId);
+                final SecretKey secretKey = performHandshake(socket, user, connectionId);
+                decryptCipher = Crypt.getCipher(Cipher.DECRYPT_MODE, secretKey);
+                encryptCipher = Crypt.getCipher(Cipher.ENCRYPT_MODE, secretKey);
             } catch (Exception e) {
                 WorldHost.LOGGER.error("Failed to connect to {} ({}).", originalHost, target, e);
                 if (failureToast) {
@@ -106,6 +112,8 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 WHToast.builder("world-host.wh_connect.connected").show();
             }
             final Socket fSocket = socket;
+            final Cipher fDecryptCipher = decryptCipher;
+            final Cipher fEncryptCipher = encryptCipher;
 
             final Thread sendThread = SEND_THREAD_BUILDER.start(() -> {
                 try {
@@ -113,12 +121,17 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     final DataOutputStream tempDos = new DataOutputStream(baos);
                     while (!closed) {
-                        final var message = sendQueue.take();
-                        if (message.isEmpty()) break;
-                        message.get().encode(tempDos);
-                        dos.writeInt(baos.size());
-                        dos.write(baos.toByteArray());
+                        final var optionalMessage = sendQueue.take();
+                        if (optionalMessage.isEmpty()) break;
+                        final var message = optionalMessage.get();
+                        message.encode(tempDos);
+                        final byte[] data = message.isEncrypted()
+                            ? fEncryptCipher.update(baos.toByteArray())
+                            : baos.toByteArray();
                         baos.reset();
+                        dos.writeInt(data.length + 1);
+                        dos.writeByte(message.typeId() & 0xff);
+                        dos.write(data);
                         dos.flush();
                     }
                 } catch (IOException e) {
@@ -133,18 +146,25 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 try {
                     final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
                     while (!closed) {
-                        final int length = dis.readInt();
-                        if (length < 1) {
-                            WorldHost.LOGGER.warn("Received invalid short packet (under 1 byte) from WH server");
-                            dis.skipNBytes(length);
+                        final int length = dis.readInt() - 1;
+                        if (length < 0) {
+                            WorldHost.LOGGER.warn("Received invalid empty packet from WH server");
                             continue;
                         }
-                        final BoundedInputStream bis = new BoundedInputStream(dis, length);
-                        bis.setPropagateClose(false);
-                        final CountingInputStream cis = new CountingInputStream(bis);
+                        final int packetId = dis.readUnsignedByte();
+                        final CountingInputStream cis;
+                        if (WorldHostS2CMessage.isEncrypted(packetId)) {
+                            final byte[] data = dis.readNBytes(length);
+                            final byte[] decrypted = fDecryptCipher.update(data);
+                            cis = new CountingInputStream(new ByteArrayInputStream(decrypted));
+                        } else {
+                            final BoundedInputStream bis = new BoundedInputStream(dis, length);
+                            bis.setPropagateClose(false);
+                            cis = new CountingInputStream(bis);
+                        }
                         WorldHostS2CMessage message = null;
                         try {
-                            message = WorldHostS2CMessage.decode(new DataInputStream(cis));
+                            message = WorldHostS2CMessage.decode(packetId, new DataInputStream(cis));
                         } catch (EOFException e) {
                             WorldHost.LOGGER.error("Message decoder read past end (length {})!", length);
                         } catch (Exception e) {
@@ -192,7 +212,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         });
     }
 
-    private static void performHandshake(
+    private static SecretKey performHandshake(
         Socket socket, User user, long connectionId
     ) throws IOException, CryptException, AuthenticationException {
         final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
@@ -247,6 +267,8 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         WorldHostC2SMessage.writeString(dos, user.getName());
         dos.writeLong(connectionId);
         dos.flush();
+
+        return secretKey;
     }
 
     public String getOriginalHost() {
