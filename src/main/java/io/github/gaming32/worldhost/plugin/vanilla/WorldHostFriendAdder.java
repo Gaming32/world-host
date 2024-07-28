@@ -8,9 +8,8 @@ import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.network.chat.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public class WorldHostFriendAdder implements FriendAdder {
@@ -23,32 +22,25 @@ public class WorldHostFriendAdder implements FriendAdder {
     }
 
     @Override
-    public CompletableFuture<Optional<FriendListFriend>> resolveFriend(String name) {
+    public void searchFriends(String name, int maxResults, Consumer<FriendListFriend> friendConsumer) {
         if (VALID_USERNAME.matcher(name).matches()) {
-            final CompletableFuture<Optional<FriendListFriend>> result = new CompletableFuture<>();
             WorldHost.getMaybeAsync(
                 WorldHost.getProfileCache(), name,
-                profile -> result.complete(profile.map(WorldHostFriendListFriend::new))
+                profile -> profile.map(WorldHostFriendListFriend::new).ifPresent(friendConsumer)
             );
-            return result;
-        }
-        if (VALID_UUID.matcher(name).matches()) {
-            return CompletableFuture.completedFuture(Optional.of(
-                new WorldHostFriendListFriend(UUID.fromString(name))
-            ));
-        }
-        if (name.startsWith("o:")) {
+        } else if (VALID_UUID.matcher(name).matches()) {
+            friendConsumer.accept(new WorldHostFriendListFriend(UUID.fromString(name)));
+        } else if (name.startsWith("o:")) {
             final String actualName = name.substring(2);
             // TODO: Use createOfflinePlayerUUID when 1.19.2+ becomes the minimum, and createOfflineProfile in 1.20.4+
-            return CompletableFuture.completedFuture(Optional.of(new WorldHostFriendListFriend(new GameProfile(
+            friendConsumer.accept(new WorldHostFriendListFriend(new GameProfile(
                 UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName
-            ))));
+            )));
         }
-        return CompletableFuture.completedFuture(Optional.empty());
     }
 
     @Override
-    public boolean rateLimit(String name) {
+    public boolean delayLookup(String name) {
         return !VALID_UUID.matcher(name).matches() && !name.startsWith("o:");
     }
 }

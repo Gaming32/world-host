@@ -31,9 +31,7 @@
     "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor",
-    //#if FABRIC
     "modmenu.MixinModMenuEventHandler"
-    //#endif
   ],
   "injectors": {
     "defaultRequire": 1

@@ -39,7 +39,6 @@ import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.multiplayer.resolver.ServerAddress;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
@@ -97,13 +96,8 @@ import static net.minecraft.commands.Commands.literal;
 //#if MC >= 1.19.2
 import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
 //#else
-//$$ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 //$$ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 //$$ import net.minecraft.world.entity.player.Player;
-//#endif
-
-//#if MC >= 1.20.2
-import net.minecraft.client.resources.PlayerSkin;
 //#endif
 
 //#if FABRIC
@@ -579,33 +573,12 @@ public class WorldHost
         return profileCache;
     }
 
-    public static CompletableFuture<ResourceLocation> getInsecureSkinLocation(GameProfile gameProfile) {
-        final var skinManager = Minecraft.getInstance().getSkinManager();
-        //#if MC >= 1.20.2
-        return skinManager.getOrLoad(gameProfile).thenApply(PlayerSkin::texture);
-        //#elseif MC >= 1.19.2
-        //$$ return CompletableFuture.completedFuture(skinManager.getInsecureSkinLocation(gameProfile));
-        //#else
-        //$$ final MinecraftProfileTexture texture = skinManager.getInsecureSkinInformation(gameProfile)
-        //$$     .get(MinecraftProfileTexture.Type.SKIN);
-        //$$ return CompletableFuture.completedFuture(
-        //$$     texture != null
-        //$$         ? skinManager.registerTexture(texture, MinecraftProfileTexture.Type.SKIN)
-        //$$         : DefaultPlayerSkin.getDefaultSkin(Player.createPlayerUUID(gameProfile))
-        //$$ );
-        //#endif
+    public static WHPlayerSkin getInsecureSkin(GameProfile profile) {
+        return WHPlayerSkin.fromSkinManager(Minecraft.getInstance().getSkinManager(), profile);
     }
 
-    public static ResourceLocation getSkinLocationNow(GameProfile gameProfile) {
-        final ResourceLocation location = getInsecureSkinLocation(gameProfile).getNow(null);
-        if (location == null) {
-            //#if MC >= 1.20.2
-            return DefaultPlayerSkin.get(gameProfile).texture();
-            //#else
-            //$$ return DefaultPlayerSkin.getDefaultSkin(gameProfile.getId());
-            //#endif
-        }
-        return location;
+    public static ResourceLocation getSkinLocationNow(GameProfile profile) {
+        return getInsecureSkin(profile).texture();
     }
 
     public static void getMaybeAsync(GameProfileCache cache, String name, Consumer<Optional<GameProfile>> action) {
@@ -636,9 +609,9 @@ public class WorldHost
         return fetchProfile(sessionService, profile.getId(), profile);
     }
 
-    public static CompletableFuture<ProfileInfo> resolveProfileInfo(GameProfile profile) {
+    public static CompletableFuture<GameProfile> resolveGameProfile(GameProfile profile) {
         if (profile.getId().version() != 4) {
-            return CompletableFuture.completedFuture(new GameProfileProfileInfo(profile));
+            return CompletableFuture.completedFuture(profile);
         }
         return CompletableFuture.supplyAsync(
             () -> WorldHost.fetchProfile(Minecraft.getInstance().getMinecraftSessionService(), profile),
@@ -647,7 +620,11 @@ public class WorldHost
             //#else
             //$$ Util.ioPool()
             //#endif
-        ).thenApply(GameProfileProfileInfo::new);
+        );
+    }
+
+    public static CompletableFuture<ProfileInfo> resolveProfileInfo(GameProfile profile) {
+        return resolveGameProfile(profile).thenApply(GameProfileProfileInfo::new);
     }
 
     public static boolean isFriend(UUID user) {

@@ -3,10 +3,12 @@ package io.github.gaming32.worldhost.gui.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
+import io.github.gaming32.worldhost.gui.widget.UserListWidget;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -25,9 +27,9 @@ import net.minecraft.client.gui.GuiGraphics;
 
 public class FriendsScreen extends ScreenWithInfoTexts {
     public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
-    private static final Component ADD_SILENTLY_TEXT = Components.translatable("world-host.friends.add_silently");
 
     private final Screen parent;
+    private Button infoButton;
     private Button removeButton;
     private FriendsList list;
 
@@ -61,26 +63,23 @@ public class FriendsScreen extends ScreenWithInfoTexts {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(
                     this, ADD_FRIEND_TEXT, null,
-                    friend -> friend.addFriend(true, refresher)
+                    (friend, notify) -> friend.addFriend(notify, refresher)
                 ));
             }).width(152)
                 .pos(width / 2 - 154, height - 54)
-                .tooltip(Components.translatable("world-host.add_friend.tooltip"))
                 .build()
         );
 
-        addRenderableWidget(
-            button(ADD_SILENTLY_TEXT, button -> {
-                assert minecraft != null;
-                minecraft.setScreen(new AddFriendScreen(
-                    this, ADD_SILENTLY_TEXT, null,
-                    friend -> friend.addFriend(false, refresher)
-                ));
+        infoButton = addRenderableWidget(
+            button(Components.translatable("world-host.friends.show_info"), button -> {
+                if (list.getSelected() != null) {
+                    list.getSelected().friend.showFriendInfo(this);
+                }
             }).width(152)
                 .pos(width / 2 - 154, height - 30)
-                .tooltip(Components.translatable("world-host.friends.add_silently.tooltip"))
                 .build()
         );
+        infoButton.active = false;
 
         removeButton = addRenderableWidget(
             button(Components.translatable("world-host.friends.remove"), button -> {
@@ -145,6 +144,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         @Override
         public void setSelected(@Nullable FriendsEntry entry) {
             super.setSelected(entry);
+            infoButton.active = entry != null;
             removeButton.active = entry != null;
         }
 
@@ -171,6 +171,8 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         private final FriendListFriend friend;
         private ProfileInfo profile;
 
+        private long clickTime;
+
         public FriendsEntry(FriendListFriend friend) {
             minecraft = Minecraft.getInstance();
             this.friend = friend;
@@ -190,12 +192,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         }
 
         public Component getNameWithTag() {
-            return friend.tag()
-                .map(component -> Components.translatable(
-                    "world-host.friends.tagged_friend",
-                    profile.name(), component
-                ))
-                .orElseGet(() -> Components.literal(profile.name()));
+            return UserListWidget.getNameWithTag(friend, profile);
         }
 
         @Override
@@ -231,6 +228,12 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             FriendsScreen.this.list.setSelected(this);
+            if (Util.getMillis() - clickTime < 250L) {
+                friend.showFriendInfo(FriendsScreen.this);
+                clickTime = Util.getMillis();
+                return true;
+            }
+            clickTime = Util.getMillis();
             return false;
         }
     }

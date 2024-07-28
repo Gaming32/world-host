@@ -635,6 +635,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             final double relX = mouseX - OnlineFriendsScreen.this.list.getRowLeft();
             if (relX < 32.0 && relX > 16.0) {
                 connect();
+                clickTime = Util.getMillis();
                 return true;
             }
 
