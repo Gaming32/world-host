@@ -8,6 +8,7 @@
     "MixinConnection",
     "MixinInputConstants",
     "MixinLevelSummary",
+    "MixinMinecraftServer",
     "MixinPlayerList",
     "MixinPublishCommand",
     "MixinServerConnectionListener_1",
