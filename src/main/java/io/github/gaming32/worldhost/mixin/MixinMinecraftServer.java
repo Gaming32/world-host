@@ -1,7 +1,5 @@
 package io.github.gaming32.worldhost.mixin;
 
-import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.compat.WorldHostSimpleVoiceChatCompat;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,8 +12,8 @@ import java.util.function.BooleanSupplier;
 public class MixinMinecraftServer {
     @Inject(method = "tickServer", at = @At("RETURN"))
     private void tickVoiceChat(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
-        if (WorldHost.isModLoaded("voicechat")) {
-            WorldHostSimpleVoiceChatCompat.tick((MinecraftServer)(Object)this);
-        }
+//        if (WorldHost.isModLoaded("voicechat")) {
+//            WorldHostSimpleVoiceChatCompat.tick((MinecraftServer)(Object)this);
+//        }
     }
 }

@@ -1,7 +1,6 @@
 package io.github.gaming32.worldhost.protocol.punch;
 
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.compat.WorldHostSimpleVoiceChatCompat;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,10 +59,10 @@ public record PunchReason(String id, VerificationType verificationType, Transmit
         SIMPLE_VOICE_CHAT {
             @Override
             public PunchTransmitter findTransmitter() {
-                if (!WorldHost.isModLoaded("voicechat")) {
+//                if (!WorldHost.isModLoaded("voicechat")) {
                     return null;
-                }
-                return WorldHostSimpleVoiceChatCompat.getTransmitter().orElse(null);
+//                }
+//                return WorldHostSimpleVoiceChatCompat.getTransmitter().orElse(null);
             }
         };
 
