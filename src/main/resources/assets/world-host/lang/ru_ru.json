@@ -71,7 +71,7 @@
   "world-host.share_world": "Играть по сети",
   "world-host.share_world.failed": "Не удалось открыть мир для сети",
   "world-host.create_world": "Создать мир",
-  "world-host.world_with_security": "%s \u2022 %s"
+  "world-host.world_with_security": "%s \u2022 %s",
   "modmenu.summaryTranslation.world-host": "Откройте мир для сети без сервера и проброски портов!",
   "modmenu.descriptionTranslation.world-host": "Открывайте ваш мир для друзей в Интернете без необходимости запуска отдельного сервера или проброски портов!\nВ будущем также планируется добавить поддержку подключения с Bedrock Edition при помощи Geyser."
 }
