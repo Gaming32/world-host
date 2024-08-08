@@ -1,6 +1,7 @@
 package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.WorldHost;
+import io.github.gaming32.worldhost.protocol.punch.PunchCookie;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataOutputStream;
@@ -173,6 +174,42 @@ public sealed interface WorldHostC2SMessage {
             dos.writeLong(connectionId);
             final var buf = WorldHost.writeServerStatus(metadata);
             buf.readBytes(dos, buf.readableBytes());
+        }
+    }
+
+    record RequestPunchOpen(long targetConnection, String purpose, PunchCookie cookie) implements WorldHostC2SMessage {
+        @Override
+        public byte typeId() {
+            return 12;
+        }
+
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeLong(targetConnection);
+            writeString(dos, purpose);
+            cookie.writeTo(dos);
+        }
+
+        @Override
+        public boolean isEncrypted() {
+            return true;
+        }
+    }
+
+    record PunchRequestInvalid(PunchCookie cookie) implements WorldHostC2SMessage {
+        @Override
+        public byte typeId() {
+            return 13;
+        }
+
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            cookie.writeTo(dos);
+        }
+
+        @Override
+        public boolean isEncrypted() {
+            return true;
         }
     }
 

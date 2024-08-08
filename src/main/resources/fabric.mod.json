@@ -24,6 +24,9 @@
     ],
     "modmenu": [
       "io.github.gaming32.worldhost.compat.WorldHostModMenuCompat"
+    ],
+    "voicechat": [
+      "io.github.gaming32.worldhost.compat.WorldHostSimpleVoiceChatCompat"
     ]
   },
   "mixins": [

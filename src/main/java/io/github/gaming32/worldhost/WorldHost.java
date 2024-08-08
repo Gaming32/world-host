@@ -21,6 +21,7 @@ import io.github.gaming32.worldhost.plugin.vanilla.GameProfileProfileInfo;
 import io.github.gaming32.worldhost.protocol.ProtocolClient;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
+import io.github.gaming32.worldhost.protocol.punch.PunchManager;
 import io.github.gaming32.worldhost.proxy.ProxyClient;
 import io.github.gaming32.worldhost.toast.WHToast;
 import io.github.gaming32.worldhost.upnp.Gateway;
@@ -434,6 +435,7 @@ public class WorldHost
     }
 
     public static void tickHandler() {
+        PunchManager.transmitPunches();
         if (protoClient == null || protoClient.isClosed()) {
             protoClient = null;
             if (proxyProtocolClient != null) {
@@ -985,6 +987,15 @@ public class WorldHost
         return FabricLoader.getInstance().getGameDir();
         //#else
         //$$ return FMLPaths.GAMEDIR.get();
+        //#endif
+    }
+
+    public static UUID getUserId() {
+        final var user = Minecraft.getInstance().getUser();
+        //#if MC >= 1.20.4
+        return user.getProfileId();
+        //#else
+        //$$ return user.getGameProfile().getId();
         //#endif
     }
 }

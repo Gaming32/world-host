@@ -2,11 +2,18 @@ package io.github.gaming32.worldhost.protocol;
 
 import com.google.common.net.HostAndPort;
 import com.mojang.authlib.exceptions.AuthenticationException;
+import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
+import com.mojang.authlib.exceptions.ForcedUsernameChangeException;
+import com.mojang.authlib.exceptions.InsufficientPrivilegesException;
+import com.mojang.authlib.exceptions.InvalidCredentialsException;
+import com.mojang.authlib.exceptions.UserBannedException;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
+import io.github.gaming32.worldhost.protocol.punch.PunchCookie;
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
@@ -43,10 +50,12 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     private static final Thread.Builder SEND_THREAD_BUILDER = Thread.ofVirtual().name("WH-SendThread-", 1);
     private static final Thread.Builder RECV_THREAD_BUILDER = Thread.ofVirtual().name("WH-RecvThread-", 1);
 
-    public static final int PROTOCOL_VERSION = 6;
+    public static final int PROTOCOL_VERSION = 7;
     private static final int KEY_PREFIX = 0xFAFA0000;
 
     private final String originalHost;
+    private HostAndPort hostAndPort;
+
     final CompletableFuture<Void> connectingFuture = new CompletableFuture<>();
     private final BlockingQueue<Optional<WorldHostC2SMessage>> sendQueue = new LinkedBlockingQueue<>();
 
@@ -68,13 +77,12 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
     public ProtocolClient(String host, boolean successToast, boolean failureToast) {
         this.originalHost = host;
         CONNECTION_THREAD_BUILDER.start(() -> {
-            HostAndPort target = null;
             Socket socket = null;
             Cipher decryptCipher = null;
             Cipher encryptCipher = null;
             try {
-                target = HostAndPort.fromString(host).withDefaultPort(9646);
-                socket = new Socket(target.getHost(), target.getPort());
+                hostAndPort = HostAndPort.fromString(host).withDefaultPort(9646);
+                socket = new Socket(hostAndPort.getHost(), hostAndPort.getPort());
 
                 final User user = authUser.join();
                 authUser = null;
@@ -83,7 +91,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                 decryptCipher = Crypt.getCipher(Cipher.DECRYPT_MODE, secretKey);
                 encryptCipher = Crypt.getCipher(Cipher.ENCRYPT_MODE, secretKey);
             } catch (Exception e) {
-                WorldHost.LOGGER.error("Failed to connect to {} ({}).", originalHost, target, e);
+                WorldHost.LOGGER.error("Failed to connect to {} ({}).", originalHost, hostAndPort, e);
                 if (failureToast) {
                     WHToast.builder("world-host.wh_connect.connect_failed")
                         .description(Component.nullToEmpty(e.getLocalizedMessage()))
@@ -151,9 +159,9 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                             WorldHost.LOGGER.warn("Received invalid empty packet from WH server");
                             continue;
                         }
-                        final int packetId = dis.readUnsignedByte();
+                        final int typeId = dis.readUnsignedByte();
                         final CountingInputStream cis;
-                        if (WorldHostS2CMessage.isEncrypted(packetId)) {
+                        if (WorldHostS2CMessage.isEncrypted(typeId)) {
                             final byte[] data = dis.readNBytes(length);
                             final byte[] decrypted = fDecryptCipher.update(data);
                             cis = new CountingInputStream(new ByteArrayInputStream(decrypted));
@@ -164,9 +172,9 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         }
                         WorldHostS2CMessage message = null;
                         try {
-                            message = WorldHostS2CMessage.decode(packetId, new DataInputStream(cis));
+                            message = WorldHostS2CMessage.decode(typeId, new DataInputStream(cis));
                         } catch (EOFException e) {
-                            WorldHost.LOGGER.error("Message decoder read past end (length {})!", length);
+                            WorldHost.LOGGER.error("Message decoder for message {} read past end (length {})!", typeId, length);
                         } catch (Exception e) {
                             WorldHost.LOGGER.error("Error decoding WH message", e);
                         }
@@ -214,7 +222,7 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
     private static SecretKey performHandshake(
         Socket socket, User user, long connectionId
-    ) throws IOException, CryptException, AuthenticationException {
+    ) throws IOException, CryptException {
         final DataOutputStream dos = new DataOutputStream(socket.getOutputStream());
         dos.writeInt(PROTOCOL_VERSION);
         dos.flush();
@@ -251,16 +259,17 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         //#endif
 
         if (profileId.version() == 4) {
-            Minecraft.getInstance()
-                .getMinecraftSessionService()
-                .joinServer(
-                    //#if MC >= 1.20.4
-                    profileId,
-                    //#else
-                    //$$ profile,
-                    //#endif
-                    user.getAccessToken(), authKey
-                );
+            final String failure = authenticateServer(
+                //#if MC >= 1.20.4
+                profileId,
+                //#else
+                //$$ profile,
+                //#endif
+                user.getAccessToken(), authKey
+            );
+            if (failure != null) {
+                throw new IllegalStateException(failure);
+            }
         }
 
         WorldHostC2SMessage.writeUuid(dos, profileId);
@@ -271,8 +280,36 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         return secretKey;
     }
 
+    private static String authenticateServer(
+        //#if MC >= 1.20.4
+        UUID profile,
+        //#else
+        //$$ GameProfile profile,
+        //#endif
+        String authenticationToken, String serverId
+    ) {
+        try {
+            Minecraft.getInstance().getMinecraftSessionService().joinServer(profile, authenticationToken, serverId);
+            return null;
+        } catch (AuthenticationUnavailableException e) {
+            return null;
+        } catch (InvalidCredentialsException e) {
+            return I18n.get("disconnect.loginFailedInfo.invalidSession");
+        } catch (InsufficientPrivilegesException e) {
+            return I18n.get("disconnect.loginFailedInfo.insufficientPrivileges");
+        } catch (ForcedUsernameChangeException | UserBannedException e) {
+            return I18n.get("disconnect.loginFailedInfo.userBanned");
+        } catch (AuthenticationException e) {
+            return e.getMessage();
+        }
+    }
+
     public String getOriginalHost() {
         return originalHost;
+    }
+
+    public HostAndPort getHostAndPort() {
+        return hostAndPort;
     }
 
     public void authenticate(User user) {
@@ -334,6 +371,14 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
     public void requestDirectJoin(long connectionId) {
         enqueue(new WorldHostC2SMessage.RequestDirectJoin(connectionId));
+    }
+
+    public void requestPunchOpen(long connectionId, String purpose, PunchCookie cookie) {
+        enqueue(new WorldHostC2SMessage.RequestPunchOpen(connectionId, purpose, cookie));
+    }
+
+    public void punchRequestInvalid(PunchCookie cookie) {
+        enqueue(new WorldHostC2SMessage.PunchRequestInvalid(cookie));
     }
 
     public Future<Void> getConnectingFuture() {

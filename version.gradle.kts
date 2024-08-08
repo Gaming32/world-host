@@ -223,6 +223,12 @@ repositories {
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://repo.viaversion.com")
     maven("https://maven.wagyourtail.xyz/snapshots")
+    maven("https://maven.maxhenkel.de/repository/public")
+    maven("https://api.modrinth.com/maven") {
+        content {
+            includeGroup("maven.modrinth")
+        }
+    }
     maven("https://jitpack.io")
 }
 
@@ -313,6 +319,20 @@ dependencies {
         modCompileOnly("de.florianmichael:viafabricplus:3.0.2") {
             isTransitive = false
         }
+    }
+
+    compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.0")
+    when (mcVersion) {
+        1_21_00 -> "2.5.19"
+        1_20_06 -> "2.5.19"
+        1_20_04 -> "2.5.19"
+        1_20_01 -> "2.5.19"
+        1_19_04 -> "2.5.12"
+        1_19_02 -> "2.5.19"
+        1_18_02 -> "2.5.19"
+        else -> null
+    }?.let {
+        modCompileOnly("maven.modrinth:simple-voice-chat:$loaderName-$mcVersionString-$it")
     }
 
     compileOnly("com.demonwav.mcdev:annotations:2.1.0")
