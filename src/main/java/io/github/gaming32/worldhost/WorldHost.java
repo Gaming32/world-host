@@ -238,17 +238,15 @@ public class WorldHost
         //#endif
     //$$     final var modFile = container.getModInfo().getOwningFile().getFile();
     //$$     init(path -> modFile.findResource(path.split("/")));
-    //$$     final BiFunction<Minecraft, Screen, Screen> screenFunction =
-    //$$         (mc, screen) -> new WorldHostConfigScreen(screen);
     //$$     container.registerExtensionPoint(
             //#if MC >= 1.20.5
-            //$$ IConfigScreenFactory.class, screenFunction::apply
+            //$$ IConfigScreenFactory.class, (ignored, screen) -> new WorldHostConfigScreen(screen)
             //#elseif MC >= 1.19.2
             //$$ ConfigScreenHandler.ConfigScreenFactory.class,
-            //$$ () -> new ConfigScreenHandler.ConfigScreenFactory(screenFunction)
+            //$$ () -> new ConfigScreenHandler.ConfigScreenFactory((ignored, screen) -> new WorldHostConfigScreen(screen))
             //#else
             //$$ ConfigGuiHandler.ConfigGuiFactory.class,
-            //$$ () -> new ConfigGuiHandler.ConfigGuiFactory(screenFunction)
+            //$$ () -> new ConfigGuiHandler.ConfigGuiFactory((ignored, screen) -> new WorldHostConfigScreen(screen))
             //#endif
     //$$     );
     //$$ }
