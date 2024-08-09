@@ -17,7 +17,7 @@ plugins {
     id("io.github.gaming32.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.modrinth.minotaur") version "2.8.7"
-    id("xyz.wagyourtail.jvmdowngrader") version "0.8.2"
+    id("xyz.wagyourtail.jvmdowngrader") version "1.0.1"
 }
 
 fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
@@ -72,10 +72,13 @@ unimined.minecraft {
 
     mappings {
         intermediary()
-        searge()
+        if (mcVersion <= 1_19_00) {
+            searge()
+        }
         mojmap()
         when {
-            mcVersion >= 1_20_05 -> "1.20.6:2024.06.02"
+            mcVersion >= 1_21_00 -> "1.21:2024.07.28"
+            mcVersion >= 1_20_05 -> "1.20.6:2024.06.16"
             mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
             mcVersion >= 1_20_03 -> "1.20.3:2023.12.31"
             mcVersion >= 1_20_02 -> "1.20.2:2023.12.10"
@@ -91,8 +94,8 @@ unimined.minecraft {
             parchment(it.substringBefore(":"), it.substringAfter(":"))
         }
 
-        stub.withMappings("searge", listOf("mojmap")) {
-            if (mcVersion <= 1_19_00) {
+        if (mcVersion <= 1_19_00) {
+            stub.withMappings("searge", listOf("mojmap")) {
                 c("net/minecraft/client/gui/chat/NarratorChatListener", "net/minecraft/client/GameNarrator")
             }
         }
@@ -116,7 +119,7 @@ unimined.minecraft {
         }
         isNeoForge -> neoForge {
             loader(when (mcVersion) {
-                1_21_00 -> "78-beta"
+                1_21_01 -> "1"
                 1_20_06 -> "115"
                 1_20_04 -> "167"
                 else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
@@ -265,7 +268,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_21_00 -> "11.0.0-beta.1"
+            1_21_01 -> "11.0.1"
             1_20_06 -> "10.0.0-beta.1"
             1_20_04 -> "9.0.0"
             1_20_01 -> "7.2.2"
@@ -287,7 +290,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_21_00 -> "0.100.1+1.21"
+            1_21_01 -> "0.102.0+1.21.1"
             1_20_06 -> "0.100.0+1.20.6"
             1_20_04 -> "0.97.1+1.20.4"
             1_20_01 -> "0.92.2+1.20.1"
@@ -323,13 +326,13 @@ dependencies {
 
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.0")
     when (mcVersion) {
-        1_21_00 -> "2.5.19"
-        1_20_06 -> "2.5.19"
-        1_20_04 -> "2.5.19"
-        1_20_01 -> "2.5.19"
+        1_21_01 -> "2.5.20"
+        1_20_06 -> "2.5.20"
+        1_20_04 -> "2.5.20"
+        1_20_01 -> "2.5.20"
         1_19_04 -> "2.5.12"
-        1_19_02 -> "2.5.19"
-        1_18_02 -> "2.5.19"
+        1_19_02 -> "2.5.20"
+        1_18_02 -> "2.5.20"
         else -> null
     }?.let {
         modCompileOnly("maven.modrinth:simple-voice-chat:$loaderName-$mcVersionString-$it")
