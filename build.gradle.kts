@@ -1,6 +1,6 @@
 plugins {
     id("io.github.gaming32.gradle.preprocess-root") version "0.4.4"
-    id("xyz.wagyourtail.unimined") version "1.3.0" apply false
+    id("xyz.wagyourtail.unimined") version "1.3.4" apply false
 }
 
 repositories {

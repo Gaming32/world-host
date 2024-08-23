@@ -17,7 +17,7 @@ plugins {
     id("io.github.gaming32.gradle.preprocess")
     id("xyz.wagyourtail.unimined")
     id("com.modrinth.minotaur") version "2.8.7"
-    id("xyz.wagyourtail.jvmdowngrader") version "1.0.1"
+    id("xyz.wagyourtail.jvmdowngrader") version "1.1.2-SNAPSHOT"
 }
 
 fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
@@ -191,30 +191,31 @@ val mappingsConfig = object {
     var tinyMappingsWithSrg: Path? = null
 }
 loom.setGroovyProperty("mappingConfiguration", mappingsConfig)
+val mappings = minecraft.mappings as MappingsProvider
 val tinyMappings: File = file("${projectDir}/build/tmp/tinyMappings.tiny").also { file ->
-    val export = ExportMappingsTaskImpl.ExportImpl(minecraft.mappings as MappingsProvider).apply {
+    val export = ExportMappingsTaskImpl.ExportImpl(mappings).apply {
         location = file
         type = ExportMappingsTask.MappingExportTypes.TINY_V2
         setSourceNamespace("official")
         setTargetNamespaces(listOf("intermediary", "mojmap"))
-        renameNs[minecraft.mappings.getNamespace("mojmap")] = "named"
+        renameNs[mappings.getNamespace("mojmap")] = "named"
     }
     export.validate()
-    export.exportFunc((minecraft.mappings as MappingsProvider).mappingTree)
+    export.exportFunc(mappings.mappingTree)
 }
 mappingsConfig.setGroovyProperty("tinyMappings", tinyMappings.toPath())
 if (isForge) {
     val tinyMappingsWithSrg: File = file("${projectDir}/build/tmp/tinyMappingsWithSrg.tiny").also { file ->
-        val export = ExportMappingsTaskImpl.ExportImpl(minecraft.mappings as MappingsProvider).apply {
+        val export = ExportMappingsTaskImpl.ExportImpl(mappings).apply {
             location = file
             type = ExportMappingsTask.MappingExportTypes.TINY_V2
             setSourceNamespace("official")
             setTargetNamespaces(listOf("intermediary", "searge", "mojmap"))
-            renameNs[minecraft.mappings.getNamespace("mojmap")] = "named"
-            renameNs[minecraft.mappings.getNamespace("searge")] = "srg"
+            renameNs[mappings.getNamespace("mojmap")] = "named"
+            renameNs[mappings.getNamespace("searge")] = "srg"
         }
         export.validate()
-        export.exportFunc((minecraft.mappings as MappingsProvider).mappingTree)
+        export.exportFunc(mappings.mappingTree)
     }
     mappingsConfig.setGroovyProperty("tinyMappingsWithSrg", tinyMappingsWithSrg.toPath())
 }
@@ -370,13 +371,13 @@ modrinth {
     token.set(project.properties["modrinth.token"] as String? ?: System.getenv("MODRINTH_TOKEN"))
     projectId.set(if (isStaging) "world-host-staging" else "world-host")
     versionNumber.set(version.toString())
-    val loadersText = when {
+    val loaderName = when {
         isFabric -> "Fabric"
         isForge -> "Forge"
         isNeoForge -> "NeoForge"
         else -> throw IllegalStateException()
     }
-    versionName.set("[$loadersText $mcVersionString] World Host $modVersion")
+    versionName.set("[$loaderName $mcVersionString] World Host $modVersion")
     uploadFile.set(tasks.named("remapJar"))
     additionalFiles.add(tasks.named("sourcesJar"))
     gameVersions.add(mcVersionString)
@@ -385,9 +386,10 @@ modrinth {
         1_20_01 -> "1.20"
         1_20_04 -> "1.20.3"
         1_20_06 -> "1.20.5"
+        1_21_01 -> "1.21"
         else -> null
     }?.let(gameVersions::add)
-    loaders.add(loaderName)
+    loaders.add(this@Version_gradle.loaderName)
     dependencies {
         if (isFabric) {
             optional.project("modmenu")
