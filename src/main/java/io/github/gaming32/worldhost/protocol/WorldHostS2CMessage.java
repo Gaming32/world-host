@@ -564,17 +564,6 @@ public sealed interface WorldHostS2CMessage {
      */
     void handle(ProtocolClient client);
 
-    static boolean isEncrypted(int typeId) {
-        return switch (typeId) {
-            case PunchOpenRequest.ID,
-                 CancelPortLookup.ID,
-                 PortLookupSuccess.ID,
-                 PunchRequestCancelled.ID,
-                 PunchSuccess.ID -> true;
-            default -> false;
-        };
-    }
-
     static WorldHostS2CMessage decode(int typeId, DataInputStream dis) throws IOException {
         return switch (typeId) {
             case Error.ID -> Error.decode(dis);

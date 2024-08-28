@@ -19,8 +19,9 @@ import org.apache.commons.io.input.CountingInputStream;
 import org.jetbrains.annotations.Nullable;
 
 import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.SecretKey;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -130,7 +131,9 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
             final Thread sendThread = SEND_THREAD_BUILDER.start(() -> {
                 try {
-                    final DataOutputStream dos = new DataOutputStream(fSocket.getOutputStream());
+                    final DataOutputStream dos = new DataOutputStream(
+                        new CipherOutputStream(fSocket.getOutputStream(), fEncryptCipher)
+                    );
                     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     final DataOutputStream tempDos = new DataOutputStream(baos);
                     while (!closed) {
@@ -138,13 +141,10 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                         if (optionalMessage.isEmpty()) break;
                         final var message = optionalMessage.get();
                         message.encode(tempDos);
-                        final byte[] data = message.isEncrypted()
-                            ? fEncryptCipher.update(baos.toByteArray())
-                            : baos.toByteArray();
-                        baos.reset();
-                        dos.writeInt(data.length + 1);
+                        dos.writeInt(baos.size() + 1);
                         dos.writeByte(message.typeId() & 0xff);
-                        dos.write(data);
+                        dos.write(baos.toByteArray());
+                        baos.reset();
                         dos.flush();
                     }
                 } catch (IOException e) {
@@ -157,7 +157,9 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
 
             RECV_THREAD_BUILDER.start(() -> {
                 try {
-                    final DataInputStream dis = new DataInputStream(fSocket.getInputStream());
+                    final DataInputStream dis = new DataInputStream(
+                        new CipherInputStream(fSocket.getInputStream(), fDecryptCipher)
+                    );
                     while (!closed) {
                         final int length = dis.readInt() - 1;
                         if (length < 0) {
@@ -165,16 +167,9 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                             continue;
                         }
                         final int typeId = dis.readUnsignedByte();
-                        final CountingInputStream cis;
-                        if (WorldHostS2CMessage.isEncrypted(typeId)) {
-                            final byte[] data = dis.readNBytes(length);
-                            final byte[] decrypted = fDecryptCipher.update(data);
-                            cis = new CountingInputStream(new ByteArrayInputStream(decrypted));
-                        } else {
-                            final BoundedInputStream bis = new BoundedInputStream(dis, length);
-                            bis.setPropagateClose(false);
-                            cis = new CountingInputStream(bis);
-                        }
+                        final BoundedInputStream bis = new BoundedInputStream(dis, length);
+                        bis.setPropagateClose(false);
+                        final var cis = new CountingInputStream(bis);
                         WorldHostS2CMessage message = null;
                         try {
                             message = WorldHostS2CMessage.decode(typeId, new DataInputStream(cis));

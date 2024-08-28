@@ -192,11 +192,6 @@ public sealed interface WorldHostC2SMessage {
             writeString(dos, myHost);
             dos.writeShort(myPort);
         }
-
-        @Override
-        public boolean isEncrypted() {
-            return true;
-        }
     }
 
     record PunchFailed(long targetConnection, UUID punchId) implements WorldHostC2SMessage {
@@ -209,11 +204,6 @@ public sealed interface WorldHostC2SMessage {
         public void encode(DataOutputStream dos) throws IOException {
             writeUuid(dos, punchId);
         }
-
-        @Override
-        public boolean isEncrypted() {
-            return true;
-        }
     }
 
     record BeginPortLookup(UUID lookupId) implements WorldHostC2SMessage {
@@ -225,11 +215,6 @@ public sealed interface WorldHostC2SMessage {
         @Override
         public void encode(DataOutputStream dos) throws IOException {
             writeUuid(dos, lookupId);
-        }
-
-        @Override
-        public boolean isEncrypted() {
-            return true;
         }
     }
 
@@ -246,21 +231,11 @@ public sealed interface WorldHostC2SMessage {
             writeString(dos, host);
             dos.writeShort(port);
         }
-
-        @Override
-        public boolean isEncrypted() {
-            return true;
-        }
     }
 
     byte typeId();
 
     void encode(DataOutputStream dos) throws IOException;
-
-    // TODO: Rewrite encryption to encrypt whole stream
-    default boolean isEncrypted() {
-        return false;
-    }
 
     static void writeUuid(DataOutputStream dos, UUID uuid) throws IOException {
         dos.writeLong(uuid.getMostSignificantBits());
