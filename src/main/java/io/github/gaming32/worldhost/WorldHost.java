@@ -824,7 +824,10 @@ public class WorldHost
         );
         ((ServerDataExt)serverData).wh$setConnectionId(cid);
         ConnectScreen.startConnecting(
-            parentScreen, minecraft, serverAddress, serverData, false
+            parentScreen, minecraft, serverAddress, serverData
+            //#if MC >= 1.20.1
+            , false
+            //#endif
             //#if MC >= 1.20.5
             , null
             //#endif

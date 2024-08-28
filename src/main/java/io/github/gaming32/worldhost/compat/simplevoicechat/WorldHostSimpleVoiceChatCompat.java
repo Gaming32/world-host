@@ -29,9 +29,7 @@ public class WorldHostSimpleVoiceChatCompat implements VoicechatPlugin {
     @Override
     public void registerEvents(EventRegistration registration) {
         registration.registerEvent(ClientVoicechatInitializationEvent.class, event -> {
-            final var connection = Minecraft.getInstance().getConnection();
-            if (connection == null) return;
-            final var serverData = (ServerDataExt)connection.getServerData();
+            final var serverData = (ServerDataExt)Minecraft.getInstance().getCurrentServer();
             if (serverData == null) return;
             final var connectionId = serverData.wh$getConnectionId();
             if (connectionId == null) return;
