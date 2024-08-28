@@ -7,7 +7,6 @@ import com.mojang.authlib.exceptions.InsufficientPrivilegesException;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
-import io.github.gaming32.worldhost.protocol.punch.PunchCookie;
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.User;
@@ -387,12 +386,20 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         enqueue(new WorldHostC2SMessage.RequestDirectJoin(connectionId));
     }
 
-    public void requestPunchOpen(long connectionId, String purpose, PunchCookie cookie) {
-        enqueue(new WorldHostC2SMessage.RequestPunchOpen(connectionId, purpose, cookie));
+    public void requestPunchOpen(long targetConnection, String purpose, UUID punchId, String myHost, int myPort) {
+        enqueue(new WorldHostC2SMessage.RequestPunchOpen(targetConnection, purpose, punchId, myHost, myPort));
     }
 
-    public void punchRequestInvalid(PunchCookie cookie) {
-        enqueue(new WorldHostC2SMessage.PunchRequestInvalid(cookie));
+    public void punchFailed(long targetConnection, UUID punchId) {
+        enqueue(new WorldHostC2SMessage.PunchFailed(targetConnection, punchId));
+    }
+
+    public void beginPortLookup(UUID lookupId) {
+        enqueue(new WorldHostC2SMessage.BeginPortLookup(lookupId));
+    }
+
+    public void punchSuccess(long connectionId, UUID punchId, String host, int port) {
+        enqueue(new WorldHostC2SMessage.PunchSuccess(connectionId, punchId, host, port));
     }
 
     public Future<Void> getConnectingFuture() {

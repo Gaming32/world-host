@@ -27,6 +27,7 @@
     "MixinOptions",
     "MixinPauseScreen",
     "MixinSelectWorldScreen",
+    "MixinServerData",
     "MixinShareToLanScreen",
     "MixinTitleScreen",
     "MixinWorldSelectionList_WorldListEntry",

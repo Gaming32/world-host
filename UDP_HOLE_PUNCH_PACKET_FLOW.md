@@ -16,4 +16,4 @@ Client A refers to the client hosting the world. Client B refers to the connecti
 3. Server passes the request to Client A.
 4. Client A verifies the request comes from a valid party.
 5. If verification is successful, Client A performs Port Lookup and sends an empty packet to Client B's port until Port Lookup finishes.
-6. Server notifies Client B of the IP and external port of Client A.
+6. Client A asks Server to send Client B its IP and port.

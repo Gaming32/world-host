@@ -9,6 +9,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
+import io.github.gaming32.worldhost.ext.ServerDataExt;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
@@ -218,6 +219,8 @@ public class WorldHost
     public static boolean shareWorldOnLoad;
 
     public static SocketAddress proxySocketAddress;
+
+    public static long tickCount;
 
     private static List<LoadedWorldHostPlugin> plugins;
 
@@ -433,7 +436,8 @@ public class WorldHost
     }
 
     public static void tickHandler() {
-        PunchManager.transmitPunches();
+        tickCount++;
+        PunchManager.retransmitAll();
         if (protoClient == null || protoClient.isClosed()) {
             protoClient = null;
             if (proxyProtocolClient != null) {
@@ -810,20 +814,17 @@ public class WorldHost
             minecraft.getSingleplayerServer().halt(false);
         }
         final ServerAddress serverAddress = new ServerAddress(host, port);
-        ConnectScreen.startConnecting(
-            parentScreen, minecraft, serverAddress,
-            //#if MC < 1.20.0
-            //$$ null
+        final var serverData = new ServerData(
+            WorldHost.connectionIdToString(cid), serverAddress.toString(),
+            //#if MC < 1.20.2
+            //$$ false
             //#else
-            new ServerData(
-                WorldHost.connectionIdToString(cid), serverAddress.toString(),
-                //#if MC < 1.20.2
-                //$$ false
-                //#else
-                ServerData.Type.OTHER
-                //#endif
-            ), false
+            ServerData.Type.OTHER
             //#endif
+        );
+        ((ServerDataExt)serverData).wh$setConnectionId(cid);
+        ConnectScreen.startConnecting(
+            parentScreen, minecraft, serverAddress, serverData, false
             //#if MC >= 1.20.5
             , null
             //#endif

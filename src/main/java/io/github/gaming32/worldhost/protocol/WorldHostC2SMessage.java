@@ -1,7 +1,6 @@
 package io.github.gaming32.worldhost.protocol;
 
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.protocol.punch.PunchCookie;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataOutputStream;
@@ -177,7 +176,9 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record RequestPunchOpen(long targetConnection, String purpose, PunchCookie cookie) implements WorldHostC2SMessage {
+    record RequestPunchOpen(
+        long targetConnection, String purpose, UUID punchId, String myHost, int myPort
+    ) implements WorldHostC2SMessage {
         @Override
         public byte typeId() {
             return 12;
@@ -187,7 +188,9 @@ public sealed interface WorldHostC2SMessage {
         public void encode(DataOutputStream dos) throws IOException {
             dos.writeLong(targetConnection);
             writeString(dos, purpose);
-            cookie.writeTo(dos);
+            writeUuid(dos, punchId);
+            writeString(dos, myHost);
+            dos.writeShort(myPort);
         }
 
         @Override
@@ -196,7 +199,7 @@ public sealed interface WorldHostC2SMessage {
         }
     }
 
-    record PunchRequestInvalid(PunchCookie cookie) implements WorldHostC2SMessage {
+    record PunchFailed(long targetConnection, UUID punchId) implements WorldHostC2SMessage {
         @Override
         public byte typeId() {
             return 13;
@@ -204,7 +207,44 @@ public sealed interface WorldHostC2SMessage {
 
         @Override
         public void encode(DataOutputStream dos) throws IOException {
-            cookie.writeTo(dos);
+            writeUuid(dos, punchId);
+        }
+
+        @Override
+        public boolean isEncrypted() {
+            return true;
+        }
+    }
+
+    record BeginPortLookup(UUID lookupId) implements WorldHostC2SMessage {
+        @Override
+        public byte typeId() {
+            return 14;
+        }
+
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            writeUuid(dos, lookupId);
+        }
+
+        @Override
+        public boolean isEncrypted() {
+            return true;
+        }
+    }
+
+    record PunchSuccess(long connectionId, UUID punchId, String host, int port) implements WorldHostC2SMessage {
+        @Override
+        public byte typeId() {
+            return 15;
+        }
+
+        @Override
+        public void encode(DataOutputStream dos) throws IOException {
+            dos.writeLong(connectionId);
+            writeUuid(dos, punchId);
+            writeString(dos, host);
+            dos.writeShort(port);
         }
 
         @Override
@@ -217,6 +257,7 @@ public sealed interface WorldHostC2SMessage {
 
     void encode(DataOutputStream dos) throws IOException;
 
+    // TODO: Rewrite encryption to encrypt whole stream
     default boolean isEncrypted() {
         return false;
     }

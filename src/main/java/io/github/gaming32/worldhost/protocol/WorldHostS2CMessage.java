@@ -13,7 +13,6 @@ import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
 import io.github.gaming32.worldhost.plugin.vanilla.WorldHostFriendListFriend;
 import io.github.gaming32.worldhost.plugin.vanilla.WorldHostOnlineFriend;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
-import io.github.gaming32.worldhost.protocol.punch.PunchCookie;
 import io.github.gaming32.worldhost.protocol.punch.PunchManager;
 import io.github.gaming32.worldhost.protocol.punch.PunchReason;
 import io.github.gaming32.worldhost.toast.WHToast;
@@ -452,14 +451,17 @@ public sealed interface WorldHostS2CMessage {
     }
 
     record PunchOpenRequest(
-        PunchCookie cookie, String purpose, UUID user, SecurityLevel security
+        UUID punchId, String purpose, String fromHost, int fromPort, long connectionId, UUID user, SecurityLevel security
     ) implements WorldHostS2CMessage, SecurityCheckable {
         public static final int ID = 18;
 
         public static PunchOpenRequest decode(DataInputStream dis) throws IOException {
             return new PunchOpenRequest(
-                PunchCookie.readFrom(dis),
+                readUuid(dis),
                 readString(dis),
+                readString(dis),
+                dis.readUnsignedShort(),
+                dis.readLong(),
                 readUuid(dis),
                 SecurityLevel.byId(dis.readUnsignedByte())
             );
@@ -470,68 +472,85 @@ public sealed interface WorldHostS2CMessage {
             if (!checkAndLogSecurity()) return;
             final PunchReason reason = PunchReason.byId(purpose);
             if (reason == null) {
-                WorldHost.LOGGER.warn("Punch {} from {} has unknown purpose {}", cookie, user, purpose);
-                client.punchRequestInvalid(cookie);
+                WorldHost.LOGGER.warn("Punch {} from {} has unknown purpose {}", punchId, user, purpose);
+                client.punchFailed(connectionId, punchId);
                 return;
             }
             if (!reason.verificationType().verify(user)) {
                 WorldHost.LOGGER.warn(
                     "Punch {} from {} failed verification (verification type {})",
-                    cookie, user, reason.verificationType()
+                    punchId, user, PunchReason.VerificationType.getName(reason.verificationType())
                 );
-                client.punchRequestInvalid(cookie);
+                client.punchFailed(connectionId, punchId);
                 return;
             }
-            final var transmitter = reason.transmitterFinder().findTransmitter();
+            final var transmitter = reason.transmitterFinder().findServerTransmitter();
             if (transmitter == null) {
                 WorldHost.LOGGER.warn(
                     "Punch {} from {} couldn't find transmitter (transmitter finder {})",
-                    cookie, user, reason.transmitterFinder()
+                    punchId, user, reason.transmitterFinder()
                 );
-                client.punchRequestInvalid(cookie);
+                client.punchFailed(connectionId, punchId);
                 return;
             }
-            Minecraft.getInstance().execute(() -> PunchManager.openPunchRequest(cookie, transmitter));
+            Minecraft.getInstance().execute(
+                () -> PunchManager.openPunchRequest(punchId, transmitter, fromHost, fromPort, connectionId)
+            );
         }
     }
 
-    record StopPunchRetransmit(PunchCookie cookie) implements WorldHostS2CMessage {
+    record CancelPortLookup(UUID lookupId) implements WorldHostS2CMessage {
         public static final int ID = 19;
 
-        public static StopPunchRetransmit decode(DataInputStream dis) throws IOException {
-            return new StopPunchRetransmit(PunchCookie.readFrom(dis));
+        public static CancelPortLookup decode(DataInputStream dis) throws IOException {
+            return new CancelPortLookup(readUuid(dis));
         }
 
         @Override
         public void handle(ProtocolClient client) {
-            Minecraft.getInstance().execute(() -> PunchManager.stopTransmit(cookie));
+            Minecraft.getInstance().execute(() -> PunchManager.cancelPortLookup(lookupId));
         }
     }
 
-    record PunchRequestSuccess(PunchCookie cookie, String host, int port) implements WorldHostS2CMessage {
+    record PortLookupSuccess(UUID lookupId, String host, int port) implements WorldHostS2CMessage {
         public static final int ID = 20;
 
-        public static PunchRequestSuccess decode(DataInputStream dis) throws IOException {
-            return new PunchRequestSuccess(PunchCookie.readFrom(dis), readString(dis), dis.readUnsignedShort());
+        public static PortLookupSuccess decode(DataInputStream dis) throws IOException {
+            var lookupId = readUuid(dis);
+            return new PortLookupSuccess(lookupId, readString(dis), dis.readUnsignedShort());
         }
 
         @Override
         public void handle(ProtocolClient client) {
             final HostAndPort hostAndPort = HostAndPort.fromParts(host, port);
-            Minecraft.getInstance().execute(() -> PunchManager.punchSuccess(cookie, hostAndPort));
+            Minecraft.getInstance().execute(() -> PunchManager.portLookupSuccess(lookupId, hostAndPort));
         }
     }
 
-    record PunchRequestCancelled(PunchCookie cookie) implements WorldHostS2CMessage {
+    record PunchRequestCancelled(UUID punchId) implements WorldHostS2CMessage {
         public static final int ID = 21;
 
         public static PunchRequestCancelled decode(DataInputStream dis) throws IOException {
-            return new PunchRequestCancelled(PunchCookie.readFrom(dis));
+            return new PunchRequestCancelled(readUuid(dis));
         }
 
         @Override
         public void handle(ProtocolClient client) {
-            Minecraft.getInstance().execute(() -> PunchManager.punchCancelled(cookie));
+            Minecraft.getInstance().execute(() -> PunchManager.cancelPunch(punchId));
+        }
+    }
+
+    record PunchSuccess(UUID punchId, String host, int port) implements WorldHostS2CMessage {
+        public static final int ID = 22;
+
+        public static PunchSuccess decode(DataInputStream dis) throws IOException {
+            return new PunchSuccess(readUuid(dis), readString(dis), dis.readUnsignedShort());
+        }
+
+        @Override
+        public void handle(ProtocolClient client) {
+            final HostAndPort hostAndPort = HostAndPort.fromParts(host, port);
+            Minecraft.getInstance().execute(() -> PunchManager.punchSuccess(punchId, hostAndPort));
         }
     }
 
@@ -548,9 +567,10 @@ public sealed interface WorldHostS2CMessage {
     static boolean isEncrypted(int typeId) {
         return switch (typeId) {
             case PunchOpenRequest.ID,
-                 StopPunchRetransmit.ID,
-                 PunchRequestSuccess.ID,
-                 PunchRequestCancelled.ID -> true;
+                 CancelPortLookup.ID,
+                 PortLookupSuccess.ID,
+                 PunchRequestCancelled.ID,
+                 PunchSuccess.ID -> true;
             default -> false;
         };
     }
@@ -576,9 +596,10 @@ public sealed interface WorldHostS2CMessage {
             case NewQueryResponse.ID -> NewQueryResponse.decode(dis);
             case Warning.ID -> Warning.decode(dis);
             case PunchOpenRequest.ID -> PunchOpenRequest.decode(dis);
-            case StopPunchRetransmit.ID -> StopPunchRetransmit.decode(dis);
-            case PunchRequestSuccess.ID -> PunchRequestSuccess.decode(dis);
+            case CancelPortLookup.ID -> CancelPortLookup.decode(dis);
+            case PortLookupSuccess.ID -> PortLookupSuccess.decode(dis);
             case PunchRequestCancelled.ID -> PunchRequestCancelled.decode(dis);
+            case PunchSuccess.ID -> PunchSuccess.decode(dis);
             default -> new Error("Received packet with unknown typeId from server (outdated client?): " + typeId);
         };
     }

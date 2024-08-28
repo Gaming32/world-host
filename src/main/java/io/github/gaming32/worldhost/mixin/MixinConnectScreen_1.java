@@ -54,9 +54,7 @@ public class MixinConnectScreen_1 {
         cancellable = true
     )
     private void overrideError(CallbackInfo ci) {
-        if (WorldHost.protoClient == null || wh$host.endsWith(WorldHost.protoClient.getBaseIp())) {
-            return;
-        }
+        if (WorldHost.protoClient == null || wh$host.endsWith(WorldHost.protoClient.getBaseIp())) return;
         final Long attemptingToJoin = WorldHost.protoClient.getAttemptingToJoin();
         if (attemptingToJoin == null) return;
         Minecraft.getInstance().execute(() -> WorldHost.connect(

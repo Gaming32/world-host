@@ -2,88 +2,150 @@ package io.github.gaming32.worldhost.protocol.punch;
 
 import com.google.common.net.HostAndPort;
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.protocol.ProtocolClient;
+import io.github.gaming32.worldhost.protocol.WorldHostC2SMessage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public final class PunchManager {
-    private static final Map<PunchCookie, PendingClientPunch> PENDING_CLIENT_PUNCHES = new HashMap<>();
-    private static final Map<PunchCookie, PendingServerPunch> PENDING_SERVER_PUNCHES = new HashMap<>();
+    private static final int PORT_LOOKUP_RETRANSMIT_PERIOD = 3;
+    private static final int SERVER_PUNCH_EXPIRY = 10 * 20;
+
+    private static final Map<UUID, PendingClientPunch> PENDING_CLIENT_PUNCHES = new HashMap<>();
+    private static final Map<UUID, PendingServerPunch> PENDING_SERVER_PUNCHES = new ConcurrentHashMap<>();
+    private static final Map<UUID, PendingPortLookup> PENDING_PORT_LOOKUPS = new ConcurrentHashMap<>();
 
     private PunchManager() {
+    }
+
+    public static void lookupPort(
+        PunchTransmitter transmitter, Consumer<HostAndPort> successAction, Runnable cancelledAction
+    ) {
+        final var lookupId = UUID.randomUUID();
+        final var lookup = new PendingPortLookup(lookupId, transmitter, successAction, cancelledAction);
+        PENDING_PORT_LOOKUPS.put(lookupId, lookup);
+        if (WorldHost.protoClient != null) {
+            WorldHost.protoClient.beginPortLookup(lookupId);
+            final var signalling = WorldHost.protoClient.getHostAndPort();
+            Thread.ofVirtual()
+                .name("PunchManager-TransmitLookup-" + lookup)
+                .start(() -> lookup.transmit(signalling));
+        }
     }
 
     public static void punch(
         long connectionId,
         PunchReason reason,
+        PunchTransmitter transmitter,
         Consumer<HostAndPort> successAction,
         Runnable cancelledAction
     ) {
-        final PunchCookie cookie = PunchCookie.random();
-        PENDING_CLIENT_PUNCHES.put(cookie, new PendingClientPunch(successAction, cancelledAction));
-        if (WorldHost.protoClient != null) {
-            WorldHost.protoClient.requestPunchOpen(connectionId, reason.id(), cookie);
-        }
+        lookupPort(transmitter, myHostAndPort -> {
+            final var punchId = UUID.randomUUID();
+            PENDING_CLIENT_PUNCHES.put(punchId, new PendingClientPunch(successAction, cancelledAction));
+            if (WorldHost.protoClient != null) {
+                WorldHost.protoClient.requestPunchOpen(
+                    connectionId, reason.id(), punchId, myHostAndPort.getHost(), myHostAndPort.getPort()
+                );
+            }
+        }, cancelledAction);
     }
 
-    public static void transmitPunches() {
-        final HostAndPort signalling = getSignallingServer();
-        if (signalling == null) return;
-        final List<PendingServerPunch> punches = new ArrayList<>(PENDING_SERVER_PUNCHES.values());
-        Thread.ofVirtual().name("PunchManager-Retransmit").start(() -> {
-            for (final PendingServerPunch punch : punches) {
-                punch.transmit(signalling);
+    public static void retransmitAll() {
+        final long tickCount = WorldHost.tickCount;
+
+        if (tickCount % PORT_LOOKUP_RETRANSMIT_PERIOD == 0 && WorldHost.protoClient != null) {
+            final var signalling = WorldHost.protoClient.getHostAndPort();
+            Thread.ofVirtual().name("PunchManager-RetransmitLookups").start(() -> {
+                for (final PendingPortLookup lookup : PENDING_PORT_LOOKUPS.values()) {
+                    lookup.transmit(signalling);
+                }
+            });
+        }
+
+        Thread.ofVirtual().name("PunchManager-RetransmitPunches").start(() -> {
+            final var iter = PENDING_SERVER_PUNCHES.values().iterator();
+            while (iter.hasNext()) {
+                final var punch = iter.next();
+                punch.transmit();
+                if (tickCount > punch.expiryTick) {
+                    iter.remove();
+                }
             }
         });
     }
 
-    public static void openPunchRequest(PunchCookie cookie, PunchTransmitter transmitter) {
-        final PendingServerPunch punch = new PendingServerPunch(cookie, transmitter);
-        final PendingServerPunch old = PENDING_SERVER_PUNCHES.put(cookie, punch);
+    public static void openPunchRequest(
+        UUID punchId, PunchTransmitter transmitter, String host, int port, long connectionId
+    ) {
+        final var punch = new PendingServerPunch(
+            punchId, connectionId, host, port, transmitter,
+            WorldHost.tickCount + SERVER_PUNCH_EXPIRY
+        );
+        final var old = PENDING_SERVER_PUNCHES.put(punchId, punch);
         if (old != null) {
-            WorldHost.LOGGER.warn("New punch request {} replaced old request {}", punch, old);
+            WorldHost.LOGGER.warn("New punch request {} replaced old request {} (ID {})", punch, old, punchId);
         }
 
-        final HostAndPort signalling = getSignallingServer();
-        if (signalling == null) return;
         Thread.ofVirtual()
-            .name("PunchManager-Transmit-" + cookie)
-            .start(() -> punch.transmit(signalling));
+            .name("PunchManager-TransmitPunch-" + punchId)
+            .start(punch::transmit);
+
+        lookupPort(
+            transmitter,
+            myAddr -> {
+                PENDING_SERVER_PUNCHES.remove(punchId);
+                if (WorldHost.protoClient != null) {
+                    WorldHost.protoClient.punchSuccess(connectionId, punchId, myAddr.getHost(), myAddr.getPort());
+                }
+            },
+            () -> {
+                PENDING_SERVER_PUNCHES.remove(punchId);
+                if (WorldHost.protoClient != null) {
+                    WorldHost.protoClient.punchFailed(connectionId, punchId);
+                }
+            }
+        );
     }
 
-    private static HostAndPort getSignallingServer() {
-        final ProtocolClient client = WorldHost.protoClient;
-        if (client == null) {
-            return null;
+    public static void portLookupSuccess(UUID lookupId, HostAndPort hostAndPort) {
+        final var lookup = PENDING_PORT_LOOKUPS.remove(lookupId);
+        if (lookup == null) {
+            WorldHost.LOGGER.warn("Success received for unknown port lookup {}", lookupId);
+            return;
         }
-        return client.getHostAndPort();
+        lookup.successAction.accept(hostAndPort);
     }
 
-    public static void stopTransmit(PunchCookie cookie) {
-        if (PENDING_SERVER_PUNCHES.remove(cookie) == null) {
-            WorldHost.LOGGER.warn("Requested to stop transmitting unknown punch {}", cookie);
+    public static void cancelPortLookup(UUID lookupId) {
+        final var lookup = PENDING_PORT_LOOKUPS.remove(lookupId);
+        if (lookup == null) {
+            WorldHost.LOGGER.warn("Cancellation received for unknown port lookup {}", lookupId);
+            return;
         }
+        lookup.cancelledAction.run();
     }
 
-    public static void punchSuccess(PunchCookie cookie, HostAndPort hostAndPort) {
-        final PendingClientPunch punch = PENDING_CLIENT_PUNCHES.remove(cookie);
+    public static void punchSuccess(UUID punchId, HostAndPort hostAndPort) {
+        final PendingClientPunch punch = PENDING_CLIENT_PUNCHES.remove(punchId);
         if (punch == null) {
-            WorldHost.LOGGER.warn("Success received for unknown punch {}", cookie);
+            WorldHost.LOGGER.warn("Success received for unknown punch {}", punchId);
             return;
         }
         punch.successAction.accept(hostAndPort);
     }
 
-    public static void punchCancelled(PunchCookie cookie) {
-        final PendingClientPunch punch = PENDING_CLIENT_PUNCHES.remove(cookie);
+    public static void cancelPunch(UUID punchId) {
+        final PendingClientPunch punch = PENDING_CLIENT_PUNCHES.remove(punchId);
         if (punch == null) {
-            WorldHost.LOGGER.warn("Cancellation received for unknown punch {}", cookie);
+            WorldHost.LOGGER.warn("Cancellation received for unknown punch {}", punchId);
             return;
         }
         punch.cancelledAction.run();
@@ -92,15 +154,27 @@ public final class PunchManager {
     private record PendingClientPunch(Consumer<HostAndPort> successAction, Runnable cancelledAction) {
     }
 
-    private record PendingServerPunch(PunchCookie cookie, PunchTransmitter transmitter) {
-        void transmit(HostAndPort target) {
-//            try (DatagramSocket socket = new DatagramSocket(localPort)) {
-//                socket.send(new DatagramPacket(
-//                    cookie.toBytes(), PunchCookie.BYTES,
-//                    new InetSocketAddress(target.getHost(), target.getPort())
-//                ));
+    private record PendingServerPunch(
+        UUID punchId, long connectionId, String host, int port, PunchTransmitter transmitter, long expiryTick
+    ) {
+        void transmit() {
             try {
-                transmitter.transmit(cookie.toBytes(), new InetSocketAddress(target.getHost(), target.getPort()));
+                transmitter.transmit(new byte[0], new InetSocketAddress(host, port));
+            } catch (IOException e) {
+                WorldHost.LOGGER.error("Failed to transmit {}", this, e);
+            }
+        }
+    }
+
+    private record PendingPortLookup(
+        UUID lookupId, PunchTransmitter transmitter,
+        Consumer<HostAndPort> successAction, Runnable cancelledAction
+    ) {
+        void transmit(HostAndPort target) {
+            try {
+                final var packet = new ByteArrayOutputStream();
+                WorldHostC2SMessage.writeUuid(new DataOutputStream(packet), lookupId);
+                transmitter.transmit(packet.toByteArray(), new InetSocketAddress(target.getHost(), target.getPort()));
             } catch (IOException e) {
                 WorldHost.LOGGER.error("Failed to transmit {}", this, e);
             }
