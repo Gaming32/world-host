@@ -257,8 +257,7 @@ public class WorldHost
 
     private static void init(IOFunction<String, Path> assetGetter) {
         try (BufferedReader reader = Files.newBufferedReader(
-            assetGetter.apply("assets/world-host/16k.txt"),
-            StandardCharsets.US_ASCII
+            assetGetter.apply("16k.txt"), StandardCharsets.US_ASCII
         )) {
             wordsForCid = reader.lines().filter(s -> !s.startsWith("//")).toList();
         } catch (IOException e) {
