@@ -11,14 +11,8 @@ import java.net.SocketAddress;
 import java.util.Objects;
 
 public class WorldHostClientVoicechatSocket extends VoicechatSocketBase implements ClientVoicechatSocket {
-    private final byte[] buffer = new byte[4096];
-
     private DatagramSocket socket;
     private SocketAddress targetAddress;
-
-    public DatagramSocket getSocket() {
-        return socket;
-    }
 
     public void setTargetAddress(SocketAddress targetAddress) {
         this.targetAddress = targetAddress;
