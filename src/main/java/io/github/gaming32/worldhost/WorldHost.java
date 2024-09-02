@@ -109,9 +109,9 @@ import net.fabricmc.loader.api.FabricLoader;
 //#else
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 //$$ import java.lang.annotation.ElementType;
+//$$ import java.lang.reflect.InvocationTargetException;
 //$$ import java.util.Objects;
 //$$ import java.util.function.BiConsumer;
-//$$ import java.util.function.BiFunction;
 //$$ import org.objectweb.asm.Type;
 //#if FORGE
 //$$ import net.minecraftforge.fml.ModContainer;
@@ -392,8 +392,10 @@ public class WorldHost
         //$$             try {
         //$$                 return (WorldHostPlugin)Class.forName(ad.clazz().getClassName()).getDeclaredConstructor().newInstance();
         //$$             } catch (ReflectiveOperationException e) {
-        //$$                 LOGGER.error("Failed to load World Host plugin from class {}", ad.clazz().getClassName(), e);
-        //$$                 return null;
+        //$$                 throw new IllegalStateException(
+        //$$                     "World Host plugin from " + modFile.moduleName() + " failed to load",
+        //$$                     e instanceof InvocationTargetException target ? target.getTargetException() : e
+        //$$                 );
         //$$             }
         //$$         })
         //$$         .filter(Objects::nonNull)
