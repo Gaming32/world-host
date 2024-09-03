@@ -34,8 +34,8 @@ public class AddFriendScreen extends WorldHostScreen {
     //$$ private static final Component ADD_FRIEND_SILENT_TEXT = Components.literal("+Q");
     //$$ private static final Component ADD_FRIEND_NOTIFY_TEXT = Components.literal("+N");
     //#endif
-    private static final Component ADD_FRIEND_SILENT_TOOLTIP = Components.translatable("world-host.add_friend.tooltip");
-    private static final Component ADD_FRIEND_NOTIFY_TOOLTIP = Components.translatable("world-host.friends.add_silently.tooltip");
+    private static final Component ADD_FRIEND_SILENT_TOOLTIP = Components.translatable("world-host.friends.add_silently.tooltip");
+    private static final Component ADD_FRIEND_NOTIFY_TOOLTIP = Components.translatable("world-host.add_friend.tooltip");
 
     private final Screen parent;
     private final BiConsumer<FriendListFriend, Boolean> addAction;
