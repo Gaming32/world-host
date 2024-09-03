@@ -10,6 +10,7 @@ import xyz.wagyourtail.unimined.util.capitalized
 import xyz.wagyourtail.unimined.util.sourceSets
 import java.net.NetworkInterface
 import java.nio.file.Path
+import java.util.UUID
 
 plugins {
     java
@@ -164,9 +165,11 @@ unimined.minecraft {
             val user = name.uppercase()
             val provider = (minecraftData as MinecraftDownloader).provider
             provider.provideRunClientTask(runName, file("run/$runName"))
-            configFirst(runName) {
+            config(runName) {
                 description = "Test $user"
-                args = args!!.map { if (it == "Dev") "$user$usernameSuffix" else it }
+                val username = "$user$usernameSuffix"
+                properties["auth_player_name"] = { username }
+                properties["auth_uuid"] = { UUID.nameUUIDFromBytes("OfflinePlayer:$username".encodeToByteArray()).toString() }
                 jvmArgs(
                     "-Dworld-host-testing.enabled=true",
                     "-Dworld-host-testing.user=$user",
