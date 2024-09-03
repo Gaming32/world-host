@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import org.intellij.lang.annotations.RegExp;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -15,7 +16,6 @@ import java.util.stream.Stream;
 
 //#if MC >= 1.19.2
 import net.minecraft.network.chat.contents.TranslatableContents;
-import org.intellij.lang.annotations.RegExp;
 //#else
 //$$ import net.minecraft.network.chat.TranslatableComponent;
 //#endif
