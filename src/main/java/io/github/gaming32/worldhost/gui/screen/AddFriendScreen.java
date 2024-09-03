@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.players.GameProfileCache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +29,12 @@ public class AddFriendScreen extends WorldHostScreen {
     private static final Component FRIEND_USERNAME_TEXT = Components.translatable("world-host.add_friend.enter_username");
     private static final Component ADD_FRIEND_TEXT = Components.literal("+");
     //#if MC >= 1.20.0
-    private static final Component ADD_FRIEND_SILENT_TEXT = Components.literal("+\ud83d\udd08");
+    @VisibleForTesting
+    public static final Component ADD_FRIEND_SILENT_TEXT = Components.literal("+\ud83d\udd08");
     private static final Component ADD_FRIEND_NOTIFY_TEXT = Components.literal("+\ud83d\udd0a");
     //#else
-    //$$ private static final Component ADD_FRIEND_SILENT_TEXT = Components.literal("+Q");
+    //$$ @VisibleForTesting
+    //$$ public static final Component ADD_FRIEND_SILENT_TEXT = Components.literal("+Q");
     //$$ private static final Component ADD_FRIEND_NOTIFY_TEXT = Components.literal("+N");
     //#endif
     private static final Component ADD_FRIEND_SILENT_TOOLTIP = Components.translatable("world-host.friends.add_silently.tooltip");

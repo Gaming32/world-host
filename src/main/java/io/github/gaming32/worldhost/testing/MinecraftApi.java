@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 //#if MC >= 1.19.2
 import net.minecraft.network.chat.contents.TranslatableContents;
+import org.intellij.lang.annotations.RegExp;
 //#else
 //$$ import net.minecraft.network.chat.TranslatableComponent;
 //#endif
@@ -65,7 +66,7 @@ public class MinecraftApi {
         type(text);
     }
 
-    public static AbstractWidget findWidgetByRegex(String regex) {
+    public static AbstractWidget findWidgetByRegex(@RegExp String regex) {
         return findWidgetByRegex(Pattern.compile(regex));
     }
 

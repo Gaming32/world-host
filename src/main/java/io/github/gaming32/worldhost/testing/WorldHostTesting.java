@@ -130,7 +130,7 @@ public class WorldHostTesting {
             .then(FriendsScreen.class, () -> click(findWidgetByTranslation("world-host.add_friend")))
             .then(AddFriendScreen.class, () -> {
                 enterText(findWidgetByTranslation("world-host.add_friend.enter_username"), "o:" + user + getUsernameSuffix());
-                click(findWidgetByTranslation("world-host.add_friend"));
+                click(findWidgetByComponent(AddFriendScreen.ADD_FRIEND_SILENT_TEXT));
             })
             .then(FriendsScreen.class, () -> click(findWidgetByTranslation("gui.done")))
             .then(WorldHostConfigScreen.class, () -> click(findWidgetByTranslation("gui.done")));

@@ -21,6 +21,9 @@ jobs:
           - 1.20.4-fabric
           - 1.20.6-neoforge
           - 1.20.6-fabric
+        side:
+          - Host
+          - Joiner
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -40,7 +43,5 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 21
-      - name: Compile World Host
-        run: ./gradlew :${{ matrix.subproject }}:classes
       - name: Run tests
-        run: xvfb-run -a -s "-screen 0 1920x1080x24" bash runTests.sh ${{ matrix.subproject }}
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew :${{ matrix.subproject }}:runTest${{ matrix.side }}
