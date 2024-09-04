@@ -43,4 +43,9 @@ public class WorldHostFriendAdder implements FriendAdder {
     public boolean delayLookup(String name) {
         return !VALID_UUID.matcher(name).matches() && !name.startsWith("o:");
     }
+
+    @Override
+    public int maxValidNameLength() {
+        return 36;
+    }
 }

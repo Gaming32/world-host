@@ -84,7 +84,7 @@ public class AddFriendScreen extends WorldHostScreen {
         GameProfileCache.setUsesAuthentication(true); // This makes non-existent users return an empty value instead of an offline mode fallback.
 
         nameField = addRenderableWidget(new EditBox(font, width / 2 - 100, 66, 200, 20, nameField, FRIEND_USERNAME_TEXT));
-        nameField.setMaxLength(36);
+        friendAdders.stream().mapToInt(FriendAdder::maxValidNameLength).max().ifPresent(nameField::setMaxLength);
         //#if MC >= 1.19.4
         setInitialFocus(nameField);
         //#else
@@ -95,6 +95,7 @@ public class AddFriendScreen extends WorldHostScreen {
             userList.clearUsers();
             final List<FriendAdder> delayedAdders = new ArrayList<>();
             for (final FriendAdder adder : friendAdders) {
+                if (name.length() > adder.maxValidNameLength()) continue;
                 if (adder.delayLookup(name)) {
                     delayedAdders.add(adder);
                 } else {
