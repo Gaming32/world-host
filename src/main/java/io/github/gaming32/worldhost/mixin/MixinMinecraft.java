@@ -44,14 +44,12 @@ public abstract class MixinMinecraft {
 
     @Unique
     private Class<? extends Screen> wh$lastScreenClass;
-    @Unique
-    private boolean wh$readyForTesting;
 
     @Inject(method = "setOverlay", at = @At("HEAD"))
     private void deferredToastReady(Overlay loadingGui, CallbackInfo ci) {
         if (loadingGui == null) {
             WHToast.ready();
-            wh$readyForTesting = true;
+            WorldHost.clientLoadedFully = true;
         }
     }
 
@@ -59,7 +57,7 @@ public abstract class MixinMinecraft {
     private void preTick(CallbackInfo ci) {
         WHToast.tick();
         final var screenClass = ScreenChain.getScreenClass(screen);
-        if (WorldHostTesting.ENABLED && wh$readyForTesting && screenClass != wh$lastScreenClass) {
+        if (WorldHostTesting.ENABLED && WorldHost.clientLoadedFully && screenClass != wh$lastScreenClass) {
             wh$lastScreenClass = screenClass;
             WorldHostTesting.SCREEN_CHAIN.get().advance(screen);
         }

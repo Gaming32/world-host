@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost;
 
 import com.demonwav.mcdev.annotations.Translatable;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.brigadier.Command;
@@ -11,6 +12,7 @@ import com.mojang.logging.LogUtils;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
 import io.github.gaming32.worldhost.ext.ServerDataExt;
 import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
+import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
@@ -50,10 +52,12 @@ import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.players.GameProfileCache;
+import org.apache.commons.io.function.IOConsumer;
 import org.apache.commons.io.function.IOFunction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
@@ -74,6 +78,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -182,9 +187,14 @@ public class WorldHost
     public static final Path CACHE_DIR = GAME_DIR.resolve(".world-host-cache");
 
     public static final Path CONFIG_DIR = GAME_DIR.resolve("config");
+    public static final Path GLOBAL_CONFIG_DIR = locateGlobalConfigDir();
+
     public static final Path CONFIG_FILE = CONFIG_DIR.resolve("world-host.json5");
-    public static final Path FRIENDS_FILE = CONFIG_DIR.resolve("world-host-friends.json");
     public static final Path OLD_CONFIG_FILE = CONFIG_DIR.resolve("world-host.json");
+
+    public static final Path FRIENDS_FILE = GLOBAL_CONFIG_DIR.resolve("friends.json");
+    public static final Path OLD_FRIENDS_FILE = CONFIG_DIR.resolve("world-host-friends.json");
+
     public static final WorldHostConfig CONFIG = new WorldHostConfig();
 
     private static List<String> wordsForCid;
@@ -220,6 +230,7 @@ public class WorldHost
 
     public static SocketAddress proxySocketAddress;
 
+    public static boolean clientLoadedFully;
     public static long tickCount;
 
     private static List<LoadedWorldHostPlugin> plugins;
@@ -275,6 +286,7 @@ public class WorldHost
         LOGGER.info("Using client-generated connection ID {}", connectionIdToString(CONNECTION_ID));
 
         loadConfig();
+        prepareFileWatcher();
 
         try {
             Files.createDirectories(CACHE_DIR);
@@ -317,53 +329,145 @@ public class WorldHost
         reconnect(false, true);
     }
 
+    private static Path locateGlobalConfigDir() {
+        return switch (Util.getPlatform()) {
+            case WINDOWS -> Path.of(System.getenv("APPDATA"), "World Host Mod");
+            case OSX -> Path.of(System.getProperty("user.home"), "Library/Application Support/World Host Mod");
+            default -> {
+                var configHome = System.getenv("XDG_CONFIG_HOME");
+                if (configHome == null) {
+                    configHome = System.getProperty("user.home") + "/.config";
+                }
+                yield Path.of(configHome, "world-host-mod");
+            }
+        };
+    }
+
     public static void loadConfig() {
-        try (JsonReader reader = JsonReader.json5(CONFIG_FILE)) {
-            CONFIG.read(reader);
-            if (Files.exists(OLD_CONFIG_FILE)) {
-                LOGGER.info("Old {} still exists. Maybe consider removing it?", OLD_CONFIG_FILE.getFileName());
-            }
-        } catch (NoSuchFileException e) {
-            LOGGER.info("{} not found. Trying to load old {}.", CONFIG_FILE.getFileName(), OLD_CONFIG_FILE.getFileName());
-            try (JsonReader reader = JsonReader.json(OLD_CONFIG_FILE)) {
-                CONFIG.read(reader);
-                LOGGER.info(
-                    "Found and read old {} into new {}. Maybe consider deleting the old {}?",
-                    OLD_CONFIG_FILE.getFileName(), CONFIG_FILE.getFileName(), OLD_CONFIG_FILE.getFileName()
-                );
-            } catch (NoSuchFileException e1) {
-                LOGGER.info("Old {} not found. Writing default config.", OLD_CONFIG_FILE.getFileName());
-            } catch (IOException e1) {
-                LOGGER.error("Failed to load old {}.", OLD_CONFIG_FILE.getFileName(), e1);
-            }
-        } catch (Exception e) {
-            LOGGER.error("Failed to load {}.", CONFIG_FILE.getFileName(), e);
-        }
-        try (JsonReader reader = JsonReader.json(FRIENDS_FILE)) {
-            CONFIG.readFriends(reader);
-        } catch (NoSuchFileException ignored) {
-        } catch (Exception e) {
-            LOGGER.error("Failed to load {}.", FRIENDS_FILE.getFileName(), e);
-        }
+        loadConfigFile(CONFIG_FILE, JsonReader::json5, OLD_CONFIG_FILE, JsonReader::json, CONFIG::read);
+        loadFriendsOnly();
         saveConfig();
     }
 
-    public static void saveConfig() {
-        try {
-            Files.createDirectories(CONFIG_FILE.getParent());
-            try (JsonWriter writer = JsonWriter.json5(CONFIG_FILE)) {
-                CONFIG.write(writer);
+    private static void loadFriendsOnly() {
+        loadConfigFile(FRIENDS_FILE, JsonReader::json, OLD_FRIENDS_FILE, JsonReader::json, CONFIG::readFriends);
+    }
+
+    @Contract("_, _, !null, null, _ -> fail")
+    private static void loadConfigFile(
+        Path configFile, IOFunction<Path, JsonReader> configFormat,
+        @Nullable Path oldConfigFile, @Nullable IOFunction<Path, JsonReader> oldConfigFormat,
+        IOConsumer<JsonReader> configReader
+    ) {
+        try (JsonReader reader = configFormat.apply(configFile)) {
+            configReader.accept(reader);
+            if (oldConfigFile != null && Files.exists(oldConfigFile)) {
+                LOGGER.info("Old {} still exists. Consider removing it.", oldConfigFile.getFileName());
+            }
+        } catch (NoSuchFileException e) {
+            if (oldConfigFile != null) {
+                assert oldConfigFormat != null;
+                LOGGER.info("{} not found. Trying to load old {}.", configFile.getFileName(), oldConfigFile.getFileName());
+                try (JsonReader reader = oldConfigFormat.apply(oldConfigFile)) {
+                    configReader.accept(reader);
+                    LOGGER.info(
+                        "Found and read old {} into new {}. Consider removing the old {}.",
+                        oldConfigFile.getFileName(), configFile.getFileName(), oldConfigFile.getFileName()
+                    );
+                } catch (NoSuchFileException e1) {
+                    LOGGER.info("Old {} not found. Writing default config.", oldConfigFile.getFileName());
+                } catch (IOException e1) {
+                    LOGGER.error("Failed to load old {}.", oldConfigFile.getFileName(), e1);
+                }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to write {}.", CONFIG_FILE.getFileName(), e);
+            LOGGER.error("Failed to load {}.", configFile.getFileName(), e);
         }
+    }
+
+    public static void saveConfig() {
+        saveConfigFile(CONFIG_FILE, JsonWriter::json5, CONFIG::write);
+        saveConfigFile(FRIENDS_FILE, JsonWriter::json, CONFIG::writeFriends);
+    }
+
+    private static void saveConfigFile(
+        Path configFile, IOFunction<Path, JsonWriter> configFormat,
+        IOConsumer<JsonWriter> configWriter
+    ) {
         try {
-            Files.createDirectories(FRIENDS_FILE.getParent());
-            try (JsonWriter writer = JsonWriter.json(FRIENDS_FILE)) {
-                CONFIG.writeFriends(writer);
+            Files.createDirectories(configFile.getParent());
+            try (JsonWriter writer = configFormat.apply(configFile)) {
+                configWriter.accept(writer);
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to write {}.", FRIENDS_FILE.getFileName(), e);
+            LOGGER.error("Failed to write {}.", configFile.getFileName(), e);
+        }
+    }
+
+    private static void prepareFileWatcher() {
+        try {
+            final var watchService = GLOBAL_CONFIG_DIR.getFileSystem().newWatchService();
+            GLOBAL_CONFIG_DIR.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+            Thread.ofVirtual().name("WorldHostFileWatcher").start(() -> {
+                try {
+                    while (Minecraft.getInstance().isRunning() || !clientLoadedFully) {
+                        final var key = watchService.take();
+                        for (final var event : key.pollEvents()) {
+                            final var eventPath = GLOBAL_CONFIG_DIR.resolve((Path)event.context());
+                            if (eventPath.equals(FRIENDS_FILE)) {
+                                LOGGER.info("Friends file modified. Reloading...");
+                                Minecraft.getInstance().execute(() -> {
+                                    final var oldFriends = Set.copyOf(CONFIG.getFriends());
+                                    loadFriendsOnly();
+                                    fullFriendsRefresh(oldFriends);
+                                });
+                            }
+                        }
+                        key.reset();
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("Exception in file watcher. Stopping.", e);
+                }
+                try {
+                    watchService.close();
+                } catch (IOException e) {
+                    LOGGER.error("Exception closing file watcher", e);
+                }
+            });
+        } catch (Exception e) {
+            LOGGER.warn(
+                "Failed to setup watch service for {}. Friends setup in other instances will not be dynamically refreshed.",
+                FRIENDS_FILE, e
+            );
+        }
+    }
+
+    public static void setFriends(Set<UUID> friends) {
+        final var oldFriends = Set.copyOf(CONFIG.getFriends());
+        CONFIG.getFriends().clear();
+        CONFIG.getFriends().addAll(friends);
+        fullFriendsRefresh(oldFriends);
+    }
+
+    public static void fullFriendsRefresh(Set<UUID> oldFriends) {
+        if (!CONFIG.isEnableFriends()) return;
+        final var friends = CONFIG.getFriends();
+        final var removedFriends = Sets.difference(oldFriends, friends);
+        final var newFriends = Sets.difference(oldFriends, friends);
+        if (protoClient != null) {
+            final var server = Minecraft.getInstance().getSingleplayerServer();
+            if (server != null && server.isPublished()) {
+                if (!removedFriends.isEmpty()) {
+                    protoClient.closedWorld(removedFriends);
+                }
+                if (!newFriends.isEmpty()) {
+                    protoClient.publishedWorld(newFriends);
+                }
+            }
+            refreshFriendsList();
+            if (Minecraft.getInstance().screen instanceof FriendsScreen friendsScreen) {
+                friendsScreen.refresh();
+            }
         }
     }
 

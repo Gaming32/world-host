@@ -33,11 +33,6 @@ public class FriendsScreen extends ScreenWithInfoTexts {
     private Button removeButton;
     private FriendsList list;
 
-    private final Runnable refresher = () -> {
-        assert minecraft != null;
-        minecraft.execute(() -> list.reloadEntries());
-    };
-
     public FriendsScreen(Screen parent) {
         super(WorldHostComponents.FRIENDS, InfoTextsCategory.FRIENDS_SCREEN);
         this.parent = parent;
@@ -63,7 +58,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
                 assert minecraft != null;
                 minecraft.setScreen(new AddFriendScreen(
                     this, ADD_FRIEND_TEXT, null,
-                    (friend, notify) -> friend.addFriend(notify, refresher)
+                    (friend, notify) -> friend.addFriend(notify, this::refresh)
                 ));
             }).width(152)
                 .pos(width / 2 - 154, height - 54)
@@ -108,6 +103,11 @@ public class FriendsScreen extends ScreenWithInfoTexts {
     public void onClose() {
         assert minecraft != null;
         minecraft.setScreen(parent);
+    }
+
+    public void refresh() {
+        assert minecraft != null;
+        minecraft.execute(() -> list.reloadEntries());
     }
 
     @Override
@@ -216,7 +216,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             minecraft.setScreen(new ConfirmScreen(
                 yes -> {
                     if (yes) {
-                        friend.removeFriend(refresher);
+                        friend.removeFriend(FriendsScreen.this::refresh);
                     }
                     minecraft.setScreen(FriendsScreen.this);
                 },

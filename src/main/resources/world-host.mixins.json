@@ -8,7 +8,6 @@
     "MixinConnection",
     "MixinInputConstants",
     "MixinLevelSummary",
-    "MixinMinecraftServer",
     "MixinPlayerList",
     "MixinPublishCommand",
     "MixinServerConnectionListener_1",
@@ -33,7 +32,9 @@
     "MixinWorldSelectionList_WorldListEntry",
     "PlainTextButtonAccessor",
     "ServerStatusPingerAccessor",
+    //#if FABRIC
     "modmenu.MixinModMenuEventHandler"
+    //#endif
   ],
   "injectors": {
     "defaultRequire": 1
