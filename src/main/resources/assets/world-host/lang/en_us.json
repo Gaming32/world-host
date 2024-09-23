@@ -71,5 +71,7 @@
   "world-host.share_world": "Share World",
   "world-host.share_world.failed": "Failed to share world",
   "world-host.create_world": "Create World",
-  "world-host.world_with_security": "%s \u2022 %s"
+  "world-host.world_with_security": "%s \u2022 %s",
+  "world-host.nonstandard_origin": "Unofficial World Host download",
+  "world-host.nonstandard_origin.desc": "World Host was downloaded from an unofficial source (%s). The only official source is Modrinth. This message will not be shown again."
 }

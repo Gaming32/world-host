@@ -15,6 +15,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
+import io.github.gaming32.worldhost.origincheck.OriginCheckers;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
@@ -239,7 +240,10 @@ public class WorldHost
     @Override
     public void onInitializeClient() {
         final var container = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow();
-        init(path -> container.findPath(path).orElseThrow(() -> new NoSuchFileException(path)));
+        init(
+            path -> container.findPath(path).orElseThrow(() -> new NoSuchFileException(path)),
+            container.getOrigin().getPaths().getFirst()
+        );
     }
     //#else
     //$$ public WorldHost(
@@ -251,7 +255,7 @@ public class WorldHost
         //$$ final ModContainer container = ModLoadingContext.get().getActiveContainer();
         //#endif
     //$$     final var modFile = container.getModInfo().getOwningFile().getFile();
-    //$$     init(path -> modFile.findResource(path.split("/")));
+    //$$     init(path -> modFile.findResource(path.split("/")), modFile.getFilePath());
     //$$     container.registerExtensionPoint(
             //#if MC >= 1.20.5
             //$$ IConfigScreenFactory.class, (ignored, screen) -> new WorldHostConfigScreen(screen)
@@ -266,7 +270,7 @@ public class WorldHost
     //$$ }
     //#endif
 
-    private static void init(IOFunction<String, Path> assetGetter) {
+    private static void init(IOFunction<String, Path> assetGetter, Path modPath) {
         try (BufferedReader reader = Files.newBufferedReader(
             assetGetter.apply("16k.txt"), StandardCharsets.US_ASCII
         )) {
@@ -287,6 +291,21 @@ public class WorldHost
 
         loadConfig();
         prepareFileWatcher();
+
+        final var nonstandardOrigins = OriginCheckers.getNonstandardOriginsOnce(OriginCheckers.NATIVE_CHECKER, modPath);
+        if (!nonstandardOrigins.isEmpty()) {
+            LOGGER.warn("Found nonstandard download origins: {}", nonstandardOrigins);
+            WHToast.builder("world-host.nonstandard_origin")
+                .description(Components.translatable(
+                    "world-host.nonstandard_origin.desc",
+                    nonstandardOrigins.stream()
+                        .map(URI::getHost)
+                        .collect(Collectors.joining(", "))
+                ))
+                .important()
+                .ticks(200)
+                .show();
+        }
 
         try {
             Files.createDirectories(CACHE_DIR);

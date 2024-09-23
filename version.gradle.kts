@@ -76,7 +76,10 @@ unimined.minecraft {
         if (mcVersion <= 1_19_00) {
             searge()
         }
-        mojmap()
+        mojmap {
+            dependsOn("intermediary")
+            onlyExistingSrc()
+        }
         when {
             mcVersion >= 1_21_00 -> "1.21:2024.07.28"
             mcVersion >= 1_20_05 -> "1.20.6:2024.06.16"
