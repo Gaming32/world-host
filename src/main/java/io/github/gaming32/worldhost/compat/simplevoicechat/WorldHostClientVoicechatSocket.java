@@ -3,6 +3,7 @@ package io.github.gaming32.worldhost.compat.simplevoicechat;
 import de.maxhenkel.voicechat.api.ClientVoicechatSocket;
 import de.maxhenkel.voicechat.api.RawUdpPacket;
 import de.maxhenkel.voicechat.plugins.impl.VoicechatSocketBase;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -11,10 +12,12 @@ import java.net.SocketAddress;
 import java.util.Objects;
 
 public class WorldHostClientVoicechatSocket extends VoicechatSocketBase implements ClientVoicechatSocket {
+    @Nullable
     private DatagramSocket socket;
+    @Nullable
     private SocketAddress targetAddress;
 
-    public void setTargetAddress(SocketAddress targetAddress) {
+    public void setTargetAddress(@Nullable SocketAddress targetAddress) {
         this.targetAddress = targetAddress;
     }
 

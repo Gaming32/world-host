@@ -212,7 +212,6 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         }
 
         public void maybeRemove() {
-            assert minecraft != null;
             minecraft.setScreen(new ConfirmScreen(
                 yes -> {
                     if (yes) {

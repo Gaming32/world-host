@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost.origincheck.checkers;
+package io.github.gaming32.worldhost.origincheck.checker;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.origincheck.OriginChecker;

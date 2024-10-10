@@ -73,6 +73,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
     private final Screen parent;
     private OnlineFriendsList list;
     private Button joinButton;
+    @Nullable
     private List<FormattedCharSequence> tooltip;
 
     public OnlineFriendsScreen(Screen parent) {
@@ -331,6 +332,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         private ProfileInfo profile;
 
         private Component displayName;
+        @Nullable
         private List<FormattedCharSequence> joinabilityTooltip;
         private boolean joinable;
 
@@ -412,6 +414,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     iconData = icon;
                 } else {
                     //#if MC >= 1.19.4
+                    //noinspection DataFlowIssue
                     serverInfo.setIconBytes(null);
                     //#else
                     //$$ serverInfo.setIconB64(null);
@@ -590,7 +593,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
 
         private boolean uploadServerIcon(
             //#if MC >= 1.19.4
-            byte[] newIconData
+            byte @Nullable [] newIconData
             //#else
             //$$ @Nullable String newIconData
             //#endif

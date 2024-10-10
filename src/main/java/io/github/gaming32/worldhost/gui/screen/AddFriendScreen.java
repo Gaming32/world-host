@@ -50,6 +50,7 @@ public class AddFriendScreen extends WorldHostScreen {
     private UserListWidget userList;
     private EditBox nameField;
     private long lastTyping;
+    @Nullable
     private Runnable delayedLookup;
 
     public AddFriendScreen(

@@ -217,18 +217,23 @@ public class WorldHost
         .build();
 
     private static boolean hasScannedForUpnp;
+    @Nullable
     public static Gateway upnpGateway;
 
     private static GameProfileCache profileCache;
 
+    @Nullable
     public static ProtocolClient protoClient;
+    @Nullable
     public static ProxyProtocolClient proxyProtocolClient;
     public static int reconnectDelay = 0;
     private static int delayIndex = 0;
+    @Nullable
     private static Future<Void> connectingFuture;
 
     public static boolean shareWorldOnLoad;
 
+    @Nullable
     public static SocketAddress proxySocketAddress;
 
     public static boolean clientLoadedFully;
@@ -327,7 +332,7 @@ public class WorldHost
             "Found {} World Host plugin(s): {}",
             plugins.size(),
             plugins.stream()
-                .map(plugin -> plugin.modId() + " (" + plugin.plugin().toString() + ")")
+                .map(plugin -> plugin.modId() + " (" + plugin.plugin() + ")")
                 .collect(Collectors.joining(", "))
         );
 
@@ -588,6 +593,7 @@ public class WorldHost
             refreshFriendsList();
             final var server = Minecraft.getInstance().getSingleplayerServer();
             if (server != null && server.isPublished()) {
+                assert protoClient != null;
                 protoClient.publishedWorld(CONFIG.getFriends());
             }
         }
@@ -612,11 +618,14 @@ public class WorldHost
                 .requires(s ->
                     CONFIG.isUPnP() &&
                     s.getServer().isPublished() &&
-                        upnpGateway != null &&
-                        protoClient != null &&
+                    upnpGateway != null &&
+                    protoClient != null &&
                     !protoClient.getUserIp().isEmpty()
                 )
                 .executes(ctx -> {
+                    // TODO: Improve this command to maybe use less requires
+                    assert upnpGateway != null;
+                    assert protoClient != null;
                     try {
                         final int port = ctx.getSource().getServer().getPort();
                         final var error = upnpGateway.openPort(port, 60, false);
@@ -717,7 +726,7 @@ public class WorldHost
         //#endif
     }
 
-    public static GameProfile fetchProfile(MinecraftSessionService sessionService, UUID uuid, GameProfile fallback) {
+    public static GameProfile fetchProfile(MinecraftSessionService sessionService, UUID uuid, @Nullable GameProfile fallback) {
         //#if MC < 1.20.2
         //$$ return sessionService.fillProfileProperties(fallback != null ? fallback : new GameProfile(uuid, null), false);
         //#else
@@ -777,7 +786,7 @@ public class WorldHost
         @Translatable String title,
         @Translatable String description,
         int ticks,
-        Runnable clickAction
+        @Nullable Runnable clickAction
     ) {
         profileFuture.thenAccept(profile ->
             WHToast.builder(Components.translatable(title, profile.name()))
@@ -805,7 +814,7 @@ public class WorldHost
         //#endif
     }
 
-    public static FriendlyByteBuf writeServerStatus(ServerStatus metadata) {
+    public static FriendlyByteBuf writeServerStatus(@Nullable ServerStatus metadata) {
         if (metadata == null) {
             metadata = WorldHost.createEmptyServerStatus();
         }
@@ -848,6 +857,7 @@ public class WorldHost
     }
 
     private static String getExternalIp0(String baseIp, int basePort) {
+        assert protoClient != null;
         String ip = connectionIdToString(protoClient.getConnectionId()) + '.' + baseIp;
         if (basePort != 25565) {
             ip += ":" + basePort;
@@ -925,6 +935,10 @@ public class WorldHost
     }
 
     public static void connect(Screen parentScreen, long cid) {
+        if (protoClient == null) {
+            LOGGER.error("Tried to connect to {}, but protoClient == null!", connectionIdToString(cid));
+            return;
+        }
         connect(
             parentScreen, cid,
             connectionIdToString(cid) + '.' + protoClient.getBaseIp(),

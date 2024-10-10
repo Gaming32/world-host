@@ -14,6 +14,8 @@ import net.minecraft.client.gui.GuiGraphics;
 
 //#if MC >= 1.19.4
 import net.minecraft.client.gui.components.Tooltip;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 //#endif
 
 public final class SimpleStringWidget extends AbstractWidget {
@@ -24,7 +26,7 @@ public final class SimpleStringWidget extends AbstractWidget {
     //$$ private final WorldHostScreen.TooltipRenderer tooltip;
     //#endif
 
-    public SimpleStringWidget(int x, int y, Component message, Component tooltip, Font font) {
+    public SimpleStringWidget(int x, int y, Component message, @Nullable Component tooltip, Font font) {
         super(x, y, font.width(message), font.lineHeight, message);
         this.xPos = x;
         this.yPos = y;
@@ -50,7 +52,7 @@ public final class SimpleStringWidget extends AbstractWidget {
         //#if MC < 1.20.0
         //$$ PoseStack context,
         //#else
-        GuiGraphics context,
+        @NotNull GuiGraphics context,
         //#endif
         int mouseX, int mouseY, float partialTick
     ) {
@@ -64,7 +66,7 @@ public final class SimpleStringWidget extends AbstractWidget {
 
     //#if MC >= 1.19.4
     @Override
-    protected void updateWidgetNarration(NarrationElementOutput output) {
+    protected void updateWidgetNarration(@NotNull NarrationElementOutput output) {
     }
     //#else
     //$$ @Override

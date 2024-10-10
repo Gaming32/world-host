@@ -5,6 +5,7 @@ import io.github.gaming32.worldhost.config.ConfigProperty;
 import io.github.gaming32.worldhost.config.WorldHostConfig;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
+import org.jetbrains.annotations.Nullable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 
@@ -15,6 +16,7 @@ import java.util.Collection;
 public abstract sealed class ConfigOption<T> permits EnumOption, StringOption, YesNoOption {
     protected final PropertyDescriptor property;
     private final int order;
+    @Nullable
     private Runnable onSet = null;
 
     protected ConfigOption(PropertyDescriptor property) {

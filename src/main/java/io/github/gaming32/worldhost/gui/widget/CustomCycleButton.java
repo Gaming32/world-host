@@ -18,6 +18,7 @@ import net.minecraft.client.gui.components.Tooltip;
 //#endif
 
 public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> extends Button {
+    @Nullable
     private final Component title;
     @Nullable
     private final Map<Component, Component> messages;
@@ -102,6 +103,7 @@ public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> ex
         if (messages == null) {
             return valueMessage;
         }
+        assert title != null;
         Component result = messages.get(valueMessage);
         if (result != null) {
             return result;

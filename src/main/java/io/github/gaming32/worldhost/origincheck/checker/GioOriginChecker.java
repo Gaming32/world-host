@@ -1,4 +1,4 @@
-package io.github.gaming32.worldhost.origincheck.checkers;
+package io.github.gaming32.worldhost.origincheck.checker;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;

@@ -1,10 +1,10 @@
 package io.github.gaming32.worldhost.origincheck;
 
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.origincheck.checkers.GioOriginChecker;
-import io.github.gaming32.worldhost.origincheck.checkers.MacOriginChecker;
-import io.github.gaming32.worldhost.origincheck.checkers.NoopOriginChecker;
-import io.github.gaming32.worldhost.origincheck.checkers.WindowsOriginChecker;
+import io.github.gaming32.worldhost.origincheck.checker.GioOriginChecker;
+import io.github.gaming32.worldhost.origincheck.checker.MacOriginChecker;
+import io.github.gaming32.worldhost.origincheck.checker.NoopOriginChecker;
+import io.github.gaming32.worldhost.origincheck.checker.WindowsOriginChecker;
 import net.minecraft.Util;
 
 import java.net.URI;

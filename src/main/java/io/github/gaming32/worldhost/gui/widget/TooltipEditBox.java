@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 
 //#if MC >= 1.19.4
 import net.minecraft.client.gui.components.Tooltip;
+import org.jetbrains.annotations.Nullable;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
@@ -17,7 +18,7 @@ public final class TooltipEditBox extends EditBox {
     //$$ private final WorldHostScreen.TooltipRenderer tooltip;
     //#endif
 
-    public TooltipEditBox(Font font, int x, int y, int width, int height, Component message, Component tooltip) {
+    public TooltipEditBox(Font font, int x, int y, int width, int height, Component message, @Nullable Component tooltip) {
         super(font, x, y, width, height, message);
         //#if MC >= 1.19.4
         if (tooltip != null) {
