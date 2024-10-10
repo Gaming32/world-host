@@ -3,10 +3,10 @@ package io.github.gaming32.worldhost.gui.widget;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 //#if MC >= 1.19.4
 import net.minecraft.client.gui.components.Tooltip;
-import org.jetbrains.annotations.Nullable;
 //#else
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //$$ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;

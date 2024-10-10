@@ -5,6 +5,8 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,8 +16,6 @@ import net.minecraft.client.gui.GuiGraphics;
 
 //#if MC >= 1.19.4
 import net.minecraft.client.gui.components.Tooltip;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 //#endif
 
 public final class SimpleStringWidget extends AbstractWidget {
