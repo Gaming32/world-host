@@ -52,7 +52,9 @@ public final class PunchManager {
             PENDING_CLIENT_PUNCHES.put(punchId, new PendingClientPunch(successAction, cancelledAction));
             if (WorldHost.protoClient != null) {
                 WorldHost.protoClient.requestPunchOpen(
-                    connectionId, reason.id(), punchId, myHostAndPort.getHost(), myHostAndPort.getPort()
+                    connectionId, reason.id(), punchId,
+                    myHostAndPort.getHost(), myHostAndPort.getPort(),
+                    "", 0
                 );
             }
         }, cancelledAction);

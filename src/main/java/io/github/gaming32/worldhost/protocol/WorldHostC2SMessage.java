@@ -177,7 +177,8 @@ public sealed interface WorldHostC2SMessage {
     }
 
     record RequestPunchOpen(
-        long targetConnection, String purpose, UUID punchId, String myHost, int myPort
+        long targetConnection, String purpose, UUID punchId,
+        String myHost, int myPort, String myLocalHost, int myLocalPort
     ) implements WorldHostC2SMessage {
         @Override
         public byte typeId() {
@@ -191,6 +192,8 @@ public sealed interface WorldHostC2SMessage {
             writeUuid(dos, punchId);
             writeString(dos, myHost);
             dos.writeShort(myPort);
+            writeString(dos, myLocalHost);
+            dos.writeShort(myLocalPort);
         }
     }
 

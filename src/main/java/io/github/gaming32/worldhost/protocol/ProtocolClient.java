@@ -381,8 +381,14 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         enqueue(new WorldHostC2SMessage.RequestDirectJoin(connectionId));
     }
 
-    public void requestPunchOpen(long targetConnection, String purpose, UUID punchId, String myHost, int myPort) {
-        enqueue(new WorldHostC2SMessage.RequestPunchOpen(targetConnection, purpose, punchId, myHost, myPort));
+    public void requestPunchOpen(
+        long targetConnection, String purpose, UUID punchId,
+        String myHost, int myPort, String myLocalHost, int myLocalPort
+    ) {
+        enqueue(new WorldHostC2SMessage.RequestPunchOpen(
+            targetConnection, purpose, punchId,
+            myHost, myPort, myLocalHost, myLocalPort
+        ));
     }
 
     public void punchFailed(long targetConnection, UUID punchId) {
