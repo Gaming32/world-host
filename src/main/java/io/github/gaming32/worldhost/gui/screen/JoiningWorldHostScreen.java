@@ -1,7 +1,6 @@
 package io.github.gaming32.worldhost.gui.screen;
 
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -14,7 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 public class JoiningWorldHostScreen extends WorldHostScreen {
-    private static final Component MESSAGE = Components.translatable("world-host.joining_world_host");
+    private static final Component MESSAGE = Component.translatable("world-host.joining_world_host");
 
     public final Screen parent;
 

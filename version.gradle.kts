@@ -98,12 +98,6 @@ unimined.minecraft {
             parchment(it.substringBefore(":"), it.substringAfter(":"))
         }
 
-        if (mcVersion <= 1_19_00) {
-            stub.withMappings("searge", listOf("mojmap")) {
-                c("net/minecraft/client/gui/chat/NarratorChatListener", "net/minecraft/client/GameNarrator")
-            }
-        }
-
         devFallbackNamespace("official")
     }
 
@@ -116,7 +110,6 @@ unimined.minecraft {
                 1_20_01 -> "47.1.3"
                 1_19_04 -> "45.1.0"
                 1_19_02 -> "43.2.0"
-                1_18_02 -> "40.2.0"
                 else -> throw IllegalStateException("Unknown Forge version for $mcVersionString")
             })
             mixinConfig("world-host.mixins.json")
@@ -281,7 +274,6 @@ dependencies {
             1_20_01 -> "7.2.2"
             1_19_04 -> "6.3.1"
             1_19_02 -> "4.2.0-beta.2"
-            1_18_02 -> "3.2.5"
             else -> null
         }?.let {
             modImplementation("com.terraformersmc:modmenu:$it")
@@ -303,7 +295,6 @@ dependencies {
             1_20_01 -> "0.92.2+1.20.1"
             1_19_04 -> "0.87.2+1.19.4"
             1_19_02 -> "0.77.0+1.19.2"
-            1_18_02 -> "0.77.0+1.18.2"
             else -> null
         }?.let { fapiVersion ->
             val resourceLoader = fabricApi.fabricModule("fabric-resource-loader-v0", fapiVersion)
@@ -339,7 +330,6 @@ dependencies {
         1_20_01 -> "2.5.20"
         1_19_04 -> "2.5.12"
         1_19_02 -> "2.5.20"
-        1_18_02 -> "2.5.20"
         else -> null
     }?.let {
         modCompileOnly("maven.modrinth:simple-voice-chat:$loaderName-$mcVersionString-$it")

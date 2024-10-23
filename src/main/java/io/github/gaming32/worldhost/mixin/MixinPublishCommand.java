@@ -2,6 +2,7 @@ package io.github.gaming32.worldhost.mixin;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.commands.PublishCommand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,7 +21,7 @@ public class MixinPublishCommand {
     @Inject(method = "getSuccessMessage", at = @At("HEAD"), cancellable = true)
     private static void getSuccessMessage(int port, CallbackInfoReturnable<MutableComponent> cir) {
         if (WorldHost.CONFIG.isEnableFriends()) {
-            cir.setReturnValue(Components.translatable(
+            cir.setReturnValue(Component.translatable(
                 "world-host.lan_opened.friends",
                 Components.copyOnClickText(port)
             ));
@@ -28,7 +29,7 @@ public class MixinPublishCommand {
         }
         final String externalIp = WorldHost.getExternalIp();
         if (externalIp == null) return;
-        cir.setReturnValue(Components.translatable(
+        cir.setReturnValue(Component.translatable(
             "world-host.lan_opened.no_friends",
             Components.copyOnClickText(externalIp),
             Components.copyOnClickText(port)
@@ -39,12 +40,7 @@ public class MixinPublishCommand {
     //$$     method = "publish",
     //$$     at = @At(
     //$$         value = "INVOKE",
-    //$$         target =
-                //#if MC >= 1.19.2
-                //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
-                //#else
-                //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"
-                //#endif
+    //$$         target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
     //$$     )
     //$$ )
     //$$ private static String getSuccessMessage(String key) {
@@ -62,12 +58,7 @@ public class MixinPublishCommand {
     //$$     method = "publish",
     //$$     at = @At(
     //$$         value = "INVOKE",
-    //$$         target =
-                //#if MC >= 1.19.2
-                //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
-                //#else
-                //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"
-                //#endif
+    //$$         target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
     //$$     )
     //$$ )
     //$$ private static Object[] getSuccessMessage(Object[] args) {

@@ -4,10 +4,10 @@ import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.network.chat.CommonComponents;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -24,7 +24,7 @@ public final class FriendsButton extends Button implements FriendsListUpdate {
 
     public FriendsButton(int x, int y, int width, int height, OnPress onPress) {
         super(
-            x, y, width, height, Components.EMPTY, onPress
+            x, y, width, height, CommonComponents.EMPTY, onPress
             //#if MC >= 1.19.4
             , DEFAULT_NARRATION
             //#endif

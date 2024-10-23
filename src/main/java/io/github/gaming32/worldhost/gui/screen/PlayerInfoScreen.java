@@ -3,9 +3,9 @@ package io.github.gaming32.worldhost.gui.screen;
 import com.mojang.authlib.GameProfile;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.widget.WHPlayerSkinWidget;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +18,7 @@ public class PlayerInfoScreen extends WorldHostScreen {
     private GameProfile profile;
 
     public PlayerInfoScreen(Screen parentScreen, GameProfile profile) {
-        super(Components.empty());
+        super(Component.empty());
         this.parentScreen = parentScreen;
 
         this.profile = profile;

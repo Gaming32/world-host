@@ -3,7 +3,6 @@ package io.github.gaming32.worldhost.gui.widget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.gaming32.worldhost.WHPlayerSkin;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.model.PlayerModel;
@@ -14,6 +13,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
 import java.util.function.BooleanSupplier;
@@ -56,7 +56,7 @@ public class WHPlayerSkinWidget extends AbstractWidget {
         Supplier<WHPlayerSkin> skin, BooleanSupplier isDeadmau5,
         EntityModelSet models
     ) {
-        super(x, y, width, height, Components.empty());
+        super(x, y, width, height, Component.empty());
         this.skin = skin;
         this.isDeadmau5 = isDeadmau5;
 

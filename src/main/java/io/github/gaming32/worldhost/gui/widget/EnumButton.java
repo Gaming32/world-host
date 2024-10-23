@@ -1,6 +1,5 @@
 package io.github.gaming32.worldhost.gui.widget;
 
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
@@ -34,7 +33,7 @@ public final class EnumButton<E extends Enum<E> & StringRepresentable> extends C
     }
 
     public static Component getTranslation(String base, StringRepresentable element) {
-        return Components.translatable(base + '.' + element.getSerializedName());
+        return Component.translatable(base + '.' + element.getSerializedName());
     }
 
     public void setValue(E value) {

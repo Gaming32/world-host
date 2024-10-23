@@ -7,7 +7,6 @@ import io.github.gaming32.worldhost.gui.widget.UserListWidget;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -26,7 +25,7 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 public class FriendsScreen extends ScreenWithInfoTexts {
-    public static final Component ADD_FRIEND_TEXT = Components.translatable("world-host.add_friend");
+    public static final Component ADD_FRIEND_TEXT = Component.translatable("world-host.add_friend");
 
     private final Screen parent;
     private Button infoButton;
@@ -66,7 +65,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         );
 
         infoButton = addRenderableWidget(
-            button(Components.translatable("world-host.friends.show_info"), button -> {
+            button(Component.translatable("world-host.friends.show_info"), button -> {
                 if (list.getSelected() != null) {
                     list.getSelected().friend.showFriendInfo(this);
                 }
@@ -77,7 +76,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         infoButton.active = false;
 
         removeButton = addRenderableWidget(
-            button(Components.translatable("world-host.friends.remove"), button -> {
+            button(Component.translatable("world-host.friends.remove"), button -> {
                 if (list.getSelected() != null) {
                     list.getSelected().maybeRemove();
                 }
@@ -188,7 +187,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.translatable("narrator.select", getNameWithTag());
+            return Component.translatable("narrator.select", getNameWithTag());
         }
 
         public Component getNameWithTag() {
@@ -219,8 +218,8 @@ public class FriendsScreen extends ScreenWithInfoTexts {
                     }
                     minecraft.setScreen(FriendsScreen.this);
                 },
-                Components.translatable("world-host.friends.remove.title"),
-                Components.translatable("world-host.friends.remove.message")
+                Component.translatable("world-host.friends.remove.title"),
+                Component.translatable("world-host.friends.remove.message")
             ));
         }
 

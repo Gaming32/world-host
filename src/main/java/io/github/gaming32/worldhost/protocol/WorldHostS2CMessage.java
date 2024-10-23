@@ -16,12 +16,12 @@ import io.github.gaming32.worldhost.protocol.proxy.ProxyProtocolClient;
 import io.github.gaming32.worldhost.protocol.punch.PunchManager;
 import io.github.gaming32.worldhost.protocol.punch.PunchReason;
 import io.github.gaming32.worldhost.toast.WHToast;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ServerStatus;
 
 import java.io.DataInputStream;
@@ -67,7 +67,7 @@ public sealed interface WorldHostS2CMessage {
         public void handle(ProtocolClient client) {
             if (critical) {
                 WHToast.builder("world-host.protocol_error_occurred")
-                    .description(Components.literal(message))
+                    .description(Component.literal(message))
                     .show();
                 throw new RuntimeException(message);
             } else {
@@ -371,7 +371,7 @@ public sealed interface WorldHostS2CMessage {
                 if (version.isEmpty()) return;
                 final String updateLink = WorldHostUpdateChecker.formatUpdateLink(version.get());
                 WHToast.builder("world-host.outdated_world_host")
-                    .description(Components.translatable(
+                    .description(Component.translatable(
                         "world-host.outdated_world_host.desc",
                         currentVersion, version.get()
                     ))
@@ -401,8 +401,8 @@ public sealed interface WorldHostS2CMessage {
                 }
                 minecraft.setScreen(new DisconnectedScreen(
                     parentScreen,
-                    Components.translatable("world-host.connection_not_found"),
-                    Components.translatable("world-host.connection_not_found.desc", WorldHost.connectionIdToString(connectionId))
+                    Component.translatable("world-host.connection_not_found"),
+                    Component.translatable("world-host.connection_not_found.desc", WorldHost.connectionIdToString(connectionId))
                 ));
             });
         }
@@ -443,8 +443,8 @@ public sealed interface WorldHostS2CMessage {
         @Override
         public void handle(ProtocolClient client) {
             WorldHost.LOGGER.warn("Warning from WH server (important: {}): {}", important, message);
-            WHToast.builder(Components.translatable("world-host.protocol_warning_occurred"))
-                .description(Components.literal(message))
+            WHToast.builder(Component.translatable("world-host.protocol_warning_occurred"))
+                .description(Component.literal(message))
                 .important(important)
                 .show();
         }

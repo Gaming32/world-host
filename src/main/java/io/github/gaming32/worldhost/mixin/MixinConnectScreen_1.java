@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC > 1.18.2 && MC < 1.19.4
+//#if MC < 1.19.4
 //$$ import java.util.concurrent.CompletableFuture;
 //#endif
 

@@ -2,10 +2,10 @@ package io.github.gaming32.worldhost.config.option;
 
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.widget.YesNoButton;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
 
@@ -38,8 +38,8 @@ public final class YesNoOption extends ConfigOption<Boolean> {
         final String tooltipKey = translationBase + ".tooltip";
         final YesNoButton button = new YesNoButton(
             x, y, width, height,
-            Components.translatable(translationBase),
-            I18n.exists(tooltipKey) ? Components.translatable(tooltipKey) : null,
+            Component.translatable(translationBase),
+            I18n.exists(tooltipKey) ? Component.translatable(tooltipKey) : null,
             b -> setValue(WorldHost.CONFIG, b.isToggled())
         );
         button.setToggled(getValue(WorldHost.CONFIG));

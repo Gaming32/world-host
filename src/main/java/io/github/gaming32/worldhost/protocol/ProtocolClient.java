@@ -5,6 +5,7 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
 import com.mojang.authlib.exceptions.InsufficientPrivilegesException;
 import com.mojang.authlib.exceptions.InvalidCredentialsException;
+import com.mojang.authlib.exceptions.UserBannedException;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.protocol.proxy.ProxyPassthrough;
 import io.github.gaming32.worldhost.toast.WHToast;
@@ -45,10 +46,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 //#if MC >= 1.20.2
 import com.mojang.authlib.exceptions.ForcedUsernameChangeException;
-//#endif
-
-//#if MC >= 1.19.1
-import com.mojang.authlib.exceptions.UserBannedException;
 //#endif
 
 public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
@@ -298,7 +295,6 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
         } catch (InsufficientPrivilegesException e) {
             return I18n.get("disconnect.loginFailedInfo.insufficientPrivileges");
         } catch (AuthenticationException e) {
-            //#if MC >= 1.19.1
             if (
                 //#if MC >= 1.20.2
                 e instanceof ForcedUsernameChangeException ||
@@ -307,7 +303,6 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
             ) {
                 return I18n.get("disconnect.loginFailedInfo.userBanned");
             }
-            //#endif
             return e.getMessage();
         }
     }

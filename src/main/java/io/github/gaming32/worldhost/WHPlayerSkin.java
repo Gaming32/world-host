@@ -12,11 +12,7 @@ import net.minecraft.client.resources.PlayerSkin;
 //$$ import java.util.UUID;
 //$$ import java.util.concurrent.CompletableFuture;
 //$$ import net.minecraft.client.resources.DefaultPlayerSkin;
-//#if MC >= 1.19.2
 //$$ import net.minecraft.core.UUIDUtil;
-//#else
-//$$ import net.minecraft.world.entity.player.Player;
-//#endif
 //#endif
 
 // TODO: Remove in 1.20.2+
@@ -43,11 +39,7 @@ public record WHPlayerSkin(
         //$$     skinTexture = skinManager.registerTexture(skin, MinecraftProfileTexture.Type.SKIN);
         //$$     skinModel = skin.getMetadata("model");
         //$$ } else {
-                //#if MC >= 1.19.2
-                //$$ final UUID uuid = UUIDUtil.getOrCreatePlayerUUID(profile);
-                //#else
-                //$$ final UUID uuid = Player.createPlayerUUID(profile);
-                //#endif
+        //$$     final UUID uuid = UUIDUtil.getOrCreatePlayerUUID(profile);
         //$$     skinTexture = DefaultPlayerSkin.getDefaultSkin(uuid);
         //$$     skinModel = DefaultPlayerSkin.getSkinModelName(uuid);
         //$$ }

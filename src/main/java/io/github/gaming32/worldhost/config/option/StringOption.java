@@ -5,7 +5,6 @@ import io.github.gaming32.worldhost.config.ConfigProperty;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.gui.widget.SimpleStringWidget;
 import io.github.gaming32.worldhost.gui.widget.TooltipEditBox;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.resources.language.I18n;
@@ -19,7 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 public final class StringOption extends ConfigOption<String> {
-    private static final Component RESET = Components.translatable("controls.reset");
+    private static final Component RESET = Component.translatable("controls.reset");
 
     private final String defaultValue;
 
@@ -53,8 +52,8 @@ public final class StringOption extends ConfigOption<String> {
         final String translationBase = "world-host.config." + property.getName();
         final String tooltipKey = translationBase + ".tooltip";
 
-        final Component translation = Components.translatable(translationBase);
-        final Component tooltip = I18n.exists(tooltipKey) ? Components.translatable(tooltipKey) : null;
+        final Component translation = Component.translatable(translationBase);
+        final Component tooltip = I18n.exists(tooltipKey) ? Component.translatable(tooltipKey) : null;
 
         final var label = new SimpleStringWidget(x + 5, y + 10 - font.lineHeight / 2, translation, tooltip, font);
 

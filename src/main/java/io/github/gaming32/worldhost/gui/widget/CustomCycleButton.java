@@ -1,8 +1,8 @@
 package io.github.gaming32.worldhost.gui.widget;
 
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +45,7 @@ public abstract class CustomCycleButton<T, B extends CustomCycleButton<T, B>> ex
         Consumer<B> onUpdate, T[] values
     ) {
         super(
-            x, y, width, height, Components.EMPTY, b -> {
+            x, y, width, height, CommonComponents.EMPTY, b -> {
                 @SuppressWarnings("unchecked") final B cycle = (B)b;
                 final int add = Screen.hasShiftDown() ? -1 : 1;
                 cycle.setValueIndex(Math.floorMod(cycle.getValueIndex() + add, cycle.getValues().length));

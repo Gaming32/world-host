@@ -3,7 +3,6 @@ package io.github.gaming32.worldhost.gui.widget;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.screen.WorldHostConfigScreen;
 import io.github.gaming32.worldhost.mixin.PlainTextButtonAccessor;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -31,9 +30,9 @@ public final class OnlineStatusButton extends PlainTextButton {
     };
 
     private static final List<Supplier<Component>> TEXTS = List.of(
-        () -> Components.translatable("world-host.online_status.offline", WorldHost.reconnectDelay / 20 + 1),
-        () -> Components.translatable("world-host.online_status.connecting"),
-        () -> Components.translatable("world-host.online_status.online")
+        () -> Component.translatable("world-host.online_status.offline", WorldHost.reconnectDelay / 20 + 1),
+        () -> Component.translatable("world-host.online_status.connecting"),
+        () -> Component.translatable("world-host.online_status.online")
     );
 
     private final int alignedX;
@@ -79,9 +78,9 @@ public final class OnlineStatusButton extends PlainTextButton {
 
     private static Component generateStatusComponent() {
         final int status = getStatus();
-        return Components.translatable(
+        return Component.translatable(
             "world-host.online_status",
-            Components.literal("\u25cf").withStyle(COLORS[status]),
+            Component.literal("\u25cf").withStyle(COLORS[status]),
             TEXTS.get(status).get()
         );
     }

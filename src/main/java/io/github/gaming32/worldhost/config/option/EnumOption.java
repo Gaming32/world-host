@@ -3,10 +3,10 @@ package io.github.gaming32.worldhost.config.option;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.config.ConfigProperty;
 import io.github.gaming32.worldhost.gui.widget.EnumButton;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringRepresentable;
 import org.quiltmc.parsers.json.JsonReader;
 import org.quiltmc.parsers.json.JsonWriter;
@@ -74,8 +74,8 @@ public final class EnumOption<E extends Enum<E> & StringRepresentable> extends C
         final EnumButton<E> button = new EnumButton<>(
             x, y, width, height,
             translationBase,
-            Components.translatable(translationBase),
-            I18n.exists(tooltipKey) ? Components.translatable(tooltipKey) : null,
+            Component.translatable(translationBase),
+            I18n.exists(tooltipKey) ? Component.translatable(tooltipKey) : null,
             enumType,
             b -> setValue(WorldHost.CONFIG, b.getValue())
         );
