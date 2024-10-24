@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.mixin;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -22,7 +23,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
     //#if MC >= 1.19.4
-    @Shadow @Final Minecraft minecraft;
+    @Shadow @Final
+    private Minecraft minecraft;
 
     //#if MC >= 1.20.0
     @Shadow @Final private RenderBuffers renderBuffers;
@@ -32,15 +34,22 @@ public class MixinGameRenderer {
         method = "render",
         at = @At(
             value = "INVOKE",
-            //#if MC >= 1.20.0
-            target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;render(Lnet/minecraft/client/gui/GuiGraphics;)V",
+            //#if MC >= 1.21.2
+            target = "Lnet/minecraft/client/gui/components/toasts/ToastManager;render(Lnet/minecraft/client/gui/GuiGraphics;)V",
+            //#elseif MC >= 1.20.0
+            //$$ target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;render(Lnet/minecraft/client/gui/GuiGraphics;)V",
             //#else
             //$$ target = "Lnet/minecraft/client/gui/components/toasts/ToastComponent;render(Lcom/mojang/blaze3d/vertex/PoseStack;)V",
             //#endif
             shift = At.Shift.AFTER
         )
     )
-    private void toastRender(CallbackInfo ci) {
+    private void toastRender(
+        //#if MC >= 1.21
+        DeltaTracker deltaTracker, boolean renderLevel,
+        //#endif
+        CallbackInfo ci
+    ) {
         int mouseX = (int)(
             this.minecraft.mouseHandler.xpos() * (double)this.minecraft.getWindow().getGuiScaledWidth() / (double)this.minecraft.getWindow().getScreenWidth()
         );
@@ -55,7 +64,7 @@ public class MixinGameRenderer {
             //#endif
             mouseX, mouseY,
             //#if MC >= 1.21
-            minecraft.getTimer().getGameTimeDeltaPartialTick(false)
+            deltaTracker.getGameTimeDeltaPartialTick(false)
             //#else
             //$$ minecraft.getFrameTime()
             //#endif

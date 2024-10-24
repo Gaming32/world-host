@@ -39,7 +39,6 @@ public class PlayerInfoScreen extends WorldHostScreen {
             width / 2 - 100, top,
             200, bottom - top,
             () -> WorldHost.getInsecureSkin(profile),
-            () -> profile.getName().equals("deadmau5"),
             minecraft.getEntityModels()
         ));
         addRenderableWidget(

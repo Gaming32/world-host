@@ -116,6 +116,7 @@ unimined.minecraft {
         }
         isNeoForge -> neoForge {
             loader(when (mcVersion) {
+                1_21_03 -> "2-beta"
                 1_21_01 -> "1"
                 1_20_06 -> "115"
                 1_20_04 -> "167"
@@ -268,6 +269,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_03 -> "12.0.0-beta.1"
             1_21_01 -> "11.0.1"
             1_20_06 -> "10.0.0-beta.1"
             1_20_04 -> "9.0.0"
@@ -289,6 +291,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_03 -> "0.106.1+1.21.3"
             1_21_01 -> "0.102.0+1.21.1"
             1_20_06 -> "0.100.0+1.20.6"
             1_20_04 -> "0.97.1+1.20.4"
@@ -324,6 +327,7 @@ dependencies {
 
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.0")
     when (mcVersion) {
+        1_21_03 -> "2.5.24"
         1_21_01 -> "2.5.20"
         1_20_06 -> "2.5.20"
         1_20_04 -> "2.5.20"
@@ -383,6 +387,7 @@ modrinth {
         1_20_04 -> "1.20.3"
         1_20_06 -> "1.20.5"
         1_21_01 -> "1.21"
+        1_21_03 -> "1.21.2"
         else -> null
     }?.let(gameVersions::add)
     loaders.add(this@Version_gradle.loaderName)
@@ -405,6 +410,7 @@ tasks.processResources {
     // TODO: Remove pack.mcmeta in 1.20.4
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
+            mcVersion >= 1_21_02 -> 42
             mcVersion >= 1_21_00 -> 34
             mcVersion >= 1_20_05 -> 32
             mcVersion >= 1_20_03 -> 22

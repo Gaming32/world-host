@@ -395,7 +395,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             if (incompatibleVersion) {
                 RenderSystem.enableBlend();
                 //#if MC >= 1.20.2
-                context.blitSprite(INCOMPATIBLE_SPRITE, x + entryWidth - 15, y, 10, 8);
+                blitSprite(context, INCOMPATIBLE_SPRITE, x + entryWidth - 15, y, 10, 8);
                 //#else
                 //$$ blit(context, GUI_ICONS_LOCATION, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
                 //#endif
@@ -413,7 +413,6 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     iconData = icon;
                 } else {
                     //#if MC >= 1.19.4
-                    //noinspection DataFlowIssue
                     serverInfo.setIconBytes(null);
                     //#else
                     //$$ serverInfo.setIconB64(null);
@@ -453,9 +452,9 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
                 //#if MC >= 1.20.2
                 if (relX < 32 && relX > 16) {
-                    context.blitSprite(JOIN_HIGHLIGHTED_SPRITE, x, y, 32, 32);
+                    blitSprite(context, JOIN_HIGHLIGHTED_SPRITE, x, y, 32, 32);
                 } else {
-                    context.blitSprite(JOIN_SPRITE, x, y, 32, 32);
+                    blitSprite(context, JOIN_SPRITE, x, y, 32, 32);
                 }
                 //#else
                 //$$ if (relX < 32 && relX > 16) {

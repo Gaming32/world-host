@@ -20,9 +20,12 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 //#if MC < 1.19.4
-//$$ import net.minecraft.client.Minecraft;
-//$$
 //$$ import java.util.function.Consumer;
+//$$ import net.minecraft.client.Minecraft;
+//#endif
+
+//#if MC >= 1.21.2
+import net.minecraft.client.renderer.RenderType;
 //#endif
 
 import net.minecraft.util.FormattedCharSequence;
@@ -147,7 +150,7 @@ public abstract class WorldHostScreen extends Screen {
         //#else
         GuiGraphics context,
         //#endif
-        ResourceLocation texture, int x, int y, int width, int height, float uOffset, float vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight
+        ResourceLocation texture, int x, int y, int width, int height, int uOffset, int vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight
     ) {
         //#if MC >= 1.20.0
         context.
@@ -156,6 +159,9 @@ public abstract class WorldHostScreen extends Screen {
         //$$ GuiComponent.
         //#endif
         blit(
+            //#if MC >= 1.21.2
+            RenderType::guiTextured,
+            //#endif
             //#if MC < 1.20.0
             //$$ context,
             //#else
@@ -172,7 +178,7 @@ public abstract class WorldHostScreen extends Screen {
         //#else
         GuiGraphics context,
         //#endif
-        ResourceLocation texture, int x, int y, float uOffset, float vOffset, int width, int height, int textureWidth, int textureHeight
+        ResourceLocation texture, int x, int y, int uOffset, int vOffset, int width, int height, int textureWidth, int textureHeight
     ) {
         //#if MC >= 1.20.0
         context.
@@ -181,6 +187,9 @@ public abstract class WorldHostScreen extends Screen {
         //$$ GuiComponent.
         //#endif
         blit(
+            //#if MC >= 1.21.2
+            RenderType::guiTextured,
+            //#endif
             //#if MC < 1.20.0
             //$$ context,
             //#else
@@ -189,6 +198,17 @@ public abstract class WorldHostScreen extends Screen {
             x, y, uOffset, vOffset, width, height, textureWidth, textureHeight
         );
     }
+
+    //#if MC >= 1.20.2
+    public static void blitSprite(GuiGraphics graphics, ResourceLocation sprite, int x, int y, int width, int height) {
+        graphics.blitSprite(
+            //#if MC >= 1.21.2
+            RenderType::guiTextured,
+            //#endif
+            sprite, x, y, width, height
+        );
+    }
+    //#endif
 
     public static void drawString(
         @NotNull
