@@ -458,9 +458,9 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                 }
                 //#else
                 //$$ if (relX < 32 && relX > 16) {
-                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
+                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0, 32, 32, 32, 256, 256);
                 //$$ } else {
-                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
+                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0, 0, 32, 32, 256, 256);
                 //$$ }
                 //#endif
             }
