@@ -391,7 +391,9 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             final int labelWidth = font.width(sideLabel);
             WorldHostScreen.drawString(context, font, sideLabel, x + entryWidth - labelWidth - 17, y + 1, 0x808080, false);
 
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            //#if MC < 1.21.2
+            //$$ RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            //#endif
             if (incompatibleVersion) {
                 RenderSystem.enableBlend();
                 //#if MC >= 1.20.2
@@ -449,7 +451,9 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             final boolean touchscreen = minecraft.options.touchscreen().get();
             if (joinable && (touchscreen || hovered)) {
                 fill(context, x, y, x + 32, y + 32, 0xa0909090);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                //#if MC < 1.21.2
+                //$$ RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+                //#endif
                 //#if MC >= 1.20.2
                 if (relX < 32 && relX > 16) {
                     blitSprite(context, JOIN_HIGHLIGHTED_SPRITE, x, y, 32, 32);

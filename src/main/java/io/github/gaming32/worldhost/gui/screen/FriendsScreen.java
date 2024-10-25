@@ -204,7 +204,9 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             //#endif
             int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta
         ) {
-            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            //#if MC < 1.21.2
+            //$$ RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            //#endif
             profile.iconRenderer().draw(context, x, y, 32, 32);
             RenderSystem.disableBlend();
             drawCenteredString(context, minecraft.font, getNameWithTag(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
