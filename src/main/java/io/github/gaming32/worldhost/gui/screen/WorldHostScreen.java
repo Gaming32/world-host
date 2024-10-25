@@ -150,7 +150,7 @@ public abstract class WorldHostScreen extends Screen {
         //#else
         GuiGraphics context,
         //#endif
-        ResourceLocation texture, int x, int y, int width, int height, int uOffset, int vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight
+        ResourceLocation texture, int x, int y, int width, int height, float uOffset, float vOffset, int uWidth, int vHeight, int textureWidth, int textureHeight
     ) {
         //#if MC >= 1.20.0
         context.
@@ -167,7 +167,11 @@ public abstract class WorldHostScreen extends Screen {
             //#else
             texture,
             //#endif
-            x, y, width, height, uOffset, vOffset, uWidth, vHeight, textureWidth, textureHeight
+            //#if MC >= 1.21.2
+            x, y, uOffset, vOffset, width, height, uWidth, vHeight, textureWidth, textureHeight
+            //#else
+            //$$ x, y, width, height, uOffset, vOffset, uWidth, vHeight, textureWidth, textureHeight
+            //#endif
         );
     }
 
@@ -178,7 +182,7 @@ public abstract class WorldHostScreen extends Screen {
         //#else
         GuiGraphics context,
         //#endif
-        ResourceLocation texture, int x, int y, int uOffset, int vOffset, int width, int height, int textureWidth, int textureHeight
+        ResourceLocation texture, int x, int y, float uOffset, float vOffset, int width, int height, int textureWidth, int textureHeight
     ) {
         //#if MC >= 1.20.0
         context.
@@ -195,7 +199,11 @@ public abstract class WorldHostScreen extends Screen {
             //#else
             texture,
             //#endif
-            x, y, uOffset, vOffset, width, height, textureWidth, textureHeight
+            //#if MC >= 1.21.2
+            x, y, uOffset, vOffset, width, height, width, height, textureWidth, textureHeight
+            //#else
+            //$$ x, y, uOffset, vOffset, width, height, textureWidth, textureHeight
+            //#endif
         );
     }
 

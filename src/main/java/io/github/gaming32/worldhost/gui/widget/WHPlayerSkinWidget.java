@@ -172,9 +172,13 @@ public class WHPlayerSkinWidget extends AbstractWidget {
         WHPlayerSkin skin
     ) {
         pose(context).pushPose();
-        pose(context).translate(0f, 0f, 0.125f);
+        //#if MC < 1.21.2
+        //$$ pose(context).translate(0f, 0f, 0.125f);
+        //#endif
         pose(context).mulPose(XP.rotationDegrees(6f));
-        pose(context).mulPose(YP.rotationDegrees(180f));
+        //#if MC < 1.21.2
+        //$$ pose(context).mulPose(YP.rotationDegrees(180f));
+        //#endif
         final VertexConsumer consumer = bufferSource.getBuffer(RenderType.entitySolid(skin.capeTexture()));
         //#if MC >= 1.21.2
         capeModel.renderToBuffer(context.pose(), consumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
