@@ -4,7 +4,6 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.widget.UserListWidget;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.Util;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,19 +25,19 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 public class AddFriendScreen extends WorldHostScreen {
-    private static final Component FRIEND_USERNAME_TEXT = Components.translatable("world-host.add_friend.enter_username");
-    private static final Component ADD_FRIEND_TEXT = Components.literal("+");
+    private static final Component FRIEND_USERNAME_TEXT = Component.translatable("world-host.add_friend.enter_username");
+    private static final Component ADD_FRIEND_TEXT = Component.literal("+");
     //#if MC >= 1.20.0
     @VisibleForTesting
-    public static final Component ADD_FRIEND_SILENT_TEXT = Components.literal("+\ud83d\udd08");
-    private static final Component ADD_FRIEND_NOTIFY_TEXT = Components.literal("+\ud83d\udd0a");
+    public static final Component ADD_FRIEND_SILENT_TEXT = Component.literal("+\ud83d\udd08");
+    private static final Component ADD_FRIEND_NOTIFY_TEXT = Component.literal("+\ud83d\udd0a");
     //#else
     //$$ @VisibleForTesting
-    //$$ public static final Component ADD_FRIEND_SILENT_TEXT = Components.literal("+Q");
-    //$$ private static final Component ADD_FRIEND_NOTIFY_TEXT = Components.literal("+N");
+    //$$ public static final Component ADD_FRIEND_SILENT_TEXT = Component.literal("+Q");
+    //$$ private static final Component ADD_FRIEND_NOTIFY_TEXT = Component.literal("+N");
     //#endif
-    private static final Component ADD_FRIEND_SILENT_TOOLTIP = Components.translatable("world-host.friends.add_silently.tooltip");
-    private static final Component ADD_FRIEND_NOTIFY_TOOLTIP = Components.translatable("world-host.add_friend.tooltip");
+    private static final Component ADD_FRIEND_SILENT_TOOLTIP = Component.translatable("world-host.friends.add_silently.tooltip");
+    private static final Component ADD_FRIEND_NOTIFY_TOOLTIP = Component.translatable("world-host.add_friend.tooltip");
 
     private final Screen parent;
     private final BiConsumer<FriendListFriend, Boolean> addAction;

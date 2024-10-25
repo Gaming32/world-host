@@ -7,8 +7,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(Minecraft.class)
 public interface MinecraftAccessor {
-    //#if MC >= 1.19.2
     @Accessor
     YggdrasilAuthenticationService getAuthenticationService();
-    //#endif
 }

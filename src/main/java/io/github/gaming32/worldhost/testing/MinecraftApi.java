@@ -8,17 +8,12 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import org.intellij.lang.annotations.RegExp;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-
-//#if MC >= 1.19.2
-import net.minecraft.network.chat.contents.TranslatableContents;
-//#else
-//$$ import net.minecraft.network.chat.TranslatableComponent;
-//#endif
 
 public class MinecraftApi {
     private static final Thread.Builder SLEEP_BUILDER = Thread.ofVirtual().name("WH-TestingSleeper-", 1);
@@ -83,11 +78,7 @@ public class MinecraftApi {
 
     public static AbstractWidget findWidgetByTranslation(String translation) {
         return findWidget(
-            //#if MC >= 1.19.2
             c -> c.getContents() instanceof TranslatableContents translatable && translatable.getKey().equals(translation),
-            //#else
-            //$$ c -> c instanceof TranslatableComponent translatable && translatable.getKey().equals(translation),
-            //#endif
             "Could not find widget with translation key \"" + translation + "\""
         );
     }

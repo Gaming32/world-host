@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.gaming32.worldhost.ResourceLocations;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.testing.WorldHostTesting;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
@@ -36,7 +35,7 @@ public class WHToast {
     }
 
     public static ToastBuilder builder(@NotNull @Translatable String titleKey) {
-        return new ToastBuilder(Components.translatable(titleKey));
+        return new ToastBuilder(Component.translatable(titleKey));
     }
 
     public static void ready() {

@@ -3,7 +3,6 @@ package io.github.gaming32.worldhost.gui.screen;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.config.option.ConfigOptions;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -20,8 +19,8 @@ import net.minecraft.client.gui.GuiGraphics;
 //#endif
 
 public class WorldHostConfigScreen extends WorldHostScreen {
-    private static final Component TITLE = Components.translatable("world-host.config.title");
-    private static final Component UPNP = Components.literal("UPnP");
+    private static final Component TITLE = Component.translatable("world-host.config.title");
+    private static final Component UPNP = Component.literal("UPnP");
 
     private final Screen parent;
 

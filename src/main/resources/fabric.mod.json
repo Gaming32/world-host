@@ -43,7 +43,9 @@
     //#elseif MC == 1.20.6
     //?? "minecraft": ">=1.20.5- <1.20.7",
     //#elseif MC == 1.21.1
-    "minecraft": ">=1.21.0 <1.21.2",
+    //?? "minecraft": ">=1.21.0 <1.21.2",
+    //#elseif MC == 1.21.3
+    "minecraft": ">=1.21.2 <1.21.4",
     //#else
     //?? "minecraft": "$mc_version",
     //#endif

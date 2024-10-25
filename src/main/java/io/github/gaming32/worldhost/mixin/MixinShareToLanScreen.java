@@ -29,12 +29,7 @@ public class MixinShareToLanScreen {
     //$$     method = "lambda$init$2",
     //$$     at = @At(
     //$$         value = "INVOKE",
-    //$$         target =
-            //#if MC >= 1.19.2
-            //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
-            //#else
-            //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"
-            //#endif
+    //$$         target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
     //$$     )
     //$$ )
     //$$ private String changeSuccessMessage(String key) {
@@ -49,12 +44,7 @@ public class MixinShareToLanScreen {
     //$$     method = "lambda$init$2",
     //$$     at = @At(
     //$$         value = "INVOKE",
-    //$$         target =
-            //#if MC >= 1.19.2
-            //$$ "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
-            //#else
-            //$$ "Lnet/minecraft/network/chat/TranslatableComponent;<init>(Ljava/lang/String;[Ljava/lang/Object;)V"
-            //#endif
+    //$$         target = "Lnet/minecraft/network/chat/Component;translatable(Ljava/lang/String;[Ljava/lang/Object;)Lnet/minecraft/network/chat/MutableComponent;"
     //$$     )
     //$$ )
     //$$ private Object[] changeSuccessMessage(Object[] args) {

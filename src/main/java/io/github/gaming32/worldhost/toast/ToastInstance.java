@@ -5,6 +5,7 @@ import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,8 +19,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#endif
-
-import net.minecraft.util.FormattedCharSequence;
 
 class ToastInstance {
     private static final int TEXT_WIDTH = 200;

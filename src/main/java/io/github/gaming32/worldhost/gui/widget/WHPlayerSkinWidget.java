@@ -3,7 +3,6 @@ package io.github.gaming32.worldhost.gui.widget;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.gaming32.worldhost.WHPlayerSkin;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.model.PlayerModel;
@@ -14,9 +13,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 
-import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.pose;
@@ -35,6 +35,11 @@ import static com.mojang.math.Axis.*;
 //$$ import static com.mojang.math.Vector3f.*;
 //#endif
 
+//#if MC >= 1.21.2
+import net.minecraft.client.model.PlayerCapeModel;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
+//#endif
+
 public class WHPlayerSkinWidget extends AbstractWidget {
     private static final float MODEL_OFFSET = 0.0625f;
     private static final float MODEL_HEIGHT = 2.125f;
@@ -45,25 +50,35 @@ public class WHPlayerSkinWidget extends AbstractWidget {
     private static final float ROTATION_X_LIMIT = 50f;
 
     private final Supplier<WHPlayerSkin> skin;
-    private final BooleanSupplier isDeadmau5;
-    private final PlayerModel<?> wideModel;
-    private final PlayerModel<?> slimModel;
+    //#if MC >= 1.21.2
+    private final PlayerModel wideModel;
+    private final PlayerModel slimModel;
+    private final PlayerCapeModel<PlayerRenderState> capeModel;
+    //#else
+    //$$ private final PlayerModel<?> wideModel;
+    //$$ private final PlayerModel<?> slimModel;
+    //#endif
     private float rotationX = DEFAULT_ROTATION_X;
     private float rotationY = DEFAULT_ROTATION_Y;
 
     public WHPlayerSkinWidget(
         int x, int y, int width, int height,
-        Supplier<WHPlayerSkin> skin, BooleanSupplier isDeadmau5,
+        Supplier<WHPlayerSkin> skin,
         EntityModelSet models
     ) {
-        super(x, y, width, height, Components.empty());
+        super(x, y, width, height, Component.empty());
         this.skin = skin;
-        this.isDeadmau5 = isDeadmau5;
 
-        wideModel = new PlayerModel<>(models.bakeLayer(ModelLayers.PLAYER), false);
-        slimModel = new PlayerModel<>(models.bakeLayer(ModelLayers.PLAYER_SLIM), true);
-        wideModel.young = false;
-        slimModel.young = false;
+        //#if MC >= 1.21.2
+        wideModel = new PlayerModel(models.bakeLayer(ModelLayers.PLAYER), false);
+        slimModel = new PlayerModel(models.bakeLayer(ModelLayers.PLAYER_SLIM), true);
+        capeModel = new PlayerCapeModel<>(models.bakeLayer(ModelLayers.PLAYER_CAPE));
+        //#else
+        //$$ wideModel = new PlayerModel<>(models.bakeLayer(ModelLayers.PLAYER), false);
+        //$$ slimModel = new PlayerModel<>(models.bakeLayer(ModelLayers.PLAYER_SLIM), true);
+        //$$ wideModel.young = false;
+        //$$ slimModel.young = false;
+        //#endif
     }
 
     @Override
@@ -102,14 +117,12 @@ public class WHPlayerSkinWidget extends AbstractWidget {
         //$$ pose(context).translate(0f, 1f + MODEL_OFFSET, 0f);
         //#endif
         pose(context).mulPose(YP.rotationDegrees(rotationY));
-        flush(context);
         Lighting.setupForEntityInInventory(
             //#if MC >= 1.20.6
             XP.rotationDegrees(rotationX)
             //#endif
         );
-        renderModel(context, skin.get());
-        flush(context);
+        drawSpecial(context, bufferSource -> renderModel(context, bufferSource, skin.get()));
         Lighting.setupFor3DItems();
         pose(context).popPose();
     }
@@ -120,46 +133,30 @@ public class WHPlayerSkinWidget extends AbstractWidget {
         //#else
         GuiGraphics context,
         //#endif
+        MultiBufferSource bufferSource,
         WHPlayerSkin skin
     ) {
         pose(context).pushPose();
         pose(context).scale(1f, 1f, -1f);
         pose(context).translate(0f, -1.5f, 0f);
-        final PlayerModel<?> model = skin.model() == WHPlayerSkin.Model.SLIM ? slimModel : wideModel;
+        final var model = skin.model() == WHPlayerSkin.Model.SLIM ? slimModel : wideModel;
         final var renderType = model.renderType(skin.texture());
         model.renderToBuffer(
-            pose(context), bufferSource(context).getBuffer(renderType), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
+            pose(context), bufferSource.getBuffer(renderType), LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY
             //#if MC < 1.21
             //$$ , 1f, 1f, 1f, 1f
             //#endif
         );
-        if (isDeadmau5.getAsBoolean()) {
-            renderEars(context, model, skin);
-        }
         if (skin.capeTexture() != null) {
-            renderCape(context, model, skin);
+            renderCape(
+                context, bufferSource,
+                //#if MC < 1.21.2
+                //$$ model,
+                //#endif
+                skin
+            );
         }
         pose(context).popPose();
-    }
-
-    private void renderEars(
-        //#if MC < 1.20.0
-        //$$ PoseStack context,
-        //#else
-        GuiGraphics context,
-        //#endif
-        PlayerModel<?> model,
-        WHPlayerSkin skin
-    ) {
-        final var consumer = bufferSource(context).getBuffer(RenderType.entitySolid(skin.texture()));
-        for (int ear = 0; ear < 2; ear++) {
-            pose(context).pushPose();
-            pose(context).translate(0.375f * (ear * 2 - 1), -0.375f, 0f);
-            final float scale = 1 + 1 / 3f;
-            pose(context).scale(scale, scale, scale);
-            model.renderEars(pose(context), consumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
-            pose(context).popPose();
-        }
     }
 
     private void renderCape(
@@ -168,45 +165,53 @@ public class WHPlayerSkinWidget extends AbstractWidget {
         //#else
         GuiGraphics context,
         //#endif
-        PlayerModel<?> model,
+        MultiBufferSource bufferSource,
+        //#if MC < 1.21.2
+        //$$ PlayerModel<?> model,
+        //#endif
         WHPlayerSkin skin
     ) {
         pose(context).pushPose();
-        pose(context).translate(0f, 0f, 0.125f);
+        //#if MC < 1.21.2
+        //$$ pose(context).translate(0f, 0f, 0.125f);
+        //#endif
         pose(context).mulPose(XP.rotationDegrees(6f));
-        pose(context).mulPose(YP.rotationDegrees(180f));
-        final VertexConsumer consumer = bufferSource(context).getBuffer(RenderType.entitySolid(skin.capeTexture()));
-        model.renderCloak(pose(context), consumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+        //#if MC < 1.21.2
+        //$$ pose(context).mulPose(YP.rotationDegrees(180f));
+        //#endif
+        final VertexConsumer consumer = bufferSource.getBuffer(RenderType.entitySolid(skin.capeTexture()));
+        //#if MC >= 1.21.2
+        capeModel.renderToBuffer(context.pose(), consumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+        //#else
+        //$$ model.renderCloak(pose(context), consumer, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
+        //#endif
         pose(context).popPose();
     }
 
-    private static void flush(
+    private static void drawSpecial(
         //#if MC < 1.20.0
-        //$$ PoseStack context
+        //$$ PoseStack context,
         //#else
-        GuiGraphics context
+        GuiGraphics context,
         //#endif
+        Consumer<MultiBufferSource> renderer
     ) {
+        //#if MC >= 1.21.2
+        context.drawSpecial(renderer);
+        //#else
         //#if MC >= 1.20.0
-        context.flush();
+        //$$ final var bufferSource = context.bufferSource();
+        //#else
+        //$$ final var bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        //#endif
+        //$$ renderer.accept(bufferSource);
+        //#if MC >= 1.20.0
+        //$$ context.flush();
         //#else
         //$$ RenderSystem.disableDepthTest();
-        //$$ bufferSource(context).endBatch();
+        //$$ bufferSource.endBatch();
         //$$ RenderSystem.enableDepthTest();
         //#endif
-    }
-
-    private static MultiBufferSource.BufferSource bufferSource(
-        //#if MC < 1.20.0
-        //$$ PoseStack context
-        //#else
-        GuiGraphics context
-        //#endif
-    ) {
-        //#if MC >= 1.20.0
-        return context.bufferSource();
-        //#else
-        //$$ return Minecraft.getInstance().renderBuffers().bufferSource();
         //#endif
     }
 

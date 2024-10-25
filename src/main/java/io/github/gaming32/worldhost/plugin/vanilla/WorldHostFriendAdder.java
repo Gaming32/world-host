@@ -4,10 +4,9 @@ import com.mojang.authlib.GameProfile;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
-import io.github.gaming32.worldhost.versions.Components;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
@@ -18,7 +17,7 @@ public class WorldHostFriendAdder implements FriendAdder {
 
     @Override
     public Component label() {
-        return Components.literal("World Host");
+        return Component.literal("World Host");
     }
 
     @Override
@@ -32,9 +31,9 @@ public class WorldHostFriendAdder implements FriendAdder {
             friendConsumer.accept(new WorldHostFriendListFriend(UUID.fromString(name)));
         } else if (name.startsWith("o:")) {
             final String actualName = name.substring(2);
-            // TODO: Use createOfflinePlayerUUID when 1.19.2+ becomes the minimum, and createOfflineProfile in 1.20.4+
+            // TODO: Use createOfflineProfile in 1.20.4+
             friendConsumer.accept(new WorldHostFriendListFriend(new GameProfile(
-                UUID.nameUUIDFromBytes(("OfflinePlayer:" + actualName).getBytes(StandardCharsets.UTF_8)), actualName
+                UUIDUtil.createOfflinePlayerUUID(actualName), actualName
             )));
         }
     }

@@ -15,6 +15,7 @@ import io.github.gaming32.worldhost.gui.OnlineStatusLocation;
 import io.github.gaming32.worldhost.gui.screen.FriendsScreen;
 import io.github.gaming32.worldhost.gui.screen.JoiningWorldHostScreen;
 import io.github.gaming32.worldhost.gui.screen.OnlineFriendsScreen;
+import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
 import io.github.gaming32.worldhost.origincheck.OriginCheckers;
 import io.github.gaming32.worldhost.plugin.FriendAdder;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
@@ -47,6 +48,7 @@ import net.minecraft.client.multiplayer.resolver.ServerAddress;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
@@ -101,13 +103,6 @@ import java.util.stream.Collectors;
 
 import static net.minecraft.commands.Commands.literal;
 
-//#if MC >= 1.19.2
-import io.github.gaming32.worldhost.mixin.MinecraftAccessor;
-//#else
-//$$ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-//$$ import net.minecraft.world.entity.player.Player;
-//#endif
-
 //#if FABRIC
 import dev.isxander.mainmenucredits.MainMenuCredits;
 import net.fabricmc.api.ClientModInitializer;
@@ -138,10 +133,8 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 //#elseif NEOFORGE
 //$$ import net.neoforged.neoforge.client.ConfigScreenHandler;
-//#elseif MC >= 1.19.2
-//$$ import net.minecraftforge.client.ConfigScreenHandler;
 //#else
-//$$ import net.minecraftforge.client.ConfigGuiHandler;
+//$$ import net.minecraftforge.client.ConfigScreenHandler;
 //#endif
 //#endif
 
@@ -264,12 +257,9 @@ public class WorldHost
     //$$     container.registerExtensionPoint(
             //#if MC >= 1.20.5
             //$$ IConfigScreenFactory.class, (ignored, screen) -> new WorldHostConfigScreen(screen)
-            //#elseif MC >= 1.19.2
+            //#else
             //$$ ConfigScreenHandler.ConfigScreenFactory.class,
             //$$ () -> new ConfigScreenHandler.ConfigScreenFactory((ignored, screen) -> new WorldHostConfigScreen(screen))
-            //#else
-            //$$ ConfigGuiHandler.ConfigGuiFactory.class,
-            //$$ () -> new ConfigGuiHandler.ConfigGuiFactory((ignored, screen) -> new WorldHostConfigScreen(screen))
             //#endif
     //$$     );
     //$$ }
@@ -301,7 +291,7 @@ public class WorldHost
         if (!nonstandardOrigins.isEmpty()) {
             LOGGER.warn("Found nonstandard download origins: {}", nonstandardOrigins);
             WHToast.builder("world-host.nonstandard_origin")
-                .description(Components.translatable(
+                .description(Component.translatable(
                     "world-host.nonstandard_origin.desc",
                     nonstandardOrigins.stream()
                         .map(URI::getHost)
@@ -318,11 +308,7 @@ public class WorldHost
             LOGGER.error("Failed to create cache directory", e);
         }
         profileCache = new GameProfileCache(
-            //#if MC >= 1.19.2
             ((MinecraftAccessor)Minecraft.getInstance()).getAuthenticationService().createProfileRepository(),
-            //#else
-            //$$ new YggdrasilAuthenticationService(Minecraft.getInstance().getProxy()).createProfileRepository(),
-            //#endif
             CACHE_DIR.resolve("usercache.json").toFile()
         );
         profileCache.setExecutor(Minecraft.getInstance());
@@ -634,7 +620,7 @@ public class WorldHost
                                 //#if MC >= 1.20.0
                                 () ->
                                 //#endif
-                                Components.translatable(
+                                Component.translatable(
                                     "world-host.worldhost.tempip.success",
                                     Components.copyOnClickText(protoClient.getUserIp() + ':' + port)
                                 ),
@@ -646,9 +632,9 @@ public class WorldHost
                     } catch (Exception e) {
                         WorldHost.LOGGER.error("Failed to open UPnP due to exception", e);
                     }
-                    ctx.getSource().sendFailure(Components.translatable(
+                    ctx.getSource().sendFailure(Component.translatable(
                         "world-host.worldhost.tempip.failure",
-                        ComponentUtils.wrapInSquareBrackets(Components.literal("/worldhost ip")).withStyle(style -> style
+                        ComponentUtils.wrapInSquareBrackets(Component.literal("/worldhost ip")).withStyle(style -> style
                             .withColor(ChatFormatting.GREEN)
                             .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/worldhost ip"))
                         )
@@ -789,8 +775,8 @@ public class WorldHost
         @Nullable Runnable clickAction
     ) {
         profileFuture.thenAccept(profile ->
-            WHToast.builder(Components.translatable(title, profile.name()))
-                .description(Components.translatable(description))
+            WHToast.builder(Component.translatable(title, profile.name()))
+                .description(Component.translatable(description))
                 .icon(profile.iconRenderer())
                 .clickAction(clickAction)
                 .ticks(ticks)
@@ -830,7 +816,7 @@ public class WorldHost
     public static ServerStatus createEmptyServerStatus() {
         //#if MC >= 1.19.4
         return new ServerStatus(
-            Components.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
+            CommonComponents.EMPTY, Optional.empty(), Optional.empty(), Optional.empty(), false
             //#if FORGELIKE && MC < 1.20.4
             //$$ , Optional.empty()
             //#elseif NEOFORGE
@@ -974,19 +960,19 @@ public class WorldHost
 
     private static int ipCommand(CommandContext<CommandSourceStack> ctx) {
         if (protoClient == null) {
-            ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.ip.not_connected"));
+            ctx.getSource().sendFailure(Component.translatable("world-host.worldhost.ip.not_connected"));
             return 0;
         }
         final String externalIp = getExternalIp();
         if (externalIp == null) {
-            ctx.getSource().sendFailure(Components.translatable("world-host.worldhost.ip.no_server_support"));
+            ctx.getSource().sendFailure(Component.translatable("world-host.worldhost.ip.no_server_support"));
             return 0;
         }
         ctx.getSource().sendSuccess(
             //#if MC >= 1.20.0
             () ->
             //#endif
-            Components.translatable(
+            Component.translatable(
                 "world-host.worldhost.ip.success",
                 Components.copyOnClickText(externalIp)
             ),

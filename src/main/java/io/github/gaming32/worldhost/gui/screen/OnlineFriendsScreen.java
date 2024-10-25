@@ -15,7 +15,6 @@ import io.github.gaming32.worldhost.plugin.Joinability;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.mixin.ServerStatusPingerAccessor;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -77,7 +76,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
     private List<FormattedCharSequence> tooltip;
 
     public OnlineFriendsScreen(Screen parent) {
-        super(Components.translatable("world-host.online_friends.title"), InfoTextsCategory.ONLINE_FRIENDS_SCREEN);
+        super(Component.translatable("world-host.online_friends.title"), InfoTextsCategory.ONLINE_FRIENDS_SCREEN);
         this.parent = parent;
     }
 
@@ -96,14 +95,14 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         addWidget(list);
 
         joinButton = addRenderableWidget(
-            button(Components.translatable("selectServer.select"), button -> connect())
+            button(Component.translatable("selectServer.select"), button -> connect())
                 .width(152)
                 .pos(width / 2 - 154, height - 54)
                 .build()
         );
 
         addRenderableWidget(
-            button(Components.translatable("selectServer.refresh"), button -> WorldHost.refreshFriendsList())
+            button(Component.translatable("selectServer.refresh"), button -> WorldHost.refreshFriendsList())
                 .width(152)
                 .pos(width / 2 + 2, height - 54)
                 .build()
@@ -365,7 +364,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         @NotNull
         @Override
         public Component getNarration() {
-            return Components.translatable("narrator.select", displayName);
+            return Component.translatable("narrator.select", displayName);
         }
 
         @Override
@@ -392,11 +391,13 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             final int labelWidth = font.width(sideLabel);
             WorldHostScreen.drawString(context, font, sideLabel, x + entryWidth - labelWidth - 17, y + 1, 0x808080, false);
 
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            //#if MC < 1.21.2
+            //$$ RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+            //#endif
             if (incompatibleVersion) {
                 RenderSystem.enableBlend();
                 //#if MC >= 1.20.2
-                context.blitSprite(INCOMPATIBLE_SPRITE, x + entryWidth - 15, y, 10, 8);
+                blitSprite(context, INCOMPATIBLE_SPRITE, x + entryWidth - 15, y, 10, 8);
                 //#else
                 //$$ blit(context, GUI_ICONS_LOCATION, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
                 //#endif
@@ -414,7 +415,6 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     iconData = icon;
                 } else {
                     //#if MC >= 1.19.4
-                    //noinspection DataFlowIssue
                     serverInfo.setIconBytes(null);
                     //#else
                     //$$ serverInfo.setIconB64(null);
@@ -437,7 +437,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             final int relY = mouseY - y;
             if (relX >= entryWidth - 15 && relX <= entryWidth - 5 && relY >= 0 && relY <= 8) {
                 if (incompatibleVersion) {
-                    tooltip = List.of(Components.translatable("multiplayer.status.incompatible").getVisualOrderText());
+                    tooltip = List.of(Component.translatable("multiplayer.status.incompatible").getVisualOrderText());
                 }
             } else if (relX >= entryWidth - labelWidth - 17 && relX <= entryWidth - 17 && relY >= 0 && relY <= 8) {
                 tooltip = new ArrayList<>();
@@ -448,25 +448,23 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                 tooltip = joinabilityTooltip;
             }
 
-            //#if MC >= 1.19.0
             final boolean touchscreen = minecraft.options.touchscreen().get();
-            //#else
-            //$$ final boolean touchscreen = minecraft.options.touchscreen;
-            //#endif
             if (joinable && (touchscreen || hovered)) {
                 fill(context, x, y, x + 32, y + 32, 0xa0909090);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                //#if MC < 1.21.2
+                //$$ RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+                //#endif
                 //#if MC >= 1.20.2
                 if (relX < 32 && relX > 16) {
-                    context.blitSprite(JOIN_HIGHLIGHTED_SPRITE, x, y, 32, 32);
+                    blitSprite(context, JOIN_HIGHLIGHTED_SPRITE, x, y, 32, 32);
                 } else {
-                    context.blitSprite(JOIN_SPRITE, x, y, 32, 32);
+                    blitSprite(context, JOIN_SPRITE, x, y, 32, 32);
                 }
                 //#else
                 //$$ if (relX < 32 && relX > 16) {
-                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 32.0F, 32, 32, 256, 256);
+                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0, 32, 32, 32, 256, 256);
                 //$$ } else {
-                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0.0F, 0.0F, 32, 32, 256, 256);
+                //$$     blit(context, GUI_SERVER_SELECTION_LOCATION, x, y, 0, 0, 32, 32, 256, 256);
                 //$$ }
                 //#endif
             }
@@ -477,18 +475,18 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             updateNameAndTooltip();
             final var metadata = WorldHost.ONLINE_FRIEND_PINGS.get(friend.uuid());
             if (metadata == null) {
-                serverInfo.status = Components.EMPTY;
-                serverInfo.motd = Components.EMPTY;
+                serverInfo.status = CommonComponents.EMPTY;
+                serverInfo.motd = CommonComponents.EMPTY;
                 return;
             }
 
             //#if MC >= 1.19.4
             serverInfo.motd = metadata.description();
             metadata.version().ifPresentOrElse(version -> {
-                serverInfo.version = Components.literal(version.name());
+                serverInfo.version = Component.literal(version.name());
                 serverInfo.protocol = version.protocol();
             }, () -> {
-                serverInfo.version = Components.translatable("multiplayer.status.old");
+                serverInfo.version = Component.translatable("multiplayer.status.old");
                 serverInfo.protocol = 0;
             });
             metadata.players().ifPresentOrElse(players -> {
@@ -498,11 +496,11 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     final List<Component> playerList = new ArrayList<>(players.sample().size());
 
                     for(GameProfile gameProfile : players.sample()) {
-                        playerList.add(Components.literal(gameProfile.getName()));
+                        playerList.add(Component.literal(gameProfile.getName()));
                     }
 
                     if (players.sample().size() < players.online()) {
-                        playerList.add(Components.translatable(
+                        playerList.add(Component.translatable(
                             "multiplayer.status.and_more",
                             players.online() - players.sample().size()
                         ));
@@ -512,7 +510,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                 } else {
                     serverInfo.playerList = List.of();
                 }
-            }, () -> serverInfo.status = Components.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY));
+            }, () -> serverInfo.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY));
             metadata.favicon().ifPresent(favicon -> {
                 if (!Arrays.equals(favicon.iconBytes(), serverInfo.getIconBytes())) {
                     serverInfo.setIconBytes(favicon.iconBytes());
@@ -522,14 +520,14 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             //$$ if (metadata.getDescription() != null) {
             //$$     serverInfo.motd = metadata.getDescription();
             //$$ } else {
-            //$$     serverInfo.motd = Components.EMPTY;
+            //$$     serverInfo.motd = Component.empty();
             //$$ }
             //$$
             //$$ if (metadata.getVersion() != null) {
-            //$$     serverInfo.version = Components.literal(metadata.getVersion().getName());
+            //$$     serverInfo.version = Component.literal(metadata.getVersion().getName());
             //$$     serverInfo.protocol = metadata.getVersion().getProtocol();
             //$$ } else {
-            //$$     serverInfo.version = Components.translatable("multiplayer.status.old");
+            //$$     serverInfo.version = Component.translatable("multiplayer.status.old");
             //$$     serverInfo.protocol = 0;
             //$$ }
             //$$
@@ -542,17 +540,17 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             //$$     final GameProfile[] sampleProfiles = metadata.getPlayers().getSample();
             //$$     if (sampleProfiles != null && sampleProfiles.length > 0) {
             //$$         for (final GameProfile sampleProfile : sampleProfiles) {
-            //$$             lines.add(Components.literal(sampleProfile.getName()));
+            //$$             lines.add(Component.literal(sampleProfile.getName()));
             //$$         }
             //$$         if (sampleProfiles.length < metadata.getPlayers().getNumPlayers()) {
-            //$$             lines.add(Components.translatable(
+            //$$             lines.add(Component.translatable(
             //$$                 "multiplayer.status.and_more", metadata.getPlayers().getNumPlayers() - sampleProfiles.length
             //$$             ));
             //$$         }
             //$$         serverInfo.playerList = lines;
             //$$     }
             //$$ } else {
-            //$$     serverInfo.status = Components.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
+            //$$     serverInfo.status = Component.translatable("multiplayer.status.unknown").withStyle(ChatFormatting.DARK_GRAY);
             //$$ }
             //$$
             //$$ String favicon = serverInfo.getIconB64();
@@ -574,9 +572,9 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
 
             final MutableComponent newDisplayName;
             if (security == SecurityLevel.SECURE) {
-                newDisplayName = Components.literal(profile.name());
+                newDisplayName = Component.literal(profile.name());
             } else {
-                newDisplayName = Components.translatable(
+                newDisplayName = Component.translatable(
                     "world-host.world_with_security",
                     profile.name(),
                     EnumButton.getTranslation("world-host.config.requiredSecurityLevel", security)

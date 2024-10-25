@@ -2,18 +2,17 @@ package io.github.gaming32.worldhost.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
-import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.toast.IconRenderer;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.locale.Language;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
@@ -70,7 +69,7 @@ public final class UserListWidget
         Function<FriendListFriend, List<Action>> getApplicableActions,
         @Nullable UserListWidget old
     ) {
-        super(x, y, width, height, Components.empty());
+        super(x, y, width, height, Component.empty());
         this.font = font;
         this.getApplicableActions = getApplicableActions;
         if (old != null && !old.users.isEmpty()) {
@@ -246,11 +245,11 @@ public final class UserListWidget
 
     public static Component getNameWithTag(FriendListFriend user, ProfileInfo profile) {
         return user.tag()
-            .map(component -> Components.translatable(
+            .map(component -> Component.translatable(
                 "world-host.friends.tagged_friend",
                 profile.name(), component
             ))
-            .orElseGet(() -> Components.literal(profile.name()));
+            .orElseGet(() -> Component.literal(profile.name()));
     }
 
     private final class UserInfo {
@@ -283,8 +282,8 @@ public final class UserListWidget
         }
 
         FormattedCharSequence clipName(Component unclippedName) {
-            final FormattedText clipped = font.substrByWidth(unclippedName, getMaxNameWidth() - font.width(WorldHostComponents.ELLIPSIS));
-            return Language.getInstance().getVisualOrder(FormattedText.composite(clipped, WorldHostComponents.ELLIPSIS));
+            final FormattedText clipped = font.substrByWidth(unclippedName, getMaxNameWidth() - font.width(CommonComponents.ELLIPSIS));
+            return Language.getInstance().getVisualOrder(FormattedText.composite(clipped, CommonComponents.ELLIPSIS));
         }
 
         IconRenderer getIcon() {

@@ -1,15 +1,16 @@
 package io.github.gaming32.worldhost.mixin;
 
 import com.mojang.datafixers.DataFixer;
+import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.proxy.ProxyChannels;
 import io.github.gaming32.worldhost.proxy.ProxyClient;
-import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
@@ -26,20 +27,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.Proxy;
 
-//#if MC > 1.18.2
-import net.minecraft.server.Services;
-//#else
-//$$ import com.mojang.authlib.GameProfileRepository;
-//$$ import com.mojang.authlib.minecraft.MinecraftSessionService;
-//$$ import net.minecraft.Util;
-//$$ import net.minecraft.network.chat.ChatType;
-//$$ import net.minecraft.server.players.GameProfileCache;
-//#endif
-
 @Mixin(IntegratedServer.class)
 public abstract class MixinIntegratedServer extends MinecraftServer {
     public MixinIntegratedServer(
-        //#if MC > 1.18.2
         Thread thread,
         LevelStorageSource.LevelStorageAccess levelStorageAccess,
         PackRepository packRepository,
@@ -48,24 +38,8 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
         DataFixer dataFixer,
         Services services,
         ChunkProgressListenerFactory chunkProgressListenerFactory
-        //#else
-        //$$ Thread thread,
-        //$$ LevelStorageSource.LevelStorageAccess levelStorageAccess,
-        //$$ PackRepository packRepository,
-        //$$ WorldStem worldStem,
-        //$$ Proxy proxy,
-        //$$ DataFixer dataFixer,
-        //$$ MinecraftSessionService minecraftSessionService,
-        //$$ GameProfileRepository gameProfileRepository,
-        //$$ GameProfileCache gameProfileCache,
-        //$$ ChunkProgressListenerFactory chunkProgressListenerFactory
-        //#endif
     ) {
-        //#if MC > 1.18.2
         super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, services, chunkProgressListenerFactory);
-        //#else
-        //$$ super(thread, levelStorageAccess, packRepository, worldStem, proxy, dataFixer, minecraftSessionService, gameProfileRepository, gameProfileCache, chunkProgressListenerFactory);
-        //#endif
     }
 
     @Shadow @Final private Minecraft minecraft;
@@ -101,26 +75,22 @@ public abstract class MixinIntegratedServer extends MinecraftServer {
         if (publishServer(worldData.getGameType(), allowCommands, HttpUtil.getAvailablePort())) {
             message = wh$getOpenedMessage();
         } else {
-            message = Components.translatable("world-host.share_world.failed").withStyle(ChatFormatting.RED);
+            message = Component.translatable("world-host.share_world.failed").withStyle(ChatFormatting.RED);
         }
-        //#if MC > 1.18.2
         minecraft.getChatListener().handleSystemMessage(message, false);
-        //#else
-        //$$ minecraft.gui.handleChat(ChatType.SYSTEM, message, Util.NIL_UUID);
-        //#endif
     }
 
     @Unique
     private Component wh$getOpenedMessage() {
         final Component port = Components.copyOnClickText(publishedPort);
         if (WorldHost.CONFIG.isEnableFriends()) {
-            return Components.translatable("world-host.lan_opened.friends", port);
+            return Component.translatable("world-host.lan_opened.friends", port);
         }
         final String externalIp = WorldHost.getExternalIp();
         if (externalIp == null) {
-            return Components.translatable("commands.publish.started", port);
+            return Component.translatable("commands.publish.started", port);
         }
-        return Components.translatable(
+        return Component.translatable(
             "world-host.lan_opened.no_friends",
             Components.copyOnClickText(externalIp), port
         );

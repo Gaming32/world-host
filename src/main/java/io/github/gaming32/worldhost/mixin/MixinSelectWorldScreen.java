@@ -4,7 +4,6 @@ import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.ext.SelectWorldScreenExt;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
-import io.github.gaming32.worldhost.versions.Components;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.SelectWorldScreen;
@@ -74,7 +73,7 @@ public class MixinSelectWorldScreen extends Screen implements SelectWorldScreenE
             return;
         }
         wh$shareButton = addRenderableWidget(
-            WorldHostScreen.button(Components.translatable("world-host.share_world"), b ->
+            WorldHostScreen.button(Component.translatable("world-host.share_world"), b ->
                 list.getSelectedOpt().ifPresent(worldListEntry -> {
                     wh$shareButtonPressed = true;
                     worldListEntry.joinWorld();
@@ -124,9 +123,7 @@ public class MixinSelectWorldScreen extends Screen implements SelectWorldScreenE
     //#else
     //$$ private void updateShareButtonStatus(
     //$$     boolean active,
-        //#if MC > 1.19.2
-        //$$ boolean bl2,
-        //#endif
+    //$$     boolean bl2,
     //$$     CallbackInfo ci
     //$$ ) {
     //$$     if (wh$shareButton != null) {

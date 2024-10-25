@@ -26,8 +26,8 @@ public interface IconRenderer {
     static IconRenderer createSkinIconRenderer(ResourceLocation skinTexture) {
         return (context, x, y, width, height) -> {
             RenderSystem.enableBlend();
-            WorldHostScreen.blit(context, skinTexture, x, y, width, height, 8, 8, 8, 8, 64, 64);
-            WorldHostScreen.blit(context, skinTexture, x, y, width, height, 40, 8, 8, 8, 64, 64);
+            WorldHostScreen.blit(context, skinTexture, x, y, 8, 8, width, height, 8, 8, 64, 64);
+            WorldHostScreen.blit(context, skinTexture, x, y, 40, 8, width, height, 8, 8, 64, 64);
         };
     }
 }
