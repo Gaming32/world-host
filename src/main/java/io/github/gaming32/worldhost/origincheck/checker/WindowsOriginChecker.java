@@ -4,8 +4,9 @@ import io.github.gaming32.worldhost.origincheck.parser.SimpleIniParser;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
-import java.io.CharArrayReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -34,8 +35,12 @@ public class WindowsOriginChecker extends AbstractOriginChecker {
     }
 
     private static Map<String, Map<String, String>> parseZoneIdentifier(ByteBuffer bb) throws IOException {
-        final var cb = getWindowsCharset().decode(bb);
-        try (var reader = new BufferedReader(new CharArrayReader(cb.array(), cb.arrayOffset() + cb.position(), cb.remaining()))) {
+        try (var reader = new BufferedReader(
+            new InputStreamReader(
+                new ByteArrayInputStream(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining()),
+                getWindowsCharset()
+            )
+        )) {
             return SimpleIniParser.parse(reader);
         }
     }

@@ -25,6 +25,9 @@ public class SimpleIniParser {
             section.put(split[0].trim(), split[1].trim());
         }
 
+        if (result.get("").isEmpty()) {
+            result.remove("");
+        }
         return result;
     }
 }

@@ -295,6 +295,7 @@ public class WorldHost
                     "world-host.nonstandard_origin.desc",
                     nonstandardOrigins.stream()
                         .map(URI::getHost)
+                        .distinct()
                         .collect(Collectors.joining(", "))
                 ))
                 .important()
