@@ -191,7 +191,7 @@ val mappingsConfig = object {
     var tinyMappingsWithSrg: Path? = null
 }
 loom.setGroovyProperty("mappingConfiguration", mappingsConfig)
-val mappings = minecraft.mappings as MappingsProvider
+val mappings = minecraft!!.mappings as MappingsProvider
 val tinyMappings: File = file("${projectDir}/build/tmp/tinyMappings.tiny").also { file ->
     val export = ExportMappingsTaskImpl.ExportImpl(mappings).apply {
         location = file
@@ -251,7 +251,7 @@ val modRuntimeOnly: Configuration by configurations.creating {
     configurations.getByName("runtimeOnly").extendsFrom(this)
 }
 
-minecraft.apply {
+minecraft!!.apply {
     mods.remap(modCompileOnly)
     mods.remap(modRuntimeOnly)
 }
