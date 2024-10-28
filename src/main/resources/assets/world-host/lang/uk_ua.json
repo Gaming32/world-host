@@ -71,5 +71,7 @@
   "world-host.share_world": "Поділитися світом",
   "world-host.share_world.failed": "Не вдалося поділитися світом",
   "world-host.create_world": "Створити світ",
-  "world-host.world_with_security": "%s \u2022 %s"
+  "world-host.world_with_security": "%s \u2022 %s",
+  "world-host.nonstandard_origin": "Неофіційне завантаження World Host",
+  "world-host.nonstandard_origin.desc": "World Host було завантажено з неофіційного джерела (%s). Єдиним офіційним джерелом є Modrinth. Це повідомлення більше не буде показано."
 }
