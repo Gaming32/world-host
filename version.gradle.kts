@@ -1,8 +1,8 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
 import groovy.lang.GroovyObjectSupport
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.daemon.common.toHexString
-import xyz.wagyourtail.unimined.api.mapping.task.ExportMappingsTask
-import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
+import xyz.wagyourtail.unimined.api.minecraft.task.AbstractRemapJarTask
 import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
 import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
 import xyz.wagyourtail.unimined.internal.minecraft.resolver.MinecraftDownloader
@@ -10,7 +10,7 @@ import xyz.wagyourtail.unimined.util.capitalized
 import xyz.wagyourtail.unimined.util.sourceSets
 import java.net.NetworkInterface
 import java.nio.file.Path
-import java.util.UUID
+import java.util.*
 
 plugins {
     java
@@ -65,6 +65,8 @@ tasks.compileJava {
     options.compilerArgs.add("-Xlint:all")
 }
 
+unimined.useGlobalCache = false
+
 unimined.minecraft {
     version(mcVersionString)
     if ((mcVersion != 1_20_01 || !isForge) && mcVersion < 1_20_05) {
@@ -72,14 +74,7 @@ unimined.minecraft {
     }
 
     mappings {
-        intermediary()
-        if (mcVersion <= 1_19_00) {
-            searge()
-        }
-        mojmap {
-            dependsOn("intermediary")
-            onlyExistingSrc()
-        }
+        mojmap()
         when {
             mcVersion >= 1_21_00 -> "1.21:2024.07.28"
             mcVersion >= 1_20_05 -> "1.20.6:2024.06.16"
@@ -97,8 +92,6 @@ unimined.minecraft {
         }?.let {
             parchment(it.substringBefore(":"), it.substringAfter(":"))
         }
-
-        devFallbackNamespace("official")
     }
 
     when {
@@ -195,27 +188,31 @@ val mappings = minecraft!!.mappings as MappingsProvider
 val tinyMappings: File = file("${projectDir}/build/tmp/tinyMappings.tiny").also { file ->
     val export = ExportMappingsTaskImpl.ExportImpl(mappings).apply {
         location = file
-        type = ExportMappingsTask.MappingExportTypes.TINY_V2
+        setType("tinyv2")
         setSourceNamespace("official")
         setTargetNamespaces(listOf("intermediary", "mojmap"))
-        renameNs[mappings.getNamespace("mojmap")] = "named"
+        renameNs[mappings.checkedNs("mojmap")] = "named"
     }
     export.validate()
-    export.exportFunc(mappings.mappingTree)
+    runBlocking {
+        export.exportFunc(mappings.resolve())
+    }
 }
 mappingsConfig.setGroovyProperty("tinyMappings", tinyMappings.toPath())
 if (isForge) {
     val tinyMappingsWithSrg: File = file("${projectDir}/build/tmp/tinyMappingsWithSrg.tiny").also { file ->
         val export = ExportMappingsTaskImpl.ExportImpl(mappings).apply {
             location = file
-            type = ExportMappingsTask.MappingExportTypes.TINY_V2
+            setType("tinyv2")
             setSourceNamespace("official")
             setTargetNamespaces(listOf("intermediary", "searge", "mojmap"))
-            renameNs[mappings.getNamespace("mojmap")] = "named"
-            renameNs[mappings.getNamespace("searge")] = "srg"
+            renameNs[mappings.checkedNs("mojmap")] = "named"
+            renameNs[mappings.checkedNs("searge")] = "srg"
         }
         export.validate()
-        export.exportFunc(mappings.mappingTree)
+        runBlocking {
+            export.exportFunc(mappings.resolve())
+        }
     }
     mappingsConfig.setGroovyProperty("tinyMappingsWithSrg", tinyMappingsWithSrg.toPath())
 }
@@ -478,7 +475,7 @@ tasks.jar {
     archiveClassifier = "dev"
 }
 
-tasks.withType<RemapJarTask> {
+tasks.withType<AbstractRemapJarTask> {
     if (isForgeLike && !forgeJarJar.isEmpty) {
         forgeJarJar.files.forEach { from(zipTree(it)) }
     }
