@@ -126,14 +126,12 @@ repositories {
     maven("https://maven.isxander.dev/releases")
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://repo.viaversion.com")
-    maven("https://maven.wagyourtail.xyz/snapshots")
     maven("https://maven.maxhenkel.de/repository/public")
     maven("https://api.modrinth.com/maven") {
         content {
             includeGroup("maven.modrinth")
         }
     }
-    maven("https://jitpack.io")
 }
 
 println("loaderName: $loaderName")
