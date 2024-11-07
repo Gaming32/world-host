@@ -5,14 +5,8 @@ plugins {
     `maven-publish`
     id("io.github.gaming32.gradle.preprocess")
     id("dev.architectury.loom")
-    id("com.modrinth.minotaur") version "2.8.7"
-    id("xyz.wagyourtail.jvmdowngrader") version "1.1.2"
-}
-
-buildscript {
-    dependencies {
-        classpath("org.apache.commons:commons-compress:1.26.1")
-    }
+    id("com.modrinth.minotaur")
+    id("xyz.wagyourtail.jvmdowngrader")
 }
 
 group = "io.github.gaming32"
@@ -76,7 +70,7 @@ if (targetJava < java.sourceCompatibility) {
 
     tasks.remapJar {
         dependsOn(tasks.shadeDowngradedApi)
-        inputFile = tasks.shadeDowngradedApi.get().inputFile
+        inputFile = tasks.shadeDowngradedApi.get().archiveFile
     }
 }
 
