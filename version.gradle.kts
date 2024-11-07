@@ -78,6 +78,11 @@ if (targetJava < java.sourceCompatibility) {
 }
 
 loom {
+    @Suppress("UnstableApiUsage")
+    mixin {
+        useLegacyMixinAp = false
+    }
+
     runs {
         getByName("client") {
             ideConfigGenerated(true)
