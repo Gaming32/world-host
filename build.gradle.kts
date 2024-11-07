@@ -1,6 +1,6 @@
 plugins {
     id("io.github.gaming32.gradle.preprocess-root") version "0.4.4"
-    id("xyz.wagyourtail.unimined") version "1.3.9" apply false
+    id("dev.architectury.loom") version "1.7.414" apply false
 }
 
 repositories {
@@ -36,4 +36,8 @@ preprocess {
     forge11904.link(fabric11904)
     fabric11904.link(fabric11902)
     fabric11902.link(forge11902)
+}
+
+subprojects {
+    extra["loom.platform"] = name.substringAfter('-')
 }
