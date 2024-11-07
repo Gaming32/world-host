@@ -1,4 +1,7 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
+import org.jetbrains.kotlin.daemon.common.toHexString
+import java.net.NetworkInterface
+import java.util.*
 
 plugins {
     java
@@ -74,36 +77,43 @@ if (targetJava < java.sourceCompatibility) {
     }
 }
 
-//    runs {
-//        config("client") {
-//            javaVersion = JavaVersion.VERSION_21
-//        }
-//
-//        val usernameSuffix = NetworkInterface.getNetworkInterfaces()
-//            .nextElement()
-//            .hardwareAddress
-//            .toHexString()
-//            .substring(0, 10)
-//        for (name in listOf("host", "joiner")) {
-//            val runName = "test${name.capitalized()}"
-//            val user = name.uppercase()
-//            val provider = (minecraftData as MinecraftDownloader).provider
-//            provider.provideRunClientTask(runName, file("run/$runName"))
-//            config(runName) {
-//                description = "Test $user"
-//                val username = "$user$usernameSuffix"
-//                properties["auth_player_name"] = { username }
-//                properties["auth_uuid"] = { UUID.nameUUIDFromBytes("OfflinePlayer:$username".encodeToByteArray()).toString() }
-//                jvmArgs(
-//                    "-Dworld-host-testing.enabled=true",
-//                    "-Dworld-host-testing.user=$user",
-//                    "-Ddevauth.enabled=false"
-//                )
-//                javaVersion = JavaVersion.VERSION_21
-//            }
-//        }
-//    }
-//}
+loom {
+    runs {
+        getByName("client") {
+            ideConfigGenerated(true)
+            runDir = "run/client"
+        }
+        remove(getByName("server"))
+
+        val usernameSuffix = NetworkInterface.getNetworkInterfaces()
+            .nextElement()
+            .hardwareAddress
+            .toHexString()
+            .substring(0, 10)
+        for (name in listOf("Host", "Joiner")) {
+            val runName = "test$name"
+            val user = name.uppercase()
+            register(runName) {
+                inherit(getByName("client"))
+                ideConfigGenerated(false)
+
+                configName = "Test $user"
+                runDir = "run/$runName"
+
+                val username = "$user$usernameSuffix"
+                programArgs(
+                    "--username", username,
+                    "--uuid", UUID.nameUUIDFromBytes("OfflinePlayer:$username".encodeToByteArray()).toString()
+                )
+                vmArgs(
+                    "-Dworld-host-testing.enabled=true",
+                    "-Dworld-host-testing.user=$user",
+                    "-Ddevauth.enabled=false"
+                )
+            }
+        }
+    }
+}
 
 repositories {
     maven("https://maven.quiltmc.org/repository/release/")
