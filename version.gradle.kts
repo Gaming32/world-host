@@ -9,6 +9,12 @@ plugins {
     id("xyz.wagyourtail.jvmdowngrader") version "1.1.2"
 }
 
+buildscript {
+    dependencies {
+        classpath("org.apache.commons:commons-compress:1.26.1")
+    }
+}
+
 group = "io.github.gaming32"
 
 val modVersion = project.properties["mod.version"] as String
@@ -50,24 +56,29 @@ tasks.compileJava {
     options.compilerArgs.add("-Xlint:all")
 }
 
-//unimined.minecraft {
-//    val mcJavaVersion = (minecraftData as MinecraftDownloader).metadata.javaVersion
-//
-//    if (mcJavaVersion < java.sourceCompatibility) {
-//        println("Classes need downgrading to Java $mcJavaVersion")
-//
-//        tasks.downgradeJar {
-//            downgradeTo = mcJavaVersion
-//        }
-//        tasks.shadeDowngradedApi {
-//            downgradeTo = mcJavaVersion
-//            shadePath = { "io/github/gaming32/worldhost" }
-//        }
-//
-//        defaultRemapJar = false
-//        remap(tasks.shadeDowngradedApi.get(), "remapJar")
-//        tasks.assemble.get().dependsOn("remapJar")
-//    }
+val targetJava = when {
+    mcVersion >= 1_20_06 -> JavaVersion.VERSION_21
+    mcVersion >= 1_18_00 -> JavaVersion.VERSION_17
+    mcVersion >= 1_17_00 -> JavaVersion.VERSION_16
+    else -> JavaVersion.VERSION_1_8
+}
+if (targetJava < java.sourceCompatibility) {
+    println("Classes need downgrading to Java $targetJava")
+
+    tasks.downgradeJar {
+        downgradeTo = targetJava
+    }
+
+    tasks.shadeDowngradedApi {
+        downgradeTo = targetJava
+        shadePath = { "io/github/gaming32/worldhost" }
+    }
+
+    tasks.remapJar {
+        dependsOn(tasks.shadeDowngradedApi)
+        inputFile = tasks.shadeDowngradedApi.get().inputFile
+    }
+}
 
 //    runs {
 //        config("client") {
