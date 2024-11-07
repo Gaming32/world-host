@@ -124,18 +124,6 @@ repositories {
 println("loaderName: $loaderName")
 println("mcVersion: $mcVersion")
 
-//val forgeJarJar: Configuration by configurations.creating {
-//    isTransitive = false
-//}
-
-//val modCompileOnly: Configuration by configurations.creating {
-//    configurations.getByName("compileOnly").extendsFrom(this)
-//}
-
-//val modRuntimeOnly: Configuration by configurations.creating {
-//    configurations.getByName("runtimeOnly").extendsFrom(this)
-//}
-
 dependencies {
     minecraft("com.mojang:minecraft:$mcVersionString")
     @Suppress("UnstableApiUsage")
@@ -396,27 +384,8 @@ tasks.processResources {
 
 tasks.jar {
     archiveClassifier = "dev"
+    from("$rootDir/LICENSE")
 }
-
-//tasks.withType<RemapJarTask> {
-//    if (isForgeLike && !forgeJarJar.isEmpty) {
-//        forgeJarJar.files.forEach { from(zipTree(it)) }
-//    }
-//    manifest {
-//        when {
-//            isForge -> {
-//                attributes["MixinConfigs"] = "world-host.mixins.json"
-//            }
-//            isFabric -> {
-//                attributes["Fabric-Loom-Mixin-Remap-Type"] = "static"
-//            }
-//        }
-//    }
-//    from("$rootDir/LICENSE")
-//    mixinRemap {
-//        disableRefmap()
-//    }
-//}
 
 publishing {
     publications {
