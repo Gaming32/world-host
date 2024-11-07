@@ -1,28 +1,16 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
-import groovy.lang.GroovyObjectSupport
 import org.jetbrains.kotlin.daemon.common.toHexString
-import xyz.wagyourtail.unimined.api.mapping.task.ExportMappingsTask
-import xyz.wagyourtail.unimined.api.minecraft.task.RemapJarTask
-import xyz.wagyourtail.unimined.internal.mapping.MappingsProvider
-import xyz.wagyourtail.unimined.internal.mapping.task.ExportMappingsTaskImpl
-import xyz.wagyourtail.unimined.internal.minecraft.resolver.MinecraftDownloader
-import xyz.wagyourtail.unimined.util.capitalized
-import xyz.wagyourtail.unimined.util.sourceSets
 import java.net.NetworkInterface
-import java.nio.file.Path
-import java.util.UUID
+import java.util.*
 
 plugins {
     java
     `maven-publish`
     id("io.github.gaming32.gradle.preprocess")
-    id("xyz.wagyourtail.unimined")
-    id("com.modrinth.minotaur") version "2.8.7"
-    id("xyz.wagyourtail.jvmdowngrader") version "1.1.2-SNAPSHOT"
+    id("dev.architectury.loom")
+    id("com.modrinth.minotaur")
+    id("xyz.wagyourtail.jvmdowngrader")
 }
-
-fun Any.setGroovyProperty(name: String, value: Any) = withGroovyBuilder { metaClass }.setProperty(this, name, value)
-fun Any.getGroovyProperty(name: String): Any = withGroovyBuilder { metaClass }.getProperty(this, name)!!
 
 group = "io.github.gaming32"
 
@@ -65,159 +53,71 @@ tasks.compileJava {
     options.compilerArgs.add("-Xlint:all")
 }
 
-unimined.minecraft {
-    version(mcVersionString)
-    if ((mcVersion != 1_20_01 || !isForge) && mcVersion < 1_20_05) {
-        side("client")
+val targetJava = when {
+    mcVersion >= 1_20_06 -> JavaVersion.VERSION_21
+    mcVersion >= 1_18_00 -> JavaVersion.VERSION_17
+    mcVersion >= 1_17_00 -> JavaVersion.VERSION_16
+    else -> JavaVersion.VERSION_1_8
+}
+if (targetJava < java.sourceCompatibility) {
+    println("Classes need downgrading to Java $targetJava")
+
+    tasks.downgradeJar {
+        downgradeTo = targetJava
     }
 
-    mappings {
-        intermediary()
-        if (mcVersion <= 1_19_00) {
-            searge()
-        }
-        mojmap {
-            dependsOn("intermediary")
-            onlyExistingSrc()
-        }
-        when {
-            mcVersion >= 1_21_00 -> "1.21:2024.07.28"
-            mcVersion >= 1_20_05 -> "1.20.6:2024.06.16"
-            mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
-            mcVersion >= 1_20_03 -> "1.20.3:2023.12.31"
-            mcVersion >= 1_20_02 -> "1.20.2:2023.12.10"
-            mcVersion >= 1_20_01 -> "1.20.1:2023.09.03"
-            mcVersion >= 1_19_04 -> "1.19.4:2023.06.26"
-            mcVersion >= 1_19_03 -> "1.19.3:2023.06.25"
-            mcVersion >= 1_19_00 -> "1.19.2:2022.11.27"
-            mcVersion >= 1_18_00 -> "1.18.2:2022.11.06"
-            mcVersion >= 1_17_00 -> "1.17.1:2021.12.12"
-            mcVersion >= 1_16_00 -> "1.16.5:2022.03.06"
-            else -> null
-        }?.let {
-            parchment(it.substringBefore(":"), it.substringAfter(":"))
-        }
-
-        devFallbackNamespace("official")
+    tasks.shadeDowngradedApi {
+        downgradeTo = targetJava
+        shadePath = { "io/github/gaming32/worldhost" }
     }
 
-    when {
-        isFabric -> fabric {
-            loader("0.16.7")
-        }
-        isForge -> minecraftForge {
-            loader(when(mcVersion) {
-                1_20_01 -> "47.1.3"
-                1_19_04 -> "45.1.0"
-                1_19_02 -> "43.2.0"
-                else -> throw IllegalStateException("Unknown Forge version for $mcVersionString")
-            })
-            mixinConfig("world-host.mixins.json")
-        }
-        isNeoForge -> neoForge {
-            loader(when (mcVersion) {
-                1_21_03 -> "2-beta"
-                1_21_01 -> "1"
-                1_20_06 -> "115"
-                1_20_04 -> "167"
-                else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
-            })
-            minecraftRemapper.config {
-                ignoreConflicts(true)
-            }
-        }
-        else -> throw IllegalStateException()
+    tasks.remapJar {
+        dependsOn(tasks.shadeDowngradedApi)
+        inputFile = tasks.shadeDowngradedApi.get().archiveFile
     }
+}
 
-    val mcJavaVersion = (minecraftData as MinecraftDownloader).metadata.javaVersion
-
-    if (mcJavaVersion < java.sourceCompatibility) {
-        println("Classes need downgrading to Java $mcJavaVersion")
-
-        tasks.downgradeJar {
-            downgradeTo = mcJavaVersion
-        }
-        tasks.shadeDowngradedApi {
-            downgradeTo = mcJavaVersion
-            shadePath = { "io/github/gaming32/worldhost" }
-        }
-
-        defaultRemapJar = false
-        remap(tasks.shadeDowngradedApi.get(), "remapJar")
-        tasks.assemble.get().dependsOn("remapJar")
+loom {
+    @Suppress("UnstableApiUsage")
+    mixin {
+        useLegacyMixinAp = false
     }
 
     runs {
-        config("client") {
-            javaVersion = JavaVersion.VERSION_21
+        getByName("client") {
+            ideConfigGenerated(true)
+            runDir = "run/client"
         }
+        remove(getByName("server"))
 
         val usernameSuffix = NetworkInterface.getNetworkInterfaces()
             .nextElement()
             .hardwareAddress
             .toHexString()
             .substring(0, 10)
-        for (name in listOf("host", "joiner")) {
-            val runName = "test${name.capitalized()}"
+        for (name in listOf("Host", "Joiner")) {
+            val runName = "test$name"
             val user = name.uppercase()
-            val provider = (minecraftData as MinecraftDownloader).provider
-            provider.provideRunClientTask(runName, file("run/$runName"))
-            config(runName) {
-                description = "Test $user"
+            register(runName) {
+                inherit(getByName("client"))
+                ideConfigGenerated(false)
+
+                configName = "Test $user"
+                runDir = "run/$runName"
+
                 val username = "$user$usernameSuffix"
-                properties["auth_player_name"] = { username }
-                properties["auth_uuid"] = { UUID.nameUUIDFromBytes("OfflinePlayer:$username".encodeToByteArray()).toString() }
-                jvmArgs(
+                programArgs(
+                    "--username", username,
+                    "--uuid", UUID.nameUUIDFromBytes("OfflinePlayer:$username".encodeToByteArray()).toString()
+                )
+                vmArgs(
                     "-Dworld-host-testing.enabled=true",
                     "-Dworld-host-testing.user=$user",
                     "-Ddevauth.enabled=false"
                 )
-                javaVersion = JavaVersion.VERSION_21
             }
         }
     }
-}
-val minecraft = unimined.minecrafts[sourceSets.main.get()]
-
-// jank hax to pretend to be arch-loom
-class LoomGradleExtension : GroovyObjectSupport() {
-    var mappingConfiguration: Any? = null
-}
-
-val loom = LoomGradleExtension()
-extensions.add("loom", loom)
-val mappingsConfig = object {
-    var tinyMappings: Path? = null
-    var tinyMappingsWithSrg: Path? = null
-}
-loom.setGroovyProperty("mappingConfiguration", mappingsConfig)
-val mappings = minecraft!!.mappings as MappingsProvider
-val tinyMappings: File = file("${projectDir}/build/tmp/tinyMappings.tiny").also { file ->
-    val export = ExportMappingsTaskImpl.ExportImpl(mappings).apply {
-        location = file
-        type = ExportMappingsTask.MappingExportTypes.TINY_V2
-        setSourceNamespace("official")
-        setTargetNamespaces(listOf("intermediary", "mojmap"))
-        renameNs[mappings.getNamespace("mojmap")] = "named"
-    }
-    export.validate()
-    export.exportFunc(mappings.mappingTree)
-}
-mappingsConfig.setGroovyProperty("tinyMappings", tinyMappings.toPath())
-if (isForge) {
-    val tinyMappingsWithSrg: File = file("${projectDir}/build/tmp/tinyMappingsWithSrg.tiny").also { file ->
-        val export = ExportMappingsTaskImpl.ExportImpl(mappings).apply {
-            location = file
-            type = ExportMappingsTask.MappingExportTypes.TINY_V2
-            setSourceNamespace("official")
-            setTargetNamespaces(listOf("intermediary", "searge", "mojmap"))
-            renameNs[mappings.getNamespace("mojmap")] = "named"
-            renameNs[mappings.getNamespace("searge")] = "srg"
-        }
-        export.validate()
-        export.exportFunc(mappings.mappingTree)
-    }
-    mappingsConfig.setGroovyProperty("tinyMappingsWithSrg", tinyMappingsWithSrg.toPath())
 }
 
 repositories {
@@ -239,27 +139,50 @@ repositories {
 println("loaderName: $loaderName")
 println("mcVersion: $mcVersion")
 
-val forgeJarJar: Configuration by configurations.creating {
-    isTransitive = false
-}
-
-val modCompileOnly: Configuration by configurations.creating {
-    configurations.getByName("compileOnly").extendsFrom(this)
-}
-
-val modRuntimeOnly: Configuration by configurations.creating {
-    configurations.getByName("runtimeOnly").extendsFrom(this)
-}
-
-minecraft!!.apply {
-    mods.remap(modCompileOnly)
-    mods.remap(modRuntimeOnly)
-}
-
 dependencies {
-    val include = configurations["include"]
-    val modImplementation = configurations["modImplementation"]
-    val minecraftLibraries = configurations["minecraftLibraries"]
+    minecraft("com.mojang:minecraft:$mcVersionString")
+    @Suppress("UnstableApiUsage")
+    mappings(loom.layered {
+        officialMojangMappings {
+            nameSyntheticMembers = true
+        }
+        when {
+            mcVersion >= 1_21_00 -> "1.21:2024.07.28"
+            mcVersion >= 1_20_05 -> "1.20.6:2024.06.16"
+            mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
+            mcVersion >= 1_20_03 -> "1.20.3:2023.12.31"
+            mcVersion >= 1_20_02 -> "1.20.2:2023.12.10"
+            mcVersion >= 1_20_01 -> "1.20.1:2023.09.03"
+            mcVersion >= 1_19_04 -> "1.19.4:2023.06.26"
+            mcVersion >= 1_19_03 -> "1.19.3:2023.06.25"
+            mcVersion >= 1_19_00 -> "1.19.2:2022.11.27"
+            mcVersion >= 1_18_00 -> "1.18.2:2022.11.06"
+            mcVersion >= 1_17_00 -> "1.17.1:2021.12.12"
+            mcVersion >= 1_16_00 -> "1.16.5:2022.03.06"
+            else -> null
+        }?.let {
+            parchment("org.parchmentmc.data:parchment-$it@zip")
+        }
+    })
+
+    when {
+        isFabric -> modImplementation("net.fabricmc:fabric-loader:0.16.7")
+        isForge ->
+            when (mcVersion) {
+                1_20_01 -> "47.1.3"
+                1_19_04 -> "45.1.0"
+                1_19_02 -> "43.2.0"
+                else -> throw IllegalStateException("Unknown Forge version for $mcVersionString")
+            }.let { "forge"("net.minecraftforge:forge:$mcVersionString-$it") }
+        isNeoForge ->
+            when (mcVersion) {
+                1_21_03 -> "21.3.2-beta"
+                1_21_01 -> "21.1.1"
+                1_20_06 -> "20.6.115"
+                1_20_04 -> "20.4.167"
+                else -> throw IllegalStateException("Unknown NeoForge version for $mcVersionString")
+            }.let { "neoForge"("net.neoforged:neoforge:$it") }
+    }
 
     include(implementation("org.quiltmc.parsers:json:0.3.0")!!)
     include(implementation("org.semver4j:semver4j:5.3.0")!!)
@@ -300,7 +223,7 @@ dependencies {
             1_19_02 -> "0.77.0+1.19.2"
             else -> null
         }?.let { fapiVersion ->
-            val resourceLoader = fabricApi.fabricModule("fabric-resource-loader-v0", fapiVersion)
+            val resourceLoader = fabricApi.module("fabric-resource-loader-v0", fapiVersion)
             include(modImplementation(resourceLoader)!!)
 
             for (module in listOf(
@@ -308,7 +231,7 @@ dependencies {
                 "fabric-key-binding-api-v1",
                 "fabric-lifecycle-events-v1"
             )) {
-                modRuntimeOnly(fabricApi.fabricModule(module, fapiVersion))
+                modRuntimeOnly(fabricApi.module(module, fapiVersion))
             }
         }
     }
@@ -476,26 +399,7 @@ tasks.processResources {
 
 tasks.jar {
     archiveClassifier = "dev"
-}
-
-tasks.withType<RemapJarTask> {
-    if (isForgeLike && !forgeJarJar.isEmpty) {
-        forgeJarJar.files.forEach { from(zipTree(it)) }
-    }
-    manifest {
-        when {
-            isForge -> {
-                attributes["MixinConfigs"] = "world-host.mixins.json"
-            }
-            isFabric -> {
-                attributes["Fabric-Loom-Mixin-Remap-Type"] = "static"
-            }
-        }
-    }
     from("$rootDir/LICENSE")
-    mixinRemap {
-        disableRefmap()
-    }
 }
 
 publishing {
