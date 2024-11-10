@@ -182,11 +182,10 @@ dependencies {
             }.let { "neoForge"("net.neoforged:neoforge:$it") }
     }
 
-    include(implementation("org.quiltmc.parsers:json:0.3.0")!!)
-    include(implementation("org.semver4j:semver4j:5.3.0")!!)
-    if (isForgeLike) {
-        minecraftLibraries("org.quiltmc.parsers:json:0.3.0")
-    }
+    fun simpleJavaLibrary(notation: Any) = minecraftRuntimeLibraries(include(implementation(notation)!!)!!)
+
+    simpleJavaLibrary("org.quiltmc.parsers:json:0.3.0")
+    simpleJavaLibrary("org.semver4j:semver4j:5.3.0")
 
     if (isFabric) {
         when (mcVersion) {
