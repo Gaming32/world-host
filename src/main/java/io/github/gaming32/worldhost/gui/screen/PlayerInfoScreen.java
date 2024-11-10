@@ -61,4 +61,10 @@ public class PlayerInfoScreen extends WorldHostScreen {
         drawCenteredString(context, font, profile.getName(), width / 2, height / 2 + 85, 0xffffff);
         super.render(context, mouseX, mouseY, partialTick);
     }
+
+    @Override
+    public void onClose() {
+        assert minecraft != null;
+        minecraft.setScreen(parentScreen);
+    }
 }
