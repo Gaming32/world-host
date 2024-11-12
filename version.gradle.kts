@@ -83,6 +83,12 @@ loom {
         useLegacyMixinAp = false
     }
 
+    if (isForge) {
+        forge {
+            mixinConfigs("world-host.mixins.json")
+        }
+    }
+
     runs {
         getByName("client") {
             ideConfigGenerated(true)
