@@ -123,7 +123,9 @@ public class MixinSelectWorldScreen extends Screen implements SelectWorldScreenE
     //#else
     //$$ private void updateShareButtonStatus(
     //$$     boolean active,
-    //$$     boolean bl2,
+        //#if MC > 1.19.2
+        //$$ boolean bl2,
+        //#endif
     //$$     CallbackInfo ci
     //$$ ) {
     //$$     if (wh$shareButton != null) {
