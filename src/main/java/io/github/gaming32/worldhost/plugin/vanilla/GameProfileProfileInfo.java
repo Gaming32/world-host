@@ -21,6 +21,6 @@ public final class GameProfileProfileInfo implements ProfileInfo {
 
     @Override
     public IconRenderer iconRenderer() {
-        return IconRenderer.createSkinIconRenderer(WorldHost.getSkinLocationNow(profile));
+        return IconRenderer.createSkinIconRenderer(() -> WorldHost.getSkinLocationNow(profile));
     }
 }
