@@ -38,16 +38,10 @@ public class WindowsOriginChecker extends AbstractOriginChecker {
         try (var reader = new BufferedReader(
             new InputStreamReader(
                 new ByteArrayInputStream(bb.array(), bb.arrayOffset() + bb.position(), bb.remaining()),
-                getWindowsCharset()
+                Charset.forName(System.getProperty("native.encoding"))
             )
         )) {
             return SimpleIniParser.parse(reader);
         }
-    }
-
-    // TODO: Replace with direct native.encoding usage when Java 18+ becomes the minimum
-    private static Charset getWindowsCharset() {
-        final var nativeCharset = System.getProperty("native.encoding");
-        return nativeCharset == null ? Charset.defaultCharset() : Charset.forName(nativeCharset);
     }
 }
