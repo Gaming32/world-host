@@ -135,6 +135,12 @@ public class WorldHostConfigScreen extends WorldHostScreen {
         }
     }
 
+    @Override
+    public void onClose() {
+        assert minecraft != null;
+        minecraft.setScreen(parent);
+    }
+
     //#if MC < 1.20.2
     //$$ @Override
     //$$ public void tick() {
