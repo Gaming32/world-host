@@ -18,6 +18,10 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    permissions:
+      checks: write
+      statuses: read
+
     # Event has to be a pull request, or the base branch has to be main
     if: >-
       github.event_name == 'pull_request'
