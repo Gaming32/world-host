@@ -1,0 +1,87 @@
+# https://stackoverflow.com/a/74084046/8840278
+name: Check PR approval for non-admin authors
+
+on:
+  # PR into main opened, reopened, or synchronized
+  pull_request:
+    branches:
+      - main
+
+  # When a review is submitted
+  pull_request_review:
+    types:
+      - submitted
+
+jobs:
+  checkapproval:
+    name: Check PR approval
+
+    runs-on: ubuntu-20.04
+
+    # Event has to be a pull request, or the base branch has to be main
+    if: >-
+      github.event_name == 'pull_request'
+        || github.event.pull_request.base.ref == 'main'
+
+    steps:
+      - name: Check if author is repo admin
+        env:
+          author: ${{ github.event.pull_request.user.login }}
+          repo: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          perm=$(gh api "repos/$repo/collaborators/$author/permission" \
+              --jq '.permission')
+
+          if [[ $perm != 'admin' ]]; then
+              echo "Author is not admin; approval required" >&2
+          else
+              echo "Author is admin; no approval required" >&2
+
+              # Set success state in environment
+              echo "STATE=success" >> "$GITHUB_ENV"
+          fi
+
+      - name: Check for PR approval
+        # Run only if the previous step failed
+        if: env.STATE != 'success'
+        env:
+          prid: ${{ github.event.pull_request.number }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          approved=$(gh pr view "$prid" --repo "$GITHUB_REPOSITORY" \
+              --json reviews --jq '
+                  .reviews
+                  | map(select(.state != "COMMENTED"))
+                  | reduce .[] as $item (
+                      {}; . + {($item.author.login): $item.state}
+                  )
+                  | to_entries
+                  | map(select(.value == "APPROVED"))
+                  | length > 0
+              ')
+
+          if [[ $approved != 'true' ]]; then
+              echo "No PR approval found" >&2
+
+              # Set failure state in environment
+              echo "STATE=failure" >> "$GITHUB_ENV"
+              exit 0
+          fi
+
+          echo "PR approval found" >&2
+
+          # Set success state in environment
+          echo "STATE=success" >> "$GITHUB_ENV"
+
+      - name: Set result in separate status
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          sha: ${{ github.event.pull_request.head.sha }}
+          repo: ${{ github.repository }}
+          id: ${{ github.run_id }}
+        run: |
+          gh api "repos/$repo/statuses/$sha" \
+              --raw-field state="$STATE" \
+              --raw-field context='Non-admin PR approval' \
+              --raw-field target_url="https://github.com/$repo/actions/runs/$id"
