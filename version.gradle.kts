@@ -151,18 +151,12 @@ dependencies {
             nameSyntheticMembers = true
         }
         when {
-            mcVersion >= 1_21_00 -> "1.21:2024.07.28"
-            mcVersion >= 1_20_05 -> "1.20.6:2024.06.16"
+            mcVersion >= 1_21_01 -> "1.21.1:2024.11.17"
+            mcVersion >= 1_20_06 -> "1.20.6:2024.06.16"
             mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
-            mcVersion >= 1_20_03 -> "1.20.3:2023.12.31"
-            mcVersion >= 1_20_02 -> "1.20.2:2023.12.10"
             mcVersion >= 1_20_01 -> "1.20.1:2023.09.03"
             mcVersion >= 1_19_04 -> "1.19.4:2023.06.26"
-            mcVersion >= 1_19_03 -> "1.19.3:2023.06.25"
-            mcVersion >= 1_19_00 -> "1.19.2:2022.11.27"
-            mcVersion >= 1_18_00 -> "1.18.2:2022.11.06"
-            mcVersion >= 1_17_00 -> "1.17.1:2021.12.12"
-            mcVersion >= 1_16_00 -> "1.16.5:2022.03.06"
+            mcVersion >= 1_19_02 -> "1.19.2:2022.11.27"
             else -> null
         }?.let {
             parchment("org.parchmentmc.data:parchment-$it@zip")
@@ -343,16 +337,7 @@ tasks.processResources {
             mcVersion >= 1_20_02 -> 18
             mcVersion >= 1_20_00 -> 15
             mcVersion >= 1_19_04 -> 13
-            mcVersion >= 1_19_03 -> 12
             mcVersion >= 1_19_00 -> 9
-            mcVersion >= 1_18_00 -> 8
-            mcVersion >= 1_17_00 -> 7
-            mcVersion >= 1_16_02 -> 6
-            mcVersion >= 1_15_00 -> 5
-            mcVersion >= 1_13_00 -> 4
-            mcVersion >= 1_11_00 -> 3
-            mcVersion >= 1_09_00 -> 2
-            mcVersion >= 1_06_01 -> 1
             else -> return@filesMatching
         })
     }
