@@ -31,7 +31,7 @@ jobs:
         id: cache_key
         run: echo "gradle_key=gradle-`cat versions/mainProject`" >> $GITHUB_OUTPUT
       - name: Cache Gradle stuff
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           key: ${{ steps.cache_key.outputs.gradle_key }}-${{ hashFiles('*.gradle.kts', 'gradle.properties', 'gradle/**') }}
           restore-keys: ${{ steps.cache_key.outputs.gradle_key }}-
