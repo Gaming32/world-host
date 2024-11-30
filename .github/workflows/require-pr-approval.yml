@@ -20,7 +20,7 @@ jobs:
 
     permissions:
       checks: write
-      statuses: read
+      statuses: write
 
     # Event has to be a pull request, or the base branch has to be main
     if: >-
