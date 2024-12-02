@@ -22,6 +22,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
+          distribution: zulu
       - name: Build with Gradle
         run: ./gradlew build --stacktrace
       - name: Capture build artifacts
