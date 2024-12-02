@@ -4,7 +4,13 @@ import net.minecraft.network.chat.Component;
 
 import java.util.function.Consumer;
 
+/**
+ * Manages adding friends with the add friends screen.
+ */
 public interface FriendAdder {
+    /**
+     * A descriptive label for this {@link FriendAdder}. Typically, this matches the plugin's name.
+     */
     Component label();
 
     /**
