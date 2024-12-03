@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.*;
+
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
 //#else
@@ -93,11 +95,11 @@ public final class UserListWidget
         //#endif
         int mouseX, int mouseY, float partialTick
     ) {
-        context.pose().pushPose();
+        pose(context).pushPose();
 
         //#if MC >= 1.21.4
         context.enableScissor(getX(), getY(), getX() + width, getY() + height);
-        context.pose().translate(0, -scrollAmount(), 0);
+        pose(context).translate(0, -scrollAmount(), 0);
         //#endif
 
         final int textYOffset = 10 - font.lineHeight / 2;
@@ -129,18 +131,15 @@ public final class UserListWidget
             }
             y += 24;
         }
-        context.pose().popPose();
+        pose(context).popPose();
 
         for (final var button : actionButtons) {
-            var buttonX = button.baseX;
-            var buttonY = button.baseY;
             //#if MC >= 1.21.4
-            if (scrollbarVisible()) {
-                buttonX -= 10;
-            }
-            buttonY -= (int)scrollAmount();
+            button.button.setPosition(
+                button.baseX - (scrollbarVisible() ? 10 : 0),
+                button.baseY - (int)scrollAmount()
+            );
             //#endif
-            button.button.setPosition(buttonX, buttonY);
             button.button.render(context, mouseX, mouseY, partialTick);
         }
 
@@ -195,8 +194,9 @@ public final class UserListWidget
             int x = getRight() - 24 * user.actions.size() + 4;
             for (final Action action : user.actions) {
                 actionButtons.add(new ActionButtonWrapper(
-                    WorldHostScreen.button(action.text, b -> action.apply.run())
+                    button(action.text, b -> action.apply.run())
                         .tooltip(action.tooltip)
+                        .pos(x, y)
                         .size(20, 20)
                         .build(),
                     x, y
