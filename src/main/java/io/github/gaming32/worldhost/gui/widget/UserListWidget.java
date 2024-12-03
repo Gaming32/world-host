@@ -183,13 +183,29 @@ public final class UserListWidget
     }
 
     public int getVisibleCount() {
-        return Math.min(users.size(), getHeight() / 24);
+        //#if MC >= 1.21.4
+        return users.size();
+        //#else
+        //$$ return Math.min(users.size(), getHeight() / 24);
+        //#endif
     }
 
     @Override
     public @NotNull List<? extends GuiEventListener> children() {
         return actionButtons;
     }
+
+    //#if MC >= 1.21.4
+    @Override
+    protected int contentHeight() {
+        return 24 * users.size();
+    }
+
+    @Override
+    protected double scrollRate() {
+        return 12.0;
+    }
+    //#endif
 
     //#if MC < 1.19.4
     //$$ private int getX() {
