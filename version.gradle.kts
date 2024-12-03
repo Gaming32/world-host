@@ -164,7 +164,7 @@ dependencies {
     })
 
     when {
-        isFabric -> modImplementation("net.fabricmc:fabric-loader:0.16.7")
+        isFabric -> modImplementation("net.fabricmc:fabric-loader:0.16.9")
         isForge ->
             when (mcVersion) {
                 1_20_01 -> "47.1.3"

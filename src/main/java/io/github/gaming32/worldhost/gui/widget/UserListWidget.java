@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.gui.widget;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
@@ -46,7 +47,8 @@ public final class UserListWidget
     //#endif
 {
     private final List<UserInfo> users = new ArrayList<>();
-    private final List<Button> actionButtons = new ArrayList<>();
+    private final List<ActionButtonWrapper> actionButtons = new ArrayList<>();
+    private final List<? extends GuiEventListener> children = Lists.transform(actionButtons, ActionButtonWrapper::button);
     private final Font font;
     private final Function<FriendListFriend, List<Action>> getApplicableActions;
 
@@ -91,6 +93,13 @@ public final class UserListWidget
         //#endif
         int mouseX, int mouseY, float partialTick
     ) {
+        context.pose().pushPose();
+
+        //#if MC >= 1.21.4
+        context.enableScissor(getX(), getY(), getX() + width, getY() + height);
+        context.pose().translate(0, -scrollAmount(), 0);
+        //#endif
+
         final int textYOffset = 10 - font.lineHeight / 2;
         final int x = getX();
         int y = getY();
@@ -120,9 +129,25 @@ public final class UserListWidget
             }
             y += 24;
         }
-        for (final Button button : actionButtons) {
-            button.render(context, mouseX, mouseY, partialTick);
+        context.pose().popPose();
+
+        for (final var button : actionButtons) {
+            var buttonX = button.baseX;
+            var buttonY = button.baseY;
+            //#if MC >= 1.21.4
+            if (scrollbarVisible()) {
+                buttonX -= 10;
+            }
+            buttonY -= (int)scrollAmount();
+            //#endif
+            button.button.setPosition(buttonX, buttonY);
+            button.button.render(context, mouseX, mouseY, partialTick);
         }
+
+        //#if MC >= 1.21.4
+        context.disableScissor();
+        renderScrollbar(context);
+        //#endif
     }
 
     //#if MC >= 1.19.4
@@ -169,13 +194,13 @@ public final class UserListWidget
             final UserInfo user = users.get(i);
             int x = getRight() - 24 * user.actions.size() + 4;
             for (final Action action : user.actions) {
-                actionButtons.add(
+                actionButtons.add(new ActionButtonWrapper(
                     WorldHostScreen.button(action.text, b -> action.apply.run())
                         .tooltip(action.tooltip)
-                        .pos(x, y)
                         .size(20, 20)
-                        .build()
-                );
+                        .build(),
+                    x, y
+                ));
                 x += 24;
             }
             y += 24;
@@ -192,7 +217,7 @@ public final class UserListWidget
 
     @Override
     public @NotNull List<? extends GuiEventListener> children() {
-        return actionButtons;
+        return children;
     }
 
     //#if MC >= 1.21.4
@@ -311,5 +336,8 @@ public final class UserListWidget
         public Action(Component text, Runnable apply) {
             this(text, null, apply);
         }
+    }
+
+    public record ActionButtonWrapper(Button button, int baseX, int baseY) {
     }
 }
