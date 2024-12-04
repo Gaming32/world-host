@@ -31,9 +31,9 @@ modId = "minecraft"
 ##elseif MC == 1.21.1
 #?? versionRange = "[1.21.0,1.21.2)"
 ##elseif MC == 1.21.3
-versionRange = "[1.21.2,1.21.4)"
+#?? versionRange = "[1.21.2,1.21.4)"
 ##else
-#?? versionRange = "[$mc_version]"
+versionRange = "[$mc_version]"
 ##endif
 type = "required"
 ordering = "NONE"

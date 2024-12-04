@@ -164,7 +164,7 @@ dependencies {
     })
 
     when {
-        isFabric -> modImplementation("net.fabricmc:fabric-loader:0.16.7")
+        isFabric -> modImplementation("net.fabricmc:fabric-loader:0.16.9")
         isForge ->
             when (mcVersion) {
                 1_20_01 -> "47.1.3"
@@ -174,6 +174,7 @@ dependencies {
             }.let { "forge"("net.minecraftforge:forge:$mcVersionString-$it") }
         isNeoForge ->
             when (mcVersion) {
+                1_21_04 -> "21.4.1-beta"
                 1_21_03 -> "21.3.56"
                 1_21_01 -> "21.1.1"
                 1_20_06 -> "20.6.115"
@@ -189,6 +190,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_04 -> "12.0.0-beta.1" // TODO: Use actual version
             1_21_03 -> "12.0.0-beta.1"
             1_21_01 -> "11.0.1"
             1_20_06 -> "10.0.0"
@@ -211,6 +213,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_04 -> "0.110.5+1.21.4"
             1_21_03 -> "0.106.1+1.21.3"
             1_21_01 -> "0.102.0+1.21.1"
             1_20_06 -> "0.100.0+1.20.6"
@@ -247,6 +250,7 @@ dependencies {
 
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.0")
     when (mcVersion) {
+        1_21_04 -> "2.5.26"
         1_21_03 -> "2.5.24"
         1_21_01 -> "2.5.20"
         1_20_06 -> "2.5.20"
@@ -330,6 +334,7 @@ tasks.processResources {
     // TODO: Remove pack.mcmeta in 1.20.4
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
+            mcVersion >= 1_21_04 -> 61
             mcVersion >= 1_21_02 -> 42
             mcVersion >= 1_21_00 -> 34
             mcVersion >= 1_20_05 -> 32

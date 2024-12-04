@@ -16,7 +16,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.util.Crypt;
 import net.minecraft.util.CryptException;
 import org.apache.commons.io.input.BoundedInputStream;
-import org.apache.commons.io.input.CountingInputStream;
 import org.jetbrains.annotations.Nullable;
 
 import javax.crypto.Cipher;
@@ -40,12 +39,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
+//#if MC >= 1.20.2
+import com.mojang.authlib.exceptions.ForcedUsernameChangeException;
+//#endif
+
 //#if MC < 1.20.4
 //$$ import com.mojang.authlib.GameProfile;
 //#endif
 
-//#if MC >= 1.20.2
-import com.mojang.authlib.exceptions.ForcedUsernameChangeException;
+//#if MC < 1.21.4
+//$$ import org.apache.commons.io.input.CountingInputStream;
 //#endif
 
 public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
@@ -164,23 +167,31 @@ public final class ProtocolClient implements AutoCloseable, ProxyPassthrough {
                             continue;
                         }
                         final int typeId = dis.readUnsignedByte();
-                        final BoundedInputStream bis = new BoundedInputStream(dis, length);
-                        bis.setPropagateClose(false);
-                        final var cis = new CountingInputStream(bis);
+                        //#if MC >= 1.21.4
+                        final var is = BoundedInputStream.builder()
+                            .setInputStream(dis)
+                            .setPropagateClose(false)
+                            .setMaxCount(length)
+                            .get();
+                        //#else
+                        //$$ final BoundedInputStream bis = new BoundedInputStream(dis, length);
+                        //$$ bis.setPropagateClose(false);
+                        //$$ final var is = new CountingInputStream(bis); // TODO: Remove when 1.20.2+ becomes the minimum
+                        //#endif
                         WorldHostS2CMessage message = null;
                         try {
-                            message = WorldHostS2CMessage.decode(typeId, new DataInputStream(cis));
+                            message = WorldHostS2CMessage.decode(typeId, new DataInputStream(is));
                         } catch (EOFException e) {
                             WorldHost.LOGGER.error("Message decoder for message {} read past end (length {})!", typeId, length);
                         } catch (Exception e) {
                             WorldHost.LOGGER.error("Error decoding WH message", e);
                         }
-                        if (cis.getCount() < length) {
+                        if (is.getCount() < length) {
                             WorldHost.LOGGER.warn(
                                 "Didn't read entire message (read: {}, total: {}, message: {})",
-                                cis.getCount(), length, message
+                                is.getCount(), length, message
                             );
-                            dis.skipNBytes(length - cis.getCount());
+                            dis.skipNBytes(length - is.getCount()); // TODO: getRemaining when 1.21.4+ becomes the minimum
                         }
                         if (message == null) continue; // An error occurred!
                         WorldHost.LOGGER.debug("Received {}", message);

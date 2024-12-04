@@ -45,9 +45,9 @@
     //#elseif MC == 1.21.1
     //?? "minecraft": ">=1.21.0 <1.21.2",
     //#elseif MC == 1.21.3
-    "minecraft": ">=1.21.2 <1.21.4",
+    //?? "minecraft": ">=1.21.2 <1.21.4",
     //#else
-    //?? "minecraft": "$mc_version",
+    "minecraft": "$mc_version",
     //#endif
     "fabric-resource-loader-v0": "*"
   },

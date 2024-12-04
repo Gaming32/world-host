@@ -297,10 +297,12 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             return (entry != null && entry.keyPressed(keyCode, scanCode, modifiers)) || super.keyPressed(keyCode, scanCode, modifiers);
         }
 
-        @Override
-        protected int getScrollbarPosition() {
-            return super.getScrollbarPosition() + 30;
-        }
+        //#if MC < 1.21.4
+        //$$ @Override
+        //$$ protected int getScrollbarPosition() {
+        //$$     return super.getScrollbarPosition() + 30;
+        //$$ }
+        //#endif
 
         @Override
         public int getRowWidth() {

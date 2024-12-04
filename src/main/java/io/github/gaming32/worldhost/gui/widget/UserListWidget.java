@@ -1,5 +1,6 @@
 package io.github.gaming32.worldhost.gui.widget;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
@@ -22,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
+import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.*;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -46,7 +49,8 @@ public final class UserListWidget
     //#endif
 {
     private final List<UserInfo> users = new ArrayList<>();
-    private final List<Button> actionButtons = new ArrayList<>();
+    private final List<ActionButtonWrapper> actionButtons = new ArrayList<>();
+    private final List<? extends GuiEventListener> children = Lists.transform(actionButtons, ActionButtonWrapper::button);
     private final Font font;
     private final Function<FriendListFriend, List<Action>> getApplicableActions;
 
@@ -91,6 +95,13 @@ public final class UserListWidget
         //#endif
         int mouseX, int mouseY, float partialTick
     ) {
+        pose(context).pushPose();
+
+        //#if MC >= 1.21.4
+        context.enableScissor(getX(), getY(), getX() + width, getY() + height);
+        pose(context).translate(0, -scrollAmount(), 0);
+        //#endif
+
         final int textYOffset = 10 - font.lineHeight / 2;
         final int x = getX();
         int y = getY();
@@ -120,9 +131,22 @@ public final class UserListWidget
             }
             y += 24;
         }
-        for (final Button button : actionButtons) {
-            button.render(context, mouseX, mouseY, partialTick);
+        pose(context).popPose();
+
+        for (final var button : actionButtons) {
+            //#if MC >= 1.21.4
+            button.button.setPosition(
+                button.baseX - (scrollbarVisible() ? 10 : 0),
+                button.baseY - (int)scrollAmount()
+            );
+            //#endif
+            button.button.render(context, mouseX, mouseY, partialTick);
         }
+
+        //#if MC >= 1.21.4
+        context.disableScissor();
+        renderScrollbar(context);
+        //#endif
     }
 
     //#if MC >= 1.19.4
@@ -169,13 +193,14 @@ public final class UserListWidget
             final UserInfo user = users.get(i);
             int x = getRight() - 24 * user.actions.size() + 4;
             for (final Action action : user.actions) {
-                actionButtons.add(
-                    WorldHostScreen.button(action.text, b -> action.apply.run())
+                actionButtons.add(new ActionButtonWrapper(
+                    button(action.text, b -> action.apply.run())
                         .tooltip(action.tooltip)
                         .pos(x, y)
                         .size(20, 20)
-                        .build()
-                );
+                        .build(),
+                    x, y
+                ));
                 x += 24;
             }
             y += 24;
@@ -183,13 +208,29 @@ public final class UserListWidget
     }
 
     public int getVisibleCount() {
-        return Math.min(users.size(), getHeight() / 24);
+        //#if MC >= 1.21.4
+        return users.size();
+        //#else
+        //$$ return Math.min(users.size(), getHeight() / 24);
+        //#endif
     }
 
     @Override
     public @NotNull List<? extends GuiEventListener> children() {
-        return actionButtons;
+        return children;
     }
+
+    //#if MC >= 1.21.4
+    @Override
+    protected int contentHeight() {
+        return 24 * users.size();
+    }
+
+    @Override
+    protected double scrollRate() {
+        return 12.0;
+    }
+    //#endif
 
     //#if MC < 1.19.4
     //$$ private int getX() {
@@ -295,5 +336,8 @@ public final class UserListWidget
         public Action(Component text, Runnable apply) {
             this(text, null, apply);
         }
+    }
+
+    public record ActionButtonWrapper(Button button, int baseX, int baseY) {
     }
 }

@@ -127,11 +127,15 @@ public class AddFriendScreen extends WorldHostScreen {
                 .build()
         );
 
-        maxFriends = (cancelY - 90) / 24;
+        //#if MC >= 1.21.4
+        maxFriends = 25;
+        //#else
+        //$$ maxFriends = (cancelY - 94) / 24;
+        //#endif
 
         userList = addRenderableWidget(new UserListWidget(
             font,
-            widgetsX, 90, widgetsWidth, cancelY - 90,
+            widgetsX, 90, widgetsWidth, cancelY - 94,
             this::getActions,
             userList
         ));
