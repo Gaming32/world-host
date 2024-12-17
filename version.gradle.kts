@@ -176,7 +176,7 @@ dependencies {
             }.let { "forge"("net.minecraftforge:forge:$mcVersionString-$it") }
         isNeoForge ->
             when (mcVersion) {
-                1_21_04 -> "21.4.1-beta"
+                1_21_04 -> "21.4.30-beta"
                 1_21_03 -> "21.3.56"
                 1_21_01 -> "21.1.1"
                 1_20_06 -> "20.6.115"
