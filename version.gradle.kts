@@ -1,5 +1,4 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
-import org.jetbrains.kotlin.daemon.common.toHexString
 import java.net.NetworkInterface
 import java.util.*
 
@@ -13,6 +12,8 @@ plugins {
 }
 
 group = "io.github.gaming32"
+
+fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
 val modVersion = project.properties["mod.version"] as String
 val mcVersionString by extra(name.substringBefore("-"))
@@ -273,8 +274,6 @@ dependencies {
 
 preprocess {
     fun Boolean.toInt() = if (this) 1 else 0
-
-    disableRemapping = true
 
     vars.putAll(mapOf(
         "FABRIC" to isFabric.toInt(),
