@@ -1,5 +1,4 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
-import org.jetbrains.kotlin.daemon.common.toHexString
 import java.net.NetworkInterface
 import java.util.*
 
@@ -13,6 +12,8 @@ plugins {
 }
 
 group = "io.github.gaming32"
+
+fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
 val modVersion = project.properties["mod.version"] as String
 val mcVersionString by extra(name.substringBefore("-"))
@@ -151,7 +152,7 @@ dependencies {
             nameSyntheticMembers = true
         }
         when {
-            mcVersion >= 1_21_04 -> "1.21.4:2024.12.07"
+            mcVersion >= 1_21_04 -> "1.21.4:2025.01.05"
             mcVersion >= 1_21_03 -> "1.21.3:2024.12.07"
             mcVersion >= 1_21_01 -> "1.21.1:2024.11.17"
             mcVersion >= 1_20_06 -> "1.20.6:2024.06.16"
@@ -176,7 +177,7 @@ dependencies {
             }.let { "forge"("net.minecraftforge:forge:$mcVersionString-$it") }
         isNeoForge ->
             when (mcVersion) {
-                1_21_04 -> "21.4.30-beta"
+                1_21_04 -> "21.4.50-beta"
                 1_21_03 -> "21.3.56"
                 1_21_01 -> "21.1.1"
                 1_20_06 -> "20.6.115"
@@ -192,7 +193,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_21_04 -> "13.0.0-beta.1"
+            1_21_04 -> "13.0.0"
             1_21_03 -> "12.0.0"
             1_21_01 -> "11.0.3"
             1_20_06 -> "10.0.0"
@@ -215,9 +216,9 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_21_04 -> "0.111.0+1.21.4"
-            1_21_03 -> "0.110.0+1.21.3"
-            1_21_01 -> "0.110.0+1.21.1"
+            1_21_04 -> "0.114.2+1.21.4"
+            1_21_03 -> "0.114.0+1.21.3"
+            1_21_01 -> "0.114.0+1.21.1"
             1_20_06 -> "0.100.8+1.20.6"
             1_20_04 -> "0.97.2+1.20.4"
             1_20_01 -> "0.92.2+1.20.1"
@@ -273,8 +274,6 @@ dependencies {
 
 preprocess {
     fun Boolean.toInt() = if (this) 1 else 0
-
-    disableRemapping = true
 
     vars.putAll(mapOf(
         "FABRIC" to isFabric.toInt(),

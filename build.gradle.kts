@@ -1,8 +1,8 @@
 plugins {
-    id("io.github.gaming32.gradle.preprocess-root") version "0.4.4"
-    id("dev.architectury.loom") version "1.9.420" apply false
+    id("io.github.gaming32.gradle.preprocess-root") version "0.4.5"
+    id("dev.architectury.loom") version "1.9.424" apply false
     id("com.modrinth.minotaur") version "2.8.7" apply false
-    id("xyz.wagyourtail.jvmdowngrader") version "1.2.1" apply false
+    id("xyz.wagyourtail.jvmdowngrader") version "1.2.2" apply false
 }
 
 repositories {
@@ -10,8 +10,6 @@ repositories {
 }
 
 preprocess {
-    fun createNode(project: String, mcVersion: Int) = createNode(project, mcVersion, "yarn")
-
     val fabric12104 = createNode("1.21.4-fabric", 1_21_04)
     val neoforge12104 = createNode("1.21.4-neoforge", 1_21_04)
     val fabric12103 = createNode("1.21.3-fabric", 1_21_03)
@@ -22,12 +20,12 @@ preprocess {
     val neoforge12006 = createNode("1.20.6-neoforge", 1_20_06)
     val fabric12004 = createNode("1.20.4-fabric", 1_20_04)
     val neoforge12004 = createNode("1.20.4-neoforge", 1_20_04)
-    val fabric12001 = createNode("1.20.1-fabric", 1_20_01, "yarn")
-    val forge12001 = createNode("1.20.1-forge", 1_20_01, "srg")
-    val fabric11904 = createNode("1.19.4-fabric", 1_19_04, "yarn")
-    val forge11904 = createNode("1.19.4-forge", 1_19_04, "srg")
-    val fabric11902 = createNode("1.19.2-fabric", 1_19_02, "yarn")
-    val forge11902 = createNode("1.19.2-forge", 1_19_02, "srg")
+    val fabric12001 = createNode("1.20.1-fabric", 1_20_01)
+    val forge12001 = createNode("1.20.1-forge", 1_20_01)
+    val fabric11904 = createNode("1.19.4-fabric", 1_19_04)
+    val forge11904 = createNode("1.19.4-forge", 1_19_04)
+    val fabric11902 = createNode("1.19.2-fabric", 1_19_02)
+    val forge11902 = createNode("1.19.2-forge", 1_19_02)
 
     fabric12104.link(neoforge12104)
     neoforge12104.link(neoforge12103)
