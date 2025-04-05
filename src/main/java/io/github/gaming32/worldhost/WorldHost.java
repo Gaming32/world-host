@@ -129,6 +129,10 @@ import net.fabricmc.loader.api.FabricLoader;
 //$$ import net.neoforged.fml.loading.FMLPaths;
 //$$ import net.neoforged.neoforge.internal.BrandingControl;
 //#endif
+//#if MC >= 1.21.5
+//$$ import net.neoforged.bus.api.IEventBus;
+//$$ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+//#endif
 //#if MC >= 1.20.5
 //$$ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 //#elseif NEOFORGE
@@ -246,14 +250,18 @@ public class WorldHost
     //#else
     //$$ public WorldHost(
         //#if NEOFORGE
-        //$$ ModContainer container
+        //$$ ModContainer container,
+        //$$ @SuppressWarnings("unused") IEventBus modBus
         //#endif
     //$$ ) {
         //#if FORGE
         //$$ final ModContainer container = ModLoadingContext.get().getActiveContainer();
         //#endif
-    //$$     final var modFile = container.getModInfo().getOwningFile().getFile();
-    //$$     init(path -> modFile.findResource(path.split("/")), modFile.getFilePath());
+        //#if MC >= 1.21.5
+        //$$ modBus.addListener(FMLClientSetupEvent.class, event -> forgeInit(container));
+        //#else
+        //$$ forgeInit(container);
+        //#endif
     //$$     container.registerExtensionPoint(
             //#if MC >= 1.20.5
             //$$ IConfigScreenFactory.class, (ignored, screen) -> new WorldHostConfigScreen(screen)
@@ -262,6 +270,12 @@ public class WorldHost
             //$$ () -> new ConfigScreenHandler.ConfigScreenFactory((ignored, screen) -> new WorldHostConfigScreen(screen))
             //#endif
     //$$     );
+    //$$ }
+    //$$
+    //$$ // TODO: Merge this back in when 1.21.5 becomes the minimum
+    //$$ private void forgeInit(ModContainer container) {
+    //$$     final var modFile = container.getModInfo().getOwningFile().getFile();
+    //$$     init(path -> modFile.findResource(path.split("/")), modFile.getFilePath());
     //$$ }
     //#endif
 
