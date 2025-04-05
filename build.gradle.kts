@@ -47,3 +47,14 @@ preprocess {
 subprojects {
     extra["loom.platform"] = name.substringAfter('-')
 }
+
+afterEvaluate {
+    var previousPublishTask: Task? = null
+    for (project in subprojects) {
+        val publishTask = project.tasks.findByName("modrinth") ?: continue
+        if (previousPublishTask != null) {
+            publishTask.mustRunAfter(previousPublishTask)
+        }
+        previousPublishTask = publishTask
+    }
+}
