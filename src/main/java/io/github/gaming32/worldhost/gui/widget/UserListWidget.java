@@ -1,12 +1,15 @@
 package io.github.gaming32.worldhost.gui.widget;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.toast.IconRenderer;
+import io.github.gaming32.worldhost.versions.WorldHostRenderSystem;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.Button;
@@ -19,10 +22,6 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.util.FormattedCharSequence;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 
 import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.*;
 
@@ -108,7 +107,7 @@ public final class UserListWidget
         for (int i = 0; i < getVisibleCount(); i++) {
             final var user = users.get(i);
             user.getIcon().draw(context, x, y, 20, 20);
-            RenderSystem.disableBlend();
+            WorldHostRenderSystem.disableBlend();
             final Component unclippedName = user.getUnclippedName();
             if (user.nameNeedsClipping(unclippedName)) {
                 WorldHostScreen.drawString(

@@ -637,7 +637,13 @@ public class WorldHost
                         "world-host.worldhost.tempip.failure",
                         ComponentUtils.wrapInSquareBrackets(Component.literal("/worldhost ip")).withStyle(style -> style
                             .withColor(ChatFormatting.GREEN)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/worldhost ip"))
+                            .withClickEvent(
+                                //#if MC >= 1.21.5
+                                //$$ new ClickEvent.SuggestCommand("/worldhost ip")
+                                //#else
+                                new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/worldhost ip")
+                                //#endif
+                            )
                         )
                     ));
                     return 0;

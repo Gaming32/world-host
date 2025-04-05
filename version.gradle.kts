@@ -57,8 +57,7 @@ tasks.compileJava {
 val targetJava = when {
     mcVersion >= 1_20_06 -> JavaVersion.VERSION_21
     mcVersion >= 1_18_00 -> JavaVersion.VERSION_17
-    mcVersion >= 1_17_00 -> JavaVersion.VERSION_16
-    else -> JavaVersion.VERSION_1_8
+    else -> throw IllegalStateException("Unknown Java version for $mcVersionString")
 }
 if (targetJava < java.sourceCompatibility) {
     println("Classes need downgrading to Java $targetJava")
@@ -152,7 +151,7 @@ dependencies {
             nameSyntheticMembers = true
         }
         when {
-            mcVersion >= 1_21_04 -> "1.21.4:2025.03.16"
+            mcVersion >= 1_21_04 -> "1.21.4:2025.03.23"
             mcVersion >= 1_21_03 -> "1.21.3:2024.12.07"
             mcVersion >= 1_21_01 -> "1.21.1:2024.11.17"
             mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
@@ -176,6 +175,7 @@ dependencies {
             }.let { "forge"("net.minecraftforge:forge:$mcVersionString-$it") }
         isNeoForge ->
             when (mcVersion) {
+                1_21_05 -> "21.5.26-beta"
                 1_21_04 -> "21.4.121"
                 1_21_03 -> "21.3.56"
                 1_21_01 -> "21.1.1"
@@ -191,6 +191,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_05 -> "14.0.0-rc.2"
             1_21_04 -> "13.0.3"
             1_21_03 -> "12.0.0"
             1_21_01 -> "11.0.3"
@@ -213,6 +214,7 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
+            1_21_05 -> "0.119.9+1.21.5"
             1_21_04 -> "0.119.2+1.21.4"
             1_21_03 -> "0.114.0+1.21.3"
             1_21_01 -> "0.115.3+1.21.1"
@@ -249,13 +251,14 @@ dependencies {
 
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.0")
     when (mcVersion) {
-        1_21_04 -> "2.5.26"
-        1_21_03 -> "2.5.26"
-        1_21_01 -> "2.5.26"
+        1_21_05 -> "2.5.28"
+        1_21_04 -> "2.5.28"
+        1_21_03 -> "2.5.28"
+        1_21_01 -> "2.5.28"
         1_20_04 -> "2.5.22"
-        1_20_01 -> "2.5.26"
+        1_20_01 -> "2.5.28"
         1_19_04 -> "2.5.12"
-        1_19_02 -> "2.5.26"
+        1_19_02 -> "2.5.28"
         else -> null
     }?.let {
         modCompileOnly("maven.modrinth:simple-voice-chat:$loaderName-$mcVersionString-$it")
@@ -329,11 +332,11 @@ tasks.processResources {
     // TODO: Remove pack.mcmeta in 1.20.4
     filesMatching("pack.mcmeta") {
         expand("pack_format" to when {
-            mcVersion >= 1_21_04 -> 61
+            mcVersion >= 1_21_05 -> 55
+            mcVersion >= 1_21_04 -> 46
             mcVersion >= 1_21_02 -> 42
             mcVersion >= 1_21_00 -> 34
             mcVersion >= 1_20_03 -> 22
-            mcVersion >= 1_20_02 -> 18
             mcVersion >= 1_20_00 -> 15
             mcVersion >= 1_19_04 -> 13
             mcVersion >= 1_19_00 -> 9
