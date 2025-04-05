@@ -621,7 +621,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     if (icon == null) {
                         icon = new DynamicTexture(
                             //#if MC >= 1.21.5
-                            //$$ () -> "Favicon " + iconTextureId,
+                            () -> "Favicon " + iconTextureId,
                             //#endif
                             image
                         );

@@ -639,9 +639,9 @@ public class WorldHost
                             .withColor(ChatFormatting.GREEN)
                             .withClickEvent(
                                 //#if MC >= 1.21.5
-                                //$$ new ClickEvent.SuggestCommand("/worldhost ip")
+                                new ClickEvent.SuggestCommand("/worldhost ip")
                                 //#else
-                                new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/worldhost ip")
+                                //$$ new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/worldhost ip")
                                 //#endif
                             )
                         )
