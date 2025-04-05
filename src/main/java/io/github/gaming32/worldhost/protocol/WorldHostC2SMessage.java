@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.UUID;
 
-// Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostC2SMessage.kt
+// Mirrors https://github.com/Gaming32/world-host-server-rust/blob/main/src/protocol/c2s_message.rs
 public sealed interface WorldHostC2SMessage {
     record ListOnline(Collection<UUID> friends) implements WorldHostC2SMessage {
         @Override

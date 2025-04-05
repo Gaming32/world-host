@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-// Mirrors https://github.com/Gaming32/world-host-server-kotlin/blob/main/src/main/kotlin/io/github/gaming32/worldhostserver/WorldHostS2CMessage.kt
+// Mirrors https://github.com/Gaming32/world-host-server-rust/blob/main/src/protocol/s2c_message.rs
 public sealed interface WorldHostS2CMessage {
     interface SecurityCheckable {
         SecurityLevel security();

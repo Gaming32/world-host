@@ -1,7 +1,7 @@
 package io.github.gaming32.worldhost.toast;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.gui.screen.WorldHostScreen;
+import io.github.gaming32.worldhost.versions.WorldHostRenderSystem;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,7 @@ public interface IconRenderer {
     static IconRenderer createSkinIconRenderer(Supplier<ResourceLocation> skinTexture) {
         return (context, x, y, width, height) -> {
             final var texture = skinTexture.get();
-            RenderSystem.enableBlend();
+            WorldHostRenderSystem.enableBlend();
             WorldHostScreen.blit(context, texture, x, y, 8, 8, width, height, 8, 8, 64, 64);
             WorldHostScreen.blit(context, texture, x, y, 40, 8, width, height, 8, 8, 64, 64);
         };

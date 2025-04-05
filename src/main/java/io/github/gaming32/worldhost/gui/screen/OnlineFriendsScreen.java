@@ -2,7 +2,6 @@ package io.github.gaming32.worldhost.gui.screen;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.FriendsListUpdate;
 import io.github.gaming32.worldhost.ResourceLocations;
 import io.github.gaming32.worldhost.SecurityLevel;
@@ -15,6 +14,7 @@ import io.github.gaming32.worldhost.plugin.Joinability;
 import io.github.gaming32.worldhost.plugin.OnlineFriend;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
 import io.github.gaming32.worldhost.mixin.ServerStatusPingerAccessor;
+import io.github.gaming32.worldhost.versions.WorldHostRenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.SharedConstants;
 import net.minecraft.Util;
@@ -44,6 +44,10 @@ import java.util.UUID;
 //#if MC >= 1.20.4 && FABRIC
 import de.florianmichael.viafabricplus.screen.base.ProtocolSelectionScreen;
 import de.florianmichael.viafabricplus.settings.impl.GeneralSettings;
+//#endif
+
+//#if MC < 1.21.2
+//$$ import com.mojang.blaze3d.systems.RenderSystem;
 //#endif
 
 //#if MC >= 1.20.0
@@ -344,6 +348,7 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
         //$$ @Nullable
         //$$ private String iconData;
         //#endif
+        // TODO: Switch to FaviconTexture when 1.20.1 becomes the minimum
         @Nullable
         private DynamicTexture icon;
 
@@ -397,13 +402,13 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             //$$ RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             //#endif
             if (incompatibleVersion) {
-                RenderSystem.enableBlend();
+                WorldHostRenderSystem.enableBlend();
                 //#if MC >= 1.20.2
                 blitSprite(context, INCOMPATIBLE_SPRITE, x + entryWidth - 15, y, 10, 8);
                 //#else
                 //$$ blit(context, GUI_ICONS_LOCATION, x + entryWidth - 15, y, 0, 216, 10, 8, 256, 256);
                 //#endif
-                RenderSystem.disableBlend();
+                WorldHostRenderSystem.disableBlend();
             }
 
             //#if MC >= 1.19.4
@@ -427,12 +432,11 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
             //noinspection ConstantValue
             if (icon == null) {
                 profile.iconRenderer().draw(context, x, y, 32, 32);
-                RenderSystem.disableBlend();
+                WorldHostRenderSystem.disableBlend();
             } else {
-                RenderSystem.setShaderTexture(0, iconTextureId);
-                RenderSystem.enableBlend();
+                WorldHostRenderSystem.enableBlend();
                 blit(context, iconTextureId, x, y, 0, 0, 32, 32, 32, 32);
-                RenderSystem.disableBlend();
+                WorldHostRenderSystem.disableBlend();
             }
 
             final int relX = mouseX - x;
@@ -615,7 +619,12 @@ public class OnlineFriendsScreen extends ScreenWithInfoTexts implements FriendsL
                     Validate.validState(image.getWidth() == 64, "Must be 64 pixels wide");
                     Validate.validState(image.getHeight() == 64, "Must be 64 pixels high");
                     if (icon == null) {
-                        icon = new DynamicTexture(image);
+                        icon = new DynamicTexture(
+                            //#if MC >= 1.21.5
+                            () -> "Favicon " + iconTextureId,
+                            //#endif
+                            image
+                        );
                     } else {
                         icon.setPixels(image);
                         icon.upload();

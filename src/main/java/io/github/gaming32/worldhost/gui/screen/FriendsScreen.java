@@ -1,12 +1,12 @@
 package io.github.gaming32.worldhost.gui.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.gaming32.worldhost.WorldHost;
 import io.github.gaming32.worldhost.WorldHostComponents;
 import io.github.gaming32.worldhost.gui.widget.UserListWidget;
 import io.github.gaming32.worldhost.plugin.FriendListFriend;
 import io.github.gaming32.worldhost.plugin.InfoTextsCategory;
 import io.github.gaming32.worldhost.plugin.ProfileInfo;
+import io.github.gaming32.worldhost.versions.WorldHostRenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -17,6 +17,10 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+//#if MC < 1.21.2
+//$$ import com.mojang.blaze3d.systems.RenderSystem;
+//#endif
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
@@ -208,7 +212,7 @@ public class FriendsScreen extends ScreenWithInfoTexts {
             //$$ RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
             //#endif
             profile.iconRenderer().draw(context, x, y, 32, 32);
-            RenderSystem.disableBlend();
+            WorldHostRenderSystem.disableBlend();
             drawCenteredString(context, minecraft.font, getNameWithTag(), x + 110, y + 16 - minecraft.font.lineHeight / 2, 0xffffff);
         }
 
