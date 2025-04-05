@@ -250,8 +250,10 @@ public class WorldHost
     //#else
     //$$ public WorldHost(
         //#if NEOFORGE
-        //$$ ModContainer container,
-        //$$ @SuppressWarnings("unused") IEventBus modBus
+        //$$ ModContainer container
+        //#if MC >= 1.21.5
+        //$$ , IEventBus modBus
+        //#endif
         //#endif
     //$$ ) {
         //#if FORGE
