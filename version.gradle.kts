@@ -133,6 +133,7 @@ repositories {
     maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
     maven("https://repo.viaversion.com")
     maven("https://maven.maxhenkel.de/repository/public")
+    maven("https://maven.nucleoid.xyz/")
     maven("https://api.modrinth.com/maven") {
         content {
             includeGroup("maven.modrinth")
@@ -175,7 +176,7 @@ dependencies {
             }.let { "forge"("net.minecraftforge:forge:$mcVersionString-$it") }
         isNeoForge ->
             when (mcVersion) {
-                1_21_05 -> "21.5.26-beta"
+                1_21_05 -> "21.5.74"
                 1_21_04 -> "21.4.121"
                 1_21_03 -> "21.3.56"
                 1_21_01 -> "21.1.1"
@@ -187,7 +188,7 @@ dependencies {
     fun simpleJavaLibrary(notation: Any) = minecraftRuntimeLibraries(include(implementation(notation)!!)!!)
 
     simpleJavaLibrary("org.quiltmc.parsers:json:0.3.0")
-    simpleJavaLibrary("org.semver4j:semver4j:5.3.0")
+    simpleJavaLibrary("org.semver4j:semver4j:5.8.0")
 
     if (isFabric) {
         when (mcVersion) {
@@ -195,7 +196,7 @@ dependencies {
             1_21_04 -> "13.0.3"
             1_21_03 -> "12.0.0"
             1_21_01 -> "11.0.3"
-            1_20_04 -> "9.0.0"
+            1_20_04 -> "9.2.0"
             1_20_01 -> "7.2.2"
             1_19_04 -> "6.3.1"
             1_19_02 -> "4.2.0-beta.2"
@@ -214,12 +215,12 @@ dependencies {
 
     if (isFabric) {
         when (mcVersion) {
-            1_21_05 -> "0.119.9+1.21.5"
-            1_21_04 -> "0.119.2+1.21.4"
-            1_21_03 -> "0.114.0+1.21.3"
-            1_21_01 -> "0.115.3+1.21.1"
-            1_20_04 -> "0.97.2+1.20.4"
-            1_20_01 -> "0.92.5+1.20.1"
+            1_21_05 -> "0.128.0+1.21.5"
+            1_21_04 -> "0.119.3+1.21.4"
+            1_21_03 -> "0.114.1+1.21.3"
+            1_21_01 -> "0.116.3+1.21.1"
+            1_20_04 -> "0.97.3+1.20.4"
+            1_20_01 -> "0.92.6+1.20.1"
             1_19_04 -> "0.87.2+1.19.4"
             1_19_02 -> "0.77.0+1.19.2"
             else -> null
@@ -251,14 +252,14 @@ dependencies {
 
     compileOnly("de.maxhenkel.voicechat:voicechat-api:2.5.0")
     when (mcVersion) {
-        1_21_05 -> "2.5.28"
-        1_21_04 -> "2.5.28"
-        1_21_03 -> "2.5.28"
-        1_21_01 -> "2.5.28"
+        1_21_05 -> "2.5.31"
+        1_21_04 -> "2.5.31"
+        1_21_03 -> "2.5.31"
+        1_21_01 -> "2.5.31"
         1_20_04 -> "2.5.22"
-        1_20_01 -> "2.5.28"
+        1_20_01 -> "2.5.31"
         1_19_04 -> "2.5.12"
-        1_19_02 -> "2.5.28"
+        1_19_02 -> "2.5.31"
         else -> null
     }?.let {
         modCompileOnly("maven.modrinth:simple-voice-chat:$loaderName-$mcVersionString-$it")
@@ -294,13 +295,13 @@ modrinth {
     token.set(project.properties["modrinth.token"] as String? ?: System.getenv("MODRINTH_TOKEN"))
     projectId.set(if (isStaging) "world-host-staging" else "world-host")
     versionNumber.set(version.toString())
-    val loaderName = when {
+    val prettyLoaderName = when {
         isFabric -> "Fabric"
         isForge -> "Forge"
         isNeoForge -> "NeoForge"
         else -> throw IllegalStateException()
     }
-    versionName.set("[$loaderName $mcVersionString] World Host $modVersion")
+    versionName.set("[$prettyLoaderName $mcVersionString] World Host $modVersion")
     uploadFile.set(tasks.named("remapJar"))
     additionalFiles.add(tasks.named("sourcesJar"))
     gameVersions.add(mcVersionString)
@@ -312,7 +313,7 @@ modrinth {
         1_21_03 -> "1.21.2"
         else -> null
     }?.let(gameVersions::add)
-    loaders.add(this@Version_gradle.loaderName)
+    loaders.add(loaderName)
     dependencies {
         if (isFabric) {
             optional.project("modmenu")
