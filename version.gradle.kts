@@ -1,5 +1,6 @@
 import com.replaymod.gradle.preprocess.PreprocessTask
 import java.net.NetworkInterface
+import java.net.InetAddress
 import java.util.*
 
 plugins {
@@ -96,8 +97,7 @@ loom {
         }
         remove(getByName("server"))
 
-        val usernameSuffix = NetworkInterface.getNetworkInterfaces()
-            .nextElement()
+        val usernameSuffix = NetworkInterface.getByInetAddress(InetAddress.getLocalHost())
             .hardwareAddress
             .toHexString()
             .substring(0, 10)
