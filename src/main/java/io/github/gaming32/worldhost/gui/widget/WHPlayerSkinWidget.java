@@ -23,15 +23,13 @@ import static io.github.gaming32.worldhost.gui.screen.WorldHostScreen.pose;
 
 //#if MC >= 1.20.0
 import net.minecraft.client.gui.GuiGraphics;
+
+import static com.mojang.math.Axis.*;
 //#else
 //$$ import com.mojang.blaze3d.systems.RenderSystem;
 //$$ import com.mojang.blaze3d.vertex.PoseStack;
 //$$ import net.minecraft.client.Minecraft;
-//#endif
-
-//#if MC >= 1.19.4
-import static com.mojang.math.Axis.*;
-//#else
+//$$
 //$$ import static com.mojang.math.Vector3f.*;
 //#endif
 

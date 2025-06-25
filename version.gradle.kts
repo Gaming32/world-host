@@ -157,7 +157,6 @@ dependencies {
             mcVersion >= 1_21_01 -> "1.21.1:2024.11.17"
             mcVersion >= 1_20_04 -> "1.20.4:2024.04.14"
             mcVersion >= 1_20_01 -> "1.20.1:2023.09.03"
-            mcVersion >= 1_19_04 -> "1.19.4:2023.06.26"
             mcVersion >= 1_19_02 -> "1.19.2:2022.11.27"
             else -> null
         }?.let {
@@ -170,7 +169,6 @@ dependencies {
         isForge ->
             when (mcVersion) {
                 1_20_01 -> "47.1.3"
-                1_19_04 -> "45.1.0"
                 1_19_02 -> "43.2.0"
                 else -> throw IllegalStateException("Unknown Forge version for $mcVersionString")
             }.let { "forge"("net.minecraftforge:forge:$mcVersionString-$it") }
@@ -198,7 +196,6 @@ dependencies {
             1_21_01 -> "11.0.3"
             1_20_04 -> "9.2.0"
             1_20_01 -> "7.2.2"
-            1_19_04 -> "6.3.1"
             1_19_02 -> "4.2.0-beta.2"
             else -> null
         }?.let {
@@ -221,7 +218,6 @@ dependencies {
             1_21_01 -> "0.116.3+1.21.1"
             1_20_04 -> "0.97.3+1.20.4"
             1_20_01 -> "0.92.6+1.20.1"
-            1_19_04 -> "0.87.2+1.19.4"
             1_19_02 -> "0.77.0+1.19.2"
             else -> null
         }?.let { fapiVersion ->
@@ -258,7 +254,6 @@ dependencies {
         1_21_01 -> "2.5.31"
         1_20_04 -> "2.5.22"
         1_20_01 -> "2.5.31"
-        1_19_04 -> "2.5.12"
         1_19_02 -> "2.5.31"
         else -> null
     }?.let {
@@ -306,7 +301,6 @@ modrinth {
     additionalFiles.add(tasks.named("sourcesJar"))
     gameVersions.add(mcVersionString)
     when (mcVersion) {
-        1_19_04 -> "23w13a_or_b"
         1_20_01 -> "1.20"
         1_20_04 -> "1.20.3"
         1_21_01 -> "1.21"
@@ -339,7 +333,6 @@ tasks.processResources {
             mcVersion >= 1_21_00 -> 34
             mcVersion >= 1_20_03 -> 22
             mcVersion >= 1_20_00 -> 15
-            mcVersion >= 1_19_04 -> 13
             mcVersion >= 1_19_00 -> 9
             else -> return@filesMatching
         })

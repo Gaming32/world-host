@@ -22,8 +22,6 @@ preprocess {
     addProject("1.20.4-neoforge", 1_20_04)
     addProject("1.20.1-fabric", 1_20_01)
     addProject("1.20.1-forge", 1_20_01)
-    addProject("1.19.4-fabric", 1_19_04)
-    addProject("1.19.4-forge", 1_19_04)
     addProject("1.19.2-fabric", 1_19_02)
     addProject("1.19.2-forge", 1_19_02)
 }

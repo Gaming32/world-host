@@ -4,14 +4,10 @@ import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 
 //#if MC >= 1.19.4
-//#if MC >= 1.20.0
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderBuffers;
-//#else
-//$$ import com.mojang.blaze3d.vertex.PoseStack;
-//#endif
 import io.github.gaming32.worldhost.toast.WHToast;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderBuffers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,9 +25,8 @@ public class MixinGameRenderer {
     @Shadow @Final
     private Minecraft minecraft;
 
-    //#if MC >= 1.20.0
-    @Shadow @Final private RenderBuffers renderBuffers;
-    //#endif
+    @Shadow @Final
+    private RenderBuffers renderBuffers;
 
     @Inject(
         method = "render",

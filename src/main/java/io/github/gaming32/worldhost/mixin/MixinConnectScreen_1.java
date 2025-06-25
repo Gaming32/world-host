@@ -33,7 +33,7 @@ public class MixinConnectScreen_1 {
         ServerAddress serverAddress, Minecraft minecraft,
         //#if MC > 1.19.2
         ServerData serverData,
-        //#elseif MC > 1.18.2
+        //#else
         //$$ CompletableFuture<?> completableFuture,
         //#endif
         //#if MC >= 1.20.5

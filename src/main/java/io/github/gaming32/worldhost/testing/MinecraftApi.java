@@ -25,7 +25,7 @@ public class MinecraftApi {
             widget.getY() + widget.getHeight() / 2.0
             //#else
             //$$ widget.x + widget.getWidth() / 2.0,
-            //$$ widget.x + widget.getHeight() / 2.0
+            //$$ widget.y + widget.getHeight() / 2.0
             //#endif
         );
     }
