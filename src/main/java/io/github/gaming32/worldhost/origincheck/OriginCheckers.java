@@ -33,6 +33,7 @@ public class OriginCheckers {
     );
 
     public static boolean isStandardHost(String host) {
+        if (host==null) return false;
         final var hostLength = host.length();
         for (final var origin : STANDARD_ORIGINS) {
             if (host.equals(origin)) {
