@@ -58,12 +58,18 @@ abstract class AbstractOriginChecker implements OriginChecker {
     private List<URI> toUriList(List<@Nullable String> uris) {
         final var result = new ArrayList<URI>(uris.size());
         for (final var url : uris) {
-            if (url != null && !url.isEmpty()) {
-                try {
-                    result.add(new URI(url));
-                } catch (URISyntaxException e) {
-                    WorldHost.LOGGER.warn("Failed to parse {} URL {}", getOriginAttributeName(), url, e);
+            try{
+                if (url == null || url.isEmpty()) {
+                    result.add(new URI("https://example.com/"));
+                }else{
+                    result.add(new URI("about:blank"));
+                    WorldHost.LOGGER.warn("Failed to parse {} URL {}", getOriginAttributeName(), url);
                 }
+            }catch (URISyntaxException e) {
+                try {
+                    result.add(new URI("about:blank"));
+                } catch (URISyntaxException ignored) {}
+                WorldHost.LOGGER.warn("Failed to parse {} URL {}", getOriginAttributeName(), url, e);
             }
         }
         return result;
