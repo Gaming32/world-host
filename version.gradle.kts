@@ -244,7 +244,7 @@ dependencies {
     }
 
     if (mcVersion >= 1_20_04 && isFabric) {
-        modCompileOnly("de.florianmichael:viafabricplus:3.0.2") {
+        modCompileOnly("maven.modrinth:viafabricplus:3.0.2") {
             isTransitive = false
         }
     }
@@ -312,7 +312,7 @@ modrinth {
         1_21_03 -> "1.21.2"
         else -> null
     }?.let(gameVersions::add)
-    loaders.add(this@Version_gradle.loaderName)
+    loaders.add(loaderName)
     dependencies {
         if (isFabric) {
             optional.project("modmenu")
