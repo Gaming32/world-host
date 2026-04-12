@@ -49,6 +49,7 @@ public class OriginCheckers {
     }
 
     public static boolean hasStandardOrigin(URI uri) {
+        if (uri==null) return false;
         return isStandardHost(uri.getHost());
     }
 
